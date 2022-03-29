@@ -298,8 +298,9 @@ int SU3_gauge_fix(double complex * U, int config){
 
 	do {
 		sweep++;
+		
 
-		#pragma omp parallel for num_threads(4) private(position) schedule (dynamic)
+		#pragma omp parallel for num_threads(8) private(position) schedule (dynamic)
 		// Paralelizing by slicing the time extent
 			for (int t = 0; t < Nt; t++) {
 				position.t = t;
