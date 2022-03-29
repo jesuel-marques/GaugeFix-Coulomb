@@ -1,4 +1,4 @@
-//	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/math_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O4 -march=skylake
+//	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O4 -march=skylake
 //	mpiicc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -fast -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp -g
 
 #include <stdio.h>					//	Standard header files in C
@@ -19,7 +19,8 @@
 
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 
-int main(int argc, char *argv){
+int main(){
+// int main(int argc, char *argv){
 
 	// //	Starts MPI
 	// MPI_Init(&argc,&argv);
@@ -35,6 +36,7 @@ int main(int argc, char *argv){
 	// int config_per_rank = nconfig / size;
 	// //The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
 	// for (int config = rank + 1; config <= nconfig; config += size) {
+	#pragma omp parallel for num_threads(2) schedule (dynamic) 
 	for (int config = 1; config <= 2; config ++) {
 		
 		double complex * U = (double complex *) malloc(Volume * d * 3 * 3 * sizeof(double complex));
