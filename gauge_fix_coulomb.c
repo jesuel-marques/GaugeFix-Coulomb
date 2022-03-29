@@ -40,7 +40,7 @@ int main(int argc, char *argv){
 
 		if ( U == NULL ) {
 			//	Test if allocation was successful.
-			printf("Memory allocation failed for configuration or gauge-transformation");
+			printf("Memory allocation failed for configuration");
 			exit(1); 
 		}
 
