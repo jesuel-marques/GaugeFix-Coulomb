@@ -2,10 +2,9 @@
 #define LATTICE_H
 
 typedef struct {
-	int t;
-	int i, j, k;
-} pos_vec;	//	struct for position vectors
-
+    int t;
+    int i, j, k;
+} pos_vec;  //	struct for position vectors
 
 pos_vec add_position_vector(pos_vec u, pos_vec v);
 
@@ -23,8 +22,7 @@ int position_is_even(pos_vec position);
 
 int position_is_odd(pos_vec position);
 
-double complex * get_link(double complex * U, pos_vec position, int mu);
-
+double complex * get_link(double complex *U, pos_vec position, int mu);
 
 void SU3_load_config(char filename[max_length_name], double complex *U);
 
