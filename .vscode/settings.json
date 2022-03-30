@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "omp.h": "c",
-        "lattice.h": "c"
+        "lattice.h": "c",
+        "stdlib.h": "c",
+        "su3_parameters.h": "c",
+        "su2_ops.h": "c"
     }
 }

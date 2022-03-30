@@ -298,7 +298,7 @@ int SU3_gauge_fix(double complex *U, int config) {
             //	Indicates how far we are to the Landau-gauge
             //	condition, e2=0.
 
-            printf("\nconfig: %d, sweep: %d, e2: %.2e\n", config, sweep, e2);
+            // printf("\nconfig: %d, sweep: %d, e2: %.2e\n", config, sweep, e2);
         }
         if (sweep % sweeps_to_reunitarization == 0) {
             SU3_reunitarize(U);

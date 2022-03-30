@@ -6,8 +6,8 @@
 
 #define Volume Nxyz* Nxyz* Nxyz* Nt  //	Number of points in the lattice
 
-// General parameters
+// Other parameters
 
-#define max_configs 10  //	Número máximo de configurações descorrelacionadas a serem geradas
+#define max_configs 100
 
-#define max_length_name 2000
+#define max_length_name 300

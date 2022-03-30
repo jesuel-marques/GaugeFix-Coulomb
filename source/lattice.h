@@ -24,6 +24,8 @@ int position_is_odd(pos_vec position);
 
 double complex * get_link(double complex *U, pos_vec position, int mu);
 
+char * name_configuration_file(int config);
+
 void SU3_load_config(char filename[max_length_name], double complex *U);
 
 void SU3_copy_config(double complex *U, double complex *U_copy);

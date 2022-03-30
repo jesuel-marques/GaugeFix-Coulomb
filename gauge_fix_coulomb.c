@@ -19,6 +19,10 @@
 
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 
+
+const char configs_dir_name[] = "/home/jesuel/Documents/Maynooth/GaugeFix-Coulomb-RedBlack/configs/";
+
+
 int main(){
 // int main(int argc, char *argv){
 
@@ -37,7 +41,7 @@ int main(){
 	// //The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
 	// for (int config = rank + 1; config <= nconfig; config += size) {
 	#pragma omp parallel for num_threads(2) schedule (dynamic) 
-	for (int config = 1; config <= 2; config ++) {
+	for (int config = 1; config <= max_configs; config ++) {
 		
 		double complex * U = (double complex *) malloc(Volume * d * 3 * 3 * sizeof(double complex));
 
@@ -47,11 +51,7 @@ int main(){
 			exit(1); 
 		}
 	
-		//  load each configuration based on name template
-		char config_filename[max_length_name];
-		sprintf(config_filename, "configs/NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt",config, Nxyz, Nt);
-		//sprintf(config_filename, "configs/Config_%d_beta_6.000_Nxyz_%d_Nt_%d.txt",config,Nxyz,Nt);
-		SU3_load_config(config_filename, U);
+		SU3_load_config(name_configuration_file(config), U);
 
 		//  fix the gauge
 		SU3_gauge_fix(U, config);

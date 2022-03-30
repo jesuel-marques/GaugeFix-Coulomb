@@ -1,15 +1,20 @@
+
+
 #include <complex.h>
 #include <stdio.h>  //	Standard C header files
 #include <stdlib.h>
+#include <string.h>
 
 #include "../SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
 #include "../SU3_parameters.h"              //	Simulation parameters
 
+#include "SU2_ops.h"  //	SU(2) operations
+#include "SU3_ops.h"  //	SU(3) operations
+
 #include "lattice.h"  //	Initialization functions and calculations of
                       //	positions and links on the lattice.
 
-#include "SU2_ops.h"  //	SU(2) operations
-#include "SU3_ops.h"  //	SU(3) operations
+extern char configs_dir_name[];
 
 pos_vec add_position_vector(pos_vec u, pos_vec v) {
     //	Adds two position vectors v and u, taking into account the periodic boundary conditions,
@@ -150,9 +155,19 @@ int position_is_odd(pos_vec position) {
     return ((position.t + position.i + position.j + position.k) % 2);
 }
 
-double complex * get_link(double complex *U, pos_vec position, int mu) {
+double complex *get_link(double complex *U, pos_vec position, int mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
+}
+
+char *name_configuration_file(int config) {
+    char configs_dir_name_local[max_length_name];
+    strcpy(configs_dir_name_local, configs_dir_name);
+    
+    char config_filename[max_length_name];
+    sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, Nxyz, Nt);
+
+    return strcat(configs_dir_name_local, config_filename);
 }
 
 void SU3_load_config(char filename[max_length_name], double complex *U) {
@@ -177,15 +192,13 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
     pos_vec position;
-  
+
     for (position.t = 0; position.t < Nt; position.t++) {
         for (position.i = 0; position.i < Nxyz; position.i++) {
             for (position.j = 0; position.j < Nxyz; position.j++) {
                 for (position.k = 0; position.k < Nxyz; position.k++) {
                     for (int mu = 0; mu < d; mu++) {
-                        
                         SU3_copy(get_link(U, position, mu), get_link(U_copy, position, mu));
-
                     }
                 }
             }
@@ -193,8 +206,7 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
     }
 }
 
-void 
-SU3_reunitarize(double complex *U) {
+void SU3_reunitarize(double complex *U) {
     // Reunitarizes the configuration
 
     pos_vec position;
@@ -205,7 +217,7 @@ SU3_reunitarize(double complex *U) {
         for (position.i = 0; position.i < Nxyz; position.i++) {
             for (position.j = 0; position.j < Nxyz; position.j++) {
                 for (position.k = 0; position.k < Nxyz; position.k++) {
-                    for (int mu = 0; mu < d; mu++) {                        
+                    for (int mu = 0; mu < d; mu++) {
                         SU3_projection(get_link(U, position, mu));
                     }
                 }
