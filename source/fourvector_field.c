@@ -23,7 +23,7 @@ void SU3_calculate_A(double complex *U, pos_vec position, int mu, double complex
         exit(1);
     }
 
-    local_U = get_link(U, position, mu);
+    local_U = (double complex *) get_link(U, position, mu);
 
     SU3_hermitean_conjugate(local_U, U_dagger);
 

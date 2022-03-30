@@ -177,13 +177,15 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
     pos_vec position;
-
+  
     for (position.t = 0; position.t < Nt; position.t++) {
         for (position.i = 0; position.i < Nxyz; position.i++) {
             for (position.j = 0; position.j < Nxyz; position.j++) {
                 for (position.k = 0; position.k < Nxyz; position.k++) {
                     for (int mu = 0; mu < d; mu++) {
+                        
                         SU3_copy(get_link(U, position, mu), get_link(U_copy, position, mu));
+
                     }
                 }
             }
@@ -191,16 +193,19 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
     }
 }
 
-void SU3_reunitarize(double complex *U) {
+void 
+SU3_reunitarize(double complex *U) {
     // Reunitarizes the configuration
 
     pos_vec position;
+    double complex *u = (double complex *)malloc(3 * 3 * sizeof(double complex));
+    double complex *sub_x = (double complex *)malloc(3 * 3 * sizeof(double complex));
 
     for (position.t = 0; position.t < Nt; position.t++) {
         for (position.i = 0; position.i < Nxyz; position.i++) {
             for (position.j = 0; position.j < Nxyz; position.j++) {
                 for (position.k = 0; position.k < Nxyz; position.k++) {
-                    for (int mu = 0; mu < d; mu++) {
+                    for (int mu = 0; mu < d; mu++) {                        
                         SU3_projection(get_link(U, position, mu));
                     }
                 }

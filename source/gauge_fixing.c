@@ -270,11 +270,10 @@ int SU3_gauge_fix(double complex *U, int config) {
     do {
         sweep++;
 
-#pragma omp parallel for num_threads(2) private(position) schedule(dynamic)
+        #pragma omp parallel for num_threads(2) private(position) schedule(dynamic)
         // Paralelizing by slicing the time extent
         for (int t = 0; t < Nt; t++) {
             position.t = t;
-
             for (position.i = 0; position.i < Nxyz; position.i++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
@@ -290,23 +289,25 @@ int SU3_gauge_fix(double complex *U, int config) {
         }
 
         if (sweep % sweeps_to_measurement_e2 == 0) {
+            
             //	No need to calculate e2 all the time
             //	because it will take some hundreds of sweeps
             //	to fix the gauge.
-
-            SU3_reunitarize(U);
+            
             e2 = SU3_calculate_e2(U);
             //	Indicates how far we are to the Landau-gauge
             //	condition, e2=0.
 
-            printf("\nconfig: %d, sweep: %d, e2: %3.2e\n", config, sweep, e2);
+            printf("\nconfig: %d, sweep: %d, e2: %.2e\n", config, sweep, e2);
+        }
+        if (sweep % sweeps_to_reunitarization == 0) {
+            SU3_reunitarize(U);
         }
 
     } while (e2 > tolerance);  //	As long as e2 is larger than the tolerance
                                //	repeats the process iteratively.
 
-    printf("Sweeps needed to gauge-fix: %d \n", sweep);
-
+    printf("Sweeps needed to gauge-fix config %d: %d \n", config, sweep);
     return sweep;
 }
 
