@@ -20,7 +20,7 @@
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 
 
-const char configs_dir_name[] = "/home/jesuel/Documents/Maynooth/GaugeFix-Coulomb-RedBlack/configs/";
+const char configs_dir_name[] = "configs/";
 
 
 int main(void){
