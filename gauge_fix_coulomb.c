@@ -15,7 +15,7 @@
 
 
 #include "source/lattice.h"			//	Initialization functions and calculations of
-//	positions and links on the lattice.
+									//	positions and links on the lattice.
 
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 
@@ -23,7 +23,7 @@
 const char configs_dir_name[] = "/home/jesuel/Documents/Maynooth/GaugeFix-Coulomb-RedBlack/configs/";
 
 
-int main(){
+int main(void){
 // int main(int argc, char *argv){
 
 	//	Starts MPI
@@ -41,15 +41,11 @@ int main(){
 	// //The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
 	// for (int config = rank + 1; config <= nconfig; config += size) {
 	#pragma omp parallel for num_threads(2) schedule (dynamic) 
-	for (int config = 1; config <= max_configs; config ++) {
+	for (unsigned short config = 1; config <= max_configs; config ++) {
 		
 		double complex * U = (double complex *) malloc(Volume * d * 3 * 3 * sizeof(double complex));
 
-		if ( U == NULL ) {
-			//	Test if allocation was successful.
-			printf("Memory allocation failed for configuration");
-			exit(1); 
-		}
+		test_allocation(U, "main");
 	
 		SU3_load_config(name_configuration_file(config), U);
 
