@@ -278,7 +278,7 @@ unsigned short SU3_gauge_fix(double complex *U, const unsigned short config) {
 
     } while (e2 > tolerance);  //	As long as e2 is larger than the tolerance
                                //	repeats the process iteratively.
-
+    SU3_reunitarize(U);
     printf("Sweeps needed to gauge-fix config %d: %d \n", config, sweep);
     return sweep;
 }

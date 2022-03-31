@@ -2,7 +2,7 @@
 
 #define tolerance 1e-12              //  Tolerance for e2
 #define sweeps_to_measurement_e2 20  //  Amount of sweeps to actually measure e2
-#define sweeps_to_reunitarization 200
+#define sweeps_to_reunitarization 300
 
 #define maxhits 2  //  Iterations hits for the maximization of Tr[w(n)]
 

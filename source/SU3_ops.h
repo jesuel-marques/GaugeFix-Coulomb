@@ -24,7 +24,7 @@ void SU3_substitution_multiplication_by_scalar(const double complex alpha, doubl
 
 void SU3_product(double complex *u, double complex *v, double complex *uv);
 
-void SU3_product_three(double complex *u, double complex *v, double complex *w, complex double *uvw);
+void SU3_product_three(double complex *u, double complex *v, double complex *w, double complex *uvw);
 
 void SU3_product_four(double complex *u, double complex *v, double complex *w, double complex *x, double complex *uvwx);
 
