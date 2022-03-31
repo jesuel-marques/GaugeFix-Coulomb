@@ -6,7 +6,7 @@
 #include "math_ops.h"  //	Math operations
 #include "lattice.h"
 
-void SU3_print_matrix(double complex *u, const char *name) {
+void SU3_print_matrix(const double complex *u, const char *name) {
     // Prints the matrix on screen
 
     printf("\n\n %s \n", name);
@@ -29,7 +29,7 @@ void SU3_print_matrix(double complex *u, const char *name) {
     getchar();
 }
 
-void SU3_copy(double complex *u, double complex *u_copy) {
+void SU3_copy(const double complex *u, double complex *u_copy) {
     // Copies u to u_copy
 
     for (unsigned short a = 0; a < 3; a++) {
@@ -63,7 +63,7 @@ void SU3_set_to_identity(double complex *u) {
     }
 }
 
-void SU3_accumulate(double complex *u, double complex *acc) {
+void SU3_accumulate(const double complex *u, double complex *acc) {
     // Accumulates the value of u into acc
 
     for (unsigned short a = 0; a < 3; a++) {
@@ -73,7 +73,7 @@ void SU3_accumulate(double complex *u, double complex *acc) {
     }
 }
 
-void SU3_subtraction(double complex *u, double complex *v,
+void SU3_subtraction(const double complex *u, const double complex *v,
                      double complex *u_minus_v) {
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
@@ -85,14 +85,14 @@ void SU3_subtraction(double complex *u, double complex *v,
     }
 }
 
-double complex SU3_trace(double complex *u) {
+double complex SU3_trace(const double complex *u) {
     //	Calculates the trace of the matrix u
     //  and returns result (complex) in tr
 
     return u[0 * 3 + 0] + u[1 * 3 + 1] + u[2 * 3 + 2];
 }
 
-double complex SU3_determinant(double complex *u) {
+double complex SU3_determinant(const double complex *u) {
     //  Calculates the determinant of the matrix u
     //  and returns result, a complex number, in det.
 
@@ -102,7 +102,7 @@ double complex SU3_determinant(double complex *u) {
     return u[0 * 3 + 0] * (u[1 * 3 + 1] * u[2 * 3 + 2] - u[1 * 3 + 2] * u[2 * 3 + 1]) + u[0 * 3 + 1] * (u[1 * 3 + 2] * u[2 * 3 + 0] - u[1 * 3 + 0] * u[2 * 3 + 2]) + u[0 * 3 + 2] * (u[1 * 3 + 0] * u[2 * 3 + 1] - u[1 * 3 + 1] * u[2 * 3 + 0]);
 }
 
-void SU3_hermitean_conjugate(double complex *u, double complex *u_dagger) {
+void SU3_hermitean_conjugate(const double complex *u, double complex *u_dagger) {
     // Calculates the hermitean conjugate to u
     // and returns result in u_dagger.
 
@@ -120,7 +120,7 @@ void SU3_hermitean_conjugate(double complex *u, double complex *u_dagger) {
     }
 }
 
-void SU3_multiplication_by_scalar(const double complex alpha, double complex *u,
+void SU3_multiplication_by_scalar(const double complex alpha, const double complex *u,
                                   double complex *alpha_times_u) {
     //  Calculates multiplication of SU(3) matrix u by scalar alpha
     //  and returns result in alphatimesu.
@@ -145,7 +145,7 @@ void SU3_substitution_multiplication_by_scalar(const double complex alpha, doubl
     }
 }
 
-void SU3_product(double complex *u, double complex *v, double complex *uv) {
+void SU3_product(const double complex *u, const double complex *v, double complex *uv) {
     // Calculates product of 2 SU(3) matrices u e v
     // and returns result in uv.
 
@@ -161,7 +161,7 @@ void SU3_product(double complex *u, double complex *v, double complex *uv) {
     }
 }
 
-void SU3_product_three(double complex *u, double complex *v, double complex *w,
+void SU3_product_three(const double complex *u, const double complex *v, const double complex *w,
                        double complex *uvw) {
     //  Calculates product of 3 SU(3) matrices u, v and w
     //  and returns result in uvw.
@@ -180,7 +180,7 @@ void SU3_product_three(double complex *u, double complex *v, double complex *w,
     }
 }
 
-void SU3_accumulate_left_product(double complex *g, double complex *acc_prod) {
+void SU3_accumulate_left_product(const double complex *g, double complex *acc_prod) {
     //	Calculates matrix product between g and acc_prod and accumulates result in acc_prod
 
     double complex *aux_prod = (double complex *)malloc(3 * 3 * sizeof(double complex));
@@ -192,7 +192,7 @@ void SU3_accumulate_left_product(double complex *g, double complex *acc_prod) {
     free(aux_prod);
 }
 
-void SU3_accumulate_right_product(double complex *acc_prod, double complex *g) {
+void SU3_accumulate_right_product(double complex *acc_prod, const double complex *g) {
     //	Calculates matrix product between acc_prod and g and accumulates result in acc_prod
 
     double complex *aux_prod = (double complex *)malloc(3 * 3 * sizeof(double complex));
@@ -287,7 +287,7 @@ void SU3_projection(double complex *x) {
     free(x_SU3);
 }
 
-void SU3_decompose_algebra(double complex *a, double *a_components) {
+void SU3_decompose_algebra(const double complex *a, double *a_components) {
     //  Decomposes A in the components of the alfebra of SU(3)
     //  using the Gell-Mann matrices a basis and following the conventions
     //  of Gattringer. The components are then returned in a_components

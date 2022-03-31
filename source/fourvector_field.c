@@ -44,7 +44,7 @@ void SU3_calculate_A(double complex *U, const pos_vec position,const unsigned sh
     free(trace_part);
 }
 
-void SU3_divergence_A(double complex *U,const pos_vec position, double complex *div_A) {
+void SU3_divergence_A(double complex *U, const pos_vec position, double complex *div_A) {
     //	Calculates the divergence of the field A on the lattice
     //  and returns it in div_A.
 

@@ -154,7 +154,7 @@ unsigned short position_is_odd(const pos_vec position) {
 
     return ((position.t + position.i + position.j + position.k) % 2);
 }
-void test_allocation(void * pointer, char * location ){ 
+void test_allocation(const void * pointer, const char * location ){ 
     //	Test if allocation was successful.
     if ( pointer == NULL ) {
 			

@@ -22,7 +22,7 @@ unsigned short position_is_even(const pos_vec position);
 
 unsigned short position_is_odd(const pos_vec position);
 
-void test_allocation(void * pointer, char * location );
+void test_allocation(const void * pointer, const char * location );
 
 double complex * get_link(double complex *U, const pos_vec position, const unsigned short mu);
 

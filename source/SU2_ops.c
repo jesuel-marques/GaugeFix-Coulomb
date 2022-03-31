@@ -10,7 +10,7 @@
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
 //	where sigma[i] are the Pauli matrices.
 
-void SU2_copy(double *u, double *u_copy) {
+void SU2_copy(const double *u, double *u_copy) {
     // Copies u to u_copy
 
     for (unsigned short a = 0; a < 4; a++) {
@@ -36,7 +36,7 @@ void SU2_set_to_identity(double complex *u) {
     u[3] = 0.0;
 }
 
-void SU2_accumulate(double *u, double *acc) {
+void SU2_accumulate(const double *u, double *acc) {
     // Accumulates the value of u into acc
 
     for (unsigned short a = 0; a < 4; a++) {
@@ -44,7 +44,7 @@ void SU2_accumulate(double *u, double *acc) {
     }
 }
 
-void SU2_subtraction(double *u, double *v, double *u_minus_v) {
+void SU2_subtraction(const double *u, const double *v, double *u_minus_v) {
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
 
@@ -53,7 +53,7 @@ void SU2_subtraction(double *u, double *v, double *u_minus_v) {
     }
 }
 
-double SU2_trace(double *u) {
+double SU2_trace(const double *u) {
     //	Calculates trace of u
 
     return 2.0 * u[0];
@@ -61,7 +61,7 @@ double SU2_trace(double *u) {
     //	twice the 0th component.
 }
 
-double SU2_determinant(double *u) {
+double SU2_determinant(const double *u) {
     //  Calculates the determinant of the matrix u
 
     double det_u = 0.0;
@@ -75,7 +75,7 @@ double SU2_determinant(double *u) {
     return det_u;
 }
 
-void SU2_hermitean_conjugate(double *u, double *u_dagger) {
+void SU2_hermitean_conjugate(const double *u, double *u_dagger) {
     // Calculates the hermitean conjugate to u
     // and returns result in u_dagger.
 
@@ -90,7 +90,7 @@ void SU2_hermitean_conjugate(double *u, double *u_dagger) {
     }
 }
 
-void SU2_multiplication_by_scalar(double *u, const double alpha, double *alpha_times_u) {
+void SU2_multiplication_by_scalar(const double *u, const double alpha, double *alpha_times_u) {
     //  Calculates multiplicatoin of SU(2) matrix u by scalar alpha
     //  and returns result in alpha_times_u.
 
@@ -100,7 +100,7 @@ void SU2_multiplication_by_scalar(double *u, const double alpha, double *alpha_t
     }
 }
 
-double SU2_inner_prod(double *u, double *v) {
+double SU2_inner_prod(const double *u, const double *v) {
     //	Calculates the "scalar product" of two SU(2) matrices
     //	in the Cayley-Klein representation.
     //	Used in the product of two SU(2) matrices.
@@ -116,7 +116,7 @@ double SU2_inner_prod(double *u, double *v) {
     return inner_prod;
 }
 
-void SU2_outer_product(double *u, double *v, double *outer_product) {
+void SU2_outer_product(const double *u, const double *v, double *outer_product) {
     //	Calculates the "outer product" of two SU(2) matrices
     //	in the Cayley-Klein representation, and returns result in outer_product
     //	Used in the product of two SU(2) matrices.
@@ -130,7 +130,7 @@ void SU2_outer_product(double *u, double *v, double *outer_product) {
     outer_product[3] = u[1] * v[2] - u[2] * v[1];
 }
 
-void SU2_product(double *u, double *v, double *uv) {
+void SU2_product(const double *u, const double *v, double *uv) {
     // Calculates product of 2 SU(2) matrices u e v
     // and returns result in uv.
 
@@ -153,7 +153,7 @@ void SU2_product(double *u, double *v, double *uv) {
     free(u_cross_v);
 }
 
-void SU2_product_three(double *u, double *v, double *w, double *uvw) {
+void SU2_product_three(const double *u, const double *v, const double *w, double *uvw) {
     //  Calculates product of 3 SU(3) matrices u, v and w
     //  and returns result in uvw.
 
@@ -166,7 +166,7 @@ void SU2_product_three(double *u, double *v, double *w, double *uvw) {
     free(uv);
 }
 
-void SU2_product_four(double u[4], double v[4], double w[4], double x[4], double uvwx[4]) {
+void SU2_product_four(const double *u, const double *v, const double *w, const double *x, double *uvwx) {
     //  Calculates product of 4 SU(3) matrices u, v, w and x
     //  and returns result in uvwx.
 

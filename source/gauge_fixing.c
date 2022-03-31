@@ -106,7 +106,7 @@ double SU3_calculate_e2(double complex *U) {
     return e2;
 }
 
-void SU3_update_sub_LosAlamos(double complex *matrix_SU3, unsigned short submatrix, complex double *update_SU3) {
+void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned short submatrix, complex double *update_SU3) {
     unsigned short a, b;
    
     SU3_set_to_null(update_SU3);
@@ -153,7 +153,7 @@ void SU3_update_sub_LosAlamos(double complex *matrix_SU3, unsigned short submatr
     free(matrix_SU2);
 }
 
-void SU3_LosAlamos_common_block(double complex *w, double complex *total_update) {
+void SU3_LosAlamos_common_block(const double complex *w, double complex *total_update) {
     //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
     //	algorithm for SU(3), with a division of the update matrix in submatrices
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
