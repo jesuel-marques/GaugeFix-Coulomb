@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
 #include "../SU3_parameters.h"              //	Simulation parameters
+#include "../SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
 
 #include "SU2_ops.h"  //	SU(2) operations
 #include "SU3_ops.h"  //	SU(3) operations
@@ -16,7 +16,7 @@
 
 extern char configs_dir_name[];
 
-pos_vec add_position_vector(pos_vec u, pos_vec v) {
+pos_vec add_position_vector(const pos_vec u, const  pos_vec v) {
     //	Adds two position vectors v and u, taking into account the periodic boundary conditions,
     //  and puts result in vplusu.
 
@@ -49,13 +49,13 @@ pos_vec add_position_vector(pos_vec u, pos_vec v) {
     return u_plus_v;
 }
 
-void print_pos_vec(pos_vec pos) {
+void print_pos_vec(const pos_vec pos) {
     //	prints a position to the screen
 
     printf("% d %d %d %d\n", pos.t, pos.i, pos.j, pos.k);
 }
 
-pos_vec hop_position_positive(pos_vec u, int mu) {
+pos_vec hop_position_positive(const pos_vec u, const unsigned short mu) {
     //	Calculates the position immediately forward
     //	in the direction mu, taken into account the
     //	periodic boundary conditions.
@@ -99,7 +99,7 @@ pos_vec hop_position_positive(pos_vec u, int mu) {
     return u_plus_muhat;
 }
 
-pos_vec hop_position_negative(pos_vec u, int mu) {
+pos_vec hop_position_negative(const pos_vec u, const unsigned short mu) {
     //	Calculates the position immediately behind
     //	in the direction mu, taken into account the
     //	periodic boundary conditions.
@@ -143,24 +143,32 @@ pos_vec hop_position_negative(pos_vec u, int mu) {
     return u_minus_muhat;
 }
 
-int position_is_even(pos_vec position) {
+unsigned short position_is_even(const pos_vec position) {
     //	If a position is even returns 1, if odd returns 0
 
     return ((position.t + position.i + position.j + position.k + 1) % 2);
 }
 
-int position_is_odd(pos_vec position) {
+unsigned short position_is_odd(const pos_vec position) {
     //	If a position is even returns 1, if odd returns 0
 
     return ((position.t + position.i + position.j + position.k) % 2);
 }
+void test_allocation(void * pointer, char * location ){ 
+    //	Test if allocation was successful.
+    if ( pointer == NULL ) {
+			
+			printf("Memory allocation failed at %s.\n", location);
+			exit(1); 
+	}
+}
 
-double complex *get_link(double complex *U, pos_vec position, int mu) {
+double complex *get_link(double complex *U,const pos_vec position,const unsigned short mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
 }
 
-char *name_configuration_file(int config) {
+char *name_configuration_file(const unsigned short config) {
     char configs_dir_name_local[max_length_name];
     strcpy(configs_dir_name_local, configs_dir_name);
     
@@ -170,7 +178,7 @@ char *name_configuration_file(int config) {
     return strcat(configs_dir_name_local, config_filename);
 }
 
-void SU3_load_config(char filename[max_length_name], double complex *U) {
+void SU3_load_config(const char filename[max_length_name], double complex *U) {
     //	Loads a link configuration from the file with filename to U.
 
     FILE *config_file;
@@ -197,7 +205,7 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
         for (position.i = 0; position.i < Nxyz; position.i++) {
             for (position.j = 0; position.j < Nxyz; position.j++) {
                 for (position.k = 0; position.k < Nxyz; position.k++) {
-                    for (int mu = 0; mu < d; mu++) {
+                    for (unsigned short mu = 0; mu < d; mu++) {
                         SU3_copy(get_link(U, position, mu), get_link(U_copy, position, mu));
                     }
                 }
@@ -217,7 +225,7 @@ void SU3_reunitarize(double complex *U) {
         for (position.i = 0; position.i < Nxyz; position.i++) {
             for (position.j = 0; position.j < Nxyz; position.j++) {
                 for (position.k = 0; position.k < Nxyz; position.k++) {
-                    for (int mu = 0; mu < d; mu++) {
+                    for (unsigned short mu = 0; mu < d; mu++) {
                         SU3_projection(get_link(U, position, mu));
                     }
                 }

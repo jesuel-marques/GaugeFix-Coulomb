@@ -4,6 +4,7 @@
         "lattice.h": "c",
         "stdlib.h": "c",
         "su3_parameters.h": "c",
-        "su2_ops.h": "c"
+        "su2_ops.h": "c",
+        "su3_gaugefixing_parameters.h": "c"
     }
 }

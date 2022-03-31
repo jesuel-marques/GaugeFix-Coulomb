@@ -1,7 +1,7 @@
 #ifndef SU3OPS_H
 #define SU3OPS_H
 
-void SU3_print_matrix(double complex *u, char *name);
+void SU3_print_matrix(double complex *u, const char *name);
 
 void SU3_copy(double complex *u, double complex *u_copy);
 
@@ -19,8 +19,8 @@ double complex SU3_determinant(double complex *u);
 
 void SU3_hermitean_conjugate(double complex *u, double complex *u_dagger);
 
-void SU3_multiplication_by_scalar(double complex alpha, double complex *u, double complex *alpha_times_u);
-void SU3_substitution_multiplication_by_scalar(double complex alpha, double complex *u);
+void SU3_multiplication_by_scalar(const double complex alpha, double complex *u, double complex *alpha_times_u);
+void SU3_substitution_multiplication_by_scalar(const double complex alpha, double complex *u);
 
 void SU3_product(double complex *u, double complex *v, double complex *uv);
 

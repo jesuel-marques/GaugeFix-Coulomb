@@ -4,6 +4,7 @@
 #include <stdlib.h>  //	Standard C header files
 
 #include "math_ops.h"  //	Math operations
+#include "lattice.h"
 
 // All matrices are in the Cayley-Klein representation
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
@@ -12,7 +13,7 @@
 void SU2_copy(double *u, double *u_copy) {
     // Copies u to u_copy
 
-    for (int a = 0; a < 4; a++) {
+    for (unsigned short a = 0; a < 4; a++) {
         u_copy[a] = u[a];
     }
 }
@@ -38,7 +39,7 @@ void SU2_set_to_identity(double complex *u) {
 void SU2_accumulate(double *u, double *acc) {
     // Accumulates the value of u into acc
 
-    for (int a = 0; a < 4; a++) {
+    for (unsigned short a = 0; a < 4; a++) {
         acc[a] += u[a];
     }
 }
@@ -47,7 +48,7 @@ void SU2_subtraction(double *u, double *v, double *u_minus_v) {
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
 
-    for (int a = 0; a < 4; a++) {
+    for (unsigned short a = 0; a < 4; a++) {
         u_minus_v[a] = u[a] - v[a];
     }
 }
@@ -65,7 +66,7 @@ double SU2_determinant(double *u) {
 
     double det_u = 0.0;
 
-    for (int i = 0; i <= 3; i++) {
+    for (unsigned short i = 0; i <= 3; i++) {
         det_u += pow2(u[i]);
         //	In the Cayley-Klein representation, the determinant
         //	is the sum of the squares of the components.
@@ -82,18 +83,18 @@ void SU2_hermitean_conjugate(double *u, double *u_dagger) {
     //	In the Cayley-Klein representation, the 0th
     //	component of the conjugate is the same...
 
-    for (int i = 1; i <= 3; i++) {
+    for (unsigned short i = 1; i <= 3; i++) {
         u_dagger[i] = -u[i];
         //	And the 1, 2 and 3 components are the
         //	same up to a minus sign.
     }
 }
 
-void SU2_multiplication_by_scalar(double *u, double alpha, double *alpha_times_u) {
+void SU2_multiplication_by_scalar(double *u, const double alpha, double *alpha_times_u) {
     //  Calculates multiplicatoin of SU(2) matrix u by scalar alpha
     //  and returns result in alpha_times_u.
 
-    for (int a = 0; a < 4; a++) {
+    for (unsigned short a = 0; a < 4; a++) {
         alpha_times_u[a] = alpha * u[a];
         //	Mutiplying each entry.
     }
@@ -107,7 +108,7 @@ double SU2_inner_prod(double *u, double *v) {
     double inner_prod = u[0] * v[0];
     //	The 0th component has a plus sign ...
 
-    for (int b = 1; b < 4; b++) {
+    for (unsigned short b = 1; b < 4; b++) {
         inner_prod += -u[b] * v[b];
     }
     // and the 1, 2 and 3 components have a minus sign.
@@ -134,12 +135,7 @@ void SU2_product(double *u, double *v, double *uv) {
     // and returns result in uv.
 
     double *u_cross_v = (double *)malloc(4 * sizeof(double));
-
-    if (u_cross_v == NULL) {
-        //	Test if allocation was successful.
-        printf("Memory allocation failed in function SU2_product");
-        exit(1);
-    }
+    test_allocation(u_cross_v, "SU2_product");
 
     uv[0] = SU2_inner_prod(u, v);
     //	In the Cayley-Klein representation, the 0th
@@ -147,7 +143,7 @@ void SU2_product(double *u, double *v, double *uv) {
 
     SU2_outer_product(u, v, u_cross_v);
 
-    for (int a = 1; a <= 3; a++) {
+    for (unsigned short a = 1; a <= 3; a++) {
         uv[a] = u[a] * v[0] + u[0] * v[a] - *(u_cross_v + a);
     }
     //	... and the 1, 2 e 3 components are given
@@ -162,13 +158,8 @@ void SU2_product_three(double *u, double *v, double *w, double *uvw) {
     //  and returns result in uvw.
 
     double *uv = (double *)malloc(4 * sizeof(double));
-
-    if (uv == NULL) {
-        //	Test if allocation was successful.
-        printf("Memory allocation failed in function SU2_product_three");
-        exit(1);
-    }
-
+    test_allocation(uv, "SU2_product_three");
+  
     SU2_product(u, v, uv);
     SU2_product(uv, w, uvw);
 
@@ -180,11 +171,7 @@ void SU2_product_four(double u[4], double v[4], double w[4], double x[4], double
     //  and returns result in uvwx.
 
     double *uvw = (double *)malloc(4 * sizeof(double));
-    if (uvw == NULL) {
-        //	Test if allocation was successful.
-        printf("Memory allocation failed in function SU2_product_four");
-        exit(1);
-    }
+    test_allocation(uvw, "SU2_product_four");
 
     SU2_product_three(u, v, w, uvw);
     SU2_product(uvw, x, uvwx);

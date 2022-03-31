@@ -3,19 +3,19 @@
 #include <stdio.h>  //	Standard header files in C
 #include <stdlib.h>
 
-#include "/usr/include/mkl/mkl.h"
 #include "math_ops.h"  //	Math operations
+#include "lattice.h"
 
-void SU3_print_matrix(double complex *u, char *name) {
+void SU3_print_matrix(double complex *u, const char *name) {
     // Prints the matrix on screen
 
     printf("\n\n %s \n", name);
 
     printf("{");
-    for (int i = 0; i < 3; i++) {
+    for (unsigned short i = 0; i < 3; i++) {
         printf("{");
 
-        for (int j = 0; j < 3; j++) {
+        for (unsigned short j = 0; j < 3; j++) {
             printf("%.16lf+I(%.16lf)", creal(u[3 * i + j]), cimag(u[3 * i + j]));
             if (j != 2) printf(",");
         }
@@ -32,8 +32,8 @@ void SU3_print_matrix(double complex *u, char *name) {
 void SU3_copy(double complex *u, double complex *u_copy) {
     // Copies u to u_copy
 
-    for (int a = 0; a < 3; a++) {
-        for (int b = 0; b < 3; b++) {
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < 3; b++) {
             u_copy[a * 3 + b] = u[a * 3 + b];
         }
     }
@@ -42,8 +42,8 @@ void SU3_copy(double complex *u, double complex *u_copy) {
 void SU3_set_to_null(double complex *u) {
     // Sets u to be the null matrix in SU(3)
 
-    for (int a = 0; a < 3; a++) {
-        for (int b = 0; b < 3; b++) {
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < 3; b++) {
             u[a * 3 + b] = 0.0;
         }
     }
@@ -52,8 +52,8 @@ void SU3_set_to_null(double complex *u) {
 void SU3_set_to_identity(double complex *u) {
     // Sets u to be the identity matrix in SU(3)
 
-    for (int a = 0; a < 3; a++) {
-        for (int b = 0; b < 3; b++) {
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < 3; b++) {
             if (a != b) {
                 u[a * 3 + b] = 0.0;
             } else {
@@ -66,8 +66,8 @@ void SU3_set_to_identity(double complex *u) {
 void SU3_accumulate(double complex *u, double complex *acc) {
     // Accumulates the value of u into acc
 
-    for (int a = 0; a < 3; a++) {
-        for (int b = 0; b < 3; b++) {
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < 3; b++) {
             acc[a * 3 + b] += u[a * 3 + b];
         }
     }
@@ -78,8 +78,8 @@ void SU3_subtraction(double complex *u, double complex *v,
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
 
-    for (int a = 0; a < 3; a++) {
-        for (int b = 0; b < 3; b++) {
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < 3; b++) {
             u_minus_v[a * 3 + b] = u[a * 3 + b] - v[a * 3 + b];
         }
     }
@@ -110,8 +110,8 @@ void SU3_hermitean_conjugate(double complex *u, double complex *u_dagger) {
     u_dagger[1 * 3 + 1] = conj(u[1 * 3 + 1]);
     u_dagger[2 * 3 + 2] = conj(u[2 * 3 + 2]);
 
-    for (int a = 0; a < 3; a++) {
-        for (int b = 0; b < a; b++) {
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < a; b++) {
             if (a != b) {
                 u_dagger[b * 3 + a] = conj(u[a * 3 + b]);
                 u_dagger[a * 3 + b] = conj(u[b * 3 + a]);
@@ -120,25 +120,25 @@ void SU3_hermitean_conjugate(double complex *u, double complex *u_dagger) {
     }
 }
 
-void SU3_multiplication_by_scalar(double complex alpha, double complex *u,
+void SU3_multiplication_by_scalar(const double complex alpha, double complex *u,
                                   double complex *alpha_times_u) {
     //  Calculates multiplication of SU(3) matrix u by scalar alpha
     //  and returns result in alphatimesu.
 
-    for (int a = 0; a < 3; a++) {
-        for (int b = 0; b < 3; b++) {
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < 3; b++) {
             alpha_times_u[a * 3 + b] = alpha * u[a * 3 + b];
             //	Mutiplying each entry.
         }
     }
 }
 
-void SU3_substitution_multiplication_by_scalar(double complex alpha, double complex *u) {
+void SU3_substitution_multiplication_by_scalar(const double complex alpha, double complex *u) {
     //  Calculates multiplication of SU(3) matrix u by scalar alpha
     //  and returns result in u.
 
-    for (int a = 0; a < 3; a++) {
-        for (int b = 0; b < 3; b++) {
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < 3; b++) {
             u[a * 3 + b] *= alpha;
             //	Mutiplying each entry.
         }
@@ -150,9 +150,9 @@ void SU3_product(double complex *u, double complex *v, double complex *uv) {
     // and returns result in uv.
 
     SU3_set_to_null(uv);
-    for (int a = 0; a < 3; a++) {          //  lines
-        for (int b = 0; b < 3; b++) {      //  columns
-            for (int c = 0; c < 3; c++) {  //  dummy index
+    for (unsigned short a = 0; a < 3; a++) {          //  lines
+        for (unsigned short b = 0; b < 3; b++) {      //  columns
+            for (unsigned short c = 0; c < 3; c++) {  //  dummy index
 
                 uv[a * 3 + b] += u[a * 3 + c] * v[c * 3 + b];
                 //  Usual matrix multiplication.
@@ -167,10 +167,10 @@ void SU3_product_three(double complex *u, double complex *v, double complex *w,
     //  and returns result in uvw.
 
     SU3_set_to_null(uvw);
-    for (int a = 0; a < 3; a++) {              //  lines
-        for (int b = 0; b < 3; b++) {          //  columns
-            for (int c = 0; c < 3; c++) {      //  dummy index 1
-                for (int e = 0; e < 3; e++) {  //  dummy index 2
+    for (unsigned short a = 0; a < 3; a++) {              //  lines
+        for (unsigned short b = 0; b < 3; b++) {          //  columns
+            for (unsigned short c = 0; c < 3; c++) {      //  dummy index 1
+                for (unsigned short e = 0; e < 3; e++) {  //  dummy index 2
 
                     uvw[a * 3 + b] += u[a * 3 + c] * v[c * 3 + e] * w[e * 3 + b];
                     //  Usual matrix multiplication.
@@ -184,6 +184,7 @@ void SU3_accumulate_left_product(double complex *g, double complex *acc_prod) {
     //	Calculates matrix product between g and acc_prod and accumulates result in acc_prod
 
     double complex *aux_prod = (double complex *)malloc(3 * 3 * sizeof(double complex));
+    test_allocation(aux_prod, "SU3_accumulate_left_product");
 
     SU3_copy(acc_prod, aux_prod);
     SU3_product(g, aux_prod, acc_prod);
@@ -195,6 +196,7 @@ void SU3_accumulate_right_product(double complex *acc_prod, double complex *g) {
     //	Calculates matrix product between acc_prod and g and accumulates result in acc_prod
 
     double complex *aux_prod = (double complex *)malloc(3 * 3 * sizeof(double complex));
+    test_allocation(aux_prod, "SU3_accumulate_right_product");
 
     SU3_copy(acc_prod, aux_prod);
     SU3_product(aux_prod, g, acc_prod);
@@ -207,26 +209,27 @@ void SU3_projection(double complex *x) {
     //	Follows method found in Gattringer around Eq. 4.27.
     //  More explanation below.
 
-    double complex *x_SU3 = (double complex *)malloc(3 * 3 * sizeof(double complex));
-
     double sum_absvalue = 0.0;  //  To calculate first two lines of
                                 //  projected matrix.
 
-    double complex u_new_conj[3];  //  To calculate last line of
-    double complex v_new_conj[3];  //  projected matrix.
-
-    for (int b = 0; b < 3; b++) {
+    for (unsigned short b = 0; b < 3; b++) {
         sum_absvalue += pow2(cabsl(x[0 * 3 + b]));
         //	Absvalue of first line of x matrix
         //  to be used for normalization below.
     }
 
+    double complex *x_SU3 = (double complex *)malloc(3 * 3 * sizeof(double complex));
+    test_allocation(x_SU3, "SU3_projection");
+
     //  Used in the Gram-Schmidt
     double complex v_unewconj = 0.0;  //  method to calculate
                                       //  second line of projected
                                       //  matrix.
+    
+    double complex u_new_conj[3];  //  To calculate last line of
+    double complex v_new_conj[3];  //  projected matrix.
 
-    for (int b = 0; b < 3; b++) {
+    for (unsigned short b = 0; b < 3; b++) {
         x_SU3[0 * 3 + b] = x[0 * 3 + b] / sqrt(sum_absvalue);
         //	Calculates u_new, first line of x_SU3, projected from x
         //  simply by dividing its first line by its absolute value.
@@ -245,20 +248,20 @@ void SU3_projection(double complex *x) {
 
     //	Gram-Schmidt method
 
-    for (int b = 0; b < 3; b++) {
+    for (unsigned short b = 0; b < 3; b++) {
         v_prime[b] = x[1 * 3 + b] - x_SU3[0 * 3 + b] * v_unewconj;
         // Subtraction of the part parallel to u_new of v.
     }
 
     sum_absvalue = 0.0;
 
-    for (int b = 0; b < 3; b++) {
+    for (unsigned short b = 0; b < 3; b++) {
         sum_absvalue += pow2(cabsl(v_prime[b]));
         //	Absvalue of second line of projected matrix
         //  before being normalized.
     }
 
-    for (int b = 0; b < 3; b++) {
+    for (unsigned short b = 0; b < 3; b++) {
         x_SU3[1 * 3 + b] = v_prime[b] / sqrt(sum_absvalue);
         //	Calculates  v_new, second line of the projected matrix
         //  from v_prime, by normalizing it.

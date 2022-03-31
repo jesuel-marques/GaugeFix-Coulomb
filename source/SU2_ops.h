@@ -14,7 +14,7 @@ double SU2_determinant(double* u);
 
 void SU2_hermitean_conjugate(double* u, double* u_dagger);
 
-void SU2_multiplication_by_scalar(double* u, double alpha, double* alpha_times_u);
+void SU2_multiplication_by_scalar(double* u, const double alpha, double* alpha_times_u);
 
 double SU2_inner_prod(double* u, double* v);
 
