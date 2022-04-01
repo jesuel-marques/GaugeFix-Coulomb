@@ -17,14 +17,14 @@ void SU3_print_matrix(const double complex *u, const char *name) {
 
         for (unsigned short j = 0; j < 3; j++) {
             printf("%.16lf+I(%.16lf)", creal(u[3 * i + j]), cimag(u[3 * i + j]));
-            if (j != 2) printf(",");
+            
+            j != 2 ?  printf(",") : 0 ;
         }
-        if (i != 2) {
-            printf("},\n");
-        }
+
+        i != 2 ?  printf("},\n") : 0 ;
     }
 
-    printf("}}");
+    printf("}}\n\n");
 
     getchar();
 }
@@ -54,11 +54,9 @@ void SU3_set_to_identity(double complex *u) {
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
-            if (a != b) {
-                u[a * 3 + b] = 0.0;
-            } else {
-                u[a * 3 + b] = 1.0;
-            }
+
+                u[a * 3 + b] = a != b ? 0.0 : 1.0 ;
+
         }
     }
 }

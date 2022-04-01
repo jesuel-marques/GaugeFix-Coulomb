@@ -103,43 +103,23 @@ static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned 
    
     SU3_set_to_null(update_SU3);
 
-    switch (submatrix) {
-        case 0:
-            a = 0;
-            b = 1;
-            update_SU3[2 * 3 + 2] = 1.0;
-            break;
-
-        case 1:
-            a = 0;
-            b = 2;
-            update_SU3[1 * 3 + 1] = 1.0;
-            break;
-
-        case 2:
-            a = 1;
-            b = 2;
-            update_SU3[0 * 3 + 0] = 1.0;
-            break;
-
-        default:
-            printf("Invalid submatrix");
-            exit(1);
-    }
+    update_SU3[(2-submatrix) * 3 + (2-submatrix)] = 1.0;
+    a = submatrix == 2 ? 1 : 0;
+    b = submatrix == 0 ? 1 : 2;
 
     double matrix_SU2[4];
 
-    matrix_SU2[0] = (creal(matrix_SU3[a * 3 + a]) + creal(matrix_SU3[b * 3 + b]));
+    matrix_SU2[0] =  (creal(matrix_SU3[a * 3 + a]) + creal(matrix_SU3[b * 3 + b]));
     matrix_SU2[1] = -(cimag(matrix_SU3[a * 3 + b]) + cimag(matrix_SU3[b * 3 + a]));
     matrix_SU2[2] = -(creal(matrix_SU3[a * 3 + b]) - creal(matrix_SU3[b * 3 + a]));
     matrix_SU2[3] = -(cimag(matrix_SU3[a * 3 + a]) - cimag(matrix_SU3[b * 3 + b]));
 
     SU2_projection(matrix_SU2);
 
-    update_SU3[a * 3 + a] = matrix_SU2[0] + I * matrix_SU2[3];
-    update_SU3[a * 3 + b] = matrix_SU2[2] + I * matrix_SU2[1];
+    update_SU3[a * 3 + a] =  matrix_SU2[0] + I * matrix_SU2[3];
+    update_SU3[a * 3 + b] =  matrix_SU2[2] + I * matrix_SU2[1];
     update_SU3[b * 3 + a] = -matrix_SU2[2] + I * matrix_SU2[1];
-    update_SU3[b * 3 + b] = matrix_SU2[0] - I * matrix_SU2[3];
+    update_SU3[b * 3 + b] =  matrix_SU2[0] - I * matrix_SU2[3];
 
 }
 
@@ -228,32 +208,31 @@ unsigned short SU3_gauge_fix(double complex *U, const unsigned short config) {
             for (position.i = 0; position.i < Nxyz; position.i++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
-                        if ((position_is_even(position) + sweep) % 2) {
+                        (position_is_even(position) + sweep) % 2 ? 
                             //	Implementation of the red black subdivision of the lattice
-
-                            SU3_gaugefixing_overrelaxation(U, position);
-                            //	The actual gauge-fixing algorithm
-                        }
+                            SU3_gaugefixing_overrelaxation(U, position): 0 ;
+                            //  The actual gauge-fixing algorithm                  
                     }
                 }
             }
         }
 
-        if (sweep % sweeps_to_measurement_e2 == 0) {
+        sweep % sweeps_to_measurement_e2 == 0 ?
             
             //	No need to calculate e2 all the time
             //	because it will take some hundreds of sweeps
             //	to fix the gauge.
             
-            e2 = SU3_calculate_e2(U);
+            e2 = SU3_calculate_e2(U) : 0;
             //	Indicates how far we are to the Landau-gauge
             //	condition, e2=0.
 
             // printf("\nconfig: %d, sweep: %d, e2: %.2e\n", config, sweep, e2);
-        }
-        if (sweep % sweeps_to_reunitarization == 0) {
-            SU3_reunitarize(U);
-        }
+        
+        sweep % sweeps_to_reunitarization == 0 ? 
+        
+            SU3_reunitarize(U): 0 ;
+        
 
     } while (e2 > tolerance);  //	As long as e2 is larger than the tolerance
                                //	repeats the process iteratively.

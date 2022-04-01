@@ -14,39 +14,6 @@
 
 extern char configs_dir_name[];
 
-pos_vec add_position_vector(const pos_vec u, const  pos_vec v) {
-    //	Adds two position vectors v and u, taking into account the periodic boundary conditions,
-    //  and puts result in vplusu.
-
-    pos_vec u_plus_v;
-
-    if ((u.t + v.t) >= 0) {  //	time component
-        u_plus_v.t = ((u.t + v.t) % Nt);
-    } else {
-        u_plus_v.t = (((u.t + v.t) % Nt + Nt) % Nt);
-    }
-
-    if ((u.i + v.i) >= 0) {  //	x component
-        u_plus_v.i = ((u.i + v.i) % Nxyz);
-    } else {
-        u_plus_v.i = (((u.i + v.i) % Nxyz + Nxyz) % Nxyz);
-    }
-
-    if ((u.j + v.j) >= 0) {  //	y component
-        u_plus_v.j = ((u.j + v.j) % Nxyz);
-    } else {
-        u_plus_v.j = (((u.j + v.j) % Nxyz + Nxyz) % Nxyz);
-    }
-
-    if ((u.k + v.k) >= 0) {  //	z component
-        u_plus_v.k = ((u.k + v.k) % Nxyz);
-    } else {
-        u_plus_v.k = (((u.k + v.k) % Nxyz + Nxyz) % Nxyz);
-    }
-
-    return u_plus_v;
-}
-
 void print_pos_vec(const pos_vec pos) {
     //	prints a position to the screen
 
@@ -152,6 +119,7 @@ unsigned short position_is_odd(const pos_vec position) {
 
     return ((position.t + position.i + position.j + position.k) % 2);
 }
+
 void test_allocation(const void * pointer, const char * location ){ 
     //	Test if allocation was successful.
     if ( pointer == NULL ) {
@@ -216,9 +184,7 @@ void SU3_reunitarize(double complex *U) {
     // Reunitarizes the configuration
 
     pos_vec position;
-    double complex *u = (double complex *)malloc(3 * 3 * sizeof(double complex));
-    double complex *sub_x = (double complex *)malloc(3 * 3 * sizeof(double complex));
-
+  
     for (position.t = 0; position.t < Nt; position.t++) {
         for (position.i = 0; position.i < Nxyz; position.i++) {
             for (position.j = 0; position.j < Nxyz; position.j++) {

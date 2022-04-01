@@ -8,8 +8,6 @@ typedef struct {
     unsigned short i, j, k;
 } pos_vec;  //	struct for position vectors
 
-pos_vec add_position_vector(const pos_vec u, const pos_vec v);
-
 pos_vec add_pos_vec(const pos_vec u, const pos_vec v);
 
 void print_pos_vec(const pos_vec u);
