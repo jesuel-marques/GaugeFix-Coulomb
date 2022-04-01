@@ -26,7 +26,7 @@ const char configs_dir_name[] = "configs/";
 // int main(void){
 int main(int argc, char *argv){
 
-		Starts MPI
+	//Starts MPI
 	MPI_Init(&argc,&argv);
 	int rank, size;
 	//MPI needs a communicator to know how to send/receive data. We aren't sending or receiving things here
