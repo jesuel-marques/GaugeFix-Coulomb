@@ -1,5 +1,3 @@
-
-
 #include <complex.h>
 #include <stdio.h>  //	Standard C header files
 #include <stdlib.h>

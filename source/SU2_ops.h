@@ -16,15 +16,12 @@ void SU2_hermitean_conjugate(const double* u, double* u_dagger);
 
 void SU2_multiplication_by_scalar(const double* u, const double alpha, double* alpha_times_u);
 
-double SU2_inner_prod(const double* u, const double* v);
-
-void SU2_outer_product(const double* u, const double* v, double* outer_product);
 void SU2_product(const double* u, const double* v, double* uv);
 
 void SU2_product_three(const double* u, const double* v, const double* w, double* uvw);
 
 void SU2_product_four(const double* u, const double* v, const double* w, const double* x, double* uvwx);
 
-void SU2_projection(double* a);
+void SU2_projection(double* u);
 
 #endif

@@ -100,7 +100,7 @@ void SU2_multiplication_by_scalar(const double *u, const double alpha, double *a
     }
 }
 
-double SU2_inner_prod(const double *u, const double *v) {
+static double SU2_inner_prod(const double *u, const double *v) {
     //	Calculates the "scalar product" of two SU(2) matrices
     //	in the Cayley-Klein representation.
     //	Used in the product of two SU(2) matrices.
@@ -116,7 +116,7 @@ double SU2_inner_prod(const double *u, const double *v) {
     return inner_prod;
 }
 
-void SU2_outer_product(const double *u, const double *v, double *outer_product) {
+static void SU2_outer_product(const double *u, const double *v, double *outer_product) {
     //	Calculates the "outer product" of two SU(2) matrices
     //	in the Cayley-Klein representation, and returns result in outer_product
     //	Used in the product of two SU(2) matrices.
@@ -134,8 +134,9 @@ void SU2_product(const double *u, const double *v, double *uv) {
     // Calculates product of 2 SU(2) matrices u e v
     // and returns result in uv.
 
-    double *u_cross_v = (double *)malloc(4 * sizeof(double));
-    test_allocation(u_cross_v, "SU2_product");
+
+
+    double u_cross_v[4];
 
     uv[0] = SU2_inner_prod(u, v);
     //	In the Cayley-Klein representation, the 0th
@@ -149,43 +150,34 @@ void SU2_product(const double *u, const double *v, double *uv) {
     //	... and the 1, 2 e 3 components are given
     //	by minus the cross product summed with
     //	a term which mixes 0 and 1, 2, 3 components.
-
-    free(u_cross_v);
 }
 
 void SU2_product_three(const double *u, const double *v, const double *w, double *uvw) {
     //  Calculates product of 3 SU(3) matrices u, v and w
     //  and returns result in uvw.
 
-    double *uv = (double *)malloc(4 * sizeof(double));
-    test_allocation(uv, "SU2_product_three");
+    double uv[4];
   
     SU2_product(u, v, uv);
     SU2_product(uv, w, uvw);
-
-    free(uv);
 }
 
 void SU2_product_four(const double *u, const double *v, const double *w, const double *x, double *uvwx) {
     //  Calculates product of 4 SU(3) matrices u, v, w and x
     //  and returns result in uvwx.
 
-    double *uvw = (double *)malloc(4 * sizeof(double));
-    test_allocation(uvw, "SU2_product_four");
+    double uvw[4];
 
     SU2_product_three(u, v, w, uvw);
     SU2_product(uvw, x, uvwx);
 
-    free(uvw);
 }
 
-void SU2_projection(double *a) {
+void SU2_projection(double *u) {
     //	Projects matrix a to the group SU(2) returning SU(2) matrix a_SU2.
 
-    double *a_SU2 = (double *)malloc(4 * sizeof(double));
+    double u_SU2[4];
 
-    SU2_multiplication_by_scalar(a, 1.0 / sqrt(SU2_determinant(a)), a_SU2);
-    SU2_copy(a_SU2, a);
-
-    free(a_SU2);
+    SU2_multiplication_by_scalar(u, 1.0 / sqrt(SU2_determinant(u)), u_SU2);
+    SU2_copy(u_SU2, u);
 }

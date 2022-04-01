@@ -182,26 +182,21 @@ void SU3_product_three(const double complex *u, const double complex *v, const d
 
 void SU3_accumulate_left_product(const double complex *g, double complex *acc_prod) {
     //	Calculates matrix product between g and acc_prod and accumulates result in acc_prod
-
-    double complex *aux_prod = (double complex *)malloc(3 * 3 * sizeof(double complex));
-    test_allocation(aux_prod, "SU3_accumulate_left_product");
-
+    double complex aux_prod[3 * 3];
+ 
     SU3_copy(acc_prod, aux_prod);
     SU3_product(g, aux_prod, acc_prod);
 
-    free(aux_prod);
 }
 
 void SU3_accumulate_right_product(double complex *acc_prod, const double complex *g) {
     //	Calculates matrix product between acc_prod and g and accumulates result in acc_prod
 
-    double complex *aux_prod = (double complex *)malloc(3 * 3 * sizeof(double complex));
-    test_allocation(aux_prod, "SU3_accumulate_right_product");
+    double complex aux_prod[3 * 3];
 
     SU3_copy(acc_prod, aux_prod);
     SU3_product(aux_prod, g, acc_prod);
 
-    free(aux_prod);
 }
 
 void SU3_projection(double complex *x) {
@@ -218,8 +213,7 @@ void SU3_projection(double complex *x) {
         //  to be used for normalization below.
     }
 
-    double complex *x_SU3 = (double complex *)malloc(3 * 3 * sizeof(double complex));
-    test_allocation(x_SU3, "SU3_projection");
+    double complex x_SU3[3 * 3];
 
     //  Used in the Gram-Schmidt
     double complex v_unewconj = 0.0;  //  method to calculate
@@ -284,7 +278,6 @@ void SU3_projection(double complex *x) {
 
     SU3_copy(x_SU3, x);
 
-    free(x_SU3);
 }
 
 void SU3_decompose_algebra(const double complex *a, double *a_components) {
