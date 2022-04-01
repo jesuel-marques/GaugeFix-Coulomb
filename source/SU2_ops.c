@@ -134,8 +134,6 @@ void SU2_product(const double *u, const double *v, double *uv) {
     // Calculates product of 2 SU(2) matrices u e v
     // and returns result in uv.
 
-
-
     double u_cross_v[4];
 
     uv[0] = SU2_inner_prod(u, v);

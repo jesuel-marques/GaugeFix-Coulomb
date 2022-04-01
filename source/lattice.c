@@ -161,7 +161,7 @@ void test_allocation(const void * pointer, const char * location ){
 	}
 }
 
-double complex *get_link(double complex *U,const pos_vec position,const unsigned short mu) {
+double complex *get_link(double complex *U, const pos_vec position, const unsigned short mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
 }

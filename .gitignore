@@ -1,2 +1,5 @@
 configs/
 gauge_fix_coulomb
+hostfile
+*.sh
+*.dbg
