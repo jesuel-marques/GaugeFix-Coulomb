@@ -51,11 +51,10 @@ int main(void){
 		//  fix the gauge
 		SU3_gauge_fix(U, config);
 
-		// print the gauge fixed configuration based on template name
-		// print_gaugefixedconfig();
+		// write the gauge fixed configuration based on template name
+		// write_gaugefixedconfig();
 
 		free(U);	//	Free memory allocated for the configuration.
-
 	}
 	// MPI_Finalise();
 	return 0;

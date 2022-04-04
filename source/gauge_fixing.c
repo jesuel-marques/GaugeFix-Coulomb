@@ -55,7 +55,7 @@ static void SU3_calculate_w(double complex *U, const pos_vec position, double co
 }
 
 unsigned calculate_sweeps_to_next_measurement(double e2){
-    return (unsigned)((2.0*initial_sweeps_to_measurement_e2*atan(0.3*(log10(e2/tolerance))))/M_PI+1.0);
+    return (unsigned)(initial_sweeps_to_measurement_e2-((initial_sweeps_to_measurement_e2-1.0)*log10(e2)/log10(tolerance)));
 }
 
 static double SU3_calculate_e2_local(double complex *U, const pos_vec position) {
