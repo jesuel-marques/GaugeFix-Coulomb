@@ -66,7 +66,9 @@ void SU3_accumulate(const double complex *u, double complex *acc) {
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
+
             acc[a * 3 + b] += u[a * 3 + b];
+        
         }
     }
 }
@@ -78,7 +80,9 @@ void SU3_subtraction(const double complex *u, const double complex *v,
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
+
             u_minus_v[a * 3 + b] = u[a * 3 + b] - v[a * 3 + b];
+
         }
     }
 }
@@ -111,8 +115,10 @@ void SU3_hermitean_conjugate(const double complex *u, double complex *u_dagger) 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < a; b++) {
             if (a != b) {
+
                 u_dagger[b * 3 + a] = conj(u[a * 3 + b]);
                 u_dagger[a * 3 + b] = conj(u[b * 3 + a]);
+
             }
         }
     }
@@ -125,8 +131,10 @@ void SU3_multiplication_by_scalar(const double complex alpha, const double compl
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
+
             alpha_times_u[a * 3 + b] = alpha * u[a * 3 + b];
             //	Mutiplying each entry.
+
         }
     }
 }
@@ -137,8 +145,10 @@ void SU3_substitution_multiplication_by_scalar(const double complex alpha, doubl
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
+
             u[a * 3 + b] *= alpha;
             //	Mutiplying each entry.
+            
         }
     }
 }
