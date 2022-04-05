@@ -54,33 +54,16 @@ static void SU3_calculate_w(double complex *U, const pos_vec position, double co
     }
 }
 
-unsigned calculate_sweeps_to_next_measurement(double e2){
-    return (unsigned)(initial_sweeps_to_measurement_e2-((initial_sweeps_to_measurement_e2-1.0)*log10(e2)/log10(tolerance)));
+unsigned calculate_sweeps_to_next_measurement(double e2) {
+    return (unsigned)(initial_sweeps_to_measurement_e2 * (1.0 - log10(e2) / log10(tolerance)))+1;
 }
-
-static double SU3_calculate_e2_local(double complex *U, const pos_vec position) {
-    //	Calculates quadridivergence and projects to the SU(3) algebra
-    double complex div_A[3 * 3];
-
-    SU3_divergence_A(U, position, div_A);
-
-    double div_A_components[9];
-
-    SU3_decompose_algebra(div_A, div_A_components);
-
-    double e2_local = 0.0;
-    for (unsigned short a = 1; a <= 8; a++) {
-        //	Normalized sum of the squares of the color components of the divergence of A.
-
-        e2_local += (double)pow2(div_A_components[a]) / (Volume);
-    }
-
-    return e2_local;
-}
-
+    
 static double SU3_calculate_e2(double complex *U) {
     //	Calculates e2 (defined in hep-lat/0301019v2),
     //	used to find out distance to the gauge-fixed situation.
+
+    double complex div_A[3 * 3];
+    double div_A_components[9];
 
     pos_vec position;
 
@@ -90,7 +73,16 @@ static double SU3_calculate_e2(double complex *U) {
         for (position.i = 0; position.i < Nxyz; position.i++) {
             for (position.j = 0; position.j < Nxyz; position.j++) {
                 for (position.k = 0; position.k < Nxyz; position.k++) {
-                    e2 += SU3_calculate_e2_local(U, position);
+                    
+                    SU3_divergence_A(U, position, div_A);
+                    SU3_decompose_algebra(div_A, div_A_components);
+
+                    for (unsigned short a = 1; a <= 8; a++) {
+                        //	Normalized sum of the squares of the color components of the divergence of A.
+
+                        e2 += (double)pow2(div_A_components[a]) / (Volume);
+                    }
+
                 }
             }
         }
@@ -110,17 +102,17 @@ static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned 
 
     double matrix_SU2[4];
 
-    matrix_SU2[0] = (creal(matrix_SU3[a * 3 + a]) + creal(matrix_SU3[b * 3 + b]));
+    matrix_SU2[0] =  (creal(matrix_SU3[a * 3 + a]) + creal(matrix_SU3[b * 3 + b]));
     matrix_SU2[1] = -(cimag(matrix_SU3[a * 3 + b]) + cimag(matrix_SU3[b * 3 + a]));
     matrix_SU2[2] = -(creal(matrix_SU3[a * 3 + b]) - creal(matrix_SU3[b * 3 + a]));
     matrix_SU2[3] = -(cimag(matrix_SU3[a * 3 + a]) - cimag(matrix_SU3[b * 3 + b]));
 
     SU2_projection(matrix_SU2);
 
-    update_SU3[a * 3 + a] = matrix_SU2[0] + I * matrix_SU2[3];
-    update_SU3[a * 3 + b] = matrix_SU2[2] + I * matrix_SU2[1];
+    update_SU3[a * 3 + a] =  matrix_SU2[0] + I * matrix_SU2[3];
+    update_SU3[a * 3 + b] =  matrix_SU2[2] + I * matrix_SU2[1];
     update_SU3[b * 3 + a] = -matrix_SU2[2] + I * matrix_SU2[1];
-    update_SU3[b * 3 + b] = matrix_SU2[0] - I * matrix_SU2[3];
+    update_SU3[b * 3 + b] =  matrix_SU2[0] - I * matrix_SU2[3];
 }
 
 static void SU3_LosAlamos_common_block(const double complex *w, double complex *total_update) {
@@ -189,14 +181,14 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
 
     pos_vec position;
 
+    double e2;
+
     unsigned sweep = 0;
     unsigned sweeps_to_measurement_e2 = initial_sweeps_to_measurement_e2;
     //	Counter to the number of sweeps to fix config to Landau gauge
 
-    double e2;
-
     while (1) {
-        #pragma omp parallel for num_threads(2) private(position) schedule(dynamic)
+    #pragma omp parallel for num_threads(2) private(position) schedule(dynamic)
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
             position.t = t;
@@ -217,32 +209,29 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
 
         if (sweep % sweeps_to_measurement_e2 == 0) {
             e2 = SU3_calculate_e2(U);
-            if (e2 < tolerance) {
-
-                break;
-
-            } else {
-
-                sweeps_to_measurement_e2 = calculate_sweeps_to_next_measurement(e2);
-           
-            }
-
-            //	No need to calculate e2 all the time
-            //	because it will take some hundreds of sweeps
-            //	to fix the gauge.
-
             //	Gauge-fixing index, indicates how far we are to the Landau-gauge.
             //  It will be less than the tolerance,
             //	when the gauge-fixing is considered to be attained.
             //	Following the notation of hep-lat/0301019v2
 
-            //	Indicates how far we are to the Landau-gauge
+            if (e2 <= tolerance) {
+                break;
+
+            } else {
+                sweeps_to_measurement_e2 = calculate_sweeps_to_next_measurement(e2);
+                //	No need to calculate e2 all the time
+                //	because it will take some hundreds of sweeps
+                //	to fix the gauge.
+            }
         }
+
         sweep % sweeps_to_reunitarization == 0 ?
 
-            SU3_reunitarize(U): 0;
+                                               SU3_reunitarize(U)
+                                               : 0;
     }
     SU3_reunitarize(U);
+
     printf("Sweeps needed to gauge-fix config %d: %d. e2: %3.2e \n", config, sweep, e2);
     return sweep;
 }

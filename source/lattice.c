@@ -58,7 +58,7 @@ pos_vec hop_position_positive(const pos_vec u, const unsigned short mu) {
 
         default:
             printf("mu outside of range");
-            exit(1);
+            exit(EXIT_FAILURE);
     }
 
     return u_plus_muhat;
@@ -102,30 +102,39 @@ pos_vec hop_position_negative(const pos_vec u, const unsigned short mu) {
 
         default:
             printf("mu outside of range");
-            exit(1);
+            exit(EXIT_FAILURE);
     }
 
     return u_minus_muhat;
 }
 
+
+unsigned short position_is_odd(const pos_vec position) {
+    //	If a position is odd returns 1, if even returns 0
+
+    return ((position.t ^ position.i ^ position.j ^ position.k) & 1);
+
+    // if position is odd, then the XOR of the first bit of each element
+    // of position must be 1. Take AND with 1 select this first bit.
+}
+
 unsigned short position_is_even(const pos_vec position) {
     //	If a position is even returns 1, if odd returns 0
 
-    return ((position.t + position.i + position.j + position.k + 1) % 2);
+    return !((position.t ^ position.i ^ position.j ^ position.k) & 1);
+
+    // if position is even, then the XOR of the first bit of each element
+    // of position must be 0. Taking AND with 1 select this first bit. Take the NOT of 
+    // the odd code, because want 1 for even and 0 for odd.
 }
 
-unsigned short position_is_odd(const pos_vec position) {
-    //	If a position is even returns 1, if odd returns 0
-
-    return ((position.t + position.i + position.j + position.k) % 2);
-}
 
 void test_allocation(const void * pointer, const char * location ){ 
     //	Test if allocation was successful.
     if ( pointer == NULL ) {
 			
 			printf("Memory allocation failed at %s.\n", location);
-			exit(1); 
+			exit(EXIT_FAILURE); 
 	}
 }
 
