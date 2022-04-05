@@ -195,11 +195,14 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
             for (position.i = 0; position.i < Nxyz; position.i++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
-                        (position_is_even(position) + sweep) % 2 ?
-                                                                 //	Implementation of the red black subdivision of the lattice
+                        !((position_is_even(position) + sweep) % 2) ?
+                            //	Implementation of the red black subdivision of the lattice
+                            
                             SU3_gaugefixing_overrelaxation(U, position)
-                                                                 : 0;
-                        //  The actual gauge-fixing algorithm
+                            //  The actual gauge-fixing algorithm
+                                                                 
+                            : 0;
+                        
                     }
                 }
             }
@@ -207,7 +210,7 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
 
         sweep++;
 
-        if (sweep % sweeps_to_measurement_e2 == 0) {
+        if (!(sweep % sweeps_to_measurement_e2)) {
             e2 = SU3_calculate_e2(U);
             //	Gauge-fixing index, indicates how far we are to the Landau-gauge.
             //  It will be less than the tolerance,
@@ -225,10 +228,8 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
             }
         }
 
-        sweep % sweeps_to_reunitarization == 0 ?
-
-                                               SU3_reunitarize(U)
-                                               : 0;
+        sweep % sweeps_to_reunitarization == 0 ? SU3_reunitarize(U) : 0;
+                                               
     }
     SU3_reunitarize(U);
 
