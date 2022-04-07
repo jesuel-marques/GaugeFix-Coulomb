@@ -6,4 +6,4 @@
 
 #define maxhits 2  //  Iterations hits for the maximization of Tr[w(n)]
 
-#define omega_OR 1.95  //  omega parameter of the overrelaxation
+#define omega_OR 1.97  //  omega parameter of the overrelaxation

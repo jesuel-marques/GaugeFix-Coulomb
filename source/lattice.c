@@ -193,10 +193,10 @@ void SU3_print_config(char filename[max_length_name], const char modifier[max_le
 void SU3_copy_config(float complex *U, float complex *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
-    pos_vec position;
-    #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
+            pos_vec position;
             position.t = t;
             for (position.i = 0; position.i < Nxyz; position.i++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
@@ -213,10 +213,10 @@ void SU3_copy_config(float complex *U, float complex *U_copy) {
 void SU3_reunitarize(float complex *U) {
     // Reunitarizes the configuration
 
-    pos_vec position;
-    #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
+            pos_vec position;
             position.t = t;
             for (position.i = 0; position.i < Nxyz; position.i++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {

@@ -64,7 +64,7 @@ static float SU3_calculate_e2(float complex *U) {
  
     float e2 = 0.0;
 
-    #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS)  private(position) schedule(dynamic) 
+    #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
             float complex div_A[3 * 3];
