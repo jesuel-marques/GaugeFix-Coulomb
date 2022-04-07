@@ -4,10 +4,12 @@
 #define Nt 8    // Temporal lattice size
 #define d 4     // Space-time lattice dimension
 
-#define Volume Nxyz* Nxyz* Nxyz* Nt  //	Number of points in the lattice
+#define Volume Nxyz * Nxyz * Nxyz * Nt  //	Number of points in the lattice
 
 // Other parameters
 
 #define max_configs 100
 
 #define max_length_name 300
+
+#define NUM_THREADS 2

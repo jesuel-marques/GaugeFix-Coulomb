@@ -15,10 +15,10 @@
 #include "fourvector_field.h"  //	Calculation of A_mu(n) and related things
 #include "math_ops.h"          //	Math operations
 
-static void SU3_local_update_U(double complex *U, const pos_vec position, const double complex *g) {
+static void SU3_local_update_U(float complex *U, const pos_vec position, const float complex *g) {
     //	Updates U only at a given position
 
-    double complex g_dagger[3 * 3];
+    float complex g_dagger[3 * 3];
 
     for (unsigned short mu = 0; mu < d; mu++) {
         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
@@ -33,13 +33,13 @@ static void SU3_local_update_U(double complex *U, const pos_vec position, const 
     }
 }
 
-static void SU3_calculate_w(double complex *U, const pos_vec position, double complex *w) {
+static void SU3_calculate_w(float complex *U, const pos_vec position, float complex *w) {
     //	Calculates 	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision, following the notation in hep-lat/9306018
     //	returns result in w.
 
     SU3_set_to_null(w);  //	Initializing w(n)=0
 
-    double complex u_dagger_rear[3 * 3];
+    float complex u_dagger_rear[3 * 3];
 
     // h(n)	calculation
 
@@ -54,44 +54,47 @@ static void SU3_calculate_w(double complex *U, const pos_vec position, double co
     }
 }
 
-unsigned calculate_sweeps_to_next_measurement(double e2) {
+unsigned calculate_sweeps_to_next_measurement(float e2) {
     return (unsigned)(initial_sweeps_to_measurement_e2 * (1.0 - log10(e2) / log10(tolerance)))+1;
 }
     
-static double SU3_calculate_e2(double complex *U) {
+static float SU3_calculate_e2(float complex *U) {
     //	Calculates e2 (defined in hep-lat/0301019v2),
     //	used to find out distance to the gauge-fixed situation.
 
-    double complex div_A[3 * 3];
-    double div_A_components[9];
+    float complex div_A[3 * 3];
+    float div_A_components[9];
 
     pos_vec position;
 
-    double e2 = 0.0;
+    float e2 = 0.0;
 
-    for (position.t = 0; position.t < Nt; position.t++) {
-        for (position.i = 0; position.i < Nxyz; position.i++) {
-            for (position.j = 0; position.j < Nxyz; position.j++) {
-                for (position.k = 0; position.k < Nxyz; position.k++) {
-                    
-                    SU3_divergence_A(U, position, div_A);
-                    SU3_decompose_algebra(div_A, div_A_components);
+   #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
+        // Paralelizing by slicing the time extent
+        for (unsigned short t = 0; t < Nt; t++) {
+            position.t = t;
+            for (position.i = 0; position.i < Nxyz; position.i++) {
+                for (position.j = 0; position.j < Nxyz; position.j++) {
+                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                        
+                        SU3_divergence_A(U, position, div_A);
+                        SU3_decompose_algebra(div_A, div_A_components);
 
-                    for (unsigned short a = 1; a <= 8; a++) {
-                        //	Normalized sum of the squares of the color components of the divergence of A.
+                        for (unsigned short a = 1; a <= 8; a++) {
+                            //	Normalized sum of the squares of the color components of the divergence of A.
 
-                        e2 += (double)pow2(div_A_components[a]) / (Volume);
+                            e2 += (float)pow2(div_A_components[a]) / (Volume);
+                        }
+
                     }
-
                 }
             }
-        }
     }
 
     return e2;
 }
 
-static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned short submatrix, complex double *update_SU3) {
+static void SU3_update_sub_LosAlamos(const float complex *matrix_SU3, unsigned short submatrix, complex float *update_SU3) {
     unsigned short a, b;
 
     SU3_set_to_null(update_SU3);
@@ -100,7 +103,7 @@ static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned 
     a = submatrix == 2 ? 1 : 0;
     b = submatrix == 0 ? 1 : 2;
 
-    double matrix_SU2[4];
+    float matrix_SU2[4];
 
     matrix_SU2[0] =  (creal(matrix_SU3[a * 3 + a]) + creal(matrix_SU3[b * 3 + b]));
     matrix_SU2[1] = -(cimag(matrix_SU3[a * 3 + b]) + cimag(matrix_SU3[b * 3 + a]));
@@ -115,15 +118,15 @@ static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned 
     update_SU3[b * 3 + b] =  matrix_SU2[0] - I * matrix_SU2[3];
 }
 
-static void SU3_LosAlamos_common_block(const double complex *w, double complex *total_update) {
+static void SU3_LosAlamos_common_block(const float complex *w, float complex *total_update) {
     //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
     //	algorithm for SU(3), with a division of the update matrix in submatrices
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
     //	of "hits" to be performed one after another.
 
-    double complex update[3 * 3];
+    float complex update[3 * 3];
 
-    double complex updated_w[3 * 3];
+    float complex updated_w[3 * 3];
 
     SU3_copy(w, updated_w);
     SU3_set_to_identity(total_update);
@@ -143,16 +146,16 @@ static void SU3_LosAlamos_common_block(const double complex *w, double complex *
     }
 }
 
-static void SU3_gaugefixing_overrelaxation(double complex *U, const pos_vec position) {
+static void SU3_gaugefixing_overrelaxation(float complex *U, const pos_vec position) {
     //	Generalization of the algorithm described in hep-lat/0301019v2, using the
     //	Cabbibo-Marinari submatrices trick.
     //	It updates the g at the given position.
 
-    double complex w[3 * 3];
+    float complex w[3 * 3];
 
     SU3_calculate_w(U, position, w);  //	Calculating w(n)=h(n) for red black subdivision
 
-    double complex update_LA[3 * 3];
+    float complex update_LA[3 * 3];
 
     SU3_LosAlamos_common_block(w, update_LA);
 
@@ -163,7 +166,7 @@ static void SU3_gaugefixing_overrelaxation(double complex *U, const pos_vec posi
     //	converge faster. update_LA^omega is calculated using the first two terms
     //	of the binomial expansion: update_LA^omega=I+omega(update_LA-I)+...=I(1-omega)+omega*update_LA+...
 
-    double complex update_OR[3 * 3];
+    float complex update_OR[3 * 3];
 
     // update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA)
     SU3_set_to_identity(update_OR);
@@ -176,19 +179,19 @@ static void SU3_gaugefixing_overrelaxation(double complex *U, const pos_vec posi
     SU3_local_update_U(U, position, update_OR);
 }
 
-unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
+unsigned SU3_gauge_fix(float complex *U, const unsigned short config) {
     //	Fix the gauge and follows the process by calculating e2;
 
     pos_vec position;
 
-    double e2;
+    float e2;
 
     unsigned sweep = 0;
     unsigned sweeps_to_measurement_e2 = initial_sweeps_to_measurement_e2;
     //	Counter to the number of sweeps to fix config to Landau gauge
 
     while (1) {
-    #pragma omp parallel for num_threads(2) private(position) schedule(dynamic)
+    #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
             position.t = t;
@@ -210,13 +213,16 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
 
         sweep++;
 
-        if (!(sweep % sweeps_to_measurement_e2)) {
+        !(sweep % 50) ?
+            printf("sweep: %d\n", sweep) : 0; 
+
+        if(!(sweep % sweeps_to_measurement_e2)){
             e2 = SU3_calculate_e2(U);
             //	Gauge-fixing index, indicates how far we are to the Landau-gauge.
             //  It will be less than the tolerance,
             //	when the gauge-fixing is considered to be attained.
             //	Following the notation of hep-lat/0301019v2
-
+            
             if (e2 <= tolerance) {
                 break;
 
@@ -228,27 +234,11 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
             }
         }
 
-        sweep % sweeps_to_reunitarization == 0 ? SU3_reunitarize(U) : 0;
+        !(sweep % sweeps_to_reunitarization) ? SU3_reunitarize(U) : 0;
                                                
     }
     SU3_reunitarize(U);
 
-    printf("Sweeps needed to gauge-fix config %d: %d. e2: %3.2e \n", config, sweep, e2);
+    printf("Sweeps needed to gauge-fix config %d: %d. e2: %3.2E \n", config, sweep, e2);
     return sweep;
 }
-
-// void SU3_print_gaugefixed_U(double complex * U, double complex *U_aux, char filename[max_length_name]){
-
-// //	Prints the current configuration to a file, after the process
-// //	of gauge-fixing. The configuration printed is therefore the one
-// //	stored in U_aux.
-
-//	FILE *gauge_configuration_file;
-
-//	gauge_configuration_file = fopen(filename, "w+");
-
-//	fwrite(U_aux, sizeof(U_aux), 1, gauge_configuration_file);
-
-//	fclose(gauge_configuration_file);
-
-//}

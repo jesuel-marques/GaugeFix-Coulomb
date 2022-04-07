@@ -138,7 +138,7 @@ void test_allocation(const void * pointer, const char * location ){
 	}
 }
 
-double complex *get_link(double complex *U, const pos_vec position, const unsigned short mu) {
+float complex *get_link(float complex *U, const pos_vec position, const unsigned short mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
 }
@@ -153,7 +153,7 @@ char *name_configuration_file(const unsigned short config) {
     return strcat(configs_dir_name_local, config_filename);
 }
 
-void SU3_load_config(const char filename[max_length_name], double complex *U) {
+void SU3_load_config(const char filename[max_length_name], float complex *U) {
     //	Loads a link configuration from the file with filename to U.
 
     FILE *config_file;
@@ -162,7 +162,7 @@ void SU3_load_config(const char filename[max_length_name], double complex *U) {
 
     config_file = fopen(filename, "r");
 
-    if (fread(U, Volume * d * 3 * 3 * sizeof(double complex), 1, config_file) == 1) {
+    if (fread(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
         printf("U Loaded\n");
     } else {
         printf(" Configuration loading failed.\n");
@@ -171,38 +171,60 @@ void SU3_load_config(const char filename[max_length_name], double complex *U) {
     fclose(config_file);
 }
 
-void SU3_copy_config(double complex *U, double complex *U_copy) {
+void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], float complex *U) {
+    //  Loads a link configuration from the file with filename to U.
+
+    FILE *config_file;
+
+    printf("Creating: %s\t", strcat(filename, modifier));
+
+    config_file = fopen(filename, "w+");
+
+    if (fwrite(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
+        printf("U written OK.\n");
+    } else {
+        printf(" Configuration writing failed.\n");
+    }
+
+    fclose(config_file);
+}
+
+void SU3_copy_config(float complex *U, float complex *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
     pos_vec position;
-
-    for (position.t = 0; position.t < Nt; position.t++) {
-        for (position.i = 0; position.i < Nxyz; position.i++) {
-            for (position.j = 0; position.j < Nxyz; position.j++) {
-                for (position.k = 0; position.k < Nxyz; position.k++) {
-                    for (unsigned short mu = 0; mu < d; mu++) {
-                        SU3_copy(get_link(U, position, mu), get_link(U_copy, position, mu));
+    #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
+        // Paralelizing by slicing the time extent
+        for (unsigned short t = 0; t < Nt; t++) {
+            position.t = t;
+            for (position.i = 0; position.i < Nxyz; position.i++) {
+                for (position.j = 0; position.j < Nxyz; position.j++) {
+                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                        for (unsigned short mu = 0; mu < d; mu++) {
+                            SU3_copy(get_link(U, position, mu), get_link(U_copy, position, mu));
+                        }
                     }
                 }
             }
-        }
     }
 }
 
-void SU3_reunitarize(double complex *U) {
+void SU3_reunitarize(float complex *U) {
     // Reunitarizes the configuration
 
     pos_vec position;
-  
-    for (position.t = 0; position.t < Nt; position.t++) {
-        for (position.i = 0; position.i < Nxyz; position.i++) {
-            for (position.j = 0; position.j < Nxyz; position.j++) {
-                for (position.k = 0; position.k < Nxyz; position.k++) {
-                    for (unsigned short mu = 0; mu < d; mu++) {
-                        SU3_projection(get_link(U, position, mu));
+    #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
+        // Paralelizing by slicing the time extent
+        for (unsigned short t = 0; t < Nt; t++) {
+            position.t = t;
+            for (position.i = 0; position.i < Nxyz; position.i++) {
+                for (position.j = 0; position.j < Nxyz; position.j++) {
+                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                        for (unsigned short mu = 0; mu < d; mu++) {
+                            SU3_projection(get_link(U, position, mu));
+                        }
                     }
                 }
             }
-        }
     }
 }

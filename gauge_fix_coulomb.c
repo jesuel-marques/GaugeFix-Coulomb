@@ -1,5 +1,5 @@
 //	srun -p DevQ -N 1 -A nuim01 -t 1:00:00 --pty bash
-//	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O4 -march=skylake
+//	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O4 -march=skylake -fopenmp
 //	mpiicc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp
 
 #include <stdio.h>					//	Standard header files in C
@@ -41,19 +41,18 @@ int main(void){
 	// int config_per_rank = nconfig / size;
 	// // The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
 	// for (int config = rank + 1; config <= nconfig; config += size) {
-	#pragma omp parallel for num_threads(2) schedule (dynamic) 
+	#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
 	for (unsigned short config = 1; config <= max_configs; config ++) {
 		
-		double complex * U = (double complex *) malloc(Volume * d * 3 * 3 * sizeof(double complex));
+		float complex * U = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
 		test_allocation(U, "main");
-	
 		SU3_load_config(name_configuration_file(config), U);
 		
 		//  fix the gauge
 		SU3_gauge_fix(U, config);
 
 		// write the gauge fixed configuration based on template name
-		// write_gaugefixedconfig();
+		SU3_print_config(name_configuration_file(config),"GF", U);
 
 		free(U);	//	Free memory allocated for the configuration.
 	}

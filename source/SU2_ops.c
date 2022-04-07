@@ -10,7 +10,7 @@
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
 //	where sigma[i] are the Pauli matrices.
 
-void SU2_copy(const double *u, double *u_copy) {
+void SU2_copy(const float *u, float *u_copy) {
     // Copies u to u_copy
 
     for (unsigned short a = 0; a < 4; a++) {
@@ -18,7 +18,7 @@ void SU2_copy(const double *u, double *u_copy) {
     }
 }
 
-void SU2_set_to_null(double complex *u) {
+void SU2_set_to_null(float complex *u) {
     // Sets u to be the null matrix in SU(2)
 
     u[0] = 0.0;
@@ -27,7 +27,7 @@ void SU2_set_to_null(double complex *u) {
     u[3] = 0.0;
 }
 
-void SU2_set_to_identity(double complex *u) {
+void SU2_set_to_identity(float complex *u) {
     // Sets u to be the identity matrix in SU(2)
 
     u[0] = 1.0;
@@ -36,7 +36,7 @@ void SU2_set_to_identity(double complex *u) {
     u[3] = 0.0;
 }
 
-void SU2_accumulate(const double *u, double *acc) {
+void SU2_accumulate(const float *u, float *acc) {
     // Accumulates the value of u into acc
 
     for (unsigned short a = 0; a < 4; a++) {
@@ -44,7 +44,7 @@ void SU2_accumulate(const double *u, double *acc) {
     }
 }
 
-void SU2_subtraction(const double *u, const double *v, double *u_minus_v) {
+void SU2_subtraction(const float *u, const float *v, float *u_minus_v) {
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
 
@@ -53,7 +53,7 @@ void SU2_subtraction(const double *u, const double *v, double *u_minus_v) {
     }
 }
 
-double SU2_trace(const double *u) {
+float SU2_trace(const float *u) {
     //	Calculates trace of u
 
     return 2.0 * u[0];
@@ -61,10 +61,10 @@ double SU2_trace(const double *u) {
     //	twice the 0th component.
 }
 
-double SU2_determinant(const double *u) {
+float SU2_determinant(const float *u) {
     //  Calculates the determinant of the matrix u
 
-    double det_u = 0.0;
+    float det_u = 0.0;
 
     for (unsigned short i = 0; i <= 3; i++) {
         det_u += pow2(u[i]);
@@ -75,7 +75,7 @@ double SU2_determinant(const double *u) {
     return det_u;
 }
 
-void SU2_hermitean_conjugate(const double *u, double *u_dagger) {
+void SU2_hermitean_conjugate(const float *u, float *u_dagger) {
     // Calculates the hermitean conjugate to u
     // and returns result in u_dagger.
 
@@ -90,7 +90,7 @@ void SU2_hermitean_conjugate(const double *u, double *u_dagger) {
     }
 }
 
-void SU2_multiplication_by_scalar(const double *u, const double alpha, double *alpha_times_u) {
+void SU2_multiplication_by_scalar(const float *u, const float alpha, float *alpha_times_u) {
     //  Calculates multiplicatoin of SU(2) matrix u by scalar alpha
     //  and returns result in alpha_times_u.
 
@@ -100,12 +100,12 @@ void SU2_multiplication_by_scalar(const double *u, const double alpha, double *a
     }
 }
 
-static double SU2_inner_prod(const double *u, const double *v) {
+static float SU2_inner_prod(const float *u, const float *v) {
     //	Calculates the "scalar product" of two SU(2) matrices
     //	in the Cayley-Klein representation.
     //	Used in the product of two SU(2) matrices.
 
-    double inner_prod = u[0] * v[0];
+    float inner_prod = u[0] * v[0];
     //	The 0th component has a plus sign ...
 
     for (unsigned short b = 1; b < 4; b++) {
@@ -116,7 +116,7 @@ static double SU2_inner_prod(const double *u, const double *v) {
     return inner_prod;
 }
 
-static void SU2_outer_product(const double *u, const double *v, double *outer_product) {
+static void SU2_outer_product(const float *u, const float *v, float *outer_product) {
     //	Calculates the "outer product" of two SU(2) matrices
     //	in the Cayley-Klein representation, and returns result in outer_product
     //	Used in the product of two SU(2) matrices.
@@ -130,11 +130,11 @@ static void SU2_outer_product(const double *u, const double *v, double *outer_pr
     outer_product[3] = u[1] * v[2] - u[2] * v[1];
 }
 
-void SU2_product(const double *u, const double *v, double *uv) {
+void SU2_product(const float *u, const float *v, float *uv) {
     // Calculates product of 2 SU(2) matrices u e v
     // and returns result in uv.
 
-    double u_cross_v[4];
+    float u_cross_v[4];
 
     uv[0] = SU2_inner_prod(u, v);
     //	In the Cayley-Klein representation, the 0th
@@ -150,31 +150,31 @@ void SU2_product(const double *u, const double *v, double *uv) {
     //	a term which mixes 0 and 1, 2, 3 components.
 }
 
-void SU2_product_three(const double *u, const double *v, const double *w, double *uvw) {
+void SU2_product_three(const float *u, const float *v, const float *w, float *uvw) {
     //  Calculates product of 3 SU(3) matrices u, v and w
     //  and returns result in uvw.
 
-    double uv[4];
+    float uv[4];
   
     SU2_product(u, v, uv);
     SU2_product(uv, w, uvw);
 }
 
-void SU2_product_four(const double *u, const double *v, const double *w, const double *x, double *uvwx) {
+void SU2_product_four(const float *u, const float *v, const float *w, const float *x, float *uvwx) {
     //  Calculates product of 4 SU(3) matrices u, v, w and x
     //  and returns result in uvwx.
 
-    double uvw[4];
+    float uvw[4];
 
     SU2_product_three(u, v, w, uvw);
     SU2_product(uvw, x, uvwx);
 
 }
 
-void SU2_projection(double *u) {
+void SU2_projection(float *u) {
     //	Projects matrix a to the group SU(2) returning SU(2) matrix a_SU2.
 
-    double u_SU2[4];
+    float u_SU2[4];
 
     SU2_multiplication_by_scalar(u, 1.0 / sqrt(SU2_determinant(u)), u_SU2);
     SU2_copy(u_SU2, u);
