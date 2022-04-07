@@ -148,7 +148,8 @@ char *name_configuration_file(const unsigned short config) {
     strcpy(configs_dir_name_local, configs_dir_name);
     
     char config_filename[max_length_name];
-    sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, Nxyz, Nt);
+    //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, Nxyz, Nt);
+    sprintf(config_filename,"Gen2_24x16_1000ENDIANNESS.cfg");
 
     return strcat(configs_dir_name_local, config_filename);
 }
@@ -158,12 +159,12 @@ void SU3_load_config(const char filename[max_length_name], float complex *U) {
 
     FILE *config_file;
 
-    printf("Loading: %s\n", filename);
+    printf("Loading: %s.\t", filename);
 
     config_file = fopen(filename, "r");
 
     if (fread(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
-        printf("U Loaded\n");
+        printf("U Loaded OK\n");
     } else {
         printf(" Configuration loading failed.\n");
     }
@@ -176,7 +177,7 @@ void SU3_print_config(char filename[max_length_name], const char modifier[max_le
 
     FILE *config_file;
 
-    printf("Creating: %s\t", strcat(filename, modifier));
+    printf("Creating: %s.\t", strcat(filename, modifier));
 
     config_file = fopen(filename, "w+");
 
@@ -206,7 +207,7 @@ void SU3_copy_config(float complex *U, float complex *U_copy) {
                     }
                 }
             }
-    }
+        }
 }
 
 void SU3_reunitarize(float complex *U) {
@@ -226,5 +227,5 @@ void SU3_reunitarize(float complex *U) {
                     }
                 }
             }
-    }
+        }
 }
