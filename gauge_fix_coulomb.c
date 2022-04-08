@@ -46,7 +46,7 @@ int main(void){
 		
 		float complex * U_float = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
 		test_allocation(U_float, "main");
-		float complex * U_double = (double complex *) malloc(Volume * d * 3 * 3 * sizeof(double complex));
+		double complex * U_double = (double complex *) malloc(Volume * d * 3 * 3 * sizeof(double complex));
 		test_allocation(U_double, "main");
 
 		SU3_load_config(name_configuration_file(config), U_float);
