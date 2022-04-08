@@ -168,7 +168,7 @@ void SU3_load_config(const char filename[max_length_name], float complex *U) {
 
     config_file = fopen(filename, "r");
 
-    if (fread(U, Volume * d * 3 * 3 * sizeof(double complex), 1, config_file) == 1) {
+    if (fread(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
         printf("U Loaded OK\n");
     } else {
         printf(" Configuration loading failed.\n");
