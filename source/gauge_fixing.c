@@ -194,8 +194,10 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
     unsigned sweep = 0;
     unsigned sweeps_to_measurement_e2 = initial_sweeps_to_measurement_e2;
     //	Counter to the number of sweeps to fix config to Landau gauge
-
-    while (1) {
+	e2 = SU3_calculate_e2(U);
+	printf("Sweeps in config %d: %d. e2: %3.2E \n", config, sweep, e2);
+    
+while (1) {
     #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
