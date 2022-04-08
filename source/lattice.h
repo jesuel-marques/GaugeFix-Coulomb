@@ -34,6 +34,8 @@ void SU3_copy_config(double complex *U, double complex *U_copy);
 
 void SU3_convert_config_fd(float complex *U_float, double complex *U_double);
 
+void SU3_convert_config_df(float complex *U_double, double complex *U_float);
+
 void SU3_reunitarize(double complex *U);
 
 #endif

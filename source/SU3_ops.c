@@ -40,7 +40,7 @@ void SU3_copy(const double complex *u, double complex *u_copy) {
 }
 
 void SU3_convert_fd(float complex *u_float, double complex *u_double) {
-    // Converts link with single precision u_double to u_double with double precision
+    // Converts link with single precision u_float to u_double with double precision
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
@@ -49,6 +49,15 @@ void SU3_convert_fd(float complex *u_float, double complex *u_double) {
     }
 }
 
+void SU3_convert_df(double complex *u_double, float complex *u_float) {
+    // Converts link with single precision u_float to u_double with double precision
+
+    for (unsigned short a = 0; a < 3; a++) {
+        for (unsigned short b = 0; b < 3; b++) {
+            u_float[a * 3 + b] = (float complex) u_double[a * 3 + b];
+        }
+    }
+}
 
 void SU3_set_to_null(double complex *u) {
     // Sets u to be the null matrix in SU(3)

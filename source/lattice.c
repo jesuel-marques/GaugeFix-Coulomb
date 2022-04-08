@@ -168,7 +168,7 @@ void SU3_load_config(const char filename[max_length_name], float complex *U) {
 
     config_file = fopen(filename, "r");
 
-    if (fread(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
+    if (fread(U, 3 * 3 * sizeof(float complex),  Volume * d , config_file) == 1) {
         printf("U Loaded OK\n");
     } else {
         printf(" Configuration loading failed.\n");
@@ -187,6 +187,24 @@ void SU3_print_config(char filename[max_length_name], const char modifier[max_le
     config_file = fopen(filename, "w+");
 
     if (fwrite(U, Volume * d * 3 * 3 * sizeof(double complex), 1, config_file) == 1) {
+        printf("U written OK.\n");
+    } else {
+        printf(" Configuration writing failed.\n");
+    }
+
+    fclose(config_file);
+}
+
+void SU3_print_config_f(char filename[max_length_name], const char modifier[max_length_name], float complex *U) {
+    //  Loads a link configuration from the file with filename to U.
+
+    FILE *config_file;
+
+    printf("Creating: %s.\t", strcat(filename, modifier));
+
+    config_file = fopen(filename, "w+");
+
+    if (fwrite(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
         printf("U written OK.\n");
     } else {
         printf(" Configuration writing failed.\n");
@@ -229,6 +247,27 @@ void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
                             SU3_convert_fd(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
+                        }
+                    }
+                }
+            }
+        }
+}
+
+void SU3_convert_config_df(float complex *U_double, double complex *U_float) {
+
+    double complex u[3][3];
+
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic) 
+        // Paralelizing by slicing the time extent
+        for (unsigned short t = 0; t < Nt; t++) {
+            pos_vec position;
+            position.t = t;
+            for (position.i = 0; position.i < Nxyz; position.i++) {
+                for (position.j = 0; position.j < Nxyz; position.j++) {
+                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                        for (unsigned short mu = 0; mu < d; mu++) {
+                            SU3_convert_df(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
                         }
                     }
                 }

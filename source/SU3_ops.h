@@ -7,6 +7,8 @@ void SU3_copy(const double complex *u, double complex *u_copy);
 
 void SU3_convert_fd(float complex *u_float, double complex *u_double);
 
+void SU3_convert_df(double complex *u_double, float complex *u_float);
+
 void SU3_set_to_null(double complex *u);
 
 void SU3_set_to_identity(double complex *u);

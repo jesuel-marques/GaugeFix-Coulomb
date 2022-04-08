@@ -51,7 +51,7 @@ int main(void){
 
 		SU3_load_config(name_configuration_file(config), U_float);
 		SU3_convert_config_fd(U_float, U_double);
-
+		free(U_float);
 		pos_vec position;
 
 		position.t = 15; position.i = 2; position.j = 23; position.k = 6;
@@ -61,8 +61,13 @@ int main(void){
 		//  fix the gauge
 		SU3_gauge_fix(U_double, config);
 
+		U_float = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
+		test_allocation(U_float, "main");
+
+		SU3_convert_config_df(U_double, U_float);
+
 		// write the gauge fixed configuration based on template name
-		// SU3_print_config(name_configuration_file(config), ".GF", U);
+		SU3_print_config_f(name_configuration_file(config), ".GF", U_float);
 
 		free(U_float);	free(U_double);//	Free memory allocated for the configuration.
 		
