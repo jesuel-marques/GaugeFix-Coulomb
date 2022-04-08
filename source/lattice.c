@@ -143,6 +143,11 @@ double complex *get_link(double complex *U, const pos_vec position, const unsign
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
 }
 
+float complex *get_link_f(float complex *U, const pos_vec position, const unsigned short mu) {
+    //	Does the pointer arithmetic to get a pointer to link at given position and mu
+    return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
+}
+
 char *name_configuration_file(const unsigned short config) {
     char configs_dir_name_local[max_length_name];
     strcpy(configs_dir_name_local, configs_dir_name);
@@ -223,7 +228,7 @@ void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
-                            SU3_convert_fd(get_link(U_float, position, mu), get_link(U_double, position, mu));
+                            SU3_convert_fd(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
                         }
                     }
                 }
