@@ -159,7 +159,7 @@ char *name_configuration_file(const unsigned short config) {
     return strcat(configs_dir_name_local, config_filename);
 }
 
-void SU3_load_config(const char filename[max_length_name], double complex *U) {
+void SU3_load_config(const char filename[max_length_name], float complex *U) {
     //	Loads a link configuration from the file with filename to U.
 
     FILE *config_file;

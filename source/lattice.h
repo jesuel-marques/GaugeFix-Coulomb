@@ -26,7 +26,7 @@ double complex * get_link(double complex *U, const pos_vec position, const unsig
 
 char * name_configuration_file(const unsigned short config);
 
-void SU3_load_config(const char filename[max_length_name], double complex *U);
+void SU3_load_config(const char filename[max_length_name], float complex *U);
 
 void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], double complex *U);
 
