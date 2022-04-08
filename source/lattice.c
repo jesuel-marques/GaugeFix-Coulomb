@@ -254,7 +254,7 @@ void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
         }
 }
 
-void SU3_convert_config_df(float complex *U_double, double complex *U_float) {
+void SU3_convert_config_df(double complex *U_double, float complex *U_float) {
 
     double complex u[3][3];
 

@@ -30,11 +30,13 @@ void SU3_load_config(const char filename[max_length_name], float complex *U);
 
 void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], double complex *U);
 
+void SU3_print_config_f(char filename[max_length_name], const char modifier[max_length_name], float complex *U);
+
 void SU3_copy_config(double complex *U, double complex *U_copy);
 
 void SU3_convert_config_fd(float complex *U_float, double complex *U_double);
 
-void SU3_convert_config_df(float complex *U_double, double complex *U_float);
+void SU3_convert_config_df(double complex *U_double, float complex *U_float);
 
 void SU3_reunitarize(double complex *U);
 
