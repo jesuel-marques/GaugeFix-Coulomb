@@ -15,10 +15,10 @@
 #include "fourvector_field.h"  //	Calculation of A_mu(n) and related things
 #include "math_ops.h"          //	Math operations
 
-static void SU3_local_update_U(float complex *U, const pos_vec position, const float complex *g) {
+static void SU3_local_update_U(double complex *U, const pos_vec position, const double complex *g) {
     //	Updates U only at a given position
 
-    float complex g_dagger[3 * 3];
+    double complex g_dagger[3 * 3];
 
     for (unsigned short mu = 0; mu < d; mu++) {
         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
@@ -33,13 +33,13 @@ static void SU3_local_update_U(float complex *U, const pos_vec position, const f
     }
 }
 
-static void SU3_calculate_w(float complex *U, const pos_vec position, float complex *w) {
+static void SU3_calculate_w(double complex *U, const pos_vec position, double complex *w) {
     //	Calculates 	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision, following the notation in hep-lat/9306018
     //	returns result in w.
 
     SU3_set_to_null(w);  //	Initializing w(n)=0
 
-    float complex u_dagger_rear[3 * 3];
+    double complex u_dagger_rear[3 * 3];
 
     // h(n)	calculation
 
@@ -54,25 +54,25 @@ static void SU3_calculate_w(float complex *U, const pos_vec position, float comp
     }
 }
 
-unsigned calculate_sweeps_to_next_measurement(const float e2, const unsigned sweeps_to_measurement_e2) {
+unsigned calculate_sweeps_to_next_measurement(const double e2, const unsigned sweeps_to_measurement_e2) {
     return sweeps_to_measurement_e2 + (unsigned)(initial_sweeps_to_measurement_e2 * (1.0 - log10(e2) / log10(tolerance))) + 1;
 }
     
-static float SU3_calculate_e2(float complex *U) {
+static double SU3_calculate_e2(double complex *U) {
     //	Calculates e2 (defined in hep-lat/0301019v2),
     //	used to find out distance to the gauge-fixed situation.
  
-    float e2 = 0.0;
+    double e2 = 0.0;
 
     #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
-            float complex div_A[3 * 3];
-            float div_A_components[9];
+            double complex div_A[3 * 3];
+            double div_A_components[9];
             pos_vec position;
 
             position.t = t;
-            float e2_slice = 0.0;
+            double e2_slice = 0.0;
 
             for (position.i = 0; position.i < Nxyz; position.i++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
@@ -84,7 +84,7 @@ static float SU3_calculate_e2(float complex *U) {
                         for (unsigned short a = 1; a <= 8; a++) {
                             //	Normalized sum of the squares of the color components of the divergence of A.
 
-                            e2_slice += (float)pow2(div_A_components[a]);
+                            e2_slice += (double)pow2(div_A_components[a]);
                         }
 
                     }
@@ -98,7 +98,7 @@ static float SU3_calculate_e2(float complex *U) {
     return e2;
 }
 
-static void SU3_update_sub_LosAlamos(const float complex *matrix_SU3, unsigned short submatrix, complex float *update_SU3) {
+static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned short submatrix, complex double *update_SU3) {
     unsigned short a, b;
 
     SU3_set_to_null(update_SU3);
@@ -107,7 +107,7 @@ static void SU3_update_sub_LosAlamos(const float complex *matrix_SU3, unsigned s
     a = submatrix == 2 ? 1 : 0;
     b = submatrix == 0 ? 1 : 2;
 
-    float matrix_SU2[4];
+    double matrix_SU2[4];
 
     matrix_SU2[0] =  (creal(matrix_SU3[a * 3 + a]) + creal(matrix_SU3[b * 3 + b]));
     matrix_SU2[1] = -(cimag(matrix_SU3[a * 3 + b]) + cimag(matrix_SU3[b * 3 + a]));
@@ -122,15 +122,15 @@ static void SU3_update_sub_LosAlamos(const float complex *matrix_SU3, unsigned s
     update_SU3[b * 3 + b] =  matrix_SU2[0] - I * matrix_SU2[3];
 }
 
-static void SU3_LosAlamos_common_block(const float complex *w, float complex *total_update) {
+static void SU3_LosAlamos_common_block(const double complex *w, double complex *total_update) {
     //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
     //	algorithm for SU(3), with a division of the update matrix in submatrices
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
     //	of "hits" to be performed one after another.
 
-    float complex update[3 * 3];
+    double complex update[3 * 3];
 
-    float complex updated_w[3 * 3];
+    double complex updated_w[3 * 3];
 
     SU3_copy(w, updated_w);
     SU3_set_to_identity(total_update);
@@ -150,27 +150,28 @@ static void SU3_LosAlamos_common_block(const float complex *w, float complex *to
     }
 }
 
-static void SU3_gaugefixing_overrelaxation(float complex *U, const pos_vec position) {
+static void SU3_gaugefixing_overrelaxation(double complex *U, const pos_vec position) {
     //	Generalization of the algorithm described in hep-lat/0301019v2, using the
     //	Cabbibo-Marinari submatrices trick.
     //	It updates the g at the given position.
 
-    float complex w[3 * 3];
+    double complex w[3 * 3];
 
     SU3_calculate_w(U, position, w);  //	Calculating w(n)=h(n) for red black subdivision
 
-    float complex update_LA[3 * 3];
+    double complex update_LA[3 * 3];
 
     SU3_LosAlamos_common_block(w, update_LA);
 
-    //	The above function determines update_LA which would be the naïve
-    //	update to bring the local function to its mininum. However
-    //	we found out that actually using overrelaxation, which
-    //	means using update_LA^omega instead of  update_LA, where 1<omega<2 makes the
-    //	converge faster. update_LA^omega is calculated using the first two terms
-    //	of the binomial expansion: update_LA^omega=I+omega(update_LA-I)+...=I(1-omega)+omega*update_LA+...
+    /*	The above function determines update_LA which would be the naïve
+   	update to bring the local function to its mininum. However,
+ 	using overrelaxation, which
+   	means using update_LA^omega instead of  update_LA, where 1<omega<2 
+    makes the converge faster. update_LA^omega is calculated using 
+    the first two terms of the binomial expansion: 
+    update_LA^omega=I+omega(update_LA-I)+...=I(1-omega)+omega*update_LA+...*/
 
-    float complex update_OR[3 * 3];
+    double complex update_OR[3 * 3];
 
     // update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA)
     SU3_set_to_identity(update_OR);
@@ -183,12 +184,12 @@ static void SU3_gaugefixing_overrelaxation(float complex *U, const pos_vec posit
     SU3_local_update_U(U, position, update_OR);
 }
 
-unsigned SU3_gauge_fix(float complex *U, const unsigned short config) {
+unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
     //	Fix the gauge and follows the process by calculating e2;
 
     pos_vec position;
 
-    float e2;
+    double e2;
 
     unsigned sweep = 0;
     unsigned sweeps_to_measurement_e2 = initial_sweeps_to_measurement_e2;
@@ -203,7 +204,7 @@ unsigned SU3_gauge_fix(float complex *U, const unsigned short config) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
                         !((position_is_even(position) + sweep) % 2) ?
-                            //	Implementation of the red black subdivision of the lattice
+                            //	Implementation of the checkerboard subdivision of the lattice
                             
                             SU3_gaugefixing_overrelaxation(U, position)
                             //  The actual gauge-fixing algorithm

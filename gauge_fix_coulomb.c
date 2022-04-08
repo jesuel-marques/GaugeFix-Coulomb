@@ -44,9 +44,14 @@ int main(void){
 	//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
 	for (unsigned short config = 1; config <= max_configs; config ++) {
 		
-		float complex * U = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
-		test_allocation(U, "main");
-		SU3_load_config(name_configuration_file(config), U);
+		float complex * U_float = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
+		test_allocation(U_float, "main");
+		float complex * U_double = (double complex *) malloc(Volume * d * 3 * 3 * sizeof(double complex));
+		test_allocation(U_double, "main");
+
+		SU3_load_config(name_configuration_file(config), U_float);
+		SU3_convert_config_fd(U_float, U_double);
+
 		// pos_vec position;
 
 		// position.t = 15; position.i = 2; position.j = 23; position.k = 6;
@@ -54,12 +59,13 @@ int main(void){
 		// SU3_print_matrix(get_link(U,position,0),"U[15][2][23][6]_0");
 		// getchar();
 		//  fix the gauge
-		SU3_gauge_fix(U, config);
+		SU3_gauge_fix(U_double, config);
 
 		// write the gauge fixed configuration based on template name
-		SU3_print_config(name_configuration_file(config), ".GF", U);
+		// SU3_print_config(name_configuration_file(config), ".GF", U);
 
-		free(U);	//	Free memory allocated for the configuration.
+		free(U_float);	free(U_double);//	Free memory allocated for the configuration.
+		
 	}
 	// MPI_Finalise();
 	return 0;

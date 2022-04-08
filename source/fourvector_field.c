@@ -9,26 +9,26 @@
 
 #include "SU3_ops.h"  //	SU(3) operations
 
-void SU3_calculate_A(float complex *U, const pos_vec position, const unsigned short mu, float complex *A) {
+void SU3_calculate_A(double complex *U, const pos_vec position, const unsigned short mu, double complex *A) {
     //	Calculates the vector A_mu(n) field
     // The formula is A_mu(n)=((U - U_dagger)/2i)|traceless
 
-    float complex *local_U = 0;
+    double complex *local_U = 0;
 
     local_U = get_link(U, position, mu);
 
-    float complex U_dagger[3 * 3];
+    double complex U_dagger[3 * 3];
 
     SU3_hermitean_conjugate(local_U, U_dagger);
 
-    float complex U_minus_Udagger[3 * 3];
+    double complex U_minus_Udagger[3 * 3];
 
     //	(U - U_dagger)/2i
     SU3_subtraction(local_U, U_dagger, U_minus_Udagger);
     SU3_multiplication_by_scalar(-0.5 * I, U_minus_Udagger, A);
 
     //  Subtract the trace part
-    float complex trace_part[3 * 3];
+    double complex trace_part[3 * 3];
     
     SU3_set_to_identity(trace_part);
     SU3_substitution_multiplication_by_scalar(-(1.0 / 3.0) * SU3_trace(A), trace_part);
@@ -37,14 +37,14 @@ void SU3_calculate_A(float complex *U, const pos_vec position, const unsigned sh
 
 }
 
-void SU3_divergence_A(float complex *U, const pos_vec position, float complex *div_A) {
+void SU3_divergence_A(double complex *U, const pos_vec position, double complex *div_A) {
     //	Calculates the divergence of the field A on the lattice
     //  and returns it in div_A.
 
-    float complex A1[3 * 3];
-    float complex A2[3 * 3];
+    double complex A1[3 * 3];
+    double complex A2[3 * 3];
 
-    float complex term_divA[3 * 3];
+    double complex term_divA[3 * 3];
 
     SU3_set_to_null(div_A);
     for (unsigned short mu = 1; mu < d; mu++) {

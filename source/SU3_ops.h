@@ -1,39 +1,41 @@
 #ifndef SU3OPS_H
 #define SU3OPS_H
 
-void SU3_print_matrix(const float complex *u, const char *name);
+void SU3_print_matrix(const double complex *u, const char *name);
 
-void SU3_copy(const float complex *u, float complex *u_copy);
+void SU3_copy(const double complex *u, double complex *u_copy);
 
-void SU3_set_to_null(float complex *u);
+void SU3_convert_fd(float complex *u_float, double complex *u_double);
 
-void SU3_set_to_identity(float complex *u);
+void SU3_set_to_null(double complex *u);
 
-void SU3_accumulate(const float complex *u, float complex *acc);
+void SU3_set_to_identity(double complex *u);
 
-void SU3_subtraction(const float complex *u, const float complex *v, float complex *u_minus_v);
+void SU3_accumulate(const double complex *u, double complex *acc);
 
-float complex SU3_trace(const float complex *u);
+void SU3_subtraction(const double complex *u, const double complex *v, double complex *u_minus_v);
 
-float complex SU3_determinant(const float complex *u);
+double complex SU3_trace(const double complex *u);
 
-void SU3_hermitean_conjugate(const float complex *u, float complex *u_dagger);
+double complex SU3_determinant(const double complex *u);
 
-void SU3_multiplication_by_scalar(const float complex alpha, const float complex *u, float complex *alpha_times_u);
-void SU3_substitution_multiplication_by_scalar(const float complex alpha, float complex *u);
+void SU3_hermitean_conjugate(const double complex *u, double complex *u_dagger);
 
-void SU3_product(const float complex *u, const float complex *v, float complex *uv);
+void SU3_multiplication_by_scalar(const double complex alpha, const double complex *u, double complex *alpha_times_u);
+void SU3_substitution_multiplication_by_scalar(const double complex alpha, double complex *u);
 
-void SU3_product_three(const float complex *u, const float complex *v, const float complex *w, float complex *uvw);
+void SU3_product(const double complex *u, const double complex *v, double complex *uv);
 
-void SU3_product_four(const float complex *u, const float complex *v, const float complex *w, const float complex *x, float complex *uvwx);
+void SU3_product_three(const double complex *u, const double complex *v, const double complex *w, double complex *uvw);
 
-void SU3_accumulate_left_product(const float complex *g, float complex *acc_prod);
+void SU3_product_four(const double complex *u, const double complex *v, const double complex *w, const double complex *x, double complex *uvwx);
 
-void SU3_accumulate_right_product(float complex *acc_prod, const float complex *g);
+void SU3_accumulate_left_product(const double complex *g, double complex *acc_prod);
 
-void SU3_projection(float complex *x);
+void SU3_accumulate_right_product(double complex *acc_prod, const double complex *g);
 
-void SU3_decompose_algebra(const float complex *a, float *a_components);
+void SU3_projection(double complex *x);
+
+void SU3_decompose_algebra(const double complex *a, double *a_components);
 
 #endif

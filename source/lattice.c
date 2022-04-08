@@ -138,7 +138,7 @@ void test_allocation(const void * pointer, const char * location ){
 	}
 }
 
-float complex *get_link(float complex *U, const pos_vec position, const unsigned short mu) {
+double complex *get_link(double complex *U, const pos_vec position, const unsigned short mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
 }
@@ -154,7 +154,7 @@ char *name_configuration_file(const unsigned short config) {
     return strcat(configs_dir_name_local, config_filename);
 }
 
-void SU3_load_config(const char filename[max_length_name], float complex *U) {
+void SU3_load_config(const char filename[max_length_name], double complex *U) {
     //	Loads a link configuration from the file with filename to U.
 
     FILE *config_file;
@@ -163,7 +163,7 @@ void SU3_load_config(const char filename[max_length_name], float complex *U) {
 
     config_file = fopen(filename, "r");
 
-    if (fread(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
+    if (fread(U, Volume * d * 3 * 3 * sizeof(double complex), 1, config_file) == 1) {
         printf("U Loaded OK\n");
     } else {
         printf(" Configuration loading failed.\n");
@@ -172,7 +172,7 @@ void SU3_load_config(const char filename[max_length_name], float complex *U) {
     fclose(config_file);
 }
 
-void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], float complex *U) {
+void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], double complex *U) {
     //  Loads a link configuration from the file with filename to U.
 
     FILE *config_file;
@@ -181,7 +181,7 @@ void SU3_print_config(char filename[max_length_name], const char modifier[max_le
 
     config_file = fopen(filename, "w+");
 
-    if (fwrite(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
+    if (fwrite(U, Volume * d * 3 * 3 * sizeof(double complex), 1, config_file) == 1) {
         printf("U written OK.\n");
     } else {
         printf(" Configuration writing failed.\n");
@@ -190,7 +190,7 @@ void SU3_print_config(char filename[max_length_name], const char modifier[max_le
     fclose(config_file);
 }
 
-void SU3_copy_config(float complex *U, float complex *U_copy) {
+void SU3_copy_config(double complex *U, double complex *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
@@ -210,7 +210,29 @@ void SU3_copy_config(float complex *U, float complex *U_copy) {
         }
 }
 
-void SU3_reunitarize(float complex *U) {
+void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
+
+    double complex u[3][3];
+
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic) 
+        // Paralelizing by slicing the time extent
+        for (unsigned short t = 0; t < Nt; t++) {
+            pos_vec position;
+            position.t = t;
+            for (position.i = 0; position.i < Nxyz; position.i++) {
+                for (position.j = 0; position.j < Nxyz; position.j++) {
+                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                        for (unsigned short mu = 0; mu < d; mu++) {
+                            SU3_convert_fd(get_link(U_float, position, mu), get_link(U_double, position, mu));
+                        }
+                    }
+                }
+            }
+        }
+}
+
+
+void SU3_reunitarize(double complex *U) {
     // Reunitarizes the configuration
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)

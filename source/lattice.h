@@ -22,16 +22,18 @@ unsigned short position_is_odd(const pos_vec position);
 
 void test_allocation(const void * pointer, const char * location );
 
-float complex * get_link(float complex *U, const pos_vec position, const unsigned short mu);
+double complex * get_link(double complex *U, const pos_vec position, const unsigned short mu);
 
 char * name_configuration_file(const unsigned short config);
 
-void SU3_load_config(const char filename[max_length_name], float complex *U);
+void SU3_load_config(const char filename[max_length_name], double complex *U);
 
-void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], float complex *U);
+void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], double complex *U);
 
-void SU3_copy_config(float complex *U, float complex *U_copy);
+void SU3_copy_config(double complex *U, double complex *U_copy);
 
-void SU3_reunitarize(float complex *U);
+void SU3_convert_config_fd(float complex *U_float, double complex *U_double);
+
+void SU3_reunitarize(double complex *U);
 
 #endif
