@@ -44,7 +44,7 @@ void SU3_convert_fd(float complex *u_float, double complex *u_double) {
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
-            u_double[a * 3 + b] = (double) u_float[a * 3 + b];
+            u_double[a * 3 + b] = (double complex) u_float[a * 3 + b];
         }
     }
 }

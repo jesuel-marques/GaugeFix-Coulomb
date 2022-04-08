@@ -56,7 +56,7 @@ int main(void){
 
 		position.t = 15; position.i = 2; position.j = 23; position.k = 6;
 		
-		SU3_print_matrix(get_link(U_double,position,0),"U[15][2][23][6]_0");
+		SU3_print_matrix(get_link(U_double, position, 0), "U[15][2][23][6]_0");
 		getchar();
 		//  fix the gauge
 		SU3_gauge_fix(U_double, config);
