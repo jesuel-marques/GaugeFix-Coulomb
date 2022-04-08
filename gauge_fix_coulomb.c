@@ -52,12 +52,12 @@ int main(void){
 		SU3_load_config(name_configuration_file(config), U_float);
 		SU3_convert_config_fd(U_float, U_double);
 
-		// pos_vec position;
+		pos_vec position;
 
-		// position.t = 15; position.i = 2; position.j = 23; position.k = 6;
+		position.t = 15; position.i = 2; position.j = 23; position.k = 6;
 		
-		// SU3_print_matrix(get_link(U,position,0),"U[15][2][23][6]_0");
-		// getchar();
+		SU3_print_matrix(get_link(U_double,position,0),"U[15][2][23][6]_0");
+		getchar();
 		//  fix the gauge
 		SU3_gauge_fix(U_double, config);
 
