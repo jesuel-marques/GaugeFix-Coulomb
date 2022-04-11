@@ -177,9 +177,9 @@ void SU3_product(const double complex *u, const double complex *v, double comple
     // Calculates product of 2 SU(3) matrices u e v
     // and returns result in uv.
 
-    SU3_set_to_null(uv);
     for (unsigned short a = 0; a < 3; a++) {          //  lines
         for (unsigned short b = 0; b < 3; b++) {      //  columns
+            uv[a * 3 + b] = 0.0;
             for (unsigned short c = 0; c < 3; c++) {  //  dummy index
 
                 uv[a * 3 + b] += u[a * 3 + c] * v[c * 3 + b];
