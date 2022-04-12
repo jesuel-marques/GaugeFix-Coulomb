@@ -148,7 +148,7 @@ float complex *get_link_f(float complex *U, const pos_vec position, const unsign
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
 }
 
-char *name_configuration_file(const unsigned short config) {
+char *name_configuration_file(const unsigned config) {
     char configs_dir_name_local[max_length_name];
     strcpy(configs_dir_name_local, configs_dir_name);
     

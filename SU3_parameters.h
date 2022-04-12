@@ -8,7 +8,7 @@
 
 // Other parameters
 
-#define max_configs 1
+#define max_configs 3
 
 #define max_length_name 300
 
