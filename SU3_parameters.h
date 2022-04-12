@@ -8,8 +8,8 @@
 
 // Other parameters
 
-#define max_configs 1
+#define max_configs 1010
 
-#define max_length_name 300
+#define max_length_name 400
 
 #define NUM_THREADS 4

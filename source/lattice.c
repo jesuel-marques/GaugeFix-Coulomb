@@ -148,13 +148,13 @@ float complex *get_link_f(float complex *U, const pos_vec position, const unsign
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
 }
 
-char *name_configuration_file(const unsigned short config) {
+char *name_configuration_file(const unsigned config) {
     char configs_dir_name_local[max_length_name];
     strcpy(configs_dir_name_local, configs_dir_name);
     
     char config_filename[max_length_name];
     //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, Nxyz, Nt);
-    sprintf(config_filename,"Gen2_24x16_1000_lend.cfg");
+    sprintf(config_filename,"Gen2_24x16_%d_lend.cfg", config);
     
     return strcat(configs_dir_name_local, config_filename);
 }

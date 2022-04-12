@@ -24,7 +24,7 @@ void test_allocation(const void * pointer, const char * location );
 
 double complex * get_link(double complex *U, const pos_vec position, const unsigned short mu);
 
-char * name_configuration_file(const unsigned short config);
+char * name_configuration_file(const unsigned config);
 
 void SU3_load_config(const char filename[max_length_name], float complex *U);
 

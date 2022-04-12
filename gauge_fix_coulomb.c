@@ -42,7 +42,7 @@ int main(void){
 	// // The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
 	// for (int config = rank + 1; config <= nconfig; config += size) {
 	//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
-	for (unsigned short config = 1; config <= max_configs; config ++) {
+	for (unsigned config = 1010; config <= max_configs; config ++) {
 		
 		float complex * U_float = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
 		test_allocation(U_float, "main");
