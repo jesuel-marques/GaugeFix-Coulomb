@@ -60,11 +60,12 @@ int main(void){
 		test_allocation(U_float, "main");
 
 		SU3_convert_config_df(U_double, U_float);
+		free(U_double);
 
 		// write the gauge fixed configuration based on template name
 		SU3_print_config_f(name_configuration_file(config), ".GF", U_float);
 
-		free(U_float);	free(U_double);//	Free memory allocated for the configuration.
+		free(U_float);	//	Free memory allocated for the configuration.
 		
 	}
 	// MPI_Finalise();
