@@ -154,7 +154,7 @@ char *name_configuration_file(const unsigned short config) {
     
     char config_filename[max_length_name];
     //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, Nxyz, Nt);
-    sprintf(config_filename,"Gen2_24x16_1000ENDIANNESS.cfg.GF");
+    sprintf(config_filename,"Gen2_24x16_1000_lend.cfg");
 
     return strcat(configs_dir_name_local, config_filename);
 }
@@ -172,6 +172,7 @@ void SU3_load_config(const char filename[max_length_name], float complex *U) {
         printf("U Loaded OK\n");
     } else {
         printf(" Configuration loading failed.\n");
+        exit(1);
     }
 
     fclose(config_file);
