@@ -41,10 +41,10 @@ static void SU3_calculate_w(double complex *U, const pos_vec position, double co
 
     double complex u_dagger_rear[3 * 3];
 
-    // h(n)	calculation
+    // w(n)	calculation
 
     for (unsigned short mu = 1; mu < d; mu++) {
-        //	h(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision
+        //	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision
 
         SU3_accumulate(get_link(U, position, mu), w);
 
@@ -197,26 +197,26 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
 	e2 = SU3_calculate_e2(U);
 	printf("Sweeps in config %d: %d. e2: %3.2E \n", config, sweep, e2);
     
-while (1) {
-    #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
-        // Paralelizing by slicing the time extent
-        for (unsigned short t = 0; t < Nt; t++) {
-            position.t = t;
-            for (position.i = 0; position.i < Nxyz; position.i++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.k = 0; position.k < Nxyz; position.k++) {
-                        !((position_is_even(position) + sweep) % 2) ?
-                            //	Implementation of the checkerboard subdivision of the lattice
+    while (1) {
+        #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
+            // Paralelizing by slicing the time extent
+            for (unsigned short t = 0; t < Nt; t++) {
+                position.t = t;
+                for (position.i = 0; position.i < Nxyz; position.i++) {
+                    for (position.j = 0; position.j < Nxyz; position.j++) {
+                        for (position.k = 0; position.k < Nxyz; position.k++) {
+                            !((position_is_even(position) + sweep) % 2) ?
+                                //	Implementation of the checkerboard subdivision of the lattice
+                                
+                                SU3_gaugefixing_overrelaxation(U, position)
+                                //  The actual gauge-fixing algorithm
+                                                                    
+                                : 0;
                             
-                            SU3_gaugefixing_overrelaxation(U, position)
-                            //  The actual gauge-fixing algorithm
-                                                                 
-                            : 0;
-                        
+                        }
                     }
                 }
             }
-        }
 
         sweep++;
 

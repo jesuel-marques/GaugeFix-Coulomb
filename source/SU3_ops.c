@@ -34,7 +34,9 @@ void SU3_copy(const double complex *u, double complex *u_copy) {
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
+
             u_copy[a * 3 + b] = u[a * 3 + b];
+
         }
     }
 }
@@ -44,7 +46,9 @@ void SU3_convert_fd(float complex *u_float, double complex *u_double) {
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
+
             u_double[a * 3 + b] = (double complex) u_float[a * 3 + b];
+
         }
     }
 }
@@ -54,7 +58,9 @@ void SU3_convert_df(double complex *u_double, float complex *u_float) {
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
+
             u_float[a * 3 + b] = (float complex) u_double[a * 3 + b];
+
         }
     }
 }
@@ -64,7 +70,9 @@ void SU3_set_to_null(double complex *u) {
 
     for (unsigned short a = 0; a < 3; a++) {
         for (unsigned short b = 0; b < 3; b++) {
+
             u[a * 3 + b] = 0.0;
+
         }
     }
 }
@@ -194,9 +202,9 @@ void SU3_product_three(const double complex *u, const double complex *v, const d
     //  Calculates product of 3 SU(3) matrices u, v and w
     //  and returns result in uvw.
 
-    SU3_set_to_null(uvw);
     for (unsigned short a = 0; a < 3; a++) {              //  lines
         for (unsigned short b = 0; b < 3; b++) {          //  columns
+            uvw[a * 3 + b] = 0.0;
             for (unsigned short c = 0; c < 3; c++) {      //  dummy index 1
                 for (unsigned short e = 0; e < 3; e++) {  //  dummy index 2
 
@@ -252,6 +260,7 @@ void SU3_projection(double complex *x) {
     double complex v_new_conj[3];  //  projected matrix.
 
     for (unsigned short b = 0; b < 3; b++) {
+
         x_SU3[0 * 3 + b] = x[0 * 3 + b] / sqrt(sum_absvalue);
         //	Calculates u_new, first line of x_SU3, projected from x
         //  simply by dividing its first line by its absolute value.
@@ -262,6 +271,7 @@ void SU3_projection(double complex *x) {
         v_unewconj += x[1 * 3 + b] * u_new_conj[b];
         //	Projection of v, second line of x, onto u_new,
         //  to be used below for the Gram-Schmidt method.
+
     }
 
     double complex v_prime[3];
@@ -271,25 +281,31 @@ void SU3_projection(double complex *x) {
     //	Gram-Schmidt method
 
     for (unsigned short b = 0; b < 3; b++) {
+
         v_prime[b] = x[1 * 3 + b] - x_SU3[0 * 3 + b] * v_unewconj;
         // Subtraction of the part parallel to u_new of v.
+
     }
 
     sum_absvalue = 0.0;
 
     for (unsigned short b = 0; b < 3; b++) {
+
         sum_absvalue += pow2(cabsl(v_prime[b]));
         //	Absvalue of second line of projected matrix
         //  before being normalized.
+
     }
 
     for (unsigned short b = 0; b < 3; b++) {
+
         x_SU3[1 * 3 + b] = v_prime[b] / sqrt(sum_absvalue);
         //	Calculates  v_new, second line of the projected matrix
         //  from v_prime, by normalizing it.
 
         v_new_conj[b] = conj(x_SU3[1 * 3 + b]);
         //	v_new_conj is v_new's conjugate.
+        
     }
 
     //	The third line is calculated by taking the cross product between

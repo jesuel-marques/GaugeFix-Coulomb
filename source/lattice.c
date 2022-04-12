@@ -225,7 +225,9 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
+
                             SU3_copy(get_link(U, position, mu), get_link(U_copy, position, mu));
+                        
                         }
                     }
                 }
@@ -246,7 +248,9 @@ void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
+
                             SU3_convert_fd(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
+                        
                         }
                     }
                 }
@@ -267,7 +271,9 @@ void SU3_convert_config_df(double complex *U_double, float complex *U_float) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
+
                             SU3_convert_df(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
+                        
                         }
                     }
                 }
@@ -288,7 +294,9 @@ void SU3_reunitarize(double complex *U) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.k = 0; position.k < Nxyz; position.k++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
+
                             SU3_projection(get_link(U, position, mu));
+
                         }
                     }
                 }
