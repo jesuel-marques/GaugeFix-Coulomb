@@ -1,5 +1,6 @@
 #include "../SU3_parameters.h"
 
+#include <stdio.h>
 #include <complex.h>
 #include <omp.h>
 
@@ -18,14 +19,17 @@ double SU3_re_tr_plaquette(double complex *U, const pos_vec position, const shor
 
     pos_vec position_plus_mu = hop_position_positive(position, mu);
 
-    get_link_matrix(U, position, mu, +1, ua);
-    get_link_matrix(U, position_plus_mu, nu, +1, ub);
+    get_link_matrix(U, position,                                    mu, +1, ua);
+    get_link_matrix(U, position_plus_mu,                            nu, +1, ub);
     get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, -1, uc);
-    get_link_matrix(U, hop_position_positive(position, nu), nu, -1, ud);
+    get_link_matrix(U, hop_position_positive(position, nu),         nu, -1, ud);
 
 	SU3_product_four(ua, ub, uc, ud, plaquette);
 
-    return creal(SU3_trace(plaquette));
+    // printf("%lf\n", creal(SU3_trace(plaquette)));
+    // getchar();
+
+    return creal(SU3_trace(plaquette))/3.0;
 
 }
 

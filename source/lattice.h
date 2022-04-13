@@ -33,6 +33,8 @@ char * name_configuration_file(const unsigned config);
 
 void SU3_load_config(const char filename[max_length_name], float complex *U);
 
+void SU3_load_config_d(const char filename[max_length_name], double complex *U);
+
 void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], double complex *U);
 
 void SU3_print_config_f(char filename[max_length_name], const char modifier[max_length_name], float complex *U);

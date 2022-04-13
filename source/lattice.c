@@ -197,6 +197,26 @@ void SU3_load_config(const char filename[max_length_name], float complex *U) {
     fclose(config_file);
 }
 
+
+void SU3_load_config_d(const char filename[max_length_name], double complex *U) {
+    //	Loads a link configuration from the file with filename to U.
+
+    FILE *config_file;
+
+    // printf("Loading: %s.\t", filename);
+
+    config_file = fopen(filename, "r");
+
+    if (fread(U, 3 * 3 * sizeof(double complex),  Volume * d , config_file)) {
+        //printf("U Loaded OK\n");
+    } else {
+        printf(" Configuration loading failed.\n");
+        exit(1);
+    }
+
+    fclose(config_file);
+}
+
 void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], double complex *U) {
     //  Loads a link configuration from the file with filename to U.
 
