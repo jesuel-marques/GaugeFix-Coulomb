@@ -29,6 +29,8 @@ const char configs_dir_name[] = "/home/postgrad/jesuel/configs/";
 // int main(void){
 int main(int argc, char *argv[]) {
 
+    FILE *plaquette_averages_file;
+
 	//Starts MPI
 	MPI_Init(&argc,&argv);
 	int rank, size;
@@ -56,7 +58,7 @@ int main(int argc, char *argv[]) {
 		free(U_float);
 		
 		//  fix the gauge
-		printf("Config: %d, %lf\n", plaquette_average(U_double));
+		printf("Config: %d, %lf\n", actual_config_nr, plaquette_average(U_double));
 
 		
 		free(U_double);
