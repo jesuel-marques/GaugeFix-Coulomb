@@ -21,7 +21,7 @@ double SU3_re_tr_plaquette(double complex *U, const pos_vec position, const shor
     get_link_matrix(U, position, mu, +1, ua);
     get_link_matrix(U, position_plus_mu, nu, +1, ub);
     get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, -1, uc);
-    get_link_matrix(U, hop_position_positive(position, nu), mu, -1, ud);
+    get_link_matrix(U, hop_position_positive(position, nu), nu, -1, ud);
 
 	SU3_product_four(ua, ub, uc, ud, plaquette);
 
@@ -61,7 +61,7 @@ double plaquette_average(double complex * U){
 
         }
 
-    plaq_ave /= (6.0 * Volume);
+    plaq_ave /= (double)(6.0 * Volume);
 
     return plaq_ave;
 }
