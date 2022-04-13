@@ -148,6 +148,25 @@ float complex *get_link_f(float complex *U, const pos_vec position, const unsign
     return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
 }
 
+void get_link_matrix(double complex * U, pos_vec position, int mu, int direction, double complex * u){
+	
+	// Gets forward or backward link at given position and mu
+	// and copies it to u.
+
+	if (direction == 1) {
+
+		SU3_copy(get_link(U, position, mu), u);
+		//	Link in the positive way is what is stored in U
+
+	}
+	else if (direction == -1) {
+
+		SU3_hermitean_conjugate(get_link(U, hop_position_negative(position, mu), mu), u);
+		//	U_(-mu)(n)=(U_mu(n-mu))^\dagger
+
+	}
+}
+
 char *name_configuration_file(const unsigned config) {
     char configs_dir_name_local[max_length_name];
     strcpy(configs_dir_name_local, configs_dir_name);

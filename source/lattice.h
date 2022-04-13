@@ -24,6 +24,11 @@ void test_allocation(const void * pointer, const char * location );
 
 double complex * get_link(double complex *U, const pos_vec position, const unsigned short mu);
 
+float complex *get_link_f(float complex *U, const pos_vec position, const unsigned short mu);
+
+void get_link_matrix(double complex * U, pos_vec position, int mu, int direction, double complex * u);
+
+
 char * name_configuration_file(const unsigned config);
 
 void SU3_load_config(const char filename[max_length_name], float complex *U);

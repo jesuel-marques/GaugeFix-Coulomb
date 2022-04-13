@@ -216,6 +216,26 @@ void SU3_product_three(const double complex *u, const double complex *v, const d
     }
 }
 
+void SU3_product_four(const double complex *u, const double complex *v, const double complex *w, const double complex *x, double complex *uvwx){
+    //  Calculates product of 3 SU(3) matrices u, v and w
+    //  and returns result in uvw.
+
+    for (unsigned short a = 0; a < 3; a++) {              //  lines
+        for (unsigned short b = 0; b < 3; b++) {          //  columns
+            uvwx[a * 3 + b] = 0.0;
+            for (unsigned short c = 0; c < 3; c++) {            //  dummy index 1
+                for (unsigned short e = 0; e < 3; e++) {        //  dummy index 2
+                    for (unsigned short f = 0; f < 3; f++) {    //  dummy index 3
+
+                    uvwx[a * 3 + b] += u[a * 3 + c] * v[c * 3 + e] * w[e * 3 + f] * x[f * 3 + b];
+                    //  Usual matrix multiplication.
+                    }
+                }
+            }
+        }
+    }
+}
+
 void SU3_accumulate_left_product(const double complex *g, double complex *acc_prod) {
     //	Calculates matrix product between g and acc_prod and accumulates result in acc_prod
     double complex aux_prod[3 * 3];

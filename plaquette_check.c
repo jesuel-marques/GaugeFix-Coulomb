@@ -21,6 +21,8 @@
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 #include "source/SU3_ops.h"
 
+#include "source/measurement.h"
+
 const char configs_dir_name[] = "/home/postgrad/jesuel/configs/";
 
 
@@ -54,18 +56,12 @@ int main(int argc, char *argv[]) {
 		free(U_float);
 		
 		//  fix the gauge
-		SU3_gauge_fix(U_double, actual_config_nr);
+		printf("Config: %d, %lf\n", plaquette_average(U_double));
 
-		U_float = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
-		test_allocation(U_float, "main");
-
-		SU3_convert_config_df(U_double, U_float);
+		
 		free(U_double);
 
-		// write the gauge fixed configuration based on template name
-		SU3_print_config_f(name_configuration_file(actual_config_nr), ".GF", U_float);
-
-		free(U_float);	//	Free memory allocated for the configuration.
+	
 		
 	}
 	MPI_Finalise();
