@@ -1,5 +1,6 @@
 configs/
 gauge_fix_coulomb
+plaquette_check
 hostfile
 *.sh
 *.dbg

@@ -1,6 +1,5 @@
-//	srun -p DevQ -N 1 -A nuim01 -t 1:00:00 --pty bash
 //	gcc -o plaquette_check plaquette_check.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  source/measurement.c -lm -O4 -march=skylake -fopenmp
-//	mpiicc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp
+
 
 #include <stdio.h>					//	Standard header files in C
 #include <stdlib.h>
@@ -24,7 +23,7 @@
 #include "source/measurement.h"
 
 // const char configs_dir_name[] = "/home/postgrad/jesuel/configs/";
-const char configs_dir_name[] = "configs/";
+const char configs_dir_name[] = "/home/postgrad/jesuel/configs/";
 
 
 int main(void){
