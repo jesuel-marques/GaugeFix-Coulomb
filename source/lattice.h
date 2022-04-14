@@ -1,12 +1,14 @@
-#include "../SU3_parameters.h"   
+#include "../SU3_parameters.h"
 
 #ifndef LATTICE_H
 #define LATTICE_H
 
 typedef struct {
-    unsigned short t;
     unsigned short i, j, k;
+    unsigned short t;
 } pos_vec;  //	struct for position vectors
+
+pos_vec assign_position(const unsigned short x, const unsigned short y, const unsigned short z, const unsigned short t);
 
 pos_vec add_pos_vec(const pos_vec u, const pos_vec v);
 
@@ -46,5 +48,13 @@ void SU3_convert_config_fd(float complex *U_float, double complex *U_double);
 void SU3_convert_config_df(double complex *U_double, float complex *U_float);
 
 void SU3_reunitarize(double complex *U);
+
+/*============================JONIVAR'S CODE===============================*/
+
+void block_swap(int *buffer, size_t length);
+
+void block_swap_double(double *buffer, size_t length);
+
+int byte_swap(void* strip, size_t size, size_t length);
 
 #endif
