@@ -14,10 +14,22 @@
 
 extern char configs_dir_name[];
 
+pos_vec assign_position(const unsigned short x, const unsigned short y, const unsigned short z, const unsigned short t){
+    //	assigns x, y, z and t to a position vector
+    pos_vec position;
+
+    position.i = x;
+    position.j = y; 
+    position.k = z; 
+    position.t = t;
+
+    return position;
+}
+
 void print_pos_vec(const pos_vec pos) {
     //	prints a position to the screen
 
-    printf("% d %d %d %d\n", pos.t, pos.i, pos.j, pos.k);
+    printf("% d %d %d %d\n", pos.i, pos.j, pos.k, pos.t);
 }
 
 pos_vec hop_position_positive(const pos_vec u, const unsigned short mu) {
@@ -29,31 +41,31 @@ pos_vec hop_position_positive(const pos_vec u, const unsigned short mu) {
 
     switch (mu) {
         case 0:
-            u_plus_muhat.t = ((u.t + 1) % Nt);
-            u_plus_muhat.i = u.i;
-            u_plus_muhat.j = u.j;
-            u_plus_muhat.k = u.k;
-            break;
-
-        case 1:
-            u_plus_muhat.t = u.t;
             u_plus_muhat.i = ((u.i + 1) % Nxyz);
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
+            u_plus_muhat.t = u.t;
             break;
 
-        case 2:
-            u_plus_muhat.t = u.t;
+        case 1:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = ((u.j + 1) % Nxyz);
             u_plus_muhat.k = u.k;
+            u_plus_muhat.t = u.t;
             break;
 
-        case 3:
-            u_plus_muhat.t = u.t;
+        case 2:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = ((u.k + 1) % Nxyz);
+            u_plus_muhat.t = u.t;
+            break;
+
+        case 3:
+            u_plus_muhat.i = u.i;
+            u_plus_muhat.j = u.j;
+            u_plus_muhat.k = u.k;
+            u_plus_muhat.t = ((u.t + 1) % Nt);
             break;
 
         default:
@@ -72,32 +84,33 @@ pos_vec hop_position_negative(const pos_vec u, const unsigned short mu) {
     pos_vec u_minus_muhat;
 
     switch (mu) {
-        case 0:
-            u_minus_muhat.t = (((u.t - 1) % Nt + Nt) % Nt);
-            u_minus_muhat.i = u.i;
-            u_minus_muhat.j = u.j;
-            u_minus_muhat.k = u.k;
-            break;
 
-        case 1:
-            u_minus_muhat.t = u.t;
+        case 0:
             u_minus_muhat.i = (((u.i - 1) % Nxyz + Nxyz) % Nxyz);
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
+            u_minus_muhat.t = u.t;
             break;
 
-        case 2:
-            u_minus_muhat.t = u.t;
+        case 1:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = (((u.j - 1) % Nxyz + Nxyz) % Nxyz);
             u_minus_muhat.k = u.k;
+            u_minus_muhat.t = u.t;
             break;
 
-        case 3:
-            u_minus_muhat.t = u.t;
+        case 2:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = (((u.k - 1) % Nxyz + Nxyz) % Nxyz);
+            u_minus_muhat.t = u.t;            
+            break;
+        
+        case 3:
+            u_minus_muhat.i = u.i;
+            u_minus_muhat.j = u.j;
+            u_minus_muhat.k = u.k;
+            u_minus_muhat.t = (((u.t - 1) % Nt + Nt) % Nt);
             break;
 
         default:
@@ -112,7 +125,7 @@ pos_vec hop_position_negative(const pos_vec u, const unsigned short mu) {
 unsigned short position_is_odd(const pos_vec position) {
     //	If a position is odd returns 1, if even returns 0
 
-    return ((position.t ^ position.i ^ position.j ^ position.k) & 1);
+    return ((position.i ^ position.j ^ position.k ^ position.t) & 1);
 
     // if position is odd, then the XOR of the first bit of each element
     // of position must be 1. Take AND with 1 select this first bit.
@@ -121,7 +134,7 @@ unsigned short position_is_odd(const pos_vec position) {
 unsigned short position_is_even(const pos_vec position) {
     //	If a position is even returns 1, if odd returns 0
 
-    return !((position.t ^ position.i ^ position.j ^ position.k) & 1);
+    return !((position.i ^ position.j ^ position.k ^ position.t) & 1);
 
     // if position is even, then the XOR of the first bit of each element
     // of position must be 0. Taking AND with 1 select this first bit. Take the NOT of 
@@ -140,12 +153,12 @@ void test_allocation(const void * pointer, const char * location ){
 
 double complex *get_link(double complex *U, const pos_vec position, const unsigned short mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
+    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu) * 3 * 3);
 }
 
 float complex *get_link_f(float complex *U, const pos_vec position, const unsigned short mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.i) * Nxyz + position.j) * Nxyz + position.k) * d + mu) * 3 * 3);
+    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu) * 3 * 3);
 }
 
 void get_link_matrix(double complex * U, pos_vec position, int mu, int direction, double complex * u){
@@ -173,7 +186,7 @@ char *name_configuration_file(const unsigned config) {
     
     char config_filename[max_length_name];
     //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, Nxyz, Nt);
-    sprintf(config_filename,"lend_Gen2_24x16_%d.cfg",config);
+    sprintf(config_filename,"Gen2_24x16_%d.cfg.GF",config);
     
     return strcat(configs_dir_name_local, config_filename);
 }
@@ -261,9 +274,9 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
         for (unsigned short t = 0; t < Nt; t++) {
             pos_vec position;
             position.t = t;
-            for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                    for (position.i = 0; position.i < Nxyz; position.i++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
 
                             SU3_copy(get_link(U, position, mu), get_link(U_copy, position, mu));
@@ -279,14 +292,14 @@ void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
 
     double complex u[3][3];
 
-    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic) 
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
             pos_vec position;
             position.t = t;
-            for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                    for (position.i = 0; position.i < Nxyz; position.i++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
 
                             SU3_convert_fd(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
@@ -302,14 +315,14 @@ void SU3_convert_config_df(double complex *U_double, float complex *U_float) {
 
     double complex u[3][3];
 
-    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic) 
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
         for (unsigned short t = 0; t < Nt; t++) {
             pos_vec position;
             position.t = t;
-            for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                    for (position.i = 0; position.i < Nxyz; position.i++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
 
                             SU3_convert_df(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
@@ -330,9 +343,9 @@ void SU3_reunitarize(double complex *U) {
         for (unsigned short t = 0; t < Nt; t++) {
             pos_vec position;
             position.t = t;
-            for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                    for (position.i = 0; position.i < Nxyz; position.i++) {
                         for (unsigned short mu = 0; mu < d; mu++) {
 
                             SU3_projection(get_link(U, position, mu));
@@ -342,4 +355,69 @@ void SU3_reunitarize(double complex *U) {
                 }
             }
         }
+}
+
+
+/*============================JONIVAR'S CODE===============================*/
+
+void block_swap(int *buffer, size_t length)
+{
+  size_t i;
+  register union swapper {
+    int integer;
+    char pos[4];
+  } a, b;
+
+  for( i=0 ; i < length ; i++) {
+    a.integer = *buffer;
+    b.pos[0] = a.pos[3];
+    b.pos[1] = a.pos[2];
+    b.pos[2] = a.pos[1];
+    b.pos[3] = a.pos[0];
+    *buffer  = b.integer;
+    buffer++;
+  }
+}
+
+void block_swap_double(double *buffer, size_t length)
+{
+  size_t i;
+  register union swapper {
+    double double_number;
+    char pos[8];
+  } a, b;
+
+  for( i=0 ; i < length ; i++) {
+    a.double_number = *buffer;
+    b.pos[0] = a.pos[7];
+    b.pos[1] = a.pos[6];
+    b.pos[2] = a.pos[5];
+    b.pos[3] = a.pos[4];
+    b.pos[4] = a.pos[3];
+    b.pos[5] = a.pos[2];
+    b.pos[6] = a.pos[1];
+    b.pos[7] = a.pos[0];
+    *buffer  = b.double_number;
+    buffer++;
+  }
+}
+
+
+
+int byte_swap(void* strip, size_t size, size_t length)
+{
+  switch (size) {
+  case sizeof(float):   /* = 4 */
+    block_swap(strip,length/size);
+    break;
+  case sizeof(double):  /* = 8 */
+    block_swap_double(strip,length/size);
+    break;
+  case 1:
+    break;
+  default:  /* ERROR: unknown size!! */
+    return -1;
+  }
+
+  return 0;
 }

@@ -33,8 +33,9 @@ double SU3_re_tr_plaquette(double complex *U, const pos_vec position, const shor
 
 }
 
-double plaquette_average(double complex * U){
+double spatial_plaquette_average(double complex * U){
     double plaq_ave = 0.0;
+
 
     #pragma omp parallel for reduction (+:plaq_ave) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
@@ -45,17 +46,17 @@ double plaquette_average(double complex * U){
             position.t = t;
             double plaq_ave_slice = 0.0;
 
-            for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.k = 0; position.k < Nxyz; position.k++) {
-                        for (int mu = 0; mu < d; mu++){
-                            for (int nu = 0; nu < d; nu++){
+                    for (position.i = 0; position.i < Nxyz; position.i++) {
+                        for (int mu = 0; mu < d-1; mu++){
+                            for (int nu = 0; nu < d-1; nu++){
                                 if( mu < nu){
-                                
                                     plaq_ave_slice += SU3_re_tr_plaquette(U, position, mu, nu);                                    
                                 
                                 }
                             }
+                        
                         }
                     }
                 }
@@ -65,7 +66,41 @@ double plaquette_average(double complex * U){
 
         }
 
-    plaq_ave /= (double)(6.0 * Volume);
+    plaq_ave /= (double)((d - 1.0) * Volume);
+
+    return plaq_ave;
+}
+
+double temporal_plaquette_average(double complex * U){
+    double plaq_ave = 0.0;
+
+
+    #pragma omp parallel for reduction (+:plaq_ave) num_threads(NUM_THREADS) schedule(dynamic) 
+        // Paralelizing by slicing the time extent
+        for (unsigned short t = 0; t < Nt; t++) {
+
+            pos_vec position;
+
+            position.t = t;
+            double plaq_ave_slice = 0.0;
+
+            for (position.k = 0; position.k < Nxyz; position.k++) {
+                for (position.j = 0; position.j < Nxyz; position.j++) {
+                    for (position.i = 0; position.i < Nxyz; position.i++) {
+                        for (int mu = 0; mu < d-1; mu++){
+                     
+                                plaq_ave_slice += SU3_re_tr_plaquette(U, position, 3, mu);
+                     
+                        }    
+                    }
+                }
+            }
+
+            plaq_ave += plaq_ave_slice;
+
+        }
+
+    plaq_ave /= (double)((d - 1.0) * Volume);
 
     return plaq_ave;
 }

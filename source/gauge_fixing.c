@@ -43,7 +43,7 @@ static void SU3_calculate_w(double complex *U, const pos_vec position, double co
 
     // w(n)	calculation
 
-    for (unsigned short mu = 1; mu < d; mu++) {
+    for (unsigned short mu = 0; mu < d-1; mu++) {
         //	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision
 
         SU3_accumulate(get_link(U, position, mu), w);
@@ -74,9 +74,9 @@ static double SU3_calculate_e2(double complex *U) {
             position.t = t;
             double e2_slice = 0.0;
 
-            for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.k = 0; position.k < Nxyz; position.k++) {
+                    for (position.i = 0; position.i < Nxyz; position.i++) {
                         
                         SU3_divergence_A(U, position, div_A);
                         SU3_decompose_algebra(div_A, div_A_components);
@@ -104,6 +104,7 @@ static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned 
     SU3_set_to_null(update_SU3);
 
     update_SU3[(2 - submatrix) * 3 + (2 - submatrix)] = 1.0;
+    
     a = submatrix == 2 ? 1 : 0;
     b = submatrix == 0 ? 1 : 2;
 
@@ -202,9 +203,9 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
             // Paralelizing by slicing the time extent
             for (unsigned short t = 0; t < Nt; t++) {
                 position.t = t;
-                for (position.i = 0; position.i < Nxyz; position.i++) {
+                for (position.k = 0; position.k < Nxyz; position.k++) {
                     for (position.j = 0; position.j < Nxyz; position.j++) {
-                        for (position.k = 0; position.k < Nxyz; position.k++) {
+                        for (position.i = 0; position.i < Nxyz; position.i++) {
                             !((position_is_even(position) + sweep) % 2) ?
                                 //	Implementation of the checkerboard subdivision of the lattice
                                 

@@ -1,6 +1,8 @@
 #ifndef MEASUREMENT_H
 #define MEASUREMENT_H
 
-double plaquette_average(double complex * U);
+double spatial_plaquette_average(double complex * U);
+
+double temporal_plaquette_average(double complex * U);
 
 #endif

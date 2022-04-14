@@ -47,7 +47,7 @@ void SU3_divergence_A(double complex *U, const pos_vec position, double complex 
     double complex term_divA[3 * 3];
 
     SU3_set_to_null(div_A);
-    for (unsigned short mu = 1; mu < d; mu++) {
+    for (unsigned short mu = 0; mu < d-1; mu++) {
         SU3_calculate_A(U, position, mu, A1);
         SU3_calculate_A(U, hop_position_negative(position, mu), mu, A2);
 
