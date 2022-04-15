@@ -7,7 +7,7 @@
 #include <string.h>
 #include <complex.h>
 
-	#include <mpi.h>
+#include <mpi.h>
 //Since American English is painful on the eyes
 #define MPI_Finalise() MPI_Finalize()
 // #include <omp.h>
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 	for (int config = rank + 1; config <= nconfig; config += size) {
 	//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
 	// for (unsigned config = 1; config <= max_configs; config ++) {
-		int actual_config_nr = 500+10*(config-1);
+		int actual_config_nr = 1000+10*(config-1);
 	
 		float complex * U_float = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
 		test_allocation(U_float, "main");
