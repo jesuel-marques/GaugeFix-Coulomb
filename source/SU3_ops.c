@@ -283,19 +283,19 @@ void SU3_projection(matrix_3x3_double *x) {
                                       //  second line of projected
                                       //  matrix.
     
-    double complex u_new_conj[Nc];  //  To calculate last line of
-    double complex v_new_conj[Nc];  //  projected matrix.
+    color_3_vec u_new_conj;  //  To calculate last line of
+    color_3_vec v_new_conj;  //  projected matrix.
 
     for (SU3_color_index b = 0; b < Nc; b++) {
 
-        x_SU3.m[0 * Nc + b] = x -> m[0 * Nc + b] / sqrt(sum_absvalue);
+        x_SU3.m[0 * Nc + b] = (x -> m[0 * Nc + b]) / sqrt(sum_absvalue);
         //	Calculates u_new, first line of x_SU3, projected from x
         //  simply by dividing its first line by its absolute value.
 
-        u_new_conj[b] = conj(x_SU3.m[0 * Nc + b]);
+        u_new_conj.m[b] = conj(x_SU3.m[0 * Nc + b]);
         //	u_new_conj is u_new's conjugate.
 
-        v_unewconj += x -> m[1 * Nc + b] * u_new_conj[b];
+        v_unewconj += (x -> m[1 * Nc + b]) * u_new_conj.m[b];
         //	Projection of v, second line of x, onto u_new,
         //  to be used below for the Gram-Schmidt method.
 
@@ -309,7 +309,7 @@ void SU3_projection(matrix_3x3_double *x) {
 
     for (SU3_color_index b = 0; b < Nc; b++) {
 
-        v_prime[b] = x -> m[1 * Nc + b] - x_SU3.m[0 * Nc + b] * v_unewconj;
+        v_prime[b] = (x -> m[1 * Nc + b]) - x_SU3.m[0 * Nc + b] * v_unewconj;
         // Subtraction of the part parallel to u_new of v.
 
     }
@@ -330,7 +330,7 @@ void SU3_projection(matrix_3x3_double *x) {
         //	Calculates  v_new, second line of the projected matrix
         //  from v_prime, by normalizing it.
 
-        v_new_conj[b] = conj(x_SU3.m[1 * Nc + b]);
+        v_new_conj.m[b] = conj(x_SU3.m[1 * Nc + b]);
         //	v_new_conj is v_new's conjugate.
         
     }
@@ -339,40 +339,40 @@ void SU3_projection(matrix_3x3_double *x) {
     //  u_new_conj and v_new_conj
 
     //  First component:
-    x_SU3.m[2 * Nc + 0] = (u_new_conj[1] * v_new_conj[2] - u_new_conj[2] * v_new_conj[1]);
+    x_SU3.m[2 * Nc + 0] = (u_new_conj.m[1] * v_new_conj.m[2] - u_new_conj.m[2] * v_new_conj.m[1]);
 
     //  Second component:
-    x_SU3.m[2 * Nc + 1] = (u_new_conj[2] * v_new_conj[0] - u_new_conj[0] * v_new_conj[2]);
+    x_SU3.m[2 * Nc + 1] = (u_new_conj.m[2] * v_new_conj.m[0] - u_new_conj.m[0] * v_new_conj.m[2]);
 
     //  Third component:
-    x_SU3.m[2 * Nc + 2] = (u_new_conj[0] * v_new_conj[1] - u_new_conj[1] * v_new_conj[0]);
+    x_SU3.m[2 * Nc + 2] = (u_new_conj.m[0] * v_new_conj.m[1] - u_new_conj.m[1] * v_new_conj.m[0]);
 
     SU3_copy(&x_SU3, x);
 
 }
 
-void SU3_decompose_algebra(const matrix_3x3_double *a, double *a_components) {
+void SU3_decompose_algebra(const matrix_3x3_double *a, matrix_SU3_alg *a_components) {
     //  Decomposes A in the components of the alfebra of SU(3)
     //  using the Gell-Mann matrices a basis and following the conventions
     //  of Gattringer. The components are then returned in a_components
 
     // Formulas for the coefficients obtained in Mathematica
 
-    a_components[0] = 0.0;
+    a_components -> m[0] = 0.0;
 
-    a_components[1] = ( creal(a -> m[0 * Nc + 1]) + creal(a -> m[1 * Nc + 0]));
+    a_components -> m[1] = ( creal(a -> m[0 * Nc + 1]) + creal(a -> m[1 * Nc + 0]));
 
-    a_components[2] = (-cimag(a -> m[0 * Nc + 1]) + cimag(a -> m[1 * Nc + 0]));
+    a_components -> m[2] = (-cimag(a -> m[0 * Nc + 1]) + cimag(a -> m[1 * Nc + 0]));
 
-    a_components[3] = ( creal(a -> m[0 * Nc + 0]) - creal(a -> m[1 * Nc + 1]));
+    a_components -> m[3] = ( creal(a -> m[0 * Nc + 0]) - creal(a -> m[1 * Nc + 1]));
 
-    a_components[4] = ( creal(a -> m[0 * Nc + 2]) + creal(a -> m[2 * Nc + 0]));
+    a_components -> m[4] = ( creal(a -> m[0 * Nc + 2]) + creal(a -> m[2 * Nc + 0]));
 
-    a_components[5] = (-cimag(a -> m[0 * Nc + 2]) + cimag(a -> m[2 * Nc + 0]));
+    a_components -> m[5] = (-cimag(a -> m[0 * Nc + 2]) + cimag(a -> m[2 * Nc + 0]));
 
-    a_components[6] = ( creal(a -> m[1 * Nc + 2]) + creal(a -> m[2 * Nc + 1]));
+    a_components -> m[6] = ( creal(a -> m[1 * Nc + 2]) + creal(a -> m[2 * Nc + 1]));
 
-    a_components[7] = (-cimag(a -> m[1 * Nc + 2]) + cimag(a -> m[2 * Nc + 1]));
+    a_components -> m[7] = (-cimag(a -> m[1 * Nc + 2]) + cimag(a -> m[2 * Nc + 1]));
 
-    a_components[8] = ( creal(a -> m[0 * Nc + 0]) + creal(a -> m[1 * Nc + 1]) - 2.0 * creal(a -> m[2 * Nc + 2])) / pow(3.0, 0.5);
+    a_components -> m[8] = ( creal(a -> m[0 * Nc + 0]) + creal(a -> m[1 * Nc + 1]) - 2.0 * creal(a -> m[2 * Nc + 2])) / pow(3.0, 0.5);
 }

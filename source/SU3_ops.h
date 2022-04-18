@@ -5,6 +5,10 @@ typedef unsigned short SU3_color_index;
 typedef unsigned short SU3_color_alg_index;
 
 typedef struct {
+    double complex m[Nc];
+} color_3_vec;
+
+typedef struct {
     double complex m[Nc * Nc];
 } matrix_3x3_double;
 
@@ -12,6 +16,10 @@ typedef struct {
 typedef struct {
     float complex m[Nc * Nc];
 } matrix_3x3_float;
+
+typedef struct {
+    double complex m[Nc*Nc-1];
+} matrix_SU3_alg;
 
 void SU3_print_matrix(const matrix_3x3_double *u, const char *name);
 
@@ -50,6 +58,6 @@ inline extern void SU3_accumulate_right_product(matrix_3x3_double *acc_prod, con
 
 inline extern void SU3_projection(matrix_3x3_double *x);
 
-void SU3_decompose_algebra(const matrix_3x3_double *a, double *a_components);
+void SU3_decompose_algebra(const matrix_3x3_double *a, matrix_SU3_alg *a_components);
 
 #endif
