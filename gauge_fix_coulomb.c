@@ -14,12 +14,12 @@
 
 #include "SU3_parameters.h"			//	Simulation parameters
 
-
+#include "source/SU3_ops.h"
 #include "source/lattice.h"			//	Initialization functions and calculations of
 									//	positions and links on the lattice.
 
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
-#include "source/SU3_ops.h"
+
 
 #include "source/measurement.h"
 
@@ -48,13 +48,14 @@ int main(void){
 	for (unsigned config = 1; config <= max_configs; config ++) {
 		int actual_config_nr = 1000+10*(config-1);
 	
-		in_cfg_data_type * U_in = (in_cfg_data_type *) malloc(Volume * d * Nc * Nc * sizeof(in_cfg_data_type));
+		in_cfg_data_type * U_in = (in_cfg_data_type *) malloc(Volume * d * sizeof(in_cfg_data_type));
 		test_allocation(U_in, "main");
-		double complex * U_double = (double complex *) malloc(Volume * d * Nc * Nc * sizeof(double complex));
-		test_allocation(U_double, "main");
 
 		SU3_load_config(name_configuration_file(actual_config_nr), U_in);
-		byte_swap(U_in, sizeof(float), Volume * d * Nc * Nc * sizeof(in_cfg_data_type));
+		byte_swap(U_in, sizeof(float), Volume * d * sizeof(in_cfg_data_type));
+		
+		matrix_3x3_double * U_double = (matrix_3x3_double *) malloc(Volume * d * sizeof(matrix_3x3_double));
+		test_allocation(U_double, "main");
 		SU3_convert_config_fd(U_in, U_double);
 		free(U_in);
 

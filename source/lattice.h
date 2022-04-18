@@ -1,7 +1,8 @@
-#include "../SU3_parameters.h"
-
 #ifndef LATTICE_H
 #define LATTICE_H
+
+#include "../SU3_parameters.h"
+#include "SU3_ops.h"
 
 typedef unsigned short pos_index;
 
@@ -20,8 +21,8 @@ typedef enum {REAR, FRONT} direction;
 #define z_index 2
 #define t_index 3
 
-typedef float complex in_cfg_data_type;
-typedef float complex out_cfg_data_type;
+typedef matrix_3x3_float in_cfg_data_type;
+typedef matrix_3x3_float out_cfg_data_type;
 
 
 pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t);
@@ -38,11 +39,11 @@ inline unsigned short position_is_odd(const pos_vec position);
 
 void test_allocation(const void * pointer, const char * location );
 
-inline double complex * get_link(double complex *U, const pos_vec position, const lorentz_index mu);
+inline matrix_3x3_double * get_link(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu);
 
-inline float complex *get_link_f(float complex *U, const pos_vec position, const lorentz_index mu);
+matrix_3x3_float *get_link_f(matrix_3x3_float *U, const pos_vec position, const lorentz_index mu);
 
-void get_link_matrix(double complex * U, const pos_vec position, const lorentz_index mu, direction dir, double complex * u);
+void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorentz_index mu, direction dir, matrix_3x3_double * u);
 
 
 char * name_configuration_file(const unsigned config);
@@ -51,13 +52,13 @@ void SU3_load_config(const char filename[max_length_name], in_cfg_data_type *U);
 
 void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], out_cfg_data_type *U);
 
-void SU3_copy_config(double complex *U, double complex *U_copy);
+void SU3_copy_config(matrix_3x3_double *U, matrix_3x3_double *U_copy);
 
-void SU3_convert_config_fd(float complex *U_float, double complex *U_double);
+void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_double);
 
-void SU3_convert_config_df(double complex *U_double, float complex *U_float);
+void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_float);
 
-void SU3_reunitarize(double complex *U);
+void SU3_reunitarize(matrix_3x3_double *U);
 
 /*============================JONIVAR'S CODE===============================*/
 

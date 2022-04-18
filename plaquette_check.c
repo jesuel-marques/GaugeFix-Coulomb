@@ -45,9 +45,9 @@ int main(int argc, char *argv[]) {
 	//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
 	for (unsigned config = 1; config <= max_configs; config ++) {
 		int actual_config_nr = 1000+10*(config-1);
-		float complex * U_float = (float complex *) malloc(Volume * d * Nc * Nc * sizeof(float complex));
+		matrix_3x3_float * U_float = (matrix_3x3_float *) malloc(Volume * d * sizeof(matrix_3x3_float));
 		test_allocation(U_float, "main");
-		double complex * U_double = (double complex *) malloc(Volume * d * Nc * Nc * sizeof(double complex));
+		matrix_3x3_double * U_double = (matrix_3x3_double *) malloc(Volume * d * sizeof(matrix_3x3_double));
 		test_allocation(U_double, "main");
 
 		SU3_load_config(name_configuration_file(actual_config_nr), U_float);

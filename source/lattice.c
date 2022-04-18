@@ -151,20 +151,22 @@ void test_allocation(const void * pointer, const char * location ){
 	}
 }
 
-double complex *get_link(double complex *U, const pos_vec position, const lorentz_index mu) {
+matrix_3x3_double *get_link(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu) * Nc * Nc);
+    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu));
 }
 
-float complex *get_link_f(float complex *U, const pos_vec position, const lorentz_index mu) {
+matrix_3x3_float *get_link_f(matrix_3x3_float *U, const pos_vec position, const lorentz_index mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu) * Nc * Nc);
+    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu));
 }
 
-void get_link_matrix(double complex * U, const pos_vec position, const lorentz_index mu, direction dir, double complex * u){
+void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorentz_index mu, direction dir, matrix_3x3_double * u){
 	
 	// Gets forward or backward link at given position and mu
 	// and copies it to u.
+
+    matrix_3x3_double u_aux;
 
 	if (dir == FRONT) {
 
@@ -200,8 +202,8 @@ void SU3_load_config(const char filename[max_length_name], in_cfg_data_type *U) 
 
     config_file = fopen(filename, "r");
 
-    if (fread(U, Nc * Nc * sizeof(in_cfg_data_type),  Volume * d , config_file) == Volume * d) {
-        // puts("U Loaded OK\n");
+    if (fread(U, sizeof(in_cfg_data_type),  Volume * d , config_file) == Volume * d) {
+        puts("U Loaded OK\n");
     } else {
         puts(" Configuration loading failed.\n");
         exit(1);
@@ -228,7 +230,7 @@ void SU3_print_config(char filename[max_length_name], const char modifier[max_le
     fclose(config_file);
 }
 
-void SU3_copy_config(double complex *U, double complex *U_copy) {
+void SU3_copy_config(matrix_3x3_double *U, matrix_3x3_double *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
@@ -250,7 +252,7 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
         }
 }
 
-void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
+void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_double) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
@@ -271,7 +273,7 @@ void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
         }
 }
 
-void SU3_convert_config_df(double complex *U_double, float complex *U_float) {
+void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_float) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
@@ -293,7 +295,7 @@ void SU3_convert_config_df(double complex *U_double, float complex *U_float) {
 }
 
 
-void SU3_reunitarize(double complex *U) {
+void SU3_reunitarize(matrix_3x3_double *U) {
     // Reunitarizes the configuration
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)

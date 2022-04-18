@@ -7,32 +7,32 @@
 #include "lattice.h"
 #include "SU3_ops.h"
 
-double SU3_re_tr_plaquette(double complex *U, const pos_vec position, const lorentz_index mu, const lorentz_index nu){
+double SU3_re_tr_plaquette(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu, const lorentz_index nu){
 	
-    double complex plaquette[Nc * Nc];
+    matrix_3x3_double plaquette;
 
-    double complex ua[Nc * Nc];
-    double complex ub[Nc * Nc];
-    double complex uc[Nc * Nc];
-    double complex ud[Nc * Nc];
+    matrix_3x3_double ua;
+    matrix_3x3_double ub;
+    matrix_3x3_double uc;
+    matrix_3x3_double ud;
 
     pos_vec position_plus_mu = hop_position_positive(position, mu);
 
-    get_link_matrix(U, position,                                    mu, FRONT, ua);
-    get_link_matrix(U, position_plus_mu,                            nu, FRONT, ub);
-    get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, REAR , uc);
-    get_link_matrix(U, hop_position_positive(position, nu),         nu, REAR , ud);
+    get_link_matrix(U, position,                                    mu, FRONT, &ua);
+    get_link_matrix(U, position_plus_mu,                            nu, FRONT, &ub);
+    get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, REAR , &uc);
+    get_link_matrix(U, hop_position_positive(position, nu),         nu, REAR , &ud);
 
-	SU3_product_four(ua, ub, uc, ud, plaquette);
+	SU3_product_four(&ua, &ub, &uc, &ud, &plaquette);
 
     // printf("%lf\n", creal(SU3_trace(plaquette)));
     // getchar();
 
-    return (double)creal(SU3_trace(plaquette))/Nc;
+    return (double)creal(SU3_trace(&plaquette))/Nc;
 
 }
 
-double spatial_plaquette_average(double complex * U){
+double spatial_plaquette_average(matrix_3x3_double * U){
     double plaq_ave = 0.0;
 
 
@@ -70,7 +70,7 @@ double spatial_plaquette_average(double complex * U){
     return plaq_ave;
 }
 
-double temporal_plaquette_average(double complex * U){
+double temporal_plaquette_average(matrix_3x3_double * U){
     double plaq_ave = 0.0;
 
 

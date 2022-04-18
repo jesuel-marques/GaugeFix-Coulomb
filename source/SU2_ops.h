@@ -3,27 +3,31 @@
 
 typedef unsigned short SU2_color_index;
 
-void SU2_copy(const double* u, double* u_copy);
+typedef struct {
+    double complex m[4];
+} matrix_2x2_ck;
 
-void SU2_set_to_null(double * u);
-void SU2_set_to_identity(double * u);
+void SU2_copy(const matrix_2x2_ck * u, matrix_2x2_ck* u_copy);
 
-void SU2_accumulate(const double* u, double* acc);
+void SU2_set_to_null(matrix_2x2_ck * u);
+void SU2_set_to_identity(matrix_2x2_ck * u);
 
-void SU2_subtraction(const double* u, const double* v, double* u_minus_v);
+void SU2_accumulate(const matrix_2x2_ck * u, matrix_2x2_ck* acc);
 
-inline double SU2_determinant(const double* u);
+void SU2_subtraction(const matrix_2x2_ck* u, const matrix_2x2_ck* v, matrix_2x2_ck* u_minus_v);
 
-void SU2_hermitean_conjugate(const double* u, double* u_dagger);
+inline double SU2_determinant(const matrix_2x2_ck* u);
 
-void SU2_multiplication_by_scalar(const double* u, const double alpha, double* alpha_times_u);
+void SU2_hermitean_conjugate(const matrix_2x2_ck* u, matrix_2x2_ck* u_dagger);
 
-void SU2_product(const double* u, const double* v, double* uv);
+void SU2_multiplication_by_scalar(const matrix_2x2_ck* u, const double alpha, matrix_2x2_ck* alpha_times_u);
 
-void SU2_product_three(const double* u, const double* v, const double* w, double* uvw);
+void SU2_product(const matrix_2x2_ck* u, const matrix_2x2_ck* v, matrix_2x2_ck* uv);
 
-void SU2_product_four(const double* u, const double* v, const double* w, const double* x, double* uvwx);
+void SU2_product_three(const matrix_2x2_ck* u, const matrix_2x2_ck* v, const matrix_2x2_ck* w, matrix_2x2_ck* uvw);
 
-inline void SU2_projection(double* u);
+void SU2_product_four(const matrix_2x2_ck* u, const matrix_2x2_ck* v, const matrix_2x2_ck* w, const matrix_2x2_ck* x, matrix_2x2_ck* uvwx);
+
+inline void SU2_projection(matrix_2x2_ck* u);
 
 #endif
