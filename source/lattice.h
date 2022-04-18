@@ -3,43 +3,53 @@
 #ifndef LATTICE_H
 #define LATTICE_H
 
+typedef unsigned short pos_index;
+
 typedef struct {
-    unsigned short i, j, k;
-    unsigned short t;
+    pos_index i, j, k;
+    pos_index t;
 } pos_vec;  //	struct for position vectors
 
-pos_vec assign_position(const unsigned short x, const unsigned short y, const unsigned short z, const unsigned short t);
 
-pos_vec add_pos_vec(const pos_vec u, const pos_vec v);
+typedef unsigned short lorentz_index;
+
+typedef enum {REAR, FRONT} direction; 
+
+#define x_index 0
+#define y_index 1
+#define z_index 2
+#define t_index 3
+
+typedef float complex in_cfg_data_type;
+typedef float complex out_cfg_data_type;
+
+
+pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t);
 
 void print_pos_vec(const pos_vec u);
 
-pos_vec hop_position_positive(const pos_vec u, const unsigned short mu);
+inline pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu);
 
-pos_vec hop_position_negative(const pos_vec u, const unsigned short mu);
+inline pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu);
 
-unsigned short position_is_even(const pos_vec position);
+inline unsigned short position_is_even(const pos_vec position);
 
-unsigned short position_is_odd(const pos_vec position);
+inline unsigned short position_is_odd(const pos_vec position);
 
 void test_allocation(const void * pointer, const char * location );
 
-double complex * get_link(double complex *U, const pos_vec position, const unsigned short mu);
+inline double complex * get_link(double complex *U, const pos_vec position, const lorentz_index mu);
 
-float complex *get_link_f(float complex *U, const pos_vec position, const unsigned short mu);
+inline float complex *get_link_f(float complex *U, const pos_vec position, const lorentz_index mu);
 
-void get_link_matrix(double complex * U, pos_vec position, int mu, int direction, double complex * u);
+void get_link_matrix(double complex * U, const pos_vec position, const lorentz_index mu, direction dir, double complex * u);
 
 
 char * name_configuration_file(const unsigned config);
 
-void SU3_load_config(const char filename[max_length_name], float complex *U);
+void SU3_load_config(const char filename[max_length_name], in_cfg_data_type *U);
 
-void SU3_load_config_d(const char filename[max_length_name], double complex *U);
-
-void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], double complex *U);
-
-void SU3_print_config_f(char filename[max_length_name], const char modifier[max_length_name], float complex *U);
+void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], out_cfg_data_type *U);
 
 void SU3_copy_config(double complex *U, double complex *U_copy);
 

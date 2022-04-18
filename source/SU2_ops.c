@@ -5,6 +5,7 @@
 
 #include "math_ops.h"  //	Math operations
 #include "lattice.h"
+#include "SU2_ops.h"
 
 // All matrices are in the Cayley-Klein representation
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
@@ -13,24 +14,24 @@
 void SU2_copy(const double *u, double *u_copy) {
     // Copies u to u_copy
 
-    for (unsigned short a = 0; a < 4; a++) {
+    for (SU2_color_index a = 0; a < 4; a++) {
 
         u_copy[a] = u[a];
 
     }
 }
 
-void SU2_set_to_null(double complex *u) {
+void SU2_set_to_null(double *u) {
     // Sets u to be the null matrix in SU(2)
 
-    for (unsigned short a = 0; a < 4; a++) {
+    for (SU2_color_index a = 0; a < 4; a++) {
 
         u[a] = 0.0;
 
     }
 }
 
-void SU2_set_to_identity(double complex *u) {
+void SU2_set_to_identity(double *u) {
     // Sets u to be the identity matrix in SU(2)
 
     u[0] = 1.0;
@@ -42,7 +43,7 @@ void SU2_set_to_identity(double complex *u) {
 void SU2_accumulate(const double *u, double *acc) {
     // Accumulates the value of u into acc
 
-    for (unsigned short a = 0; a < 4; a++) {
+    for (SU2_color_index a = 0; a < 4; a++) {
 
         acc[a] += u[a];
 
@@ -53,7 +54,7 @@ void SU2_subtraction(const double *u, const double *v, double *u_minus_v) {
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
 
-    for (unsigned short a = 0; a < 4; a++) {
+    for (SU2_color_index a = 0; a < 4; a++) {
 
         u_minus_v[a] = u[a] - v[a];
 
@@ -73,7 +74,7 @@ double SU2_determinant(const double *u) {
 
     double det_u = 0.0;
 
-    for (unsigned short i = 0; i <= 3; i++) {
+    for (SU2_color_index i = 0; i <= 3; i++) {
 
         det_u += pow2(u[i]);
         //	In the Cayley-Klein representation, the determinant
@@ -92,7 +93,7 @@ void SU2_hermitean_conjugate(const double *u, double *u_dagger) {
     //	In the Cayley-Klein representation, the 0th
     //	component of the conjugate is the same...
 
-    for (unsigned short i = 1; i <= 3; i++) {
+    for (SU2_color_index i = 1; i <= 3; i++) {
 
         u_dagger[i] = -u[i];
         //	And the 1, 2 and 3 components are the
@@ -105,7 +106,7 @@ void SU2_multiplication_by_scalar(const double *u, const double alpha, double *a
     //  Calculates multiplicatoin of SU(2) matrix u by scalar alpha
     //  and returns result in alpha_times_u.
 
-    for (unsigned short a = 0; a < 4; a++) {
+    for (SU2_color_index a = 0; a < 4; a++) {
 
         alpha_times_u[a] = alpha * u[a];
         //	Mutiplying each entry.
@@ -121,7 +122,7 @@ static double SU2_inner_prod(const double *u, const double *v) {
     double inner_prod = u[0] * v[0];
     //	The 0th component has a plus sign ...
 
-    for (unsigned short b = 1; b < 4; b++) {
+    for (SU2_color_index b = 1; b < 4; b++) {
 
         inner_prod += -u[b] * v[b];
 
@@ -157,7 +158,7 @@ void SU2_product(const double *u, const double *v, double *uv) {
 
     SU2_outer_product(u, v, u_cross_v);
 
-    for (unsigned short a = 1; a <= 3; a++) {
+    for (SU2_color_index a = 1; a <= 3; a++) {
 
         uv[a] = u[a] * v[0] + u[0] * v[a] - *(u_cross_v + a);
         

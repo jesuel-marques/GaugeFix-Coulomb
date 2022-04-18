@@ -15,12 +15,14 @@
 #include "fourvector_field.h"  //	Calculation of A_mu(n) and related things
 #include "math_ops.h"          //	Math operations
 
+typedef enum {R, S, T} submatrix;
+
 static void SU3_local_update_U(double complex *U, const pos_vec position, const double complex *g) {
     //	Updates U only at a given position
 
-    double complex g_dagger[3 * 3];
+    double complex g_dagger[Nc * Nc];
 
-    for (unsigned short mu = 0; mu < d; mu++) {
+    for (lorentz_index mu = 0; mu < d; mu++) {
         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
 
         SU3_accumulate_left_product(g, get_link(U, position, mu));
@@ -39,11 +41,11 @@ static void SU3_calculate_w(double complex *U, const pos_vec position, double co
 
     SU3_set_to_null(w);  //	Initializing w(n)=0
 
-    double complex u_dagger_rear[3 * 3];
+    double complex u_dagger_rear[Nc * Nc];
 
     // w(n)	calculation
 
-    for (unsigned short mu = 0; mu < d-1; mu++) {
+    for (lorentz_index mu = 0; mu < d-1; mu++) {
         //	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision
 
         SU3_accumulate(get_link(U, position, mu), w);
@@ -66,9 +68,9 @@ static double SU3_calculate_e2(double complex *U) {
 
     #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        for (unsigned short t = 0; t < Nt; t++) {
-            double complex div_A[3 * 3];
-            double div_A_components[9];
+        for (pos_index t = 0; t < Nt; t++) {
+            double complex div_A[Nc * Nc];
+            double div_A_components[(pow2(Nc) - 1) + 1];
             pos_vec position;
 
             position.t = t;
@@ -81,7 +83,7 @@ static double SU3_calculate_e2(double complex *U) {
                         SU3_divergence_A(U, position, div_A);
                         SU3_decompose_algebra(div_A, div_A_components);
 
-                        for (unsigned short a = 1; a <= 8; a++) {
+                        for (SU3_color_alg_index a = 1; a <= pow2(Nc)-1; a++) {
                             //	Normalized sum of the squares of the color components of the divergence of A.
 
                             e2_slice += (double)pow2(div_A_components[a]);
@@ -98,29 +100,29 @@ static double SU3_calculate_e2(double complex *U) {
     return e2;
 }
 
-static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, unsigned short submatrix, complex double *update_SU3) {
-    unsigned short a, b;
+static void SU3_update_sub_LosAlamos(const double complex *matrix_SU3, submatrix sub, complex double *update_SU3) {
+    SU3_color_index a, b;
 
     SU3_set_to_null(update_SU3);
 
-    update_SU3[(2 - submatrix) * 3 + (2 - submatrix)] = 1.0;
+    update_SU3[(2 - sub) * Nc + (2 - sub)] = 1.0;
     
-    a = submatrix == 2 ? 1 : 0;
-    b = submatrix == 0 ? 1 : 2;
+    a = sub == T ? 1 : 0;
+    b = sub == R ? 1 : 2;
 
     double matrix_SU2[4];
 
-    matrix_SU2[0] =  (creal(matrix_SU3[a * 3 + a]) + creal(matrix_SU3[b * 3 + b]));
-    matrix_SU2[1] = -(cimag(matrix_SU3[a * 3 + b]) + cimag(matrix_SU3[b * 3 + a]));
-    matrix_SU2[2] = -(creal(matrix_SU3[a * 3 + b]) - creal(matrix_SU3[b * 3 + a]));
-    matrix_SU2[3] = -(cimag(matrix_SU3[a * 3 + a]) - cimag(matrix_SU3[b * 3 + b]));
+    matrix_SU2[0] =  (creal(matrix_SU3[a * Nc + a]) + creal(matrix_SU3[b * Nc + b]));
+    matrix_SU2[1] = -(cimag(matrix_SU3[a * Nc + b]) + cimag(matrix_SU3[b * Nc + a]));
+    matrix_SU2[2] = -(creal(matrix_SU3[a * Nc + b]) - creal(matrix_SU3[b * Nc + a]));
+    matrix_SU2[3] = -(cimag(matrix_SU3[a * Nc + a]) - cimag(matrix_SU3[b * Nc + b]));
 
     SU2_projection(matrix_SU2);
 
-    update_SU3[a * 3 + a] =  matrix_SU2[0] + I * matrix_SU2[3];
-    update_SU3[a * 3 + b] =  matrix_SU2[2] + I * matrix_SU2[1];
-    update_SU3[b * 3 + a] = -matrix_SU2[2] + I * matrix_SU2[1];
-    update_SU3[b * 3 + b] =  matrix_SU2[0] - I * matrix_SU2[3];
+    update_SU3[a * Nc + a] =  matrix_SU2[0] + I * matrix_SU2[3];
+    update_SU3[a * Nc + b] =  matrix_SU2[2] + I * matrix_SU2[1];
+    update_SU3[b * Nc + a] = -matrix_SU2[2] + I * matrix_SU2[1];
+    update_SU3[b * Nc + b] =  matrix_SU2[0] - I * matrix_SU2[3];
 }
 
 static void SU3_LosAlamos_common_block(const double complex *w, double complex *total_update) {
@@ -129,19 +131,19 @@ static void SU3_LosAlamos_common_block(const double complex *w, double complex *
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
     //	of "hits" to be performed one after another.
 
-    double complex update[3 * 3];
+    double complex update[Nc * Nc];
 
-    double complex updated_w[3 * 3];
+    double complex updated_w[Nc * Nc];
 
     SU3_copy(w, updated_w);
     SU3_set_to_identity(total_update);
 
     for (unsigned short hits = 1; hits <= maxhits; hits++) {
         //	Each hit contains the Cabbibo-Marinari subdivision
-        for (unsigned short submatrix = 0; submatrix <= 2; submatrix++) {
+        for (submatrix sub = R; sub <= T; sub++) {
             //	Submatrices are indicated by numbers from 0 to 2
 
-            SU3_update_sub_LosAlamos(updated_w, submatrix, update);
+            SU3_update_sub_LosAlamos(updated_w, sub, update);
             SU3_accumulate_left_product(update, updated_w);
 
             SU3_accumulate_left_product(update, total_update);
@@ -156,11 +158,11 @@ static void SU3_gaugefixing_overrelaxation(double complex *U, const pos_vec posi
     //	Cabbibo-Marinari submatrices trick.
     //	It updates the g at the given position.
 
-    double complex w[3 * 3];
+    double complex w[Nc * Nc];
 
     SU3_calculate_w(U, position, w);  //	Calculating w(n)=h(n) for red black subdivision
 
-    double complex update_LA[3 * 3];
+    double complex update_LA[Nc * Nc];
 
     SU3_LosAlamos_common_block(w, update_LA);
 
@@ -172,7 +174,7 @@ static void SU3_gaugefixing_overrelaxation(double complex *U, const pos_vec posi
     the first two terms of the binomial expansion: 
     update_LA^omega=I+omega(update_LA-I)+...=I(1-omega)+omega*update_LA+...*/
 
-    double complex update_OR[3 * 3];
+    double complex update_OR[Nc * Nc];
 
     // update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA)
     SU3_set_to_identity(update_OR);
@@ -201,7 +203,7 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
     while (1) {
         #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
             // Paralelizing by slicing the time extent
-            for (unsigned short t = 0; t < Nt; t++) {
+            for (pos_index t = 0; t < Nt; t++) {
                 position.t = t;
                 for (position.k = 0; position.k < Nxyz; position.k++) {
                     for (position.j = 0; position.j < Nxyz; position.j++) {
@@ -221,7 +223,7 @@ unsigned SU3_gauge_fix(double complex *U, const unsigned short config) {
 
         sweep++;
 
-        !(sweep % 50) ?
+        !(sweep % 200) ?
             printf("sweep: %d\n", sweep) : 0; 
 
         if(sweep == sweeps_to_measurement_e2){
