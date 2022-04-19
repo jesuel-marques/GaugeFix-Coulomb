@@ -11,7 +11,7 @@
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
 //	where sigma[i] are the Pauli matrices.
 
-void SU2_copy(const matrix_2x2_ck *u, matrix_2x2_ck *u_copy) {
+void copy_2x2(const matrix_2x2_ck *u, matrix_2x2_ck *u_copy) {
     // Copies u to u_copy
 
     for (SU2_color_index a = 0; a < 4; a++) {
@@ -21,8 +21,8 @@ void SU2_copy(const matrix_2x2_ck *u, matrix_2x2_ck *u_copy) {
     }
 }
 
-void SU2_set_to_null(matrix_2x2_ck *u) {
-    // Sets u to be the null matrix in SU(2)
+void set_to_null_2x2(matrix_2x2_ck *u) {
+    // Sets u to be the null Cayley-Klein 2x2 matrix
 
     for (SU2_color_index a = 0; a < 4; a++) {
 
@@ -31,8 +31,8 @@ void SU2_set_to_null(matrix_2x2_ck *u) {
     }
 }
 
-void SU2_set_to_identity(matrix_2x2_ck *u) {
-    // Sets u to be the identity matrix in SU(2)
+void set_to_identity_2x2(matrix_2x2_ck *u) {
+    // Sets u to be the identity Cayley-Klein 2x2 matrix
 
     u -> m[0] = 1.0;
     u -> m[1] = 0.0;
@@ -40,7 +40,7 @@ void SU2_set_to_identity(matrix_2x2_ck *u) {
     u -> m[3] = 0.0;
 }
 
-void SU2_accumulate(const matrix_2x2_ck *u, matrix_2x2_ck *acc) {
+void accumulate_2x2(const matrix_2x2_ck *u, matrix_2x2_ck *acc) {
     // Accumulates the value of u into acc
 
     for (SU2_color_index a = 0; a < 4; a++) {
@@ -50,7 +50,7 @@ void SU2_accumulate(const matrix_2x2_ck *u, matrix_2x2_ck *acc) {
     }
 }
 
-void SU2_subtraction(const matrix_2x2_ck *u, const matrix_2x2_ck *v, matrix_2x2_ck *u_minus_v) {
+void subtraction_2x2(const matrix_2x2_ck *u, const matrix_2x2_ck *v, matrix_2x2_ck *u_minus_v) {
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
 
@@ -69,7 +69,7 @@ double SU2_trace(const matrix_2x2_ck *u) {
     //	twice the 0th component.
 }
 
-double SU2_determinant(const matrix_2x2_ck *u) {
+double determinant_2x2(const matrix_2x2_ck *u) {
     //  Calculates the determinant of the matrix u
 
     double det_u = 0.0;
@@ -85,7 +85,7 @@ double SU2_determinant(const matrix_2x2_ck *u) {
     return det_u;
 }
 
-void SU2_hermitean_conjugate(const matrix_2x2_ck *u, matrix_2x2_ck *u_dagger) {
+void hermitean_conjugate_2x2(const matrix_2x2_ck *u, matrix_2x2_ck *u_dagger) {
     // Calculates the hermitean conjugate to u
     // and returns result in u_dagger.
 
@@ -102,8 +102,8 @@ void SU2_hermitean_conjugate(const matrix_2x2_ck *u, matrix_2x2_ck *u_dagger) {
     }
 }
 
-void SU2_multiplication_by_scalar(const matrix_2x2_ck *u, const double alpha, matrix_2x2_ck *alpha_times_u) {
-    //  Calculates multiplicatoin of SU(2) matrix u by scalar alpha
+void multiplication_by_scalar_2x2(const matrix_2x2_ck *u, const double alpha, matrix_2x2_ck *alpha_times_u) {
+    //  Calculates multiplication of Cayley-Klein 2x2 matrix u by scalar alpha
     //  and returns result in alpha_times_u.
 
     for (SU2_color_index a = 0; a < 4; a++) {
@@ -115,9 +115,9 @@ void SU2_multiplication_by_scalar(const matrix_2x2_ck *u, const double alpha, ma
 }
 
 static double SU2_inner_prod(const matrix_2x2_ck *u, const matrix_2x2_ck *v) {
-    //	Calculates the "scalar product" of two SU(2) matrices
+    //	Calculates the "scalar product" of two Cayley-Klein 2x2 matrices
     //	in the Cayley-Klein representation.
-    //	Used in the product of two SU(2) matrices.
+    //	Used in the product of two Cayley-Klein 2x2 matrices.
 
     double inner_prod = (u -> m[0]) * (v -> m[0]);
     //	The 0th component has a plus sign ...
@@ -133,9 +133,9 @@ static double SU2_inner_prod(const matrix_2x2_ck *u, const matrix_2x2_ck *v) {
 }
 
 static void SU2_outer_product(const matrix_2x2_ck *u, const matrix_2x2_ck *v, matrix_2x2_ck *outer_product) {
-    //	Calculates the "outer product" of two SU(2) matrices
+    //	Calculates the "outer product" of two Cayley-Klein 2x2 matrices
     //	in the Cayley-Klein representation, and returns result in outer_product
-    //	Used in the product of two SU(2) matrices.
+    //	Used in the product of two Cayley-Klein 2x2 matrices.
 
     //	Actually, product taken from the 1, 2 and 3 components only,
     //	in the usual way, as in regular linear algebra.
@@ -146,8 +146,8 @@ static void SU2_outer_product(const matrix_2x2_ck *u, const matrix_2x2_ck *v, ma
     outer_product -> m[3] = (u -> m[1]) * (v -> m[2]) - (u -> m[2]) * (v -> m[1]);
 }
 
-void SU2_product(const matrix_2x2_ck *u, const matrix_2x2_ck *v, matrix_2x2_ck *uv) {
-    // Calculates product of 2 SU(2) matrices u e v
+void product_2x2(const matrix_2x2_ck *u, const matrix_2x2_ck *v, matrix_2x2_ck *uv) {
+    // Calculates product of 2 Cayley-Klein 2x2 matrices u e v
     // and returns result in uv.
 
     matrix_2x2_ck u_cross_v;
@@ -170,25 +170,25 @@ void SU2_product(const matrix_2x2_ck *u, const matrix_2x2_ck *v, matrix_2x2_ck *
     //	a term which mixes 0 and 1, 2, 3 components.
 }
 
-void SU2_product_three(const matrix_2x2_ck *u, const matrix_2x2_ck *v, const matrix_2x2_ck *w, matrix_2x2_ck *uvw) {
-    //  Calculates product of 3 SU(3) matrices u, v and w
+void product_three_2x2(const matrix_2x2_ck *u, const matrix_2x2_ck *v, const matrix_2x2_ck *w, matrix_2x2_ck *uvw) {
+    //  Calculates product of 3 Cayley-Klein 2x2 matrices u, v and w
     //  and returns result in uvw.
 
     matrix_2x2_ck uv;
   
-    SU2_product(u, v, &uv);
-    SU2_product(&uv, w, uvw);
+    product_2x2(u, v, &uv);
+    product_2x2(&uv, w, uvw);
 
 }
 
-void SU2_product_four(const matrix_2x2_ck *u, const matrix_2x2_ck *v, const matrix_2x2_ck *w, const matrix_2x2_ck *x, matrix_2x2_ck *uvwx) {
-    //  Calculates product of 4 SU(3) matrices u, v, w and x
+void product_four_2x2(const matrix_2x2_ck *u, const matrix_2x2_ck *v, const matrix_2x2_ck *w, const matrix_2x2_ck *x, matrix_2x2_ck *uvwx) {
+    //  Calculates product of 4 Cayley-Klein 2x2 matrices u, v, w and x
     //  and returns result in uvwx.
 
     matrix_2x2_ck uvw;
 
-    SU2_product_three(u, v, w, &uvw);
-    SU2_product(&uvw, x, uvwx);
+    product_three_2x2(u, v, w, &uvw);
+    product_2x2(&uvw, x, uvwx);
 
 }
 
@@ -197,7 +197,7 @@ void SU2_projection(matrix_2x2_ck *u) {
 
     matrix_2x2_ck u_SU2;
 
-    SU2_multiplication_by_scalar(u, 1.0 / sqrt(SU2_determinant(u)), &u_SU2);
-    SU2_copy(&u_SU2, u);
+    multiplication_by_scalar_2x2(u, 1.0 / sqrt(determinant_2x2(u)), &u_SU2);
+    copy_2x2(&u_SU2, u);
 
 }

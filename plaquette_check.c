@@ -21,12 +21,12 @@
 
 #include "source/measurement.h"
 
-// const char configs_dir_name[] = "/home/postgrad/jesuel/configs/";
-const char configs_dir_name[] = "./configs/";
+const char configs_dir_name[max_length_name];	//	input from command line
+const char config_template[max_length_name] ;	//	input from command line
 
-
-// int main(void){
 int main(int argc, char *argv[]) {
+
+	handle_input(argc, argv);
 
 	// //Starts MPI
 	// MPI_Init(&argc,&argv);
@@ -45,31 +45,23 @@ int main(int argc, char *argv[]) {
 	//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
 	for (unsigned config = 1; config <= max_configs; config ++) {
 		int actual_config_nr = 1000+10*(config-1);
-		matrix_3x3_float * U_float = (matrix_3x3_float *) malloc(Volume * d * sizeof(matrix_3x3_float));
-		test_allocation(U_float, "main");
-		matrix_3x3_double * U_double = (matrix_3x3_double *) malloc(Volume * d * sizeof(matrix_3x3_double));
-		test_allocation(U_double, "main");
 
-		SU3_load_config(name_configuration_file(actual_config_nr), U_float);
-		byte_swap(U_float, sizeof(float), Volume * d * Nc * Nc * 2 * sizeof(float));
-		SU3_convert_config_fd(U_float, U_double);
-		free(U_float);
+		matrix_3x3_double * U = (matrix_3x3_double *) malloc(Volume * d * sizeof(matrix_3x3_double));
+		test_allocation(U, "main");
 
-		pos_vec position = assign_position(0, 0, 0, 0);
+		SU3_load_config(actual_config_nr, U);
 
-		SU3_print_matrix(get_link(U_double, position, 0), "U");
+		print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "U");
 		getchar();
-
-    	position = assign_position(Nxyz - 1, Nxyz - 1 , Nxyz - 1 , Nt - 1);
     
-		SU3_print_matrix(get_link(U_double, position, d - 1), "U");
+		print_matrix_3x3(get_link(U, assign_position(Nxyz - 1, Nxyz - 1 , Nxyz - 1 , Nt - 1), d - 1), "U");
 		getchar();
 		
 		//  calculate plaquette average
-		printf("Spatial plaquete  %.15lf\n", spatial_plaquette_average(U_double));
-    	printf("Temporal plaquete %.15lf\n", temporal_plaquette_average(U_double));
+		printf("Spatial plaquete  %.10lf\n", spatial_plaquette_average(U));
+    	printf("Temporal plaquete %.10lf\n", temporal_plaquette_average(U));
 
-		free(U_double);
+		free(U);
 	
 	}
 	// MPI_Finalise();

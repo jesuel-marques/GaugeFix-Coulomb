@@ -18,46 +18,46 @@ typedef struct {
 } matrix_3x3_float;
 
 typedef struct {
-    double complex m[Nc*Nc-1];
+    double complex m[Nc*Nc-1+1];
 } matrix_SU3_alg;
 
-void SU3_print_matrix(const matrix_3x3_double *u, const char *name);
+void print_matrix_3x3(const matrix_3x3_double *u, const char *name);
 
-void SU3_copy(const matrix_3x3_double *u, matrix_3x3_double *u_copy);
+void copy_3x3(const matrix_3x3_double *u, matrix_3x3_double *u_copy);
 
-void SU3_convert_fd(const matrix_3x3_float *u_float, matrix_3x3_double *u_double);
+void convert_fd_3x3(const matrix_3x3_float *u_float, matrix_3x3_double *u_double);
 
-void SU3_convert_df(const matrix_3x3_double *u_double, matrix_3x3_float *u_float);
+void convert_df_3x3(const matrix_3x3_double *u_double, matrix_3x3_float *u_float);
 
-void SU3_set_to_null(matrix_3x3_double *u);
+inline void set_to_null_3x3(matrix_3x3_double *u);
 
-void SU3_set_to_identity(matrix_3x3_double *u);
+inline void set_to_identity_3x3(matrix_3x3_double *u);
 
-void SU3_accumulate(const matrix_3x3_double *u, matrix_3x3_double *acc);
+inline void accumulate_3x3(const matrix_3x3_double *u, matrix_3x3_double *acc);
 
-void SU3_subtraction(const matrix_3x3_double *u, const matrix_3x3_double *v, matrix_3x3_double *u_minus_v);
+void subtraction_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, matrix_3x3_double *u_minus_v);
 
-inline extern double complex SU3_trace(const matrix_3x3_double *u);
+inline extern double complex trace_3x3(const matrix_3x3_double *u);
 
-inline extern double complex SU3_determinant(const matrix_3x3_double *u);
+inline extern double complex determinant_3x3(const matrix_3x3_double *u);
 
 inline extern void SU3_hermitean_conjugate(const matrix_3x3_double *u, matrix_3x3_double *u_dagger);
 
-inline extern void SU3_multiplication_by_scalar(const double complex alpha, const matrix_3x3_double *u, matrix_3x3_double *alpha_times_u);
-inline extern void SU3_substitution_multiplication_by_scalar(const double complex alpha, matrix_3x3_double *u);
+inline extern void multiplication_by_scalar_3x3(const double complex alpha, const matrix_3x3_double *u, matrix_3x3_double *alpha_times_u);
+inline extern void substitution_multiplication_by_scalar_3x3(const double complex alpha, matrix_3x3_double *u);
 
-inline extern void SU3_product(const matrix_3x3_double *u, const matrix_3x3_double *v, matrix_3x3_double *uv);
+inline extern void product_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, matrix_3x3_double *uv);
 
-void SU3_product_three(const matrix_3x3_double *u, const matrix_3x3_double *v, const matrix_3x3_double *w, matrix_3x3_double *uvw);
+void product_three_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, const matrix_3x3_double *w, matrix_3x3_double *uvw);
 
-void SU3_product_four(const matrix_3x3_double *u, const matrix_3x3_double *v, const matrix_3x3_double *w, const matrix_3x3_double *x, matrix_3x3_double *uvwx);
+void product_four_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, const matrix_3x3_double *w, const matrix_3x3_double *x, matrix_3x3_double *uvwx);
 
-inline extern void SU3_accumulate_left_product(const matrix_3x3_double *g, matrix_3x3_double *acc_prod);
+inline extern void accumulate_left_product_3x3(const matrix_3x3_double *g, matrix_3x3_double *acc_prod);
 
-inline extern void SU3_accumulate_right_product(matrix_3x3_double *acc_prod, const matrix_3x3_double *g);
+inline extern void accumulate_right_product_3x3(matrix_3x3_double *acc_prod, const matrix_3x3_double *g);
 
-inline extern void SU3_projection(matrix_3x3_double *x);
+inline extern void projection_SU3(matrix_3x3_double *x);
 
-void SU3_decompose_algebra(const matrix_3x3_double *a, matrix_SU3_alg *a_components);
+void decompose_algebra_SU3(const matrix_3x3_double *a, matrix_SU3_alg *a_components);
 
 #endif

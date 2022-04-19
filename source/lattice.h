@@ -45,20 +45,20 @@ matrix_3x3_float *get_link_f(matrix_3x3_float *U, const pos_vec position, const 
 
 void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorentz_index mu, direction dir, matrix_3x3_double * u);
 
+void handle_input(int argc, char *argv[]);
 
-char * name_configuration_file(const unsigned config);
+void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U);
 
-void SU3_load_config(const char filename[max_length_name], in_cfg_data_type *U);
+void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U);
 
-void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], out_cfg_data_type *U);
 
-void SU3_copy_config(matrix_3x3_double *U, matrix_3x3_double *U_copy);
+void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy);
 
 void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_double);
 
 void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_float);
 
-void SU3_reunitarize(matrix_3x3_double *U);
+inline void SU3_reunitarize(matrix_3x3_double *U);
 
 /*============================JONIVAR'S CODE===============================*/
 

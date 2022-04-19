@@ -23,12 +23,12 @@ double SU3_re_tr_plaquette(matrix_3x3_double *U, const pos_vec position, const l
     get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, REAR , &uc);
     get_link_matrix(U, hop_position_positive(position, nu),         nu, REAR , &ud);
 
-	SU3_product_four(&ua, &ub, &uc, &ud, &plaquette);
+	product_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
 
-    // printf("%lf\n", creal(SU3_trace(plaquette)));
+    // printf("%lf\n", creal(trace_3x3(plaquette)));
     // getchar();
 
-    return (double)creal(SU3_trace(&plaquette))/Nc;
+    return (double)creal(trace_3x3(&plaquette))/Nc;
 
 }
 

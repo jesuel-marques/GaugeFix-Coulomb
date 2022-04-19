@@ -21,16 +21,16 @@ void SU3_calculate_A(matrix_3x3_double *U, const pos_vec position, const lorentz
     matrix_3x3_double U_minus_Udagger;
 
     //	(U - U_dagger)/2i
-    SU3_subtraction(local_U, &U_dagger, &U_minus_Udagger);
-    SU3_multiplication_by_scalar(-0.5 * I, &U_minus_Udagger, A);
+    subtraction_3x3(local_U, &U_dagger, &U_minus_Udagger);
+    multiplication_by_scalar_3x3(-0.5 * I, &U_minus_Udagger, A);
 
     //  Subtract the trace part
     matrix_3x3_double trace_part;
     
-    SU3_set_to_identity(&trace_part);
-    SU3_substitution_multiplication_by_scalar(-( 1.0 / Nc) * SU3_trace(A), &trace_part);
+    set_to_identity_3x3(&trace_part);
+    substitution_multiplication_by_scalar_3x3(-( 1.0 / Nc) * trace_3x3(A), &trace_part);
 
-    SU3_accumulate(&trace_part, A);
+    accumulate_3x3(&trace_part, A);
 
 }
 
@@ -43,14 +43,14 @@ void SU3_divergence_A(matrix_3x3_double *U, const pos_vec position, matrix_3x3_d
 
     matrix_3x3_double term_divA;
 
-    SU3_set_to_null(div_A);
+    set_to_null_3x3(div_A);
     for (lorentz_index mu = 0; mu < d-1; mu++) {
         SU3_calculate_A(U, position, mu, &A1);
         SU3_calculate_A(U, hop_position_negative(position, mu), mu, &A2);
 
-        SU3_subtraction(&A1, &A2, &term_divA);
+        subtraction_3x3(&A1, &A2, &term_divA);
 
-        SU3_accumulate(&term_divA, div_A);  //	Sum of terms over all directions mu.
+        accumulate_3x3(&term_divA, div_A);  //	Sum of terms over all directions mu.
     }
 
 }

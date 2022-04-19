@@ -17,3 +17,6 @@
 #define max_length_name 300
 
 #define NUM_THREADS 2
+
+#define need_byte_swap 1
+

@@ -21,14 +21,12 @@
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 
 
-#include "source/measurement.h"
+char configs_dir_name[max_length_name];	//	input from command line
+char config_template[max_length_name] ;	//	input from command line
 
-// const char configs_dir_name[] = "/home/postgrad/jesuel/configs/";
-const char configs_dir_name[] = "./configs/";
+int main(int argc, char *argv[]) {
 
-
-int main(void){
-// int main(int argc, char *argv[]) {
+	handle_input(argc, argv);
 
 	// //Starts MPI
 	// MPI_Init(&argc,&argv);
@@ -46,41 +44,19 @@ int main(void){
 	// for (int config = rank + 1; config <= nconfig; config += size) {
 	//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
 	for (unsigned config = 1; config <= max_configs; config ++) {
-		int actual_config_nr = 1000+10*(config-1);
-	
-		in_cfg_data_type * U_in = (in_cfg_data_type *) malloc(Volume * d * sizeof(in_cfg_data_type));
-		test_allocation(U_in, "main");
+		int actual_config_nr = 1000 + 10 * (config - 1);
 
-		SU3_load_config(name_configuration_file(actual_config_nr), U_in);
-		byte_swap(U_in, sizeof(float), Volume * d * sizeof(in_cfg_data_type));
+		matrix_3x3_double * U = (matrix_3x3_double *) malloc(Volume * d * sizeof(matrix_3x3_double));
+		test_allocation(U, "main");
 		
-		matrix_3x3_double * U_double = (matrix_3x3_double *) malloc(Volume * d * sizeof(matrix_3x3_double));
-		test_allocation(U_double, "main");
-		SU3_convert_config_fd(U_in, U_double);
-		free(U_in);
+		SU3_load_config(actual_config_nr, U);
 
-		// pos_vec position = assign_position(0, 0, 0, 0);
-
-		// SU3_print_matrix(get_link(U_double, position, 0), "U");
-		// getchar();
-
-    	// position = assign_position(Nxyz - 1, Nxyz - 1 , Nxyz - 1 , Nt - 1);
-    
-		// SU3_print_matrix(get_link(U_double, position, d - 1), "U");
-		// getchar();
-		
 		//  fix the gauge
-		SU3_gauge_fix(U_double, actual_config_nr);
-
-		out_cfg_data_type * U_out = (out_cfg_data_type *) malloc(Volume * d * Nc * Nc * sizeof(out_cfg_data_type));
-		test_allocation(U_out, "main");
-
-		SU3_convert_config_df(U_double, U_out);
-		free(U_double);
+		SU3_gauge_fix(U, actual_config_nr);
 
 		// write the gauge fixed configuration based on template name
-		SU3_print_config(name_configuration_file(actual_config_nr), ".GF", U_out);
-		free(U_out);	//	Free memory allocated for the configuration.
+		SU3_write_config(actual_config_nr, U);
+		free(U);		//	Free memory allocated for the configuration.
 		
 	}
 	// MPI_Finalise();
