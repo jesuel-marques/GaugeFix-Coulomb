@@ -44,7 +44,7 @@ void SU3_divergence_A(matrix_3x3_double *U, const pos_vec position, matrix_3x3_d
     matrix_3x3_double term_divA;
 
     set_to_null_3x3(div_A);
-    for (lorentz_index mu = 0; mu < d-1; mu++) {
+    for (lorentz_index mu = 0; mu < DIM - 1 ; mu++) {
         SU3_calculate_A(U, position, mu, &A1);
         SU3_calculate_A(U, hop_position_negative(position, mu), mu, &A2);
 

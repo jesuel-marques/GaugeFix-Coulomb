@@ -17,7 +17,8 @@ void print_matrix_3x3(const matrix_3x3_double *u, const char *name) {
         printf("{");
 
         for (SU3_color_index b = 0; b < Nc; b++) {
-            printf("%.16lf+I(%.16lf)", creal(u->m[Nc * a + b]), cimag(u->m[Nc * a + b]));
+            printf("%.16lf+I(%.16lf)", creal(u->m[elm(a, b)]), 
+                                       cimag(u->m[elm(a, b)]));
             
             b != 2 ?  printf(",") : 0 ;
         }
@@ -36,7 +37,7 @@ void copy_3x3(const matrix_3x3_double *u, matrix_3x3_double *u_copy) {
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-            u_copy -> m[a * Nc + b] = u -> m[a * Nc + b];
+            u_copy -> m[elm(a, b)] = u -> m[elm(a, b)];
 
         }
     }
@@ -48,7 +49,7 @@ void convert_fd_3x3(const matrix_3x3_float *u_float, matrix_3x3_double *u_double
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-            u_double -> m[a * Nc + b] = (double complex) u_float -> m[a * Nc + b];
+            u_double -> m[elm(a, b)] = (double complex) u_float -> m[elm(a, b)];
 
         }
     }
@@ -60,7 +61,7 @@ void convert_df_3x3(const matrix_3x3_double *u_double, matrix_3x3_float *u_float
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-            u_float -> m[a * Nc + b] = (float complex) u_double -> m[a * Nc + b];
+            u_float -> m[elm(a, b)] = (float complex) u_double -> m[elm(a, b)];
 
         }
     }
@@ -72,7 +73,7 @@ void set_to_null_3x3(matrix_3x3_double * u) {
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-            u -> m[a * Nc + b] = 0.0;
+            u -> m[elm(a, b)] = 0.0;
 
         }
     }
@@ -84,7 +85,7 @@ void set_to_identity_3x3(matrix_3x3_double *u) {
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-                u -> m[a * Nc + b] = a != b ? 0.0 : 1.0 ;
+                u -> m[elm(a, b)] = a != b ? 0.0 : 1.0 ;
 
         }
     }
@@ -96,7 +97,7 @@ void accumulate_3x3(const matrix_3x3_double *u, matrix_3x3_double *acc) {
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-            acc -> m[a * Nc + b] += u -> m[a * Nc + b];
+            acc -> m[elm(a, b)] += u -> m[elm(a, b)];
         
         }
     }
@@ -110,7 +111,8 @@ void subtraction_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v,
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-            u_minus_v -> m[a * Nc + b] = u -> m[a * Nc + b] - v -> m[a * Nc + b];
+            u_minus_v -> m[elm(a, b)] = u -> m[elm(a, b)] 
+                                      - v -> m[elm(a, b)];
 
         }
     }
@@ -120,9 +122,9 @@ double complex trace_3x3(const matrix_3x3_double *u) {
     //	Calculates the trace of the matrix u
     //  and returns result (complex) in tr
 
-    return u -> m[0 * Nc + 0] 
-         + u -> m[1 * Nc + 1] 
-         + u -> m[2 * Nc + 2];
+    return u -> m[elm(0, 0)] 
+         + u -> m[elm(1, 1)] 
+         + u -> m[elm(2, 2)];
 }
 
 double complex determinant_3x3(const matrix_3x3_double *u) {
@@ -132,25 +134,28 @@ double complex determinant_3x3(const matrix_3x3_double *u) {
     //  The determinant is calculated in the usual manner
     //  using Leibniz formula
 
-    return u -> m[0 * Nc + 0] * (u -> m[1 * Nc + 1] * u -> m[2 * Nc + 2] - u -> m[1 * Nc + 2] * u -> m[2 * Nc + 1]) 
-         + u -> m[0 * Nc + 1] * (u -> m[1 * Nc + 2] * u -> m[2 * Nc + 0] - u -> m[1 * Nc + 0] * u -> m[2 * Nc + 2]) 
-         + u -> m[0 * Nc + 2] * (u -> m[1 * Nc + 0] * u -> m[2 * Nc + 1] - u -> m[1 * Nc + 1] * u -> m[2 * Nc + 0]);
+    return u -> m[elm(0, 0)] * (u -> m[elm(1, 1)] * u -> m[elm(2, 2)] 
+                              - u -> m[elm(1, 2)] * u -> m[elm(2, 1)]) 
+         + u -> m[elm(0, 1)] * (u -> m[elm(1, 2)] * u -> m[elm(2, 0)] 
+                              - u -> m[elm(1, 0)] * u -> m[elm(2, 2)]) 
+         + u -> m[elm(0, 2)] * (u -> m[elm(1, 0)] * u -> m[elm(2, 1)] 
+                              - u -> m[elm(1, 1)] * u -> m[elm(2, 0)]);
 }
 
 void SU3_hermitean_conjugate(const matrix_3x3_double *u, matrix_3x3_double *u_dagger) {
     // Calculates the hermitean conjugate to u
     // and returns result in u_dagger.
 
-    u_dagger -> m[0 * Nc + 0] = conj(u -> m[0 * Nc + 0]);
-    u_dagger -> m[1 * Nc + 1] = conj(u -> m[1 * Nc + 1]);
-    u_dagger -> m[2 * Nc + 2] = conj(u -> m[2 * Nc + 2]);
+    u_dagger -> m[elm(0, 0)] = conj(u -> m[elm(0, 0)]);
+    u_dagger -> m[elm(1, 1)] = conj(u -> m[elm(1, 1)]);
+    u_dagger -> m[elm(2, 2)] = conj(u -> m[elm(2, 2)]);
 
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < a; b++) {
             if (a != b) {
 
-                u_dagger -> m[b * Nc + a] = conj(u -> m[a * Nc + b]);
-                u_dagger -> m[a * Nc + b] = conj(u -> m[b * Nc + a]);
+                u_dagger -> m[elm(b, a)] = conj(u -> m[elm(a, b)]);
+                u_dagger -> m[elm(a, b)] = conj(u -> m[elm(b, a)]);
 
             }
         }
@@ -165,7 +170,7 @@ void multiplication_by_scalar_3x3(const double complex alpha, const matrix_3x3_d
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-            alpha_times_u -> m[a * Nc + b] = alpha * u -> m[a * Nc + b];
+            alpha_times_u -> m[elm(a, b)] = alpha * u -> m[elm(a, b)];
             //	Mutiplying each entry.
 
         }
@@ -179,7 +184,7 @@ void substitution_multiplication_by_scalar_3x3(const double complex alpha, matri
     for (SU3_color_index a = 0; a < Nc; a++) {
         for (SU3_color_index b = 0; b < Nc; b++) {
 
-            u -> m[a * Nc + b] *= alpha;
+            u -> m[elm(a, b)] *= alpha;
             //	Mutiplying each entry.
             
         }
@@ -192,10 +197,11 @@ void product_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, matrix_
 
     for (SU3_color_index a = 0; a < Nc; a++) {          //  lines
         for (SU3_color_index b = 0; b < Nc; b++) {      //  columns
-            uv -> m[a * Nc + b] = 0.0;
+            uv -> m[elm(a, b)] = 0.0;
             for (SU3_color_index c = 0; c < Nc; c++) {  //  dummy index
 
-                uv -> m[a * Nc + b] += u -> m[a * Nc + c] * v -> m[c * Nc + b];
+                uv -> m[elm(a, b)] += u -> m[elm(a, c)] 
+                                    * v -> m[elm(c, b)];
                 //  Usual matrix multiplication.
             }
         }
@@ -209,12 +215,13 @@ void product_three_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, c
 
     for (SU3_color_index a = 0; a < Nc; a++) {              //  lines
         for (SU3_color_index b = 0; b < Nc; b++) {          //  columns
-            uvw -> m[a * Nc + b] = 0.0;
+            uvw -> m[elm(a, b)] = 0.0;
             for (SU3_color_index c = 0; c < Nc; c++) {      //  dummy index 1
                 for (SU3_color_index e = 0; e < Nc; e++) {  //  dummy index 2
 
-                    uvw -> m[a * Nc + b] += (u -> m[a * Nc + c]) * (v -> m[c * Nc + e]) 
-                                          * (w -> m[e * Nc + b]);
+                    uvw -> m[elm(a, b)] += (u -> m[elm(a, c)]) 
+                                         * (v -> m[elm(c, e)]) 
+                                         * (w -> m[elm(e, b)]);
                     //  Usual matrix multiplication.
                 }
             }
@@ -228,13 +235,15 @@ void product_four_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, co
 
     for (SU3_color_index a = 0; a < Nc; a++) {              //  lines
         for (SU3_color_index b = 0; b < Nc; b++) {          //  columns
-            uvwx -> m[a * Nc + b] = 0.0;
+            uvwx -> m[elm(a, b)] = 0.0;
             for (SU3_color_index c = 0; c < Nc; c++) {            //  dummy index 1
                 for (SU3_color_index e = 0; e < Nc; e++) {        //  dummy index 2
                     for (SU3_color_index f = 0; f < Nc; f++) {    //  dummy index 3
 
-                    uvwx -> m[a * Nc + b] += (u -> m[a * Nc + c]) * (v -> m[c * Nc + e]) 
-                                           * (w -> m[e * Nc + f]) * (x -> m[f * Nc + b]);
+                    uvwx -> m[elm(a, b)] += (u -> m[elm(a, c)]) 
+                                          * (v -> m[elm(c, e)]) 
+                                          * (w -> m[elm(e, f)]) 
+                                          * (x -> m[elm(f, b)]);
                     //  Usual matrix multiplication.
                     }
                 }
@@ -271,7 +280,7 @@ void projection_SU3(matrix_3x3_double *x) {
                                 //  projected matrix.
 
     for (SU3_color_index b = 0; b < Nc; b++) {
-        sum_absvalue += pow2(cabsl(x -> m[0 * Nc + b]));
+        sum_absvalue += pow2(cabsl(x -> m[elm(0, b)]));
         //	Absvalue of first line of x matrix
         //  to be used for normalization below.
     }
@@ -288,14 +297,14 @@ void projection_SU3(matrix_3x3_double *x) {
 
     for (SU3_color_index b = 0; b < Nc; b++) {
 
-        x_SU3.m[0 * Nc + b] = (x -> m[0 * Nc + b]) / sqrt(sum_absvalue);
+        x_SU3.m[elm(0, b)] = (x -> m[elm(0, b)]) / sqrt(sum_absvalue);
         //	Calculates u_new, first line of x_SU3, projected from x
         //  simply by dividing its first line by its absolute value.
 
-        u_new_conj.m[b] = conj(x_SU3.m[0 * Nc + b]);
+        u_new_conj.m[b] = conj(x_SU3.m[elm(0, b)]);
         //	u_new_conj is u_new's conjugate.
 
-        v_unewconj += (x -> m[1 * Nc + b]) * u_new_conj.m[b];
+        v_unewconj += (x -> m[elm(1, b)]) * u_new_conj.m[b];
         //	Projection of v, second line of x, onto u_new,
         //  to be used below for the Gram-Schmidt method.
 
@@ -309,7 +318,7 @@ void projection_SU3(matrix_3x3_double *x) {
 
     for (SU3_color_index b = 0; b < Nc; b++) {
 
-        v_prime[b] = (x -> m[1 * Nc + b]) - x_SU3.m[0 * Nc + b] * v_unewconj;
+        v_prime[b] = (x -> m[elm(1, b)]) - x_SU3.m[elm(0, b)] * v_unewconj;
         // Subtraction of the part parallel to u_new of v.
 
     }
@@ -326,11 +335,11 @@ void projection_SU3(matrix_3x3_double *x) {
 
     for (SU3_color_index b = 0; b < Nc; b++) {
 
-        x_SU3.m[1 * Nc + b] = v_prime[b] / sqrt(sum_absvalue);
+        x_SU3.m[elm(1, b)] = v_prime[b] / sqrt(sum_absvalue);
         //	Calculates  v_new, second line of the projected matrix
         //  from v_prime, by normalizing it.
 
-        v_new_conj.m[b] = conj(x_SU3.m[1 * Nc + b]);
+        v_new_conj.m[b] = conj(x_SU3.m[elm(1, b)]);
         //	v_new_conj is v_new's conjugate.
         
     }
@@ -339,13 +348,16 @@ void projection_SU3(matrix_3x3_double *x) {
     //  u_new_conj and v_new_conj
 
     //  First component:
-    x_SU3.m[2 * Nc + 0] = (u_new_conj.m[1] * v_new_conj.m[2] - u_new_conj.m[2] * v_new_conj.m[1]);
+    x_SU3.m[elm(2, 0)] = (u_new_conj.m[1] * v_new_conj.m[2] 
+                        - u_new_conj.m[2] * v_new_conj.m[1]);
 
     //  Second component:
-    x_SU3.m[2 * Nc + 1] = (u_new_conj.m[2] * v_new_conj.m[0] - u_new_conj.m[0] * v_new_conj.m[2]);
+    x_SU3.m[elm(2, 1)] = (u_new_conj.m[2] * v_new_conj.m[0] 
+                        - u_new_conj.m[0] * v_new_conj.m[2]);
 
     //  Third component:
-    x_SU3.m[2 * Nc + 2] = (u_new_conj.m[0] * v_new_conj.m[1] - u_new_conj.m[1] * v_new_conj.m[0]);
+    x_SU3.m[elm(2, 2)] = (u_new_conj.m[0] * v_new_conj.m[1] 
+                        - u_new_conj.m[1] * v_new_conj.m[0]);
 
     copy_3x3(&x_SU3, x);
 
@@ -360,19 +372,28 @@ void decompose_algebra_SU3(const matrix_3x3_double *a, matrix_SU3_alg *a_compone
 
     a_components -> m[0] = 0.0;
 
-    a_components -> m[1] = ( creal(a -> m[0 * Nc + 1]) + creal(a -> m[1 * Nc + 0]));
+    a_components -> m[1] = ( creal(a -> m[elm(0, 1)]) 
+                           + creal(a -> m[elm(1, 0)]));
 
-    a_components -> m[2] = (-cimag(a -> m[0 * Nc + 1]) + cimag(a -> m[1 * Nc + 0]));
+    a_components -> m[2] = (-cimag(a -> m[elm(0, 1)]) 
+                           + cimag(a -> m[elm(1, 0)]));
 
-    a_components -> m[3] = ( creal(a -> m[0 * Nc + 0]) - creal(a -> m[1 * Nc + 1]));
+    a_components -> m[3] = ( creal(a -> m[elm(0, 0)]) 
+                           - creal(a -> m[elm(1, 1)]));
 
-    a_components -> m[4] = ( creal(a -> m[0 * Nc + 2]) + creal(a -> m[2 * Nc + 0]));
+    a_components -> m[4] = ( creal(a -> m[elm(0, 2)]) 
+                           + creal(a -> m[elm(2, 0)]));
 
-    a_components -> m[5] = (-cimag(a -> m[0 * Nc + 2]) + cimag(a -> m[2 * Nc + 0]));
+    a_components -> m[5] = (-cimag(a -> m[elm(0, 2)]) 
+                           + cimag(a -> m[elm(2, 0)]));
 
-    a_components -> m[6] = ( creal(a -> m[1 * Nc + 2]) + creal(a -> m[2 * Nc + 1]));
+    a_components -> m[6] = ( creal(a -> m[elm(1, 2)]) 
+                           + creal(a -> m[elm(2, 1)]));
 
-    a_components -> m[7] = (-cimag(a -> m[1 * Nc + 2]) + cimag(a -> m[2 * Nc + 1]));
+    a_components -> m[7] = (-cimag(a -> m[elm(1, 2)]) 
+                           + cimag(a -> m[elm(2, 1)]));
 
-    a_components -> m[8] = ( creal(a -> m[0 * Nc + 0]) + creal(a -> m[1 * Nc + 1]) - 2.0 * creal(a -> m[2 * Nc + 2])) / pow(3.0, 0.5);
+    a_components -> m[8] = ( creal(a -> m[elm(0, 0)]) 
+                           + creal(a -> m[elm(1, 1)]) 
+                     - 2.0 * creal(a -> m[elm(2, 2)])) / pow(3.0, 0.5);
 }

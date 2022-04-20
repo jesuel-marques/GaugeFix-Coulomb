@@ -9,8 +9,7 @@ typedef struct {
 
 void copy_2x2(const matrix_2x2_ck * u, matrix_2x2_ck* u_copy);
 
-void set_to_null_2x2(matrix_2x2_ck * u);
-void set_to_identity_2x2(matrix_2x2_ck * u);
+void set_to_null_2x2(matrix_2x2_ck * u), set_to_identity_2x2(matrix_2x2_ck * u);
 
 void accumulate_2x2(const matrix_2x2_ck * u, matrix_2x2_ck* acc);
 
@@ -22,11 +21,9 @@ void hermitean_conjugate_2x2(const matrix_2x2_ck* u, matrix_2x2_ck* u_dagger);
 
 void multiplication_by_scalar_2x2(const matrix_2x2_ck* u, const double alpha, matrix_2x2_ck* alpha_times_u);
 
-void product_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, matrix_2x2_ck* uv);
-
-void product_three_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, const matrix_2x2_ck* w, matrix_2x2_ck* uvw);
-
-void product_four_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, const matrix_2x2_ck* w, const matrix_2x2_ck* x, matrix_2x2_ck* uvwx);
+void product_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, matrix_2x2_ck* uv),
+     product_three_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, const matrix_2x2_ck* w, matrix_2x2_ck* uvw),
+     product_four_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, const matrix_2x2_ck* w, const matrix_2x2_ck* x, matrix_2x2_ck* uvwx);
 
 inline void SU2_projection(matrix_2x2_ck* u);
 

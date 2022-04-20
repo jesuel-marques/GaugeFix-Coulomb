@@ -2,9 +2,9 @@
 
 #define Nxyz 24  //   Spatial lattice size
 #define Nt 16    // Temporal lattice size
-#define d 4     // Space-time lattice dimension
+#define DIM 4     // Space-time lattice dimension
 
-#define Volume Nxyz * Nxyz * Nxyz * Nt  //	Number of points in the lattice
+#define VOLUME Nxyz * Nxyz * Nxyz * Nt  //	Number of points in the lattice
 
 
 #define Nc 3    //  Number of colors
@@ -12,11 +12,11 @@
 
 // Other parameters
 
-#define max_configs 1/*(1100-1000)/10*/
+#define MAX_CONFIGS 1/*(1100-1000)/10*/
 
-#define max_length_name 300
+#define MAX_LENGTH_NAME 300
 
 #define NUM_THREADS 2
 
-#define need_byte_swap 1
+#define NEED_BYTE_SWAP 1
 

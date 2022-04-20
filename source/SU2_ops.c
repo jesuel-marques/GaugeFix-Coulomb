@@ -16,7 +16,7 @@ void copy_2x2(const matrix_2x2_ck *u, matrix_2x2_ck *u_copy) {
 
     for (SU2_color_index a = 0; a < 4; a++) {
 
-        u_copy -> m[a] = u  -> m[a];
+        u_copy -> m[a] = u -> m[a];
 
     }
 }
@@ -56,7 +56,8 @@ void subtraction_2x2(const matrix_2x2_ck *u, const matrix_2x2_ck *v, matrix_2x2_
 
     for (SU2_color_index a = 0; a < 4; a++) {
 
-        u_minus_v -> m[a] = (u -> m[a]) - (v -> m[a]);
+        u_minus_v -> m[a] = (u -> m[a]) 
+                          - (v -> m[a]);
 
     }
 }
@@ -124,7 +125,8 @@ static double SU2_inner_prod(const matrix_2x2_ck *u, const matrix_2x2_ck *v) {
 
     for (SU2_color_index b = 1; b < 4; b++) {
 
-        inner_prod += -(u -> m[b]) * (v -> m[b]);
+        inner_prod += -(u -> m[b]) 
+                     * (v -> m[b]);
 
     }
     // and the 1, 2 and 3 components have a minus sign.
@@ -141,9 +143,12 @@ static void SU2_outer_product(const matrix_2x2_ck *u, const matrix_2x2_ck *v, ma
     //	in the usual way, as in regular linear algebra.
 
     outer_product -> m[0] = 0.0;
-    outer_product -> m[1] = (u -> m[2]) * (v -> m[3]) - (u -> m[3]) * (v -> m[2]);
-    outer_product -> m[2] = (u -> m[3]) * (v -> m[1]) - (u -> m[1]) * (v -> m[3]);
-    outer_product -> m[3] = (u -> m[1]) * (v -> m[2]) - (u -> m[2]) * (v -> m[1]);
+    outer_product -> m[1] = (u -> m[2]) * (v -> m[3]) 
+                          - (u -> m[3]) * (v -> m[2]);
+    outer_product -> m[2] = (u -> m[3]) * (v -> m[1]) 
+                          - (u -> m[1]) * (v -> m[3]);
+    outer_product -> m[3] = (u -> m[1]) * (v -> m[2]) 
+                          - (u -> m[2]) * (v -> m[1]);
 }
 
 void product_2x2(const matrix_2x2_ck *u, const matrix_2x2_ck *v, matrix_2x2_ck *uv) {

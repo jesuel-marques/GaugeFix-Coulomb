@@ -32,7 +32,7 @@ pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z,
 void print_pos_vec(const pos_vec pos) {
     //	prints a position to the screen
 
-    printf("% d %d %d %d\n", pos.i, pos.j, pos.k, pos.t);
+    printf("%d %d %d %d\n", pos.i, pos.j, pos.k, pos.t);
 }
 
 pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
@@ -72,7 +72,7 @@ pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
             break;
 
         default:
-            puts("mu outside of range\n");
+            fprintf(stderr, "mu outside of range\n");
             exit(EXIT_FAILURE);
     }
 
@@ -117,7 +117,7 @@ pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu) {
             break;
 
         default:
-            puts("mu outside of range\n");
+            fprintf(stderr, "mu outside of range\n");
             exit(EXIT_FAILURE);
     }
 
@@ -149,19 +149,19 @@ void test_allocation(const void * pointer, const char * location ){
     //	Test if allocation was successful.
     if ( pointer == NULL ) {
 			
-			printf("Memory allocation failed at %s.\n", location);
+			fprintf(stderr, "Memory allocation failed at %s.\n", location);
 			exit(EXIT_FAILURE); 
 	}
 }
 
 matrix_3x3_double *get_link(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu));
+    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * DIM + mu));
 }
 
 matrix_3x3_float *get_link_f(matrix_3x3_float *U, const pos_vec position, const lorentz_index mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu));
+    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * DIM + mu));
 }
 
 void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorentz_index mu, direction dir, matrix_3x3_double * u){
@@ -187,15 +187,15 @@ void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorent
 
 void handle_input(int argc, char *argv[]){
     if( argc != 3){
-		printf("Input names for config directory and template");
+		fprintf(stderr, "Input names for config directory and template");
         
         if(argc > 3){
-	    	printf(" only");
+	    	fprintf(stderr, " only");
 	    }
 	}
 
     if( argc != 3){
-		printf(".\n");
+		fprintf(stderr, ".\n");
 		exit(EXIT_FAILURE);
 	}
     
@@ -215,7 +215,7 @@ void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
     //	Loads a link configuration from the file with filename to U.
 
 
-    char config_filename[max_length_name];
+    char config_filename[MAX_LENGTH_NAME];
 	name_configuration_file(config_nr, config_filename);
     // const char * extension_in = "_clmbgf.cfg";
     const char * extension_in = ".cfg";
@@ -227,25 +227,25 @@ void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
     printf("Loading: %s.\n", config_filename);
     if((config_file = fopen(config_filename, "rb")) == NULL){
         
-        printf("Error loading config from file %s.\n", config_filename);
+        fprintf(stderr, "Error loading config from file %s.\n", config_filename);
         exit(EXIT_FAILURE);
 
     }
 
-    in_cfg_data_type * U_in = (in_cfg_data_type *) malloc(Volume * d * sizeof(in_cfg_data_type));
+    in_cfg_data_type * U_in = (in_cfg_data_type *) malloc(VOLUME * DIM * sizeof(in_cfg_data_type));
 	test_allocation(U_in, "SU3_load_config");
 
-    if (fread(U_in, sizeof(in_cfg_data_type),  Volume * d , config_file) == Volume * d) {
+    if (fread(U_in, sizeof(in_cfg_data_type),  VOLUME * DIM , config_file) == VOLUME * DIM) {
         puts("U Loaded OK\n");
     } else {
-        puts(" Configuration loading failed.\n");
-        exit(1);
+        fprintf(stderr, " Configuration loading failed.\n");
+        exit(EXIT_FAILURE);
     }
 
     fclose(config_file);
 
-    if(need_byte_swap){
-    	byte_swap(U_in, sizeof(float) , Volume * d * sizeof(in_cfg_data_type));
+    if(NEED_BYTE_SWAP){
+    	byte_swap(U_in, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
     }
 
     SU3_convert_config_fd(U_in, U);
@@ -255,12 +255,12 @@ void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
 void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U) {
     //  Loads a link configuration from the file with filename to U.
     
-    out_cfg_data_type * U_out = (out_cfg_data_type *) malloc(Volume * d * sizeof(out_cfg_data_type));
+    out_cfg_data_type * U_out = (out_cfg_data_type *) malloc(VOLUME * DIM * sizeof(out_cfg_data_type));
 	test_allocation(U_out, "SU3_write_config");
 
 	SU3_convert_config_df(U, U_out);
 
-    char config_filename[max_length_name];
+    char config_filename[MAX_LENGTH_NAME];
 	name_configuration_file(config_nr, config_filename);
     const char * extension_out = "_clmbgf.cfg";
     
@@ -269,18 +269,18 @@ void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U) {
     printf("Creating: %s.\n", strcat(config_filename, extension_out));
     if((config_file = fopen(config_filename, "wb")) == NULL){
         
-        printf("Error creating file %s for config.\n", config_filename);
+        fprintf(stderr, "Error creating file %s for config.\n", config_filename);
         exit(EXIT_FAILURE);
 
     }
 
-    if (fwrite(U_out, sizeof(out_cfg_data_type), Volume * d , config_file) == Volume * d) {
+    if (fwrite(U_out, sizeof(out_cfg_data_type), VOLUME * DIM , config_file) == VOLUME * DIM) {
        
         puts("U written OK.\n");
 
     } else {
 
-        puts("Configuration writing failed.\n");
+        fprintf(stderr,"Configuration writing failed.\n");
 
     }
 
@@ -300,7 +300,7 @@ void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy) {
             for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (lorentz_index mu = 0; mu < d; mu++) {
+                        for (lorentz_index mu = 0; mu < DIM; mu++) {
 
                             copy_3x3(get_link(U, position, mu), get_link(U_copy, position, mu));
                         
@@ -321,7 +321,7 @@ void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_doubl
             for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (lorentz_index mu = 0; mu < d; mu++) {
+                        for (lorentz_index mu = 0; mu < DIM; mu++) {
 
                             convert_fd_3x3(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
                         
@@ -342,7 +342,7 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
             for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (lorentz_index mu = 0; mu < d; mu++) {
+                        for (lorentz_index mu = 0; mu < DIM; mu++) {
 
                             convert_df_3x3(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
                         
@@ -376,7 +376,7 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
 //             for (position.k = 0; position.k < Nxyz; position.k++) {
 //                 for (position.j = 0; position.j < Nxyz; position.j++) {
 //                     for (position.i = 0; position.i < Nxyz; position.i++) {
-//                         for (lorentz_index mu = 0; mu < d; mu++) {
+//                         for (lorentz_index mu = 0; mu < DIM; mu++) {
 //                             switch(type){
 //                                 case FLOAT:
 //                                     f(get_link(U, position, mu), get_link_f(va_arg(arguments, matrix_3x3_float *),position, mu));
@@ -414,7 +414,7 @@ void SU3_reunitarize(matrix_3x3_double *U) {
             for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (unsigned short mu = 0; mu < d; mu++) {
+                        for (unsigned short mu = 0; mu < DIM; mu++) {
 
                             projection_SU3(get_link(U, position, mu));
 

@@ -28,7 +28,7 @@ double SU3_re_tr_plaquette(matrix_3x3_double *U, const pos_vec position, const l
     // printf("%lf\n", creal(trace_3x3(plaquette)));
     // getchar();
 
-    return (double)creal(trace_3x3(&plaquette))/Nc;
+    return creal(trace_3x3(&plaquette))/Nc;
 
 }
 
@@ -48,14 +48,14 @@ double spatial_plaquette_average(matrix_3x3_double * U){
             for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (lorentz_index mu = 0; mu < d-1; mu++){
-                            for (lorentz_index nu = 0; nu < d-1; nu++){
+                        for (lorentz_index mu = 0; mu < DIM - 1 ; mu++){
+                            for (lorentz_index nu = 0; nu < DIM - 1 ; nu++){
                                 if( mu < nu){
+
                                     plaq_ave_slice += SU3_re_tr_plaquette(U, position, mu, nu);                                    
                                 
                                 }
                             }
-                        
                         }
                     }
                 }
@@ -65,7 +65,7 @@ double spatial_plaquette_average(matrix_3x3_double * U){
 
         }
 
-    plaq_ave /= (double)((d - 1.0) * Volume);
+    plaq_ave /= ((DIM - 1.0) * VOLUME);
 
     return plaq_ave;
 }
@@ -86,7 +86,7 @@ double temporal_plaquette_average(matrix_3x3_double * U){
             for (position.k = 0; position.k < Nxyz; position.k++) {
                 for (position.j = 0; position.j < Nxyz; position.j++) {
                     for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (lorentz_index mu = 0; mu < d-1; mu++){
+                        for (lorentz_index mu = 0; mu < DIM - 1 ; mu++){
                      
                                 plaq_ave_slice += SU3_re_tr_plaquette(U, position, t_index, mu);
                      
@@ -99,7 +99,7 @@ double temporal_plaquette_average(matrix_3x3_double * U){
 
         }
 
-    plaq_ave /= (double)((d - 1.0) * Volume);
+    plaq_ave /= ((DIM - 1.0) * VOLUME);
 
     return plaq_ave;
 }

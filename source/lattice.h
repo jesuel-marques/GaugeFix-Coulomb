@@ -29,13 +29,11 @@ pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z,
 
 void print_pos_vec(const pos_vec u);
 
-inline pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu);
+inline pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu),
+               hop_position_negative(const pos_vec u, const lorentz_index mu);
 
-inline pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu);
-
-inline unsigned short position_is_even(const pos_vec position);
-
-inline unsigned short position_is_odd(const pos_vec position);
+inline unsigned short position_is_even(const pos_vec position),
+                      position_is_odd(const pos_vec position);
 
 void test_allocation(const void * pointer, const char * location );
 
@@ -47,16 +45,13 @@ void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorent
 
 void handle_input(int argc, char *argv[]);
 
-void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U);
-
-void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U);
-
+void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U),
+     SU3_write_config(const unsigned config_nr, matrix_3x3_double *U);
 
 void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy);
 
-void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_double);
-
-void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_float);
+void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_double),
+     SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_float);
 
 inline void SU3_reunitarize(matrix_3x3_double *U);
 

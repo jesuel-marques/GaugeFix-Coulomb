@@ -22,7 +22,7 @@ static void SU3_local_update_U(matrix_3x3_double *U, const pos_vec position, con
 
     matrix_3x3_double g_dagger;
 
-    for (lorentz_index mu = 0; mu < d; mu++) {
+    for (lorentz_index mu = 0; mu < DIM; mu++) {
         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
 
         accumulate_left_product_3x3(g, get_link(U, position, mu));
@@ -45,7 +45,7 @@ static void SU3_calculate_w(matrix_3x3_double *U, const pos_vec position, matrix
 
     // w(n)	calculation
 
-    for (lorentz_index mu = 0; mu < d-1; mu++) {
+    for (lorentz_index mu = 0; mu < DIM - 1 ; mu++) {
         //	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision
 
         accumulate_3x3(get_link(U, position, mu), w);
@@ -86,7 +86,7 @@ static double SU3_calculate_e2(matrix_3x3_double *U) {
                         for (SU3_color_alg_index a = 1; a <= pow2(Nc)-1; a++) {
                             //	Normalized sum of the squares of the color components of the divergence of A.
 
-                            e2_slice += (double)pow2(div_A_components.m[a]);
+                            e2_slice += pow2(div_A_components.m[a]);
                         }
 
                     }
@@ -95,7 +95,7 @@ static double SU3_calculate_e2(matrix_3x3_double *U) {
             e2 += e2_slice;
         }
 
-    e2 /= (Volume);
+    e2 /= (VOLUME);
 
     return e2;
 }
@@ -105,24 +105,32 @@ static void SU3_update_sub_LosAlamos(const matrix_3x3_double *matrix_SU3, submat
 
     set_to_null_3x3(update_SU3);
 
-    update_SU3 -> m[(2 - sub) * Nc + (2 - sub)] = 1.0;
+    update_SU3 -> m[elm(2 - sub, 2 - sub)] = 1.0;
     
     a = sub == T ? 1 : 0;
     b = sub == R ? 1 : 2;
 
     matrix_2x2_ck matrix_SU2;
 
-    matrix_SU2.m[0] =  (creal(matrix_SU3 -> m[a * Nc + a]) + creal(matrix_SU3 -> m[b * Nc + b]));
-    matrix_SU2.m[1] = -(cimag(matrix_SU3 -> m[a * Nc + b]) + cimag(matrix_SU3 -> m[b * Nc + a]));
-    matrix_SU2.m[2] = -(creal(matrix_SU3 -> m[a * Nc + b]) - creal(matrix_SU3 -> m[b * Nc + a]));
-    matrix_SU2.m[3] = -(cimag(matrix_SU3 -> m[a * Nc + a]) - cimag(matrix_SU3 -> m[b * Nc + b]));
+    matrix_SU2.m[0] =  (creal(matrix_SU3 -> m[elm(a, a)]) 
+                      + creal(matrix_SU3 -> m[elm(b, b)]));
+    matrix_SU2.m[1] = -(cimag(matrix_SU3 -> m[elm(a, b)]) 
+                      + cimag(matrix_SU3 -> m[elm(b, a)]));
+    matrix_SU2.m[2] = -(creal(matrix_SU3 -> m[elm(a, b)]) 
+                      - creal(matrix_SU3 -> m[elm(b, a)]));
+    matrix_SU2.m[3] = -(cimag(matrix_SU3 -> m[elm(a, a)]) 
+                      - cimag(matrix_SU3 -> m[elm(b, b)]));
 
     SU2_projection(&matrix_SU2);
 
-    update_SU3 -> m[a * Nc + a] =  matrix_SU2.m[0] + I * matrix_SU2.m[3];
-    update_SU3 -> m[a * Nc + b] =  matrix_SU2.m[2] + I * matrix_SU2.m[1];
-    update_SU3 -> m[b * Nc + a] = -matrix_SU2.m[2] + I * matrix_SU2.m[1];
-    update_SU3 -> m[b * Nc + b] =  matrix_SU2.m[0] - I * matrix_SU2.m[3];
+    update_SU3 -> m[elm(a, a)] =      matrix_SU2.m[0] 
+                                + I * matrix_SU2.m[3];
+    update_SU3 -> m[elm(a, b)] =      matrix_SU2.m[2]
+                                + I * matrix_SU2.m[1];
+    update_SU3 -> m[elm(b, a)] =     -matrix_SU2.m[2] 
+                                + I * matrix_SU2.m[1];
+    update_SU3 -> m[elm(b, b)] =      matrix_SU2.m[0] 
+                                - I * matrix_SU2.m[3];
 }
 
 static void SU3_LosAlamos_common_block(const matrix_3x3_double *w, matrix_3x3_double *total_update) {

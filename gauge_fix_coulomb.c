@@ -21,8 +21,8 @@
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 
 
-char configs_dir_name[max_length_name];	//	input from command line
-char config_template[max_length_name] ;	//	input from command line
+char configs_dir_name[MAX_LENGTH_NAME];	//	input from command line
+char config_template[MAX_LENGTH_NAME] ;	//	input from command line
 
 int main(int argc, char *argv[]) {
 
@@ -37,16 +37,16 @@ int main(int argc, char *argv[]) {
 	// MPI_Comm_rank(comm, &rank);
 	// //The size is the number of processes
 	// MPI_Comm_size(comm, &size);
-	// const int nconfig = max_configs;
+	// const int nconfig = MAX_CONFIGS;
 	// //Calculate the number of configs per rank
 	// int config_per_rank = nconfig / size;
 	// // The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
 	// for (int config = rank + 1; config <= nconfig; config += size) {
 	//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
-	for (unsigned config = 1; config <= max_configs; config ++) {
+	for (unsigned config = 1; config <= MAX_CONFIGS; config ++) {
 		int actual_config_nr = 1000 + 10 * (config - 1);
 
-		matrix_3x3_double * U = (matrix_3x3_double *) malloc(Volume * d * sizeof(matrix_3x3_double));
+		matrix_3x3_double * U = (matrix_3x3_double *) malloc(VOLUME * DIM * sizeof(matrix_3x3_double));
 		test_allocation(U, "main");
 		
 		SU3_load_config(actual_config_nr, U);

@@ -1,6 +1,8 @@
 #ifndef SU3OPS_H
 #define SU3OPS_H
 
+#define elm(a,b)    (a) * Nc + (b)
+
 typedef unsigned short SU3_color_index;
 typedef unsigned short SU3_color_alg_index;
 
@@ -18,20 +20,18 @@ typedef struct {
 } matrix_3x3_float;
 
 typedef struct {
-    double complex m[Nc*Nc-1+1];
+    double complex m[Nc * Nc - 1 + 1];
 } matrix_SU3_alg;
 
 void print_matrix_3x3(const matrix_3x3_double *u, const char *name);
 
 void copy_3x3(const matrix_3x3_double *u, matrix_3x3_double *u_copy);
 
-void convert_fd_3x3(const matrix_3x3_float *u_float, matrix_3x3_double *u_double);
+void convert_fd_3x3(const matrix_3x3_float *u_float, matrix_3x3_double *u_double),
+     convert_df_3x3(const matrix_3x3_double *u_double, matrix_3x3_float *u_float);
 
-void convert_df_3x3(const matrix_3x3_double *u_double, matrix_3x3_float *u_float);
-
-inline void set_to_null_3x3(matrix_3x3_double *u);
-
-inline void set_to_identity_3x3(matrix_3x3_double *u);
+inline void set_to_null_3x3(matrix_3x3_double *u),
+            set_to_identity_3x3(matrix_3x3_double *u);
 
 inline void accumulate_3x3(const matrix_3x3_double *u, matrix_3x3_double *acc);
 
@@ -48,13 +48,11 @@ inline extern void substitution_multiplication_by_scalar_3x3(const double comple
 
 inline extern void product_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, matrix_3x3_double *uv);
 
-void product_three_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, const matrix_3x3_double *w, matrix_3x3_double *uvw);
+void product_three_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, const matrix_3x3_double *w, matrix_3x3_double *uvw),
+     product_four_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, const matrix_3x3_double *w, const matrix_3x3_double *x, matrix_3x3_double *uvwx);
 
-void product_four_3x3(const matrix_3x3_double *u, const matrix_3x3_double *v, const matrix_3x3_double *w, const matrix_3x3_double *x, matrix_3x3_double *uvwx);
-
-inline extern void accumulate_left_product_3x3(const matrix_3x3_double *g, matrix_3x3_double *acc_prod);
-
-inline extern void accumulate_right_product_3x3(matrix_3x3_double *acc_prod, const matrix_3x3_double *g);
+inline extern void accumulate_left_product_3x3(const matrix_3x3_double *g, matrix_3x3_double *acc_prod),
+                   accumulate_right_product_3x3(matrix_3x3_double *acc_prod, const matrix_3x3_double *g);
 
 inline extern void projection_SU3(matrix_3x3_double *x);
 
