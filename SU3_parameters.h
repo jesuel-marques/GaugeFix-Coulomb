@@ -12,7 +12,13 @@
 
 // Other parameters
 
-#define MAX_CONFIGS 1/*(1100-1000)/10*/
+#define FIRST_CONFIG 1000
+
+#define LAST_CONFIG 1010
+
+#define CONFIG_STEP 10
+
+#define MAX_CONFIGS (LAST_CONFIG - FIRST_CONFIG) / CONFIG_STEP
 
 #define MAX_LENGTH_NAME 300
 
@@ -23,4 +29,6 @@
 #define NEED_BYTE_SWAP_OUT 0
 
 #define NEED_CONV_FROM_DOUBLE 1
+
+//  #define MPI_CODE
 

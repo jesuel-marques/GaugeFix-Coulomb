@@ -14,7 +14,11 @@
 #include "lattice.h"  //	Initialization functions and calculations of
                       //	positions and links on the lattice.
 
-#define GET_LINK(position, mu) (((((position.t * N_SPC + position.k) * N_SPC + position.j) * N_SPC + position.i) * DIM + mu))
+#define GET_LINK(position, mu) ((((position.t * N_SPC \
+                                        + position.k) * N_SPC \
+                                            + position.j) * N_SPC \
+                                                + position.i) * DIM \
+                                                    + mu)
 
 extern char config_template[];
 extern char configs_dir_name[];
@@ -39,7 +43,7 @@ void print_pos_vec(const pos_vec pos) {
     printf("%d %d %d %d\n", pos.i, pos.j, pos.k, pos.t);
 }
 
-pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
+inline pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu) {
     //	Calculates the position immediately forward
     //	in the direction mu, taken into account the
     //	periodic boundary conditions.
@@ -83,7 +87,7 @@ pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
     return u_plus_muhat;
 }
 
-pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu) {
+inline pos_vec hop_position_negative(const pos_vec u, const lorentz_idx mu) {
     //	Calculates the position immediately behind
     //	in the direction mu, taken into account the
     //	periodic boundary conditions.
@@ -128,27 +132,6 @@ pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu) {
     return u_minus_muhat;
 }
 
-
-unsigned short position_is_odd(const pos_vec position) {
-    //	If a position is odd returns 1, if even returns 0
-
-    return ((position.i ^ position.j ^ position.k ^ position.t) & 1);
-
-    // if position is odd, then the XOR of the first bit of each element
-    // of position must be 1. Take AND with 1 select this first bit.
-}
-
-unsigned short position_is_even(const pos_vec position) {
-    //	If a position is even returns 1, if odd returns 0
-
-    return !((position.i ^ position.j ^ position.k ^ position.t) & 1);
-
-    // if position is even, then the XOR of the first bit of each element
-    // of position must be 0. Taking AND with 1 select this first bit. Take the NOT of 
-    // the odd code, because want 1 for even and 0 for odd.
-}
-
-
 void test_allocation(const void * pointer, const char * location ){ 
     //	Test if allocation was successful.
     if ( pointer == NULL ) {
@@ -158,22 +141,22 @@ void test_allocation(const void * pointer, const char * location ){
 	}
 }
 
-matrix_3x3_double *get_link(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu) {
+mtrx_3x3_double *get_link(mtrx_3x3_double *U, const pos_vec position, const lorentz_idx mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + GET_LINK(position, mu);
 }
 
-matrix_3x3_float *get_link_f(matrix_3x3_float *U, const pos_vec position, const lorentz_index mu) {
+mtrx_3x3_float *get_link_f(mtrx_3x3_float *U, const pos_vec position, const lorentz_idx mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + GET_LINK(position, mu);
 }
 
-void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorentz_index mu, direction dir, matrix_3x3_double * u){
+void get_link_matrix(mtrx_3x3_double * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3_double * u){
 	
 	// Gets forward or backward link at given position and mu
 	// and copies it to u.
 
-    matrix_3x3_double u_aux;
+    mtrx_3x3_double u_aux;
 
 	if (dir == FRONT) {
 
@@ -215,7 +198,7 @@ const char *name_configuration_file(const unsigned config_number, char * config_
     sprintf(config_filename,"%s%s_%dx%d_%d", configs_dir_name, config_template, N_SPC, N_T, config_number);
 }
 
-void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
+void SU3_load_config(const unsigned config_nr, mtrx_3x3_double *U) {
     //	Loads a link configuration from the file with filename to U.
 
 
@@ -247,32 +230,32 @@ void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
     fclose(config_file);
 
     if(NEED_BYTE_SWAP_IN){
+
     	byte_swap(U_in, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
+    
     }
 
     SU3_convert_config_fd(U_in, U);
 	free(U_in);
 }
 
-void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U) {
+void SU3_write_config(const unsigned config_nr, mtrx_3x3_double *U) {
     //  Loads a link configuration from the file with filename to U.
     
     out_cfg_data_type * U_out;
 
-    if(NEED_CONV_FROM_DOUBLE){
+    #ifdef NEED_CONV_FROM_DOUBLE
         
         U_out = (out_cfg_data_type *) malloc(VOLUME * DIM * sizeof(out_cfg_data_type));
 	    test_allocation(U_out, "SU3_write_config");
 
      	SU3_convert_config_df(U, U_out);
 
-    }
-    else{
+    #else
 
-        U_out = U;
-        copy_3x3_config(U, U_out);
+        U_out = (out_cfg_data_type *) U;
 
-    }
+    #endif
 
     if(NEED_BYTE_SWAP_OUT){
     	byte_swap(U_out, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
@@ -291,7 +274,8 @@ void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U) {
 
     }
 
-    if (fwrite(U_out, sizeof(out_cfg_data_type), VOLUME * DIM , config_file) == VOLUME * DIM) {
+    if (fwrite(U_out, sizeof(out_cfg_data_type), VOLUME * DIM , config_file)
+                                                                 == VOLUME * DIM) {
        
         puts("U written OK.\n");
 
@@ -303,14 +287,14 @@ void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U) {
 
     fclose(config_file);
 
-    if(NEED_CONV_FROM_DOUBLE){
+    #ifdef NEED_CONV_FROM_DOUBLE        
         free(U_out);
-    }
+    #endif
     
 }
 
 
-void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy) {
+void copy_3x3_config(mtrx_3x3_double *U, mtrx_3x3_double *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
@@ -321,7 +305,7 @@ void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy) {
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
-                        for (lorentz_index mu = 0; mu < DIM; mu++) {
+                        for (lorentz_idx mu = 0; mu < DIM; mu++) {
 
                             copy_3x3(get_link(U, position, mu), get_link(U_copy, position, mu));
                         
@@ -332,7 +316,7 @@ void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy) {
         }
 }
 
-void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_double) {
+void SU3_convert_config_fd(mtrx_3x3_float *U_float, mtrx_3x3_double *U_double) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
@@ -342,7 +326,7 @@ void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_doubl
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
-                        for (lorentz_index mu = 0; mu < DIM; mu++) {
+                        for (lorentz_idx mu = 0; mu < DIM; mu++) {
 
                             convert_fd_3x3(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
                         
@@ -353,7 +337,7 @@ void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_doubl
         }
 }
 
-void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_float) {
+void SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
@@ -363,7 +347,7 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
-                        for (lorentz_index mu = 0; mu < DIM; mu++) {
+                        for (lorentz_idx mu = 0; mu < DIM; mu++) {
 
                             convert_df_3x3(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
                         
@@ -374,7 +358,7 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
         }
 }
 
-// typedef void (*loop_f)(matrix_3x3_double *, ...);
+// typedef void (*loop_f)(mtrx_3x3_double *, ...);
 
 // typedef enum {
 //     CHAR,
@@ -383,7 +367,7 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
 //     DOUBLE
 // } TYPE;
 
-// void loop_over_links(int num_arg, loop_f f, matrix_3x3_double *U, TYPE type,  ...) {
+// void loop_over_links(int num_arg, loop_f f, mtrx_3x3_double *U, TYPE type,  ...) {
 //     // Generic loop
 
 //     va_list arguments;
@@ -397,13 +381,13 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
 //             for (position.k = 0; position.k < N_SPC; position.k++) {
 //                 for (position.j = 0; position.j < N_SPC; position.j++) {
 //                     for (position.i = 0; position.i < N_SPC; position.i++) {
-//                         for (lorentz_index mu = 0; mu < DIM; mu++) {
+//                         for (lorentz_idx mu = 0; mu < DIM; mu++) {
 //                             switch(type){
 //                                 case FLOAT:
-//                                     f(get_link(U, position, mu), get_link_f(va_arg(arguments, matrix_3x3_float *),position, mu));
+//                                     f(get_link(U, position, mu), get_link_f(va_arg(arguments, mtrx_3x3_float *),position, mu));
 //                                     break;
 //                                 case DOUBLE:
-//                                     f(get_link(U, position, mu), get_link(va_arg(arguments, matrix_3x3_double *),position, mu));
+//                                     f(get_link(U, position, mu), get_link(va_arg(arguments, mtrx_3x3_double *),position, mu));
 //                                     break;
 //                                 default:
 //                                     break;
@@ -418,13 +402,13 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
 //     va_end(arguments);
 // }
 
-// void SU3_reunitarize(matrix_3x3_double *U) {
+// void SU3_reunitarize(mtrx_3x3_double *U) {
 //     // Reunitarizes the configuration
 //     // printf("here\n");
 //     loop_over_links(1, projection_SU3, U, DOUBLE);
 // }
 
-void SU3_reunitarize(matrix_3x3_double *U) {
+void SU3_reunitarize(mtrx_3x3_double *U) {
     // Reunitarizes the configuration
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
