@@ -5,9 +5,9 @@
 #include <string.h>
 #include <complex.h>
 
-#include <mpi.h>
-//Since American English is painful on the eyes
-#define MPI_Finalise() MPI_Finalize()
+// #include <mpi.h>
+// //Since American English is painful on the eyes
+// #define MPI_Finalise() MPI_Finalize()
 // #include <omp.h>
 
 #include "SU3_parameters.h"			//	Simulation parameters
@@ -21,57 +21,49 @@
 
 #include "source/measurement.h"
 
-const char configs_dir_name[] = "/home/postgrad/jesuel/configs/";
-// const char configs_dir_name[] = "./configs/";
+const char configs_dir_name[MAX_LENGTH_NAME];	//	input from command line
+const char config_template[MAX_LENGTH_NAME] ;	//	input from command line
 
-
-// int main(void){
 int main(int argc, char *argv[]) {
 
-	//Starts MPI
-	MPI_Init(&argc,&argv);
-	int rank, size;
-	//MPI needs a communicator to know how to send/receive data. We aren't sending or receiving things here
-	MPI_Comm comm = MPI_COMM_WORLD;
-	//The rank is the process number
-	MPI_Comm_rank(comm, &rank);
-	//The size is the number of processes
-	MPI_Comm_size(comm, &size);
-	const int nconfig = max_configs;
-	//Calculate the number of configs per rank
-	int config_per_rank = nconfig / size;
-	// The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
-	for (int config = rank + 1; config <= nconfig; config += size) {
+	handle_input(argc, argv);
+
+	// //Starts MPI
+	// MPI_Init(&argc,&argv);
+	// int rank, size;
+	// //MPI needs a communicator to know how to send/receive data. We aren't sending or receiving things here
+	// MPI_Comm comm = MPI_COMM_WORLD;
+	// //The rank is the process number
+	// MPI_Comm_rank(comm, &rank);
+	// //The size is the number of processes
+	// MPI_Comm_size(comm, &size);
+	// const int nconfig = MAX_CONFIGS;
+	// //Calculate the number of configs per rank
+	// int config_per_rank = nconfig / size;
+	// // The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
+	// for (int config = rank + 1; config <= nconfig; config += size) {
 	//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic) 
-	// for (unsigned config = 1; config <= max_configs; config ++) {
-		int actual_config_nr = 500+10*(config-1);
-		float complex * U_float = (float complex *) malloc(Volume * d * 3 * 3 * sizeof(float complex));
-		test_allocation(U_float, "main");
-		double complex * U_double = (double complex *) malloc(Volume * d * 3 * 3 * sizeof(double complex));
-		test_allocation(U_double, "main");
+	for (unsigned config = 1; config <= MAX_CONFIGS; config ++) {
+		int actual_config_nr = 1000 + 10 * (config - 1);
 
-		SU3_load_config(name_configuration_file(actual_config_nr), U_float);
-		byte_swap(U_float, sizeof(float), Volume * d * 3 * 3 * 2 * sizeof(float));
-		SU3_convert_config_fd(U_float, U_double);
-		free(U_float);
+		matrix_3x3_double * U = (matrix_3x3_double *) malloc(VOLUME * DIM * sizeof(matrix_3x3_double));
+		test_allocation(U, "main");
 
-		pos_vec position = assign_position(0, 0, 0, 0);
+		SU3_load_config(actual_config_nr, U);
 
-		SU3_print_matrix(get_link(U_double, position, 0), "U");
+		print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link");
 		getchar();
-
-    	position = assign_position(Nxyz - 1, Nxyz - 1 , Nxyz - 1 , Nt - 1);
     
-		SU3_print_matrix(get_link(U_double, position, d - 1), "U");
+		print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link");
 		getchar();
 		
 		//  calculate plaquette average
-		printf("Spatial plaquete %.15lf\n", spatial_plaquette_average(U_double));
-    	printf("Temporal plaquete %.15lf\n", temporal_plaquette_average(U_double));
+		printf("Spatial plaquete  %.10lf\n", spatial_plaquette_average(U));
+    	printf("Temporal plaquete %.10lf\n", temporal_plaquette_average(U));
 
-		free(U_double);
+		free(U);
 	
 	}
-	MPI_Finalise();
-	return 0;
+	// MPI_Finalise();
+	return EXIT_SUCCESS;
 }

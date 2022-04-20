@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <stdarg.h>
+
 #include "../SU3_parameters.h"              //	Simulation parameters
 #include "../SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
 
@@ -12,9 +14,14 @@
 #include "lattice.h"  //	Initialization functions and calculations of
                       //	positions and links on the lattice.
 
-extern char configs_dir_name[];
+#define GET_LINK(position, mu) (((((position.t * N_SPC + position.k) * N_SPC + position.j) * N_SPC + position.i) * DIM + mu))
 
-pos_vec assign_position(const unsigned short x, const unsigned short y, const unsigned short z, const unsigned short t){
+extern char config_template[];
+extern char configs_dir_name[];
+extern char extension_in[];
+extern char extension_out[];
+
+pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t){
     //	assigns x, y, z and t to a position vector
     pos_vec position;
 
@@ -29,10 +36,10 @@ pos_vec assign_position(const unsigned short x, const unsigned short y, const un
 void print_pos_vec(const pos_vec pos) {
     //	prints a position to the screen
 
-    printf("% d %d %d %d\n", pos.i, pos.j, pos.k, pos.t);
+    printf("%d %d %d %d\n", pos.i, pos.j, pos.k, pos.t);
 }
 
-pos_vec hop_position_positive(const pos_vec u, const unsigned short mu) {
+pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
     //	Calculates the position immediately forward
     //	in the direction mu, taken into account the
     //	periodic boundary conditions.
@@ -40,43 +47,43 @@ pos_vec hop_position_positive(const pos_vec u, const unsigned short mu) {
     pos_vec u_plus_muhat;
 
     switch (mu) {
-        case 0:
-            u_plus_muhat.i = ((u.i + 1) % Nxyz);
+        case x_index:
+            u_plus_muhat.i = ((u.i + 1) % N_SPC);
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
             break;
 
-        case 1:
+        case y_index:
             u_plus_muhat.i = u.i;
-            u_plus_muhat.j = ((u.j + 1) % Nxyz);
+            u_plus_muhat.j = ((u.j + 1) % N_SPC);
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
             break;
 
-        case 2:
+        case z_index:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
-            u_plus_muhat.k = ((u.k + 1) % Nxyz);
+            u_plus_muhat.k = ((u.k + 1) % N_SPC);
             u_plus_muhat.t = u.t;
             break;
 
-        case 3:
+        case t_index:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
-            u_plus_muhat.t = ((u.t + 1) % Nt);
+            u_plus_muhat.t = ((u.t + 1) % N_T);
             break;
 
         default:
-            printf("mu outside of range");
+            fprintf(stderr, "mu outside of range\n");
             exit(EXIT_FAILURE);
     }
 
     return u_plus_muhat;
 }
 
-pos_vec hop_position_negative(const pos_vec u, const unsigned short mu) {
+pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu) {
     //	Calculates the position immediately behind
     //	in the direction mu, taken into account the
     //	periodic boundary conditions.
@@ -85,36 +92,36 @@ pos_vec hop_position_negative(const pos_vec u, const unsigned short mu) {
 
     switch (mu) {
 
-        case 0:
-            u_minus_muhat.i = (((u.i - 1) % Nxyz + Nxyz) % Nxyz);
+        case x_index:
+            u_minus_muhat.i = (((u.i - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
             break;
 
-        case 1:
+        case y_index:
             u_minus_muhat.i = u.i;
-            u_minus_muhat.j = (((u.j - 1) % Nxyz + Nxyz) % Nxyz);
+            u_minus_muhat.j = (((u.j - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
             break;
 
-        case 2:
+        case z_index:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
-            u_minus_muhat.k = (((u.k - 1) % Nxyz + Nxyz) % Nxyz);
+            u_minus_muhat.k = (((u.k - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.t = u.t;            
             break;
         
-        case 3:
+        case t_index:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
-            u_minus_muhat.t = (((u.t - 1) % Nt + Nt) % Nt);
+            u_minus_muhat.t = (((u.t - 1) % N_T + N_T) % N_T);
             break;
 
         default:
-            printf("mu outside of range");
+            fprintf(stderr, "mu outside of range\n");
             exit(EXIT_FAILURE);
     }
 
@@ -146,33 +153,35 @@ void test_allocation(const void * pointer, const char * location ){
     //	Test if allocation was successful.
     if ( pointer == NULL ) {
 			
-			printf("Memory allocation failed at %s.\n", location);
+			fprintf(stderr, "Memory allocation failed at %s.\n", location);
 			exit(EXIT_FAILURE); 
 	}
 }
 
-double complex *get_link(double complex *U, const pos_vec position, const unsigned short mu) {
+matrix_3x3_double *get_link(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu) * 3 * 3);
+    return U + GET_LINK(position, mu);
 }
 
-float complex *get_link_f(float complex *U, const pos_vec position, const unsigned short mu) {
+matrix_3x3_float *get_link_f(matrix_3x3_float *U, const pos_vec position, const lorentz_index mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * d + mu) * 3 * 3);
+    return U + GET_LINK(position, mu);
 }
 
-void get_link_matrix(double complex * U, pos_vec position, int mu, int direction, double complex * u){
+void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorentz_index mu, direction dir, matrix_3x3_double * u){
 	
 	// Gets forward or backward link at given position and mu
 	// and copies it to u.
 
-	if (direction == 1) {
+    matrix_3x3_double u_aux;
 
-		SU3_copy(get_link(U, position, mu), u);
+	if (dir == FRONT) {
+
+		copy_3x3(get_link(U, position, mu), u);
 		//	Link in the positive way is what is stored in U
 
 	}
-	else if (direction == -1) {
+	else if (dir == REAR) {
 
 		SU3_hermitean_conjugate(get_link(U, hop_position_negative(position, mu), mu), u);
 		//	U_(-mu)(n)=(U_mu(n-mu))^\dagger
@@ -180,106 +189,141 @@ void get_link_matrix(double complex * U, pos_vec position, int mu, int direction
 	}
 }
 
-char *name_configuration_file(const unsigned config) {
-    char configs_dir_name_local[max_length_name];
-    strcpy(configs_dir_name_local, configs_dir_name);
+void handle_input(int argc, char *argv[]){
+    if( argc != 3){
+		fprintf(stderr, "Input names for config directory and template");
+        
+        if(argc > 3){
+	    	fprintf(stderr, " only");
+	    }
+	}
+
+    if( argc != 3){
+		fprintf(stderr, ".\n");
+		exit(EXIT_FAILURE);
+	}
     
-    char config_filename[max_length_name];
-    //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, Nxyz, Nt);
-    sprintf(config_filename,"Gen2_24x16_%d.cfg.GF",config);
-    
-    return strcat(configs_dir_name_local, config_filename);
+
+	strcpy(configs_dir_name, argv[1]);
+	strcpy(config_template, argv[2]); 
 }
 
-void SU3_load_config(const char filename[max_length_name], float complex *U) {
+
+const char *name_configuration_file(const unsigned config_number, char * config_filename) {
+    
+    //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, N_SPC, N_T);
+    sprintf(config_filename,"%s%s_%dx%d_%d", configs_dir_name, config_template, N_SPC, N_T, config_number);
+}
+
+void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
     //	Loads a link configuration from the file with filename to U.
 
-    FILE *config_file;
 
-    //printf("Loading: %s.\t", filename);
-
-    config_file = fopen(filename, "r");
-
-    if (fread(U, 3 * 3 * sizeof(float complex),  Volume * d , config_file)) {
-        //printf("U Loaded OK\n");
-    } else {
-        printf(" Configuration loading failed.\n");
-        exit(1);
-    }
-
-    fclose(config_file);
-}
-
-
-void SU3_load_config_d(const char filename[max_length_name], double complex *U) {
-    //	Loads a link configuration from the file with filename to U.
+    char config_filename[MAX_LENGTH_NAME];
+	name_configuration_file(config_nr, config_filename);
 
     FILE *config_file;
 
-    // printf("Loading: %s.\t", filename);
+    strcat(config_filename, extension_in);
 
-    config_file = fopen(filename, "r");
+    printf("Loading: %s.\n", config_filename);
+    if((config_file = fopen(config_filename, "rb")) == NULL){
+        
+        fprintf(stderr, "Error loading config from file %s.\n", config_filename);
+        exit(EXIT_FAILURE);
 
-    if (fread(U, 3 * 3 * sizeof(double complex),  Volume * d , config_file)) {
-        //printf("U Loaded OK\n");
+    }
+
+    in_cfg_data_type * U_in = (in_cfg_data_type *) malloc(VOLUME * DIM * sizeof(in_cfg_data_type));
+	test_allocation(U_in, "SU3_load_config");
+
+    if (fread(U_in, sizeof(in_cfg_data_type),  VOLUME * DIM , config_file) == VOLUME * DIM) {
+        puts("U Loaded OK\n");
     } else {
-        printf(" Configuration loading failed.\n");
-        exit(1);
+        fprintf(stderr, "Configuration loading failed.\n");
+        exit(EXIT_FAILURE);
     }
 
     fclose(config_file);
+
+    if(NEED_BYTE_SWAP_IN){
+    	byte_swap(U_in, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
+    }
+
+    SU3_convert_config_fd(U_in, U);
+	free(U_in);
 }
 
-void SU3_print_config(char filename[max_length_name], const char modifier[max_length_name], double complex *U) {
+void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U) {
     //  Loads a link configuration from the file with filename to U.
+    
+    out_cfg_data_type * U_out;
 
+    if(NEED_CONV_FROM_DOUBLE){
+        
+        U_out = (out_cfg_data_type *) malloc(VOLUME * DIM * sizeof(out_cfg_data_type));
+	    test_allocation(U_out, "SU3_write_config");
+
+     	SU3_convert_config_df(U, U_out);
+
+    }
+    else{
+
+        U_out = U;
+        copy_3x3_config(U, U_out);
+
+    }
+
+    if(NEED_BYTE_SWAP_OUT){
+    	byte_swap(U_out, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
+    }
+
+    char config_filename[MAX_LENGTH_NAME];
+	name_configuration_file(config_nr, config_filename);
+    
     FILE *config_file;
 
-    printf("Creating: %s.\t", strcat(filename, modifier));
+    printf("Creating: %s.\n", strcat(config_filename, extension_out));
+    if((config_file = fopen(config_filename, "wb")) == NULL){
+        
+        fprintf(stderr, "Error creating file %s for config.\n", config_filename);
+        exit(EXIT_FAILURE);
 
-    config_file = fopen(filename, "w+");
+    }
 
-    if (fwrite(U, Volume * d * 3 * 3 * sizeof(double complex), 1, config_file) == 1) {
-        printf("U written OK.\n");
+    if (fwrite(U_out, sizeof(out_cfg_data_type), VOLUME * DIM , config_file) == VOLUME * DIM) {
+       
+        puts("U written OK.\n");
+
     } else {
-        printf(" Configuration writing failed.\n");
+
+        fprintf(stderr,"Configuration writing failed.\n");
+
     }
 
     fclose(config_file);
-}
 
-void SU3_print_config_f(char filename[max_length_name], const char modifier[max_length_name], float complex *U) {
-    //  Loads a link configuration from the file with filename to U.
-
-    FILE *config_file;
-
-    printf("Creating: %s.\t", strcat(filename, modifier));
-
-    config_file = fopen(filename, "w+");
-
-    if (fwrite(U, Volume * d * 3 * 3 * sizeof(float complex), 1, config_file) == 1) {
-        printf("U written OK.\n");
-    } else {
-        printf(" Configuration writing failed.\n");
+    if(NEED_CONV_FROM_DOUBLE){
+        free(U_out);
     }
-
-    fclose(config_file);
+    
 }
 
-void SU3_copy_config(double complex *U, double complex *U_copy) {
+
+void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
-        for (unsigned short t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
             pos_vec position;
             position.t = t;
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (unsigned short mu = 0; mu < d; mu++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (lorentz_index mu = 0; mu < DIM; mu++) {
 
-                            SU3_copy(get_link(U, position, mu), get_link(U_copy, position, mu));
+                            copy_3x3(get_link(U, position, mu), get_link(U_copy, position, mu));
                         
                         }
                     }
@@ -288,21 +332,19 @@ void SU3_copy_config(double complex *U, double complex *U_copy) {
         }
 }
 
-void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
-
-    double complex u[3][3];
+void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_double) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
-        for (unsigned short t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
             pos_vec position;
             position.t = t;
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (unsigned short mu = 0; mu < d; mu++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (lorentz_index mu = 0; mu < DIM; mu++) {
 
-                            SU3_convert_fd(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
+                            convert_fd_3x3(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
                         
                         }
                     }
@@ -311,21 +353,19 @@ void SU3_convert_config_fd(float complex *U_float, double complex *U_double) {
         }
 }
 
-void SU3_convert_config_df(double complex *U_double, float complex *U_float) {
-
-    double complex u[3][3];
+void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_float) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
-        for (unsigned short t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
             pos_vec position;
             position.t = t;
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (unsigned short mu = 0; mu < d; mu++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (lorentz_index mu = 0; mu < DIM; mu++) {
 
-                            SU3_convert_df(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
+                            convert_df_3x3(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
                         
                         }
                     }
@@ -334,21 +374,70 @@ void SU3_convert_config_df(double complex *U_double, float complex *U_float) {
         }
 }
 
+// typedef void (*loop_f)(matrix_3x3_double *, ...);
 
-void SU3_reunitarize(double complex *U) {
+// typedef enum {
+//     CHAR,
+//     INT,
+//     FLOAT,
+//     DOUBLE
+// } TYPE;
+
+// void loop_over_links(int num_arg, loop_f f, matrix_3x3_double *U, TYPE type,  ...) {
+//     // Generic loop
+
+//     va_list arguments;
+//     va_start(arguments, num_arg+1);
+
+//     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+//         // Paralelizing by slicing the time extent
+//         for (pos_index t = 0; t < N_T; t++) {
+//             pos_vec position;
+//             position.t = t;
+//             for (position.k = 0; position.k < N_SPC; position.k++) {
+//                 for (position.j = 0; position.j < N_SPC; position.j++) {
+//                     for (position.i = 0; position.i < N_SPC; position.i++) {
+//                         for (lorentz_index mu = 0; mu < DIM; mu++) {
+//                             switch(type){
+//                                 case FLOAT:
+//                                     f(get_link(U, position, mu), get_link_f(va_arg(arguments, matrix_3x3_float *),position, mu));
+//                                     break;
+//                                 case DOUBLE:
+//                                     f(get_link(U, position, mu), get_link(va_arg(arguments, matrix_3x3_double *),position, mu));
+//                                     break;
+//                                 default:
+//                                     break;
+//                             }
+
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
+//     va_end(arguments);
+// }
+
+// void SU3_reunitarize(matrix_3x3_double *U) {
+//     // Reunitarizes the configuration
+//     // printf("here\n");
+//     loop_over_links(1, projection_SU3, U, DOUBLE);
+// }
+
+void SU3_reunitarize(matrix_3x3_double *U) {
     // Reunitarizes the configuration
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
-        for (unsigned short t = 0; t < Nt; t++) {
+        for (unsigned short t = 0; t < N_T; t++) {
             pos_vec position;
             position.t = t;
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
-                        for (unsigned short mu = 0; mu < d; mu++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (unsigned short mu = 0; mu < DIM; mu++) {
 
-                            SU3_projection(get_link(U, position, mu));
+                            projection_SU3(get_link(U, position, mu));
 
                         }
                     }
@@ -356,14 +445,13 @@ void SU3_reunitarize(double complex *U) {
             }
         }
 }
-
 
 /*============================JONIVAR'S CODE===============================*/
 
 void block_swap(int *buffer, size_t length)
 {
   size_t i;
-  register union swapper {
+  union swapper {
     int integer;
     char pos[4];
   } a, b;
@@ -382,7 +470,7 @@ void block_swap(int *buffer, size_t length)
 void block_swap_double(double *buffer, size_t length)
 {
   size_t i;
-  register union swapper {
+  union swapper {
     double double_number;
     char pos[8];
   } a, b;
@@ -408,10 +496,10 @@ int byte_swap(void* strip, size_t size, size_t length)
 {
   switch (size) {
   case sizeof(float):   /* = 4 */
-    block_swap(strip,length/size);
+    block_swap(strip, length / size);
     break;
   case sizeof(double):  /* = 8 */
-    block_swap_double(strip,length/size);
+    block_swap_double(strip, length / size);
     break;
   case 1:
     break;

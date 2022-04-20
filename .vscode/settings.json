@@ -7,6 +7,8 @@
         "su2_ops.h": "c",
         "su3_gaugefixing_parameters.h": "c",
         "complex.h": "c",
-        "gauge_fixing.h": "c"
+        "gauge_fixing.h": "c",
+        "su3_ops.h": "c",
+        "random": "c"
     }
 }
