@@ -68,7 +68,7 @@ static double SU3_calculate_e2(matrix_3x3_double *U) {
 
     #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        for (pos_index t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
             matrix_3x3_double div_A;
             matrix_SU3_alg div_A_components;
             pos_vec position;
@@ -76,9 +76,9 @@ static double SU3_calculate_e2(matrix_3x3_double *U) {
             position.t = t;
             double e2_slice = 0.0;
 
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
                         
                         SU3_divergence_A(U, position, &div_A);
                         decompose_algebra_SU3(&div_A, &div_A_components);
@@ -211,11 +211,11 @@ unsigned SU3_gauge_fix(matrix_3x3_double *U, const unsigned short config) {
     while (1) {
         #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
             // Paralelizing by slicing the time extent
-            for (pos_index t = 0; t < Nt; t++) {
+            for (pos_index t = 0; t < N_T; t++) {
                 position.t = t;
-                for (position.k = 0; position.k < Nxyz; position.k++) {
-                    for (position.j = 0; position.j < Nxyz; position.j++) {
-                        for (position.i = 0; position.i < Nxyz; position.i++) {
+                for (position.k = 0; position.k < N_SPC; position.k++) {
+                    for (position.j = 0; position.j < N_SPC; position.j++) {
+                        for (position.i = 0; position.i < N_SPC; position.i++) {
                             !((position_is_even(position) + sweep) % 2) ?
                                 //	Implementation of the checkerboard subdivision of the lattice
                                 

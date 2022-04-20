@@ -25,9 +25,6 @@ double SU3_re_tr_plaquette(matrix_3x3_double *U, const pos_vec position, const l
 
 	product_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
 
-    // printf("%lf\n", creal(trace_3x3(plaquette)));
-    // getchar();
-
     return creal(trace_3x3(&plaquette))/Nc;
 
 }
@@ -38,16 +35,16 @@ double spatial_plaquette_average(matrix_3x3_double * U){
 
     #pragma omp parallel for reduction (+:plaq_ave) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        for (pos_index t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
 
             pos_vec position;
 
             position.t = t;
             double plaq_ave_slice = 0.0;
 
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_index mu = 0; mu < DIM - 1 ; mu++){
                             for (lorentz_index nu = 0; nu < DIM - 1 ; nu++){
                                 if( mu < nu){
@@ -76,16 +73,16 @@ double temporal_plaquette_average(matrix_3x3_double * U){
 
     #pragma omp parallel for reduction (+:plaq_ave) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        for (pos_index t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
 
             pos_vec position;
 
             position.t = t;
             double plaq_ave_slice = 0.0;
 
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_index mu = 0; mu < DIM - 1 ; mu++){
                      
                                 plaq_ave_slice += SU3_re_tr_plaquette(U, position, t_index, mu);

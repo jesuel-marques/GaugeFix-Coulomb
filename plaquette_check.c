@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 		print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link");
 		getchar();
     
-		print_matrix_3x3(get_link(U, assign_position(Nxyz - 1, Nxyz - 1 , Nxyz - 1 , Nt - 1), DIM - 1), "Last link");
+		print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link");
 		getchar();
 		
 		//  calculate plaquette average

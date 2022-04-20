@@ -14,8 +14,12 @@
 #include "lattice.h"  //	Initialization functions and calculations of
                       //	positions and links on the lattice.
 
+#define GET_LINK(position, mu) (((((position.t * N_SPC + position.k) * N_SPC + position.j) * N_SPC + position.i) * DIM + mu))
+
 extern char config_template[];
 extern char configs_dir_name[];
+extern char extension_in[];
+extern char extension_out[];
 
 pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t){
     //	assigns x, y, z and t to a position vector
@@ -44,7 +48,7 @@ pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
 
     switch (mu) {
         case x_index:
-            u_plus_muhat.i = ((u.i + 1) % Nxyz);
+            u_plus_muhat.i = ((u.i + 1) % N_SPC);
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
@@ -52,7 +56,7 @@ pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
 
         case y_index:
             u_plus_muhat.i = u.i;
-            u_plus_muhat.j = ((u.j + 1) % Nxyz);
+            u_plus_muhat.j = ((u.j + 1) % N_SPC);
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
             break;
@@ -60,7 +64,7 @@ pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
         case z_index:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
-            u_plus_muhat.k = ((u.k + 1) % Nxyz);
+            u_plus_muhat.k = ((u.k + 1) % N_SPC);
             u_plus_muhat.t = u.t;
             break;
 
@@ -68,7 +72,7 @@ pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu) {
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
-            u_plus_muhat.t = ((u.t + 1) % Nt);
+            u_plus_muhat.t = ((u.t + 1) % N_T);
             break;
 
         default:
@@ -89,7 +93,7 @@ pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu) {
     switch (mu) {
 
         case x_index:
-            u_minus_muhat.i = (((u.i - 1) % Nxyz + Nxyz) % Nxyz);
+            u_minus_muhat.i = (((u.i - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
@@ -97,7 +101,7 @@ pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu) {
 
         case y_index:
             u_minus_muhat.i = u.i;
-            u_minus_muhat.j = (((u.j - 1) % Nxyz + Nxyz) % Nxyz);
+            u_minus_muhat.j = (((u.j - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
             break;
@@ -105,7 +109,7 @@ pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu) {
         case z_index:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
-            u_minus_muhat.k = (((u.k - 1) % Nxyz + Nxyz) % Nxyz);
+            u_minus_muhat.k = (((u.k - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.t = u.t;            
             break;
         
@@ -113,7 +117,7 @@ pos_vec hop_position_negative(const pos_vec u, const lorentz_index mu) {
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
-            u_minus_muhat.t = (((u.t - 1) % Nt + Nt) % Nt);
+            u_minus_muhat.t = (((u.t - 1) % N_T + N_T) % N_T);
             break;
 
         default:
@@ -156,12 +160,12 @@ void test_allocation(const void * pointer, const char * location ){
 
 matrix_3x3_double *get_link(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * DIM + mu));
+    return U + GET_LINK(position, mu);
 }
 
 matrix_3x3_float *get_link_f(matrix_3x3_float *U, const pos_vec position, const lorentz_index mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + (((((position.t * Nxyz + position.k) * Nxyz + position.j) * Nxyz + position.i) * DIM + mu));
+    return U + GET_LINK(position, mu);
 }
 
 void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorentz_index mu, direction dir, matrix_3x3_double * u){
@@ -207,8 +211,8 @@ void handle_input(int argc, char *argv[]){
 
 const char *name_configuration_file(const unsigned config_number, char * config_filename) {
     
-    //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, Nxyz, Nt);
-    sprintf(config_filename,"%s%s_%dx%d_%d", configs_dir_name, config_template, Nxyz, Nt, config_number);
+    //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, N_SPC, N_T);
+    sprintf(config_filename,"%s%s_%dx%d_%d", configs_dir_name, config_template, N_SPC, N_T, config_number);
 }
 
 void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
@@ -217,8 +221,6 @@ void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
 
     char config_filename[MAX_LENGTH_NAME];
 	name_configuration_file(config_nr, config_filename);
-    // const char * extension_in = "_clmbgf.cfg";
-    const char * extension_in = ".cfg";
 
     FILE *config_file;
 
@@ -238,13 +240,13 @@ void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
     if (fread(U_in, sizeof(in_cfg_data_type),  VOLUME * DIM , config_file) == VOLUME * DIM) {
         puts("U Loaded OK\n");
     } else {
-        fprintf(stderr, " Configuration loading failed.\n");
+        fprintf(stderr, "Configuration loading failed.\n");
         exit(EXIT_FAILURE);
     }
 
     fclose(config_file);
 
-    if(NEED_BYTE_SWAP){
+    if(NEED_BYTE_SWAP_IN){
     	byte_swap(U_in, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
     }
 
@@ -255,14 +257,29 @@ void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U) {
 void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U) {
     //  Loads a link configuration from the file with filename to U.
     
-    out_cfg_data_type * U_out = (out_cfg_data_type *) malloc(VOLUME * DIM * sizeof(out_cfg_data_type));
-	test_allocation(U_out, "SU3_write_config");
+    out_cfg_data_type * U_out;
 
-	SU3_convert_config_df(U, U_out);
+    if(NEED_CONV_FROM_DOUBLE){
+        
+        U_out = (out_cfg_data_type *) malloc(VOLUME * DIM * sizeof(out_cfg_data_type));
+	    test_allocation(U_out, "SU3_write_config");
+
+     	SU3_convert_config_df(U, U_out);
+
+    }
+    else{
+
+        U_out = U;
+        copy_3x3_config(U, U_out);
+
+    }
+
+    if(NEED_BYTE_SWAP_OUT){
+    	byte_swap(U_out, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
+    }
 
     char config_filename[MAX_LENGTH_NAME];
 	name_configuration_file(config_nr, config_filename);
-    const char * extension_out = "_clmbgf.cfg";
     
     FILE *config_file;
 
@@ -285,7 +302,11 @@ void SU3_write_config(const unsigned config_nr, matrix_3x3_double *U) {
     }
 
     fclose(config_file);
-    free(U_out);
+
+    if(NEED_CONV_FROM_DOUBLE){
+        free(U_out);
+    }
+    
 }
 
 
@@ -294,12 +315,12 @@ void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
-        for (pos_index t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
             pos_vec position;
             position.t = t;
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_index mu = 0; mu < DIM; mu++) {
 
                             copy_3x3(get_link(U, position, mu), get_link(U_copy, position, mu));
@@ -315,12 +336,12 @@ void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_doubl
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
-        for (pos_index t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
             pos_vec position;
             position.t = t;
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_index mu = 0; mu < DIM; mu++) {
 
                             convert_fd_3x3(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
@@ -336,12 +357,12 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
-        for (pos_index t = 0; t < Nt; t++) {
+        for (pos_index t = 0; t < N_T; t++) {
             pos_vec position;
             position.t = t;
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_index mu = 0; mu < DIM; mu++) {
 
                             convert_df_3x3(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
@@ -370,12 +391,12 @@ void SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_floa
 
 //     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
 //         // Paralelizing by slicing the time extent
-//         for (pos_index t = 0; t < Nt; t++) {
+//         for (pos_index t = 0; t < N_T; t++) {
 //             pos_vec position;
 //             position.t = t;
-//             for (position.k = 0; position.k < Nxyz; position.k++) {
-//                 for (position.j = 0; position.j < Nxyz; position.j++) {
-//                     for (position.i = 0; position.i < Nxyz; position.i++) {
+//             for (position.k = 0; position.k < N_SPC; position.k++) {
+//                 for (position.j = 0; position.j < N_SPC; position.j++) {
+//                     for (position.i = 0; position.i < N_SPC; position.i++) {
 //                         for (lorentz_index mu = 0; mu < DIM; mu++) {
 //                             switch(type){
 //                                 case FLOAT:
@@ -408,12 +429,12 @@ void SU3_reunitarize(matrix_3x3_double *U) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
-        for (unsigned short t = 0; t < Nt; t++) {
+        for (unsigned short t = 0; t < N_T; t++) {
             pos_vec position;
             position.t = t;
-            for (position.k = 0; position.k < Nxyz; position.k++) {
-                for (position.j = 0; position.j < Nxyz; position.j++) {
-                    for (position.i = 0; position.i < Nxyz; position.i++) {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (unsigned short mu = 0; mu < DIM; mu++) {
 
                             projection_SU3(get_link(U, position, mu));

@@ -24,6 +24,10 @@
 char configs_dir_name[MAX_LENGTH_NAME];	//	input from command line
 char config_template[MAX_LENGTH_NAME] ;	//	input from command line
 
+// const char * extension_in = "_clmbgf.cfg";
+char extension_in[]  = ".cfg";
+char extension_out[] = "_clmbgf.cfg";
+
 int main(int argc, char *argv[]) {
 
 	handle_input(argc, argv);
