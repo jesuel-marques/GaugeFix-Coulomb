@@ -12,9 +12,9 @@
 
 // Other parameters
 
-#define FIRST_CONFIG 1000
+#define FIRST_CONFIG 500
 
-#define LAST_CONFIG 1010
+#define LAST_CONFIG 11000
 
 #define CONFIG_STEP 10
 
@@ -29,6 +29,3 @@
 #define NEED_BYTE_SWAP_OUT 0
 
 #define NEED_CONV_FROM_DOUBLE
-
-//  #define MPI_CODE
-
