@@ -166,7 +166,7 @@ void get_link_matrix(mtrx_3x3_double * U, const pos_vec position, const lorentz_
 	}
 	else if (dir == REAR) {
 
-		SU3_hermitean_conjugate(get_link(U, hop_position_negative(position, mu), mu), u);
+		SU3_herm_conj(get_link(U, hop_position_negative(position, mu), mu), u);
 		//	U_(-mu)(n)=(U_mu(n-mu))^\dagger
 
 	}
@@ -217,6 +217,9 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3_double *U) {
 
     }
 
+    //  IF READING FROM DOUBLE, THEN THE U_in JUST HAS TO POINT TO U
+    //  MAKE HANDLING LIKE FOR U_out
+
     in_cfg_data_type * U_in = (in_cfg_data_type *) malloc(VOLUME * DIM * sizeof(in_cfg_data_type));
 	test_allocation(U_in, "SU3_load_config");
 
@@ -229,6 +232,7 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3_double *U) {
 
     fclose(config_file);
 
+    //  PASSAR ISSO PARA O PREPROCESSOR
     if(NEED_BYTE_SWAP_IN){
 
     	byte_swap(U_in, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
@@ -237,6 +241,7 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3_double *U) {
 
     SU3_convert_config_fd(U_in, U);
 	free(U_in);
+
 }
 
 void SU3_write_config(const unsigned config_nr, mtrx_3x3_double *U) {
@@ -258,7 +263,7 @@ void SU3_write_config(const unsigned config_nr, mtrx_3x3_double *U) {
     #endif
 
     if(NEED_BYTE_SWAP_OUT){
-    	byte_swap(U_out, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
+    	byte_swap(U_out, sizeof(float) , VOLUME * DIM * sizeof(out_cfg_data_type));
     }
 
     char config_filename[MAX_LENGTH_NAME];
@@ -408,6 +413,30 @@ void SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float) {
 //     loop_over_links(1, projection_SU3, U, DOUBLE);
 // }
 
+void check_det_1(mtrx_3x3_double *U) {
+
+    double det = 0.0;
+    // Reunitarizes the configuration
+
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic) reduction (+:det)
+        // Paralelizing by slicing the time extent
+        for (unsigned short t = 0; t < N_T; t++) {
+            pos_vec position;
+            position.t = t;
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (unsigned short mu = 0; mu < DIM; mu++) {
+                            det += determinant_3x3(get_link(U, position, mu));
+                        }
+                    }
+                }
+            }
+        }
+
+    printf("average determinant: %.15lf\n", det / (DIM * VOLUME));
+}
+
 void SU3_reunitarize(mtrx_3x3_double *U) {
     // Reunitarizes the configuration
 
@@ -420,8 +449,10 @@ void SU3_reunitarize(mtrx_3x3_double *U) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (unsigned short mu = 0; mu < DIM; mu++) {
-
+                            // print_matrix_3x3(get_link(U, position, mu),"link");
                             projection_SU3(get_link(U, position, mu));
+                            // print_matrix_3x3(get_link(U, position, mu),"link");
+                            // getchar();
 
                         }
                     }
