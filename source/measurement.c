@@ -25,7 +25,7 @@ double SU3_re_tr_plaquette(mtrx_3x3_double *U, const pos_vec position,
     get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, REAR , &uc);
     get_link_matrix(U, hop_position_positive(position, nu),         nu, REAR , &ud);
 
-	product_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
+	prod_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
 
     return creal(trace_3x3(&plaquette))/Nc;
 

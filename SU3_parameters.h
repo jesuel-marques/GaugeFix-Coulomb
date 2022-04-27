@@ -28,7 +28,7 @@
 
 #define NEED_BYTE_SWAP_OUT 0
 
-#define NEED_CONV_FROM_DOUBLE 1
+#define NEED_CONV_FROM_DOUBLE
 
 //  #define MPI_CODE
 

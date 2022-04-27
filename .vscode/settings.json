@@ -9,6 +9,8 @@
         "complex.h": "c",
         "gauge_fixing.h": "c",
         "su3_ops.h": "c",
-        "random": "c"
+        "random": "c",
+        "stdio.h": "c",
+        "measurement.h": "c"
     }
 }

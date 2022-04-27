@@ -29,13 +29,13 @@ static void SU3_local_update_U(mtrx_3x3_double *U, const pos_vec position,
     for (lorentz_idx mu = 0; mu < DIM; mu++) {
         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
 
-        accumulate_left_prod_3x3(g, get_link(U, position, mu));
+        accum_left_prod_3x3(g, get_link(U, position, mu));
 
         //	U'_mu(x-mu)=1.U_mu(x-mu).g_dagger(x) for red-black updates
 
-        SU3_hermitean_conjugate(g, &g_dagger);
+        SU3_herm_conj(g, &g_dagger);
 
-        accumulate_right_prod_3x3(get_link(U, hop_position_negative(position, mu), mu), 
+        accum_right_prod_3x3(get_link(U, hop_position_negative(position, mu), mu), 
                                                                                &g_dagger);
     }
 }
@@ -56,8 +56,8 @@ static void SU3_calculate_w(mtrx_3x3_double *U, const pos_vec position,
 
         accumulate_3x3(get_link(U, position, mu), w);
 
-        SU3_hermitean_conjugate(get_link(U, hop_position_negative(position, mu), mu), 
-                                                                        &u_dagger_rear);
+        SU3_herm_conj(get_link(U, hop_position_negative(position, mu), mu), 
+                                                                &u_dagger_rear);
 
         accumulate_3x3(&u_dagger_rear, w);
     }
@@ -158,9 +158,9 @@ static void SU3_LosAlamos_common_block(const mtrx_3x3_double *w,
             //	Submatrices are indicated by numbers from 0 to 2
 
             SU3_update_sub_LosAlamos(&updated_w, sub, &update);
-            accumulate_left_prod_3x3(&update, &updated_w);
+            accum_left_prod_3x3(&update, &updated_w);
 
-            accumulate_left_prod_3x3(&update, total_update);
+            accum_left_prod_3x3(&update, total_update);
             //	Updates matrix to total_update. It is the
             //	accumulated updates from the hits.
         }
@@ -192,8 +192,8 @@ static void SU3_gaugefixing_overrelaxation(mtrx_3x3_double *U, const pos_vec pos
 
     // update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA)
     set_identity_3x3(&update_OR);
-    substitution_multiplication_by_scalar_3x3(1.0 - omega_OR, &update_OR);
-    substitution_multiplication_by_scalar_3x3(omega_OR, &update_LA);
+    subst_mult_scalar_3x3(1.0 - omega_OR, &update_OR);
+    subst_mult_scalar_3x3(omega_OR, &update_LA);
     accumulate_3x3(&update_LA, &update_OR);
 
     projection_SU3(&update_OR);
@@ -215,6 +215,7 @@ unsigned SU3_gauge_fix(mtrx_3x3_double *U, const unsigned short config) {
 	printf("Sweeps in config %5d: %8d. e2: %3.2E \n", config, sweep, e2);
     
     while (1) {
+
         #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
             // Paralelizing by slicing the time extent
             for (pos_index t = 0; t < N_T; t++) {
@@ -259,6 +260,7 @@ unsigned SU3_gauge_fix(mtrx_3x3_double *U, const unsigned short config) {
                 //	to fix the gauge.
             }
         }
+        
 
         !(sweep % sweeps_to_reunitarization) ? SU3_reunitarize(U) : 0;
                                                

@@ -23,11 +23,11 @@
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 #include "source/SU3_ops.h"
 
-#include "source/measurement.h"
 
 
-// const char * extension_in = "_clmbgf.cfg";
-char extension_in[]  = ".cfg";
+
+const char extension_in[] = "_clmbgf.cfg";
+// char extension_in[]  = ".cfg";
 char extension_out[] = "_clmbgf.cfg";
 
 const char configs_dir_name[MAX_LENGTH_NAME];	//	input from command line

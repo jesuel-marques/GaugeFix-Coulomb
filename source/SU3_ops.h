@@ -35,23 +35,25 @@ void set_null_3x3(mtrx_3x3_double *u),
 
 void accumulate_3x3(const mtrx_3x3_double *u, mtrx_3x3_double *acc);
 
-void subtraction_3x3(const mtrx_3x3_double *u, const mtrx_3x3_double *v, mtrx_3x3_double *u_minus_v);
+void subtraction_3x3(const mtrx_3x3_double *u, 
+                     const mtrx_3x3_double *v, 
+                                mtrx_3x3_double *u_minus_v);
 
 double complex trace_3x3(const mtrx_3x3_double *u),
          determinant_3x3(const mtrx_3x3_double *u);
 
-void SU3_hermitean_conjugate(const mtrx_3x3_double *u, mtrx_3x3_double *u_dagger);
+void SU3_herm_conj(const mtrx_3x3_double *u, mtrx_3x3_double *u_dagger);
 
-void multiplication_by_scalar_3x3(const double complex alpha, const mtrx_3x3_double *u, mtrx_3x3_double *alpha_times_u);
-void substitution_multiplication_by_scalar_3x3(const double complex alpha, mtrx_3x3_double *u);
+void mult_by_scalar_3x3(const double complex alpha, const mtrx_3x3_double *u, mtrx_3x3_double *alpha_times_u);
+void subst_mult_scalar_3x3(const double complex alpha, mtrx_3x3_double *u);
 
-void product_3x3(const mtrx_3x3_double *u, const mtrx_3x3_double *v, mtrx_3x3_double *uv);
+void prod_3x3(const mtrx_3x3_double *u, const mtrx_3x3_double *v, mtrx_3x3_double *uv);
 
-void product_three_3x3(const mtrx_3x3_double *u, const mtrx_3x3_double *v, const mtrx_3x3_double *w, mtrx_3x3_double *uvw),
-     product_four_3x3(const mtrx_3x3_double *u, const mtrx_3x3_double *v, const mtrx_3x3_double *w, const mtrx_3x3_double *x, mtrx_3x3_double *uvwx);
+void prod_three_3x3(const mtrx_3x3_double *u, const mtrx_3x3_double *v, const mtrx_3x3_double *w, mtrx_3x3_double *uvw),
+     prod_four_3x3(const mtrx_3x3_double *u, const mtrx_3x3_double *v, const mtrx_3x3_double *w, const mtrx_3x3_double *x, mtrx_3x3_double *uvwx);
 
-void accumulate_left_prod_3x3(const mtrx_3x3_double *g, mtrx_3x3_double *acc_prod),
-     accumulate_right_prod_3x3(mtrx_3x3_double *acc_prod, const mtrx_3x3_double *g);
+void accum_left_prod_3x3(const mtrx_3x3_double *g, mtrx_3x3_double *acc_prod),
+     accum_right_prod_3x3(mtrx_3x3_double *acc_prod, const mtrx_3x3_double *g);
 
 void projection_SU3(mtrx_3x3_double *x);
 

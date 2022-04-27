@@ -25,10 +25,11 @@
 
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 
+#include "source/measurement.h"
 
-// const char * extension_in = "_clmbgf.cfg";
-char extension_in[]  = ".cfg";
-char extension_out[] = "_clmbgf.cfg";
+// const char extension_in[] = "_clmbgf.cfg";
+const char extension_in[]  = ".cfg";
+const char extension_out[] = "_clmbgf.cfg";
 
 const char configs_dir_name[MAX_LENGTH_NAME];	//	input from command line
 const char config_template[MAX_LENGTH_NAME] ;	//	input from command line
@@ -66,10 +67,14 @@ int main(int argc, char *argv[]) {
 			
 			SU3_load_config(actual_config_nr, U);
 
+			SU3_reunitarize(U);	
+			//	Reunitarizing straigh away because of loss precision due to
+			//	storing config in single precision.
+
 			//  fix the gauge
 			SU3_gauge_fix(U, actual_config_nr);
 
-			// write the gauge fixed configuration based on template name
+			// write the gauge fixed configuration to file
 			SU3_write_config(actual_config_nr, U);
 			free(U);		//	Free memory allocated for the configuration.
 			

@@ -18,9 +18,9 @@ void subtraction_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, matrix_2x2_
 double SU2_trace(const matrix_2x2_ck *u),
        determinant_2x2(const matrix_2x2_ck *u);
 
-void hermitean_conjugate_2x2(const matrix_2x2_ck* u, matrix_2x2_ck* u_dagger);
+void herm_conj_2x2(const matrix_2x2_ck* u, matrix_2x2_ck* u_dagger);
 
-void multiplication_by_scalar_2x2(const matrix_2x2_ck* u, const double alpha, matrix_2x2_ck* alpha_times_u);
+void mult_scalar_2x2(const matrix_2x2_ck* u, const double alpha, matrix_2x2_ck* alpha_times_u);
 
 void product_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, matrix_2x2_ck* uv),
      product_three_2x2(const matrix_2x2_ck* u, const matrix_2x2_ck* v, const matrix_2x2_ck* w, matrix_2x2_ck* uvw),

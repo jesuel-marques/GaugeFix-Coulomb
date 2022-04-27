@@ -88,7 +88,7 @@ inline double determinant_2x2(const matrix_2x2_ck *u) {
     return det_u;
 }
 
-void hermitean_conjugate_2x2(const matrix_2x2_ck *u, matrix_2x2_ck *u_dagger) {
+void herm_conj_2x2(const matrix_2x2_ck *u, matrix_2x2_ck *u_dagger) {
     // Calculates the hermitean conjugate to u
     // and returns result in u_dagger.
 
@@ -105,7 +105,7 @@ void hermitean_conjugate_2x2(const matrix_2x2_ck *u, matrix_2x2_ck *u_dagger) {
     }
 }
 
-void multiplication_by_scalar_2x2(const matrix_2x2_ck *u, const double alpha, 
+void mult_scalar_2x2(const matrix_2x2_ck *u, const double alpha, 
                                                     matrix_2x2_ck *alpha_times_u) {
     //  Calculates multiplication of Cayley-Klein 2x2 matrix u by scalar alpha
     //  and returns result in alpha_times_u.
@@ -216,7 +216,7 @@ inline void SU2_projection(matrix_2x2_ck *u) {
 
     matrix_2x2_ck u_SU2;
 
-    multiplication_by_scalar_2x2(u, 1.0 / sqrt(determinant_2x2(u)), &u_SU2);
+    mult_scalar_2x2(u, 1.0 / sqrt(determinant_2x2(u)), &u_SU2);
     copy_2x2(&u_SU2, u);
 
 }

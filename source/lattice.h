@@ -30,6 +30,8 @@ typedef enum {REAR, FRONT} direction;
 typedef mtrx_3x3_float in_cfg_data_type;
 typedef mtrx_3x3_float out_cfg_data_type;
 
+//  CREATE A WORKING_CFG_DATA_TYPE
+
 
 pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t);
 
@@ -58,6 +60,8 @@ void copy_3x3_config(mtrx_3x3_double *U, mtrx_3x3_double *U_copy);
 
 void SU3_convert_config_fd(mtrx_3x3_float *U_float, mtrx_3x3_double *U_double),
      SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float);
+
+void check_det_1(mtrx_3x3_double *U);
 
 void SU3_reunitarize(mtrx_3x3_double *U);
 
