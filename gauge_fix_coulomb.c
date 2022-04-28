@@ -40,17 +40,10 @@ int main(int argc, char *argv[]) {
 
 	handle_input(argc, argv);
 
-	FILE* sweeps_to_gaugefix;
+	
 	char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
 	sprintf(filename_sweeps_to_gaugefix, "sweeps_to_gaugefix_%s_%dx%d.txt", config_template, N_SPC, N_T);
-
-    printf("Creating: %s.\n", filename_sweeps_to_gaugefix);
-    if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "a+")) == NULL){
-        
-        fprintf(stderr, "Error creating file %s for config.\n", filename_sweeps_to_gaugefix);
-        exit(EXIT_FAILURE);
-
-    }
+	
 
 
 	#ifdef MPI_CODE
@@ -91,11 +84,21 @@ int main(int argc, char *argv[]) {
 
 			SU3_reunitarize(U);	
 			//	Reunitarizing straigh away because of loss precision due to
-			//	storing config in single precision.
+			//	storing config in single precision.	
+
+			unsigned sweeps = SU3_gauge_fix(U, actual_config_nr);
 
 			//  fix the gauge
 			
-			fprintf(sweeps_to_gaugefix, "%d\t%u\n", actual_config_nr, SU3_gauge_fix(U, actual_config_nr));
+			FILE* sweeps_to_gaugefix;
+    		if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "a+")) == NULL){
+        
+				fprintf(stderr, "Error creating file %s for config.\n", filename_sweeps_to_gaugefix);
+				exit(EXIT_FAILURE);
+
+			}
+			fprintf(sweeps_to_gaugefix, "%d\t%u\n", actual_config_nr, sweeps);
+			fclose(sweeps_to_gaugefix);
 
 			// write the gauge fixed configuration to file
 			SU3_write_config(actual_config_nr, U);
@@ -105,6 +108,5 @@ int main(int argc, char *argv[]) {
 	#ifdef MPI_CODE
 		MPI_Finalise();
 	#endif
-	fclose(sweeps_to_gaugefix);
 	return 0;
 }
