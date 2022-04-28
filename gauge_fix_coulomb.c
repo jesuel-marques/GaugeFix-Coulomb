@@ -86,9 +86,9 @@ int main(int argc, char *argv[]) {
 			//	Reunitarizing straigh away because of loss precision due to
 			//	storing config in single precision.	
 
-			unsigned sweeps = SU3_gauge_fix(U, actual_config_nr);
-
 			//  fix the gauge
+			
+			unsigned sweeps = SU3_gauge_fix(U, actual_config_nr);			
 			
 			FILE* sweeps_to_gaugefix;
     		if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "a+")) == NULL){
@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) {
 
 			}
 			fprintf(sweeps_to_gaugefix, "%d\t%u\n", actual_config_nr, sweeps);
+			fflush(sweeps_to_gaugefix);	
 			fclose(sweeps_to_gaugefix);
 
 			// write the gauge fixed configuration to file
