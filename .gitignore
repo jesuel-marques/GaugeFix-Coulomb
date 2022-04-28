@@ -4,3 +4,4 @@ plaquette_check
 hostfile
 *.sh
 *.dbg
+*.txt
