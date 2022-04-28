@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 	//Calculate the number of configs per rank
 	int config_per_rank = nconfig / size;
 	// The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
-	for (int config = rank + 1; config <= nconfig; config += size) {
+	for (int config = rank ; config < nconfig; config += size) {
 
 	#else
 	//	If compiling for not running with MPI, then just use a simple for loop
