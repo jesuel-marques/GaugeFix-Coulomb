@@ -11,6 +11,7 @@
         "su3_ops.h": "c",
         "random": "c",
         "stdio.h": "c",
-        "measurement.h": "c"
+        "measurement.h": "c",
+        "stdbool.h": "c"
     }
 }

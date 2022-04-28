@@ -1,8 +1,9 @@
 #ifndef LATTICE_H
 #define LATTICE_H
+#include <stdbool.h>
 
 #include "../SU3_parameters.h"
-#include "SU3_ops.h"
+
 
 typedef unsigned short pos_index;
 
@@ -18,19 +19,49 @@ typedef struct {
 //  of position must be 1. Take AND with 1 select this first bit. Take the NOT of 
 //  the odd code, because want 1 for even and 0 for odd.
 
+//  Odd position means that the sum of the coordinates is odd and equivalente for even
+
 typedef unsigned short lorentz_idx;
 
-typedef enum {REAR, FRONT} direction; 
+typedef enum {REAR, FRONT} direction;
+
+//  Associations between the numeric indices and the lorentz directions
 
 #define x_index 0
 #define y_index 1
 #define z_index 2
 #define t_index 3
 
+//  Does the pointer arithmetic to get the correct index in the configuration
+
+#define GET_LINK(position, mu) ((((position.t * N_SPC \
+                                        + position.k) * N_SPC \
+                                            + position.j) * N_SPC \
+                                                + position.i) * DIM \
+                                                    + mu)
+
+//  Data types definitions
+
+typedef complex float in_data_type; 
+typedef complex float out_data_type;
+typedef complex double work_data_type;
+
+typedef struct {
+   complex double m[Nc * Nc];
+} mtrx_3x3_double; 
+
+typedef struct {
+    complex float m[Nc * Nc];
+} mtrx_3x3_float;
+
 typedef mtrx_3x3_float in_cfg_data_type;
 typedef mtrx_3x3_float out_cfg_data_type;
+typedef mtrx_3x3_double work_cfg_data_type;
 
-//  CREATE A WORKING_CFG_DATA_TYPE
+typedef work_cfg_data_type mtrx_3x3;
+
+
+#define TEST_ALLOCATION(a) test_allocation_in_function(a, __func__) //  used to test if allocation was successful
 
 
 pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t);
@@ -40,30 +71,32 @@ void print_pos_vec(const pos_vec u);
 pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu),
         hop_position_negative(const pos_vec u, const lorentz_idx mu);
 
-unsigned short position_is_even(const pos_vec position),
-               position_is_odd(const pos_vec position);
 
-void test_allocation(const void * pointer, const char * location );
+void test_allocation_in_function(const void * pointer, const char * location );
 
-mtrx_3x3_double * get_link(mtrx_3x3_double *U, const pos_vec position, const lorentz_idx mu);
 
-mtrx_3x3_float *get_link_f(mtrx_3x3_float *U, const pos_vec position, const lorentz_idx mu);
+mtrx_3x3 * get_link(mtrx_3x3 *U, const pos_vec position, const lorentz_idx mu);
 
-void get_link_matrix(mtrx_3x3_double * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3_double * u);
+in_cfg_data_type *get_link_in(in_cfg_data_type *U_in, const pos_vec position, const lorentz_idx mu);
+out_cfg_data_type *get_link_out(out_cfg_data_type *U_out, const pos_vec position, const lorentz_idx mu);
+
+void get_link_matrix(mtrx_3x3 * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3 * u);
 
 void handle_input(int argc, char *argv[]);
 
-void SU3_load_config(const unsigned config_nr, mtrx_3x3_double *U),
-     SU3_write_config(const unsigned config_nr, mtrx_3x3_double *U);
+bool is_in_exception_list(const int config_nr);
 
-void copy_3x3_config(mtrx_3x3_double *U, mtrx_3x3_double *U_copy);
+void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U),
+     SU3_write_config(const unsigned config_nr, mtrx_3x3 *U);
 
-void SU3_convert_config_fd(mtrx_3x3_float *U_float, mtrx_3x3_double *U_double),
-     SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float);
+void copy_3x3_config(mtrx_3x3 *U, mtrx_3x3 *U_copy);
 
-void check_det_1(mtrx_3x3_double *U);
+void SU3_convert_config_in_work(in_cfg_data_type *U_in, work_cfg_data_type *U_work),
+     SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *U_out);
 
-void SU3_reunitarize(mtrx_3x3_double *U);
+void check_det_1(mtrx_3x3 *U);
+
+void SU3_reunitarize(mtrx_3x3 *U);
 
 /*============================JONIVAR'S CODE===============================*/
 

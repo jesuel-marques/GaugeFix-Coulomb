@@ -2,6 +2,7 @@
 #include <stdio.h>  //	Standard C header files
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <stdarg.h>
 
@@ -14,16 +15,13 @@
 #include "lattice.h"  //	Initialization functions and calculations of
                       //	positions and links on the lattice.
 
-#define GET_LINK(position, mu) ((((position.t * N_SPC \
-                                        + position.k) * N_SPC \
-                                            + position.j) * N_SPC \
-                                                + position.i) * DIM \
-                                                    + mu)
 
 extern char config_template[];
 extern char configs_dir_name[];
 extern char extension_in[];
 extern char extension_out[];
+
+extern const int config_exception_list[];
 
 pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t){
     //	assigns x, y, z and t to a position vector
@@ -132,7 +130,7 @@ inline pos_vec hop_position_negative(const pos_vec u, const lorentz_idx mu) {
     return u_minus_muhat;
 }
 
-void test_allocation(const void * pointer, const char * location ){ 
+void test_allocation_in_function(const void * pointer, const char * location ){ 
     //	Test if allocation was successful.
     if ( pointer == NULL ) {
 			
@@ -141,22 +139,27 @@ void test_allocation(const void * pointer, const char * location ){
 	}
 }
 
-mtrx_3x3_double *get_link(mtrx_3x3_double *U, const pos_vec position, const lorentz_idx mu) {
+mtrx_3x3 *get_link(mtrx_3x3 *U, const pos_vec position, const lorentz_idx mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + GET_LINK(position, mu);
 }
 
-mtrx_3x3_float *get_link_f(mtrx_3x3_float *U, const pos_vec position, const lorentz_idx mu) {
+in_cfg_data_type *get_link_in(in_cfg_data_type *U, const pos_vec position, const lorentz_idx mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + GET_LINK(position, mu);
 }
 
-void get_link_matrix(mtrx_3x3_double * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3_double * u){
+out_cfg_data_type *get_link_out(out_cfg_data_type *U, const pos_vec position, const lorentz_idx mu) {
+    //	Does the pointer arithmetic to get a pointer to link at given position and mu
+    return U + GET_LINK(position, mu);
+}
+
+void get_link_matrix(mtrx_3x3 * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3 * u){
 	
 	// Gets forward or backward link at given position and mu
 	// and copies it to u.
 
-    mtrx_3x3_double u_aux;
+    mtrx_3x3 u_aux;
 
 	if (dir == FRONT) {
 
@@ -191,16 +194,41 @@ void handle_input(int argc, char *argv[]){
 	strcpy(config_template, argv[2]); 
 }
 
+bool is_in_exception_list(const int config_nr){
 
-const char *name_configuration_file(const unsigned config_number, char * config_filename) {
+    for( int i = 0; config_exception_list[i] != -1; i++ ){
+
+        if(config_nr ==  config_exception_list[i]){
+            
+            return true;
+        }
     
-    //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, N_SPC, N_T);
-    sprintf(config_filename,"%s%s_%dx%d_%d", configs_dir_name, config_template, N_SPC, N_T, config_number);
+    }
+
+    return false;
 }
 
-void SU3_load_config(const unsigned config_nr, mtrx_3x3_double *U) {
+const char *name_configuration_file(const unsigned config_nr, char * config_filename) {
+    
+    //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, N_SPC, N_T);
+    sprintf(config_filename,"%s%s_%dx%d_%d", configs_dir_name, config_template, N_SPC, N_T, config_nr);
+}
+
+void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
     //	Loads a link configuration from the file with filename to U.
 
+    in_cfg_data_type * U_in;
+
+    #ifdef NEED_CONV_TO_WORKING_PRECISION
+        
+        U_in = (in_cfg_data_type *) malloc(VOLUME * DIM * sizeof(in_cfg_data_type));
+	    TEST_ALLOCATION(U_in);
+
+    #else
+
+        U_in = (in_cfg_data_type *) U;
+
+    #endif
 
     char config_filename[MAX_LENGTH_NAME];
 	name_configuration_file(config_nr, config_filename);
@@ -217,44 +245,38 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3_double *U) {
 
     }
 
-    //  IF READING FROM DOUBLE, THEN THE U_in JUST HAS TO POINT TO U
-    //  MAKE HANDLING LIKE FOR U_out
-
-    in_cfg_data_type * U_in = (in_cfg_data_type *) malloc(VOLUME * DIM * sizeof(in_cfg_data_type));
-	test_allocation(U_in, "SU3_load_config");
-
     if (fread(U_in, sizeof(in_cfg_data_type),  VOLUME * DIM , config_file) == VOLUME * DIM) {
-        puts("U Loaded OK\n");
+        printf("U Loaded OK for config %d.\n", config_nr);
     } else {
-        fprintf(stderr, "Configuration loading failed.\n");
+        fprintf(stderr, "Configuration loading failed for config %d.\n", config_nr);
         exit(EXIT_FAILURE);
     }
 
     fclose(config_file);
 
-    //  PASSAR ISSO PARA O PREPROCESSOR
-    if(NEED_BYTE_SWAP_IN){
+    #ifdef NEED_BYTE_SWAP_IN
 
-    	byte_swap(U_in, sizeof(float) , VOLUME * DIM * sizeof(in_cfg_data_type));
+    	byte_swap(U_in, sizeof(in_data_type) / 2 , VOLUME * DIM * sizeof(in_cfg_data_type));
     
-    }
-
-    SU3_convert_config_fd(U_in, U);
-	free(U_in);
-
+    #endif
+    
+    #ifdef NEED_CONV_TO_WORKING_PRECISION
+        SU3_convert_config_in_work(U_in, U);    
+	    free(U_in);
+    #endif
 }
 
-void SU3_write_config(const unsigned config_nr, mtrx_3x3_double *U) {
+void SU3_write_config(const unsigned config_nr, mtrx_3x3 *U) {
     //  Loads a link configuration from the file with filename to U.
     
     out_cfg_data_type * U_out;
 
-    #ifdef NEED_CONV_FROM_DOUBLE
+    #ifdef NEED_CONV_FROM_WORKING_PRECISION
         
         U_out = (out_cfg_data_type *) malloc(VOLUME * DIM * sizeof(out_cfg_data_type));
-	    test_allocation(U_out, "SU3_write_config");
+	    TEST_ALLOCATION(U_out);
 
-     	SU3_convert_config_df(U, U_out);
+     	SU3_convert_config_work_out(U, U_out);
 
     #else
 
@@ -262,9 +284,11 @@ void SU3_write_config(const unsigned config_nr, mtrx_3x3_double *U) {
 
     #endif
 
-    if(NEED_BYTE_SWAP_OUT){
-    	byte_swap(U_out, sizeof(float) , VOLUME * DIM * sizeof(out_cfg_data_type));
-    }
+    #ifdef NEED_BYTE_SWAP_OUT
+
+    	byte_swap(U_out, sizeof(out_data_type) / 2 , VOLUME * DIM * sizeof(out_cfg_data_type));
+    
+    #endif
 
     char config_filename[MAX_LENGTH_NAME];
 	name_configuration_file(config_nr, config_filename);
@@ -282,11 +306,11 @@ void SU3_write_config(const unsigned config_nr, mtrx_3x3_double *U) {
     if (fwrite(U_out, sizeof(out_cfg_data_type), VOLUME * DIM , config_file)
                                                                  == VOLUME * DIM) {
        
-        puts("U written OK.\n");
+        printf("U written OK for config %d.\n", config_nr);
 
     } else {
 
-        fprintf(stderr,"Configuration writing failed.\n");
+        fprintf(stderr,"Configuration writing failed for config %d.\n", config_nr);
 
     }
 
@@ -299,7 +323,7 @@ void SU3_write_config(const unsigned config_nr, mtrx_3x3_double *U) {
 }
 
 
-void copy_3x3_config(mtrx_3x3_double *U, mtrx_3x3_double *U_copy) {
+void copy_3x3_config(mtrx_3x3 *U, mtrx_3x3 *U_copy) {
     // Copies configuration with pointer U to the one with pointer U_copy.
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
@@ -321,7 +345,7 @@ void copy_3x3_config(mtrx_3x3_double *U, mtrx_3x3_double *U_copy) {
         }
 }
 
-void SU3_convert_config_fd(mtrx_3x3_float *U_float, mtrx_3x3_double *U_double) {
+void SU3_convert_config_in_work(in_cfg_data_type *U_in, work_cfg_data_type *U_work) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
@@ -333,7 +357,7 @@ void SU3_convert_config_fd(mtrx_3x3_float *U_float, mtrx_3x3_double *U_double) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_idx mu = 0; mu < DIM; mu++) {
 
-                            convert_fd_3x3(get_link_f(U_float, position, mu), get_link(U_double, position, mu));
+                            convert_in_work_3x3(get_link_in(U_in, position, mu), get_link(U_work, position, mu));
                         
                         }
                     }
@@ -342,7 +366,7 @@ void SU3_convert_config_fd(mtrx_3x3_float *U_float, mtrx_3x3_double *U_double) {
         }
 }
 
-void SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float) {
+void SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *U_out) {
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
         // Paralelizing by slicing the time extent
@@ -354,7 +378,7 @@ void SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_idx mu = 0; mu < DIM; mu++) {
 
-                            convert_df_3x3(get_link(U_double, position, mu), get_link_f(U_float, position, mu));
+                            convert_work_out_3x3(get_link(U_work, position, mu), get_link_out(U_out, position, mu));
                         
                         }
                     }
@@ -363,7 +387,7 @@ void SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float) {
         }
 }
 
-// typedef void (*loop_f)(mtrx_3x3_double *, ...);
+// typedef void (*loop_f)(mtrx_3x3 *, ...);
 
 // typedef enum {
 //     CHAR,
@@ -372,7 +396,7 @@ void SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float) {
 //     DOUBLE
 // } TYPE;
 
-// void loop_over_links(int num_arg, loop_f f, mtrx_3x3_double *U, TYPE type,  ...) {
+// void loop_over_links(int num_arg, loop_f f, mtrx_3x3 *U, TYPE type,  ...) {
 //     // Generic loop
 
 //     va_list arguments;
@@ -392,7 +416,7 @@ void SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float) {
 //                                     f(get_link(U, position, mu), get_link_f(va_arg(arguments, mtrx_3x3_float *),position, mu));
 //                                     break;
 //                                 case DOUBLE:
-//                                     f(get_link(U, position, mu), get_link(va_arg(arguments, mtrx_3x3_double *),position, mu));
+//                                     f(get_link(U, position, mu), get_link(va_arg(arguments, mtrx_3x3 *),position, mu));
 //                                     break;
 //                                 default:
 //                                     break;
@@ -407,13 +431,13 @@ void SU3_convert_config_df(mtrx_3x3_double *U_double, mtrx_3x3_float *U_float) {
 //     va_end(arguments);
 // }
 
-// void SU3_reunitarize(mtrx_3x3_double *U) {
+// void SU3_reunitarize(mtrx_3x3 *U) {
 //     // Reunitarizes the configuration
 //     // printf("here\n");
 //     loop_over_links(1, projection_SU3, U, DOUBLE);
 // }
 
-void check_det_1(mtrx_3x3_double *U) {
+void check_det_1(mtrx_3x3 *U) {
 
     double det = 0.0;
     // Reunitarizes the configuration
@@ -437,7 +461,7 @@ void check_det_1(mtrx_3x3_double *U) {
     printf("average determinant: %.15lf\n", det / (DIM * VOLUME));
 }
 
-void SU3_reunitarize(mtrx_3x3_double *U) {
+void SU3_reunitarize(mtrx_3x3 *U) {
     // Reunitarizes the configuration
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)

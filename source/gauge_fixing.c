@@ -20,11 +20,11 @@ typedef enum {R, S, T} submatrix;
 #define sweeps_to_next_measurement(e2)  10 + (unsigned)(initial_sweeps_to_measurement_e2 \
                                         * (1.0 - log10((e2)) / log10(tolerance)))
 
-static void SU3_local_update_U(mtrx_3x3_double *U, const pos_vec position, 
-                                                        const mtrx_3x3_double *g) {
+static void SU3_local_update_U(mtrx_3x3 *U, const pos_vec position, 
+                                                        const mtrx_3x3 *g) {
     //	Updates U only at a given position
 
-    mtrx_3x3_double g_dagger;
+    mtrx_3x3 g_dagger;
 
     for (lorentz_idx mu = 0; mu < DIM; mu++) {
         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
@@ -40,14 +40,14 @@ static void SU3_local_update_U(mtrx_3x3_double *U, const pos_vec position,
     }
 }
 
-static void SU3_calculate_w(mtrx_3x3_double *U, const pos_vec position,
-                                                         mtrx_3x3_double *w) {
+static void SU3_calculate_w(mtrx_3x3 *U, const pos_vec position,
+                                                         mtrx_3x3 *w) {
     //	Calculates 	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision, following the notation in hep-lat/9306018
     //	returns result in w.
 
     set_null_3x3(w);  //	Initializing w(n)=0
 
-    mtrx_3x3_double u_dagger_rear;
+    mtrx_3x3 u_dagger_rear;
 
     // w(n)	calculation
 
@@ -63,7 +63,7 @@ static void SU3_calculate_w(mtrx_3x3_double *U, const pos_vec position,
     }
 }
     
-static double SU3_calculate_e2(mtrx_3x3_double *U) {
+static double SU3_calculate_e2(mtrx_3x3 *U) {
     //	Calculates e2 (defined in hep-lat/0301019v2),
     //	used to find out distance to the gauge-fixed situation.
  
@@ -72,7 +72,7 @@ static double SU3_calculate_e2(mtrx_3x3_double *U) {
     #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
-            mtrx_3x3_double div_A;
+            mtrx_3x3 div_A;
             matrix_SU3_alg div_A_components;
             pos_vec position;
 
@@ -104,8 +104,8 @@ static double SU3_calculate_e2(mtrx_3x3_double *U) {
     return e2;
 }
 
-static void SU3_update_sub_LosAlamos(const mtrx_3x3_double *matrix_SU3, submatrix sub, 
-                                                            mtrx_3x3_double *update_SU3) {
+static void SU3_update_sub_LosAlamos(const mtrx_3x3 *matrix_SU3, submatrix sub, 
+                                                            mtrx_3x3 *update_SU3) {
     SU3_color_idx a, b;
 
     set_null_3x3(update_SU3);
@@ -138,16 +138,16 @@ static void SU3_update_sub_LosAlamos(const mtrx_3x3_double *matrix_SU3, submatri
                                 - I * matrix_SU2.m[3];
 }
 
-static void SU3_LosAlamos_common_block(const mtrx_3x3_double *w, 
-                                            mtrx_3x3_double *total_update) {
+static void SU3_LosAlamos_common_block(const mtrx_3x3 *w, 
+                                            mtrx_3x3 *total_update) {
     //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
     //	algorithm for SU(3), with a division of the update matrix in submatrices
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
     //	of "hits" to be performed one after another.
 
-    mtrx_3x3_double update;
+    mtrx_3x3 update;
 
-    mtrx_3x3_double updated_w;
+    mtrx_3x3 updated_w;
 
     copy_3x3(w, &updated_w);
     set_identity_3x3(total_update);
@@ -167,16 +167,16 @@ static void SU3_LosAlamos_common_block(const mtrx_3x3_double *w,
     }
 }
 
-static void SU3_gaugefixing_overrelaxation(mtrx_3x3_double *U, const pos_vec position) {
+static void SU3_gaugefixing_overrelaxation(mtrx_3x3 *U, const pos_vec position) {
     //	Generalization of the algorithm described in hep-lat/0301019v2, using the
     //	Cabbibo-Marinari submatrices trick.
     //	It updates the g at the given position.
 
-    mtrx_3x3_double w;
+    mtrx_3x3 w;
 
     SU3_calculate_w(U, position, &w);  //	Calculating w(n)=h(n) for red black subdivision
 
-    mtrx_3x3_double update_LA;
+    mtrx_3x3 update_LA;
 
     SU3_LosAlamos_common_block(&w, &update_LA);
 
@@ -188,7 +188,7 @@ static void SU3_gaugefixing_overrelaxation(mtrx_3x3_double *U, const pos_vec pos
     the first two terms of the binomial expansion: 
     update_LA^omega=I+omega(update_LA-I)+...=I(1-omega)+omega*update_LA+...*/
 
-    mtrx_3x3_double update_OR;
+    mtrx_3x3 update_OR;
 
     // update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA)
     set_identity_3x3(&update_OR);
@@ -201,7 +201,7 @@ static void SU3_gaugefixing_overrelaxation(mtrx_3x3_double *U, const pos_vec pos
     SU3_local_update_U(U, position, &update_OR);
 }
 
-unsigned SU3_gauge_fix(mtrx_3x3_double *U, const unsigned short config) {
+unsigned SU3_gauge_fix(mtrx_3x3 *U, const unsigned short config) {
     //	Fix the gauge and follows the process by calculating e2;
 
     pos_vec position;

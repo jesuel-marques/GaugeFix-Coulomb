@@ -7,8 +7,9 @@
 #include "lattice.h"
 #include "SU3_ops.h"
 
-void print_matrix_3x3(const mtrx_3x3_double *u, const char *name) {
-    // Prints the matrix on screen
+void print_matrix_3x3(const mtrx_3x3 *u, const char *name, const unsigned short decimal_places) {
+    // Prints the matrix on screen with a given number of decimal places and 
+    // adds a name on the top
 
     printf("\n\n %s \n", name);
 
@@ -17,13 +18,13 @@ void print_matrix_3x3(const mtrx_3x3_double *u, const char *name) {
         printf("{");
 
         for (SU3_color_idx b = 0; b < Nc; b++) {
-            printf("%.16lf+I(%.16lf)", creal(u->m[elm(a, b)]), 
-                                       cimag(u->m[elm(a, b)]));
+            printf("%.*lf+I(%.*lf)", decimal_places, creal(u->m[elm(a, b)]), 
+                                     decimal_places, cimag(u->m[elm(a, b)]));
             
-            b != 2 ?  printf(",") : 0 ;
+            b != Nc -1 ?  printf(",") : 0 ;
         }
 
-        a != 2 ?  printf("},\n") : 0 ;
+        a != Nc - 1 ?  printf("},\n") : 0 ;
     }
 
     printf("}}\n\n");
@@ -31,7 +32,7 @@ void print_matrix_3x3(const mtrx_3x3_double *u, const char *name) {
     getchar();
 }
 
-void copy_3x3(const mtrx_3x3_double *u, mtrx_3x3_double *u_copy) {
+void copy_3x3(const mtrx_3x3 *u, mtrx_3x3 *u_copy) {
     // Copies u to u_copy
 
     for (SU3_color_idx a = 0; a < Nc; a++) {
@@ -43,33 +44,34 @@ void copy_3x3(const mtrx_3x3_double *u, mtrx_3x3_double *u_copy) {
     }
 }
 
-void convert_fd_3x3(const mtrx_3x3_float *u_float, mtrx_3x3_double *u_double) {
+void convert_in_work_3x3(const in_cfg_data_type *u_in, 
+                             work_cfg_data_type *u_work) {
     // Converts 3x3 matrix with single precision u_float to u_double with double precision
 
     for (SU3_color_idx a = 0; a < Nc; a++) {
         for (SU3_color_idx b = 0; b < Nc; b++) {
 
-            u_double -> m[elm(a, b)] = (double complex) u_float -> m[elm(a, b)];
+            u_work -> m[elm(a, b)] = (work_data_type) u_in -> m[elm(a, b)];
 
         }
     }
 }
 
-void convert_df_3x3(const mtrx_3x3_double *u_double, 
-                          mtrx_3x3_float *u_float) {
+void convert_work_out_3x3(const work_cfg_data_type *u_work, 
+                                 out_cfg_data_type *u_out) {
     // Converts 3x3 matrix with single precision 
     // u_float to u_double with double precision
 
     for (SU3_color_idx a = 0; a < Nc; a++) {
         for (SU3_color_idx b = 0; b < Nc; b++) {
 
-            u_float -> m[elm(a, b)] = (float complex) u_double -> m[elm(a, b)];
+            u_out -> m[elm(a, b)] = (out_data_type) u_work -> m[elm(a, b)];
 
         }
     }
 }
 
-inline void set_null_3x3(mtrx_3x3_double * u) {
+inline void set_null_3x3(mtrx_3x3 * u) {
     // Sets u to be the 3x3 null matrix
 
     for (SU3_color_idx a = 0; a < Nc; a++) {
@@ -81,7 +83,7 @@ inline void set_null_3x3(mtrx_3x3_double * u) {
     }
 }
 
-inline void set_identity_3x3(mtrx_3x3_double *u) {
+inline void set_identity_3x3(mtrx_3x3 *u) {
     // Sets u to be the identity matrix in SU(3)
 
     for (SU3_color_idx a = 0; a < Nc; a++) {
@@ -93,7 +95,7 @@ inline void set_identity_3x3(mtrx_3x3_double *u) {
     }
 }
 
-void accumulate_3x3(const mtrx_3x3_double *u, mtrx_3x3_double *acc) {
+void accumulate_3x3(const mtrx_3x3 *u, mtrx_3x3 *acc) {
     // Accumulates the value of u into acc
 
     for (SU3_color_idx a = 0; a < Nc; a++) {
@@ -105,9 +107,9 @@ void accumulate_3x3(const mtrx_3x3_double *u, mtrx_3x3_double *acc) {
     }
 }
 
-void subtraction_3x3(const mtrx_3x3_double *u, 
-                     const mtrx_3x3_double *v,
-                                mtrx_3x3_double *u_minus_v) {
+void subtraction_3x3(const mtrx_3x3 *u, 
+                     const mtrx_3x3 *v,
+                                mtrx_3x3 *u_minus_v) {
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
 
@@ -121,7 +123,7 @@ void subtraction_3x3(const mtrx_3x3_double *u,
     }
 }
 
-double complex trace_3x3(const mtrx_3x3_double *u) {
+work_data_type trace_3x3(const mtrx_3x3 *u) {
     //	Calculates the trace of the matrix u
     //  and returns result (complex) in tr
 
@@ -130,7 +132,7 @@ double complex trace_3x3(const mtrx_3x3_double *u) {
          + u -> m[elm(2, 2)];
 }
 
-inline double complex determinant_3x3(const mtrx_3x3_double *u) {
+inline work_data_type determinant_3x3(const mtrx_3x3 *u) {
     //  Calculates the determinant of the matrix u
     //  and returns result, a complex number, in det.
 
@@ -145,7 +147,7 @@ inline double complex determinant_3x3(const mtrx_3x3_double *u) {
                               - u -> m[elm(1, 1)] * u -> m[elm(2, 0)]);
 }
 
-inline void SU3_herm_conj(const mtrx_3x3_double *u, mtrx_3x3_double *u_dagger) {
+inline void SU3_herm_conj(const mtrx_3x3 *u, mtrx_3x3 *u_dagger) {
     // Calculates the hermitean conjugate to u
     // and returns result in u_dagger.
 
@@ -163,8 +165,8 @@ inline void SU3_herm_conj(const mtrx_3x3_double *u, mtrx_3x3_double *u_dagger) {
     }
 }
 
-inline void mult_by_scalar_3x3(const double complex alpha, const mtrx_3x3_double *u,
-                                            mtrx_3x3_double *alpha_times_u) {
+inline void mult_by_scalar_3x3(const work_data_type alpha, const mtrx_3x3 *u,
+                                            mtrx_3x3 *alpha_times_u) {
     //  Calculates multiplication of 3x3 matrix u by scalar alpha
     //  and returns result in alphatimesu.
 
@@ -178,8 +180,8 @@ inline void mult_by_scalar_3x3(const double complex alpha, const mtrx_3x3_double
     }
 }
 
-inline void subst_mult_scalar_3x3(const double complex alpha, 
-                                                                mtrx_3x3_double *u) {
+inline void subst_mult_scalar_3x3(const work_data_type alpha, 
+                                                                mtrx_3x3 *u) {
     //  Calculates multiplication of 3x3 matrix u by scalar alpha
     //  and returns result in u.
 
@@ -193,9 +195,9 @@ inline void subst_mult_scalar_3x3(const double complex alpha,
     }
 }
 
-inline void prod_3x3(const mtrx_3x3_double *u, 
-                        const mtrx_3x3_double *v, 
-                                    mtrx_3x3_double *uv) {
+inline void prod_3x3(const mtrx_3x3 *u, 
+                        const mtrx_3x3 *v, 
+                                    mtrx_3x3 *uv) {
     // Calculates product of 2 3x3 matrices u e v
     // and returns result in uv.
 
@@ -212,10 +214,10 @@ inline void prod_3x3(const mtrx_3x3_double *u,
     }
 }
 
-void prod_three_3x3(const mtrx_3x3_double *u, 
-                       const mtrx_3x3_double *v,
-                       const mtrx_3x3_double *w,
-                                mtrx_3x3_double *uvw) {
+void prod_three_3x3(const mtrx_3x3 *u, 
+                       const mtrx_3x3 *v,
+                       const mtrx_3x3 *w,
+                                mtrx_3x3 *uvw) {
     //  Calculates product of 3 3x3 matrices u, v and w
     //  and returns result in uvw.
 
@@ -235,11 +237,11 @@ void prod_three_3x3(const mtrx_3x3_double *u,
     }
 }
 
-void prod_four_3x3(const mtrx_3x3_double *u, 
-                      const mtrx_3x3_double *v,
-                      const mtrx_3x3_double *w,
-                      const mtrx_3x3_double *x, 
-                                mtrx_3x3_double *uvwx){
+void prod_four_3x3(const mtrx_3x3 *u, 
+                      const mtrx_3x3 *v,
+                      const mtrx_3x3 *w,
+                      const mtrx_3x3 *x, 
+                                mtrx_3x3 *uvwx){
     //  Calculates product of 3 3x3 matrices u, v and w
     //  and returns result in uvw.
 
@@ -262,18 +264,18 @@ void prod_four_3x3(const mtrx_3x3_double *u,
     }
 }
 
-inline void accum_left_prod_3x3(const mtrx_3x3_double *g, mtrx_3x3_double *acc_prod) {
+inline void accum_left_prod_3x3(const mtrx_3x3 *g, mtrx_3x3 *acc_prod) {
     //	Calculates matrix product between g and acc_prod and accumulates result in acc_prod
-    mtrx_3x3_double aux_prod;
+    mtrx_3x3 aux_prod;
  
     copy_3x3(acc_prod, &aux_prod);
     prod_3x3(g, &aux_prod, acc_prod);
 
 }
 
-inline void accum_right_prod_3x3(mtrx_3x3_double *acc_prod, const mtrx_3x3_double *g) {
+inline void accum_right_prod_3x3(mtrx_3x3 *acc_prod, const mtrx_3x3 *g) {
     //	Calculates matrix product between acc_prod and g and accumulates result in acc_prod
-    mtrx_3x3_double aux_prod;
+    mtrx_3x3 aux_prod;
 
     copy_3x3(acc_prod, &aux_prod);
     prod_3x3(&aux_prod, g, acc_prod);
@@ -320,7 +322,8 @@ inline void cross_product_conj(color_3_vec u, color_3_vec v, color_3_vec* u_cros
                                 - u.m[1] * v.m[0]);
 
 }
-inline void projection_SU3(mtrx_3x3_double *x) {
+
+inline void projection_SU3(mtrx_3x3 *x) {
     //	Projects matrix x to the group SU(3) 
     //  returning SU(3) matrix x at the end.
     //	Follows method found in openqcd fastsum code.
@@ -350,7 +353,7 @@ inline void projection_SU3(mtrx_3x3_double *x) {
 
 }
 
-void decompose_algebra_SU3(const mtrx_3x3_double *a, matrix_SU3_alg *a_components) {
+void decompose_algebra_SU3(const mtrx_3x3 *a, matrix_SU3_alg *a_components) {
     //  Decomposes A in the components of the alfebra of SU(3)
     //  using the Gell-Mann matrices a basis and following the conventions
     //  of Gattringer. The components are then returned in a_components
@@ -385,7 +388,7 @@ void decompose_algebra_SU3(const mtrx_3x3_double *a, matrix_SU3_alg *a_component
                      - 2.0 * creal(a -> m[elm(2, 2)])) / pow(3.0, 0.5);
 }
 
-// inline void old_projection_SU3(mtrx_3x3_double *x) {
+// inline void old_projection_SU3(mtrx_3x3 *x) {
 //     //	Projects matrix u to the group SU(3) returning SU(3) matrix x at the end.
 //     //	Follows method found in Gattringer around Eq. 4.27.
 //     //  More explanation below.
@@ -399,10 +402,10 @@ void decompose_algebra_SU3(const mtrx_3x3_double *a, matrix_SU3_alg *a_component
 //         //  to be used for normalization below.
 //     }
 
-//     mtrx_3x3_double x_SU3;
+//     mtrx_3x3 x_SU3;
 
 //     //  Used in the Gram-Schmidt
-//     double complex v_unewconj = 0.0;  //  method to calculate
+//     complex double v_unewconj = 0.0;  //  method to calculate
 //                                       //  second line of projected
 //                                       //  matrix.
     
@@ -424,7 +427,7 @@ void decompose_algebra_SU3(const mtrx_3x3_double *a, matrix_SU3_alg *a_component
 
 //     }
 
-//     double complex v_prime[Nc];
+//     complex double v_prime[Nc];
 //     //	Used in the Gram-Schmidt  method to calculate
 //     //  second line of projected matrix.
 

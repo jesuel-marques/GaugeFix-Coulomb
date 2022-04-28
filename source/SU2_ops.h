@@ -1,10 +1,12 @@
 #ifndef SU2OPS_H
 #define SU2OPS_H
 
+#include "lattice.h"
+
 typedef unsigned short SU2_color_index;
 
 typedef struct {
-    double complex m[4];
+    work_data_type m[4];
 } matrix_2x2_ck;
 
 void copy_2x2(const matrix_2x2_ck * u, matrix_2x2_ck* u_copy);

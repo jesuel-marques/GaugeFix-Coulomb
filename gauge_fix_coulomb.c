@@ -34,11 +34,14 @@ const char extension_out[] = "_clmbgf.cfg";
 const char configs_dir_name[MAX_LENGTH_NAME];	//	input from command line
 const char config_template[MAX_LENGTH_NAME] ;	//	input from command line
 
+int config_exception_list[] = {-1};
+
 int main(int argc, char *argv[]) {
 
 	handle_input(argc, argv);
 
 	#ifdef MPI_CODE
+	//	If compiling for running with MPI, then these things have to be defined
 	//Starts MPI
 	MPI_Init(&argc,&argv);
 	int rank, size;
@@ -55,16 +58,21 @@ int main(int argc, char *argv[]) {
 	for (int config = rank + 1; config <= nconfig; config += size) {
 
 	#else
-		#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic)
-		for (unsigned config = 1; config <= MAX_CONFIGS; config ++) {
+	//	If compiling for not running with MPI, then just use a simple for loop
+		// #pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic)
+		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 			
 	#endif 
-			int actual_config_nr = FIRST_CONFIG + CONFIG_STEP * (config - 1);
+			int actual_config_nr = FIRST_CONFIG + CONFIG_STEP * config;
 			
-			if(actual_config_nr == 820 || actual_config_nr == 8200) continue;
+			if(is_in_exception_list(actual_config_nr)) {
+				//	configurations which don't actually exist
+				printf("Skiping configuration %d for being in the exception list.\n", actual_config_nr);
+				continue;
+			}
 			
-			mtrx_3x3_double * U = (mtrx_3x3_double *) malloc(VOLUME * DIM * sizeof(mtrx_3x3_double));
-			test_allocation(U, "main");
+			mtrx_3x3 * U = (mtrx_3x3 *) malloc(VOLUME * DIM * sizeof(mtrx_3x3));
+			TEST_ALLOCATION(U);
 			
 			SU3_load_config(actual_config_nr, U);
 

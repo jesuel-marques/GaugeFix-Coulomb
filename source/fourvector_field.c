@@ -9,24 +9,24 @@
 
 #include "SU3_ops.h"  //	SU(3) operations
 
-void SU3_calculate_A(mtrx_3x3_double *U, const pos_vec position, const lorentz_idx mu,
-                                                                     mtrx_3x3_double *A) {
+void SU3_calculate_A(mtrx_3x3 *U, const pos_vec position, const lorentz_idx mu,
+                                                                     mtrx_3x3 *A) {
     //	Calculates the vector A_mu(n) field
     // The formula is A_mu(n)=((U - U_dagger)/2i)|traceless
 
-    mtrx_3x3_double *local_U = get_link(U, position, mu);
-    mtrx_3x3_double U_dagger;
+    mtrx_3x3 *local_U = get_link(U, position, mu);
+    mtrx_3x3 U_dagger;
 
     SU3_herm_conj(local_U, &U_dagger);
 
-    mtrx_3x3_double U_minus_Udagger;
+    mtrx_3x3 U_minus_Udagger;
 
     //	(U - U_dagger)/2i
     subtraction_3x3(local_U, &U_dagger, &U_minus_Udagger);
     mult_by_scalar_3x3(-0.5 * I, &U_minus_Udagger, A);
 
     //  Subtract the trace part
-    mtrx_3x3_double trace_part;
+    mtrx_3x3 trace_part;
     
     set_identity_3x3(&trace_part);
     subst_mult_scalar_3x3(-( 1.0 / Nc) * trace_3x3(A), &trace_part);
@@ -35,15 +35,15 @@ void SU3_calculate_A(mtrx_3x3_double *U, const pos_vec position, const lorentz_i
 
 }
 
-void SU3_divergence_A(mtrx_3x3_double *U, const pos_vec position, 
-                                            mtrx_3x3_double *div_A) {
+void SU3_divergence_A(mtrx_3x3 *U, const pos_vec position, 
+                                            mtrx_3x3 *div_A) {
     //	Calculates the divergence of the field A on the lattice
     //  and returns it in div_A.
 
-    mtrx_3x3_double A1;
-    mtrx_3x3_double A2;
+    mtrx_3x3 A1;
+    mtrx_3x3 A2;
 
-    mtrx_3x3_double term_divA;
+    mtrx_3x3 term_divA;
 
     set_null_3x3(div_A);
     for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {

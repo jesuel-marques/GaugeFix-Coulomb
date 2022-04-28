@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <complex.h>
+#include <stdbool.h>
 
 #ifdef MPI_CODE
 
@@ -23,7 +24,7 @@
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 #include "source/SU3_ops.h"
 
-
+#include "source/measurement.h"
 
 
 const char extension_in[] = "_clmbgf.cfg";
@@ -56,25 +57,33 @@ int main(int argc, char *argv[]) {
 
 	#else
 
-		for (unsigned config = 1; config <= MAX_CONFIGS; config ++) {
+		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 
 	#endif 
-			int actual_config_nr = 1000 + 10 * (config - 1);
-
-			mtrx_3x3_double * U = (mtrx_3x3_double *) malloc(VOLUME * DIM * sizeof(mtrx_3x3_double));
-			test_allocation(U, "main");
-
+			int actual_config_nr = FIRST_CONFIG + CONFIG_STEP * config;
+			
+			if(is_in_exception_list(actual_config_nr)) {
+				//	configurations which don't actually exist
+				printf("Skiping configuration %d for being in the exception list.", actual_config_nr);
+				continue;
+			}
+			
+			mtrx_3x3 * U = (mtrx_3x3 *) malloc(VOLUME * DIM * sizeof(mtrx_3x3));
+			TEST_ALLOCATION(U);
+			
 			SU3_load_config(actual_config_nr, U);
 
-			print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link");
+			print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link", 10);
 			getchar();
 		
-			print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link");
+			print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link", 10);
 			getchar();
 			
 			//  calculate plaquette average
 			printf("Spatial plaquete  %.10lf\n", spatial_plaquette_average(U));
 			printf("Temporal plaquete %.10lf\n", temporal_plaquette_average(U));
+
+			check_det_1(U);
 
 			free(U);
 		

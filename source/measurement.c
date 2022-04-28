@@ -7,16 +7,16 @@
 #include "lattice.h"
 #include "SU3_ops.h"
 
-double SU3_re_tr_plaquette(mtrx_3x3_double *U, const pos_vec position, 
+double SU3_re_tr_plaquette(mtrx_3x3 *U, const pos_vec position, 
                                                const lorentz_idx mu, 
                                                const lorentz_idx nu){
 	
-    mtrx_3x3_double plaquette;
+    mtrx_3x3 plaquette;
 
-    mtrx_3x3_double ua;
-    mtrx_3x3_double ub;
-    mtrx_3x3_double uc;
-    mtrx_3x3_double ud;
+    mtrx_3x3 ua;
+    mtrx_3x3 ub;
+    mtrx_3x3 uc;
+    mtrx_3x3 ud;
 
     pos_vec position_plus_mu = hop_position_positive(position, mu);
 
@@ -31,7 +31,7 @@ double SU3_re_tr_plaquette(mtrx_3x3_double *U, const pos_vec position,
 
 }
 
-double spatial_plaquette_average(mtrx_3x3_double * U){
+double spatial_plaquette_average(mtrx_3x3 * U){
     double plaq_ave = 0.0;
 
 
@@ -70,7 +70,7 @@ double spatial_plaquette_average(mtrx_3x3_double * U){
     return plaq_ave;
 }
 
-double temporal_plaquette_average(mtrx_3x3_double * U){
+double temporal_plaquette_average(mtrx_3x3 * U){
     double plaq_ave = 0.0;
 
 
