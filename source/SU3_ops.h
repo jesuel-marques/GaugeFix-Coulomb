@@ -3,7 +3,7 @@
 
 #include "lattice.h"
 
-#define elm(a,b)    (a) * Nc + (b)  //  used to get the element of matrices
+#define ELM(a,b)    (a) * Nc + (b)  //  used to get the element of matrices
 
 typedef unsigned short SU3_color_idx;
 typedef unsigned short SU3_alg_idx;
@@ -47,6 +47,8 @@ void prod_three_3x3(const mtrx_3x3 *u, const mtrx_3x3 *v, const mtrx_3x3 *w, mtr
 
 void accum_left_prod_3x3(const mtrx_3x3 *g, mtrx_3x3 *acc_prod),
      accum_right_prod_3x3(mtrx_3x3 *acc_prod, const mtrx_3x3 *g);
+
+void power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_3x3 * restrict A_to_omega );
 
 void projection_SU3(mtrx_3x3 *x);
 

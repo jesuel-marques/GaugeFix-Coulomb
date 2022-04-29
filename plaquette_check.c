@@ -53,9 +53,9 @@ int main(int argc, char *argv[]) {
 	int config_per_rank = nconfig / size;
 	// The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
 	for (int config = rank + 1; config <= nconfig; config += size) {
-	#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic)
 
 	#else
+		//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic)
 
 		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 

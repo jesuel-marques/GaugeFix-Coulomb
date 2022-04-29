@@ -27,10 +27,10 @@ typedef enum {REAR, FRONT} direction;
 
 //  Associations between the numeric indices and the lorentz directions
 
-#define x_index 0
-#define y_index 1
-#define z_index 2
-#define t_index 3
+#define X_INDX 0
+#define Y_INDX 1
+#define Z_INDX 2
+#define T_INDX 3
 
 //  Does the pointer arithmetic to get the correct index in the configuration
 
@@ -62,7 +62,7 @@ typedef work_cfg_data_type mtrx_3x3;
 
 
 #define TEST_ALLOCATION(a) test_allocation_in_function(a, __func__) //  used to test if allocation was successful
-
+#define GREETER()   greeter_function(__FILE__)
 
 pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t);
 
@@ -81,6 +81,8 @@ in_cfg_data_type *get_link_in(in_cfg_data_type *U_in, const pos_vec position, co
 out_cfg_data_type *get_link_out(out_cfg_data_type *U_out, const pos_vec position, const lorentz_idx mu);
 
 void get_link_matrix(mtrx_3x3 * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3 * u);
+
+void greeter_function(char * program_name);
 
 void handle_input(int argc, char *argv[]);
 

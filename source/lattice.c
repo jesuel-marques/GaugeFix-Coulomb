@@ -15,7 +15,6 @@
 #include "lattice.h"  //	Initialization functions and calculations of
                       //	positions and links on the lattice.
 
-
 extern char config_template[];
 extern char configs_dir_name[];
 extern char extension_in[];
@@ -49,28 +48,28 @@ inline pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu) {
     pos_vec u_plus_muhat;
 
     switch (mu) {
-        case x_index:
+        case X_INDX:
             u_plus_muhat.i = ((u.i + 1) % N_SPC);
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
             break;
 
-        case y_index:
+        case Y_INDX:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = ((u.j + 1) % N_SPC);
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
             break;
 
-        case z_index:
+        case Z_INDX:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = ((u.k + 1) % N_SPC);
             u_plus_muhat.t = u.t;
             break;
 
-        case t_index:
+        case T_INDX:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
@@ -94,28 +93,28 @@ inline pos_vec hop_position_negative(const pos_vec u, const lorentz_idx mu) {
 
     switch (mu) {
 
-        case x_index:
+        case X_INDX:
             u_minus_muhat.i = (((u.i - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
             break;
 
-        case y_index:
+        case Y_INDX:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = (((u.j - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
             break;
 
-        case z_index:
+        case Z_INDX:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = (((u.k - 1) % N_SPC + N_SPC) % N_SPC);
             u_minus_muhat.t = u.t;            
             break;
         
-        case t_index:
+        case T_INDX:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
@@ -139,7 +138,7 @@ void test_allocation_in_function(const void * pointer, const char * location ){
 	}
 }
 
-mtrx_3x3 *get_link(mtrx_3x3 *U, const pos_vec position, const lorentz_idx mu) {
+mtrx_3x3 *get_link(mtrx_3x3 * restrict U, const pos_vec position, const lorentz_idx mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
     return U + GET_LINK(position, mu);
 }
@@ -154,7 +153,7 @@ out_cfg_data_type *get_link_out(out_cfg_data_type *U, const pos_vec position, co
     return U + GET_LINK(position, mu);
 }
 
-void get_link_matrix(mtrx_3x3 * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3 * u){
+void get_link_matrix(mtrx_3x3 * restrict  U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3 * restrict  u){
 	
 	// Gets forward or backward link at given position and mu
 	// and copies it to u.
@@ -173,6 +172,12 @@ void get_link_matrix(mtrx_3x3 * U, const pos_vec position, const lorentz_idx mu,
 		//	U_(-mu)(n)=(U_mu(n-mu))^\dagger
 
 	}
+}
+
+void greeter_function(char * program_name){
+
+    printf("Program %s compiled at %s on %s\n", program_name, __TIME__, __DATE__);
+    printf("Using C version: %ld\n", __STDC_VERSION__);
 }
 
 void handle_input(int argc, char *argv[]){
@@ -437,7 +442,7 @@ void SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *
 //     loop_over_links(1, projection_SU3, U, DOUBLE);
 // }
 
-void check_det_1(mtrx_3x3 *U) {
+void check_det_1(mtrx_3x3 * restrict U) {
 
     double det = 0.0;
     // Reunitarizes the configuration
@@ -461,7 +466,7 @@ void check_det_1(mtrx_3x3 *U) {
     printf("average determinant: %.15lf\n", det / (DIM * VOLUME));
 }
 
-void SU3_reunitarize(mtrx_3x3 *U) {
+void SU3_reunitarize(mtrx_3x3 * restrict U) {
     // Reunitarizes the configuration
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)

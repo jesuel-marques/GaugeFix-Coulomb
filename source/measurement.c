@@ -89,7 +89,7 @@ double temporal_plaquette_average(mtrx_3x3 * U){
                         for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++){
                      
                                 plaq_ave_slice += 
-                                    SU3_re_tr_plaquette(U, position, t_index, mu);
+                                    SU3_re_tr_plaquette(U, position, T_INDX, mu);
                      
                         }    
                     }

@@ -15,7 +15,7 @@
 #define MPI_Finalise() MPI_Finalize()
 
 #endif
-// #include <omp.h>
+//#include <omp.h>
 
 #include "SU3_parameters.h"			//	Simulation parameters
 
@@ -38,13 +38,13 @@ int config_exception_list[] = {-1};
 
 int main(int argc, char *argv[]) {
 
+	GREETER();
 	handle_input(argc, argv);
 
 	
 	char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
 	sprintf(filename_sweeps_to_gaugefix, "sweeps_to_gaugefix_%s_%dx%d.txt", config_template, N_SPC, N_T);
 	
-
 
 	#ifdef MPI_CODE
 	//	If compiling for running with MPI, then these things have to be defined
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
 	#else
 	//	If compiling for not running with MPI, then just use a simple for loop
-		// #pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic)
+	// #pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic)
 		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 			
 	#endif 
@@ -109,5 +109,5 @@ int main(int argc, char *argv[]) {
 	#ifdef MPI_CODE
 		MPI_Finalise();
 	#endif
-	return 0;
+	return EXIT_SUCCESS;
 }

@@ -9,8 +9,8 @@
 
 #include "SU3_ops.h"  //	SU(3) operations
 
-void SU3_calculate_A(mtrx_3x3 *U, const pos_vec position, const lorentz_idx mu,
-                                                                     mtrx_3x3 *A) {
+void SU3_calculate_A(mtrx_3x3 * restrict U, const pos_vec position, const lorentz_idx mu,
+                                                                     mtrx_3x3 * restrict A) {
     //	Calculates the vector A_mu(n) field
     // The formula is A_mu(n)=((U - U_dagger)/2i)|traceless
 
@@ -35,8 +35,8 @@ void SU3_calculate_A(mtrx_3x3 *U, const pos_vec position, const lorentz_idx mu,
 
 }
 
-void SU3_divergence_A(mtrx_3x3 *U, const pos_vec position, 
-                                            mtrx_3x3 *div_A) {
+void SU3_divergence_A(mtrx_3x3 * restrict U, const pos_vec position, 
+                                            mtrx_3x3 * restrict div_A) {
     //	Calculates the divergence of the field A on the lattice
     //  and returns it in div_A.
 
