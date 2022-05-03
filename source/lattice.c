@@ -213,12 +213,12 @@ bool is_in_exception_list(const int config_nr){
     return false;
 }
 
-int extract_config(const char * restrict config_filename){   
+int extract_config(const unsigned config_nr, const char * restrict config_filename){   
     
 
     char command_lime[MAX_LENGTH_NAME];
 
-    sprintf(command_lime, "lime_extract_record /data/gamow/hot/Gen2/%dx%d/Run1_cfg_%d.lime 2 4 %s", N_SPC, N_T, config_filename);
+    sprintf(command_lime, "lime_extract_record /data/gamow/hot/Gen2/%dx%d/Run1_cfg_%d.lime 2 4 %s", N_SPC, N_T, config_nr, config_filename);
     
     if(system(command_lime) != 0){
         printf("Problem extracting config");
@@ -255,7 +255,7 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
 
     strcat(config_filename, extension_in);
 
-    extract_config(config_filename);
+    extract_config(config_nr, config_filename);
 
     FILE *config_file;
 
