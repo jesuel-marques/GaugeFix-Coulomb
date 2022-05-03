@@ -68,6 +68,8 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 			
+			system(sprintf("do lime_extract_record Run1_cfg_%d.lime 2 4 /data/majorana/jesuel/Gen2/24x28/Gen2_24x28_%d.cfg",actual_config_nr,actual_config_nr));
+			
 			mtrx_3x3 * U = (mtrx_3x3 *) malloc(VOLUME * DIM * sizeof(mtrx_3x3));
 			TEST_ALLOCATION(U);
 			

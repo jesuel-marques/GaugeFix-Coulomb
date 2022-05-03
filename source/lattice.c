@@ -213,6 +213,25 @@ bool is_in_exception_list(const int config_nr){
     return false;
 }
 
+// int extract_config(const unsigned config_nr){   
+//     char config_filename[MAX_LENGTH_NAME];
+
+//     char command_lime[MAX_LENGTH_NAME];
+
+//     name_configuration_file(config_nr, config_filename);
+
+//     strcat(config_filename, extension_in);
+
+//     sprintf(command_lime, "lime_extract_record /data/gamow/hot/Gen2/%dx%d/Run1_cfg_%d.lime 2 4 %s", N_SPC, N_T, config_filename);
+    
+//     if(system(command_lime) != 0){
+//         printf("Problem extracting config");
+//         exit(1);
+//     }
+
+//     return 0;
+// }
+
 const char *name_configuration_file(const unsigned config_nr, char * config_filename) {
     
     //sprintf(config_filename, "NewFormConfig_%d_beta_5.700_Nxyz_%d_Nt_%d.txt", config, N_SPC, N_T);
@@ -245,10 +264,11 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
     printf("Loading: %s.\n", config_filename);
     if((config_file = fopen(config_filename, "rb")) == NULL){
         
-        fprintf(stderr, "Error loading config from file %s.\n", config_filename);
+        fprintf(stderr, "Error opening config from file %s.\n", config_filename);
         exit(EXIT_FAILURE);
 
     }
+
 
     if (fread(U_in, sizeof(in_cfg_data_type),  VOLUME * DIM , config_file) == VOLUME * DIM) {
         printf("U Loaded OK for config %d.\n", config_nr);
@@ -257,7 +277,19 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
         exit(EXIT_FAILURE);
     }
 
+    // fseek(config_file, 1, SEEK_CUR);f
+
+    fgetc(config_file);
+
+    if( !feof(config_file) ) {
+        fprintf(stderr,"File has not been read till the end. Check lattice sizes.\n");
+        exit(EXIT_FAILURE);    
+    }
+
+
     fclose(config_file);
+
+    
 
     #ifdef NEED_BYTE_SWAP_IN
 
