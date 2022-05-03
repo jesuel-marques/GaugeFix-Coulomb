@@ -292,6 +292,28 @@ inline void power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_3
 }
 
 
+inline mtrx_3x3 inverse_3x3(const mtrx_3x3 * restrict a, mtrx_3x3 * restrict a_inv){
+
+	//	Calculates the inverse of a 3 by 3 matrix x explicitely
+    //  and returns result in x_inverse.
+
+	double complex a_det = determinant_3x3(a);
+	
+	a_inv -> m[ELM(0, 0)] = (a -> m[ELM(1, 1)] * a -> m[ELM(2, 2)] - a -> m[ELM(1, 2)] * a -> m[ELM(2, 1)]) / a_det;
+	a_inv -> m[ELM(0, 1)] = (a -> m[ELM(0, 2)] * a -> m[ELM(2, 1)] - a -> m[ELM(0, 1)] * a -> m[ELM(2, 2)]) / a_det;
+	a_inv -> m[ELM(0, 2)] = (a -> m[ELM(0, 1)] * a -> m[ELM(1, 2)] - a -> m[ELM(0, 2)] * a -> m[ELM(1, 1)]) / a_det;
+
+	a_inv -> m[ELM(1, 0)] = (a -> m[ELM(1, 2)] * a -> m[ELM(2, 0)] - a -> m[ELM(1, 0)] * a -> m[ELM(2, 2)]) / a_det;
+	a_inv -> m[ELM(1, 1)] = (a -> m[ELM(0, 0)] * a -> m[ELM(2, 2)] - a -> m[ELM(0, 2)] * a -> m[ELM(2, 0)]) / a_det;
+	a_inv -> m[ELM(1, 2)] = (a -> m[ELM(0, 2)] * a -> m[ELM(1, 0)] - a -> m[ELM(0, 0)] * a -> m[ELM(1, 2)]) / a_det;
+
+	a_inv -> m[ELM(2, 0)] = (a -> m[ELM(1, 0)] * a -> m[ELM(2, 1)] - a -> m[ELM(1, 1)] * a -> m[ELM(2, 0)]) / a_det;
+	a_inv -> m[ELM(2, 1)] = (a -> m[ELM(0, 1)] * a -> m[ELM(2, 0)] - a -> m[ELM(0, 0)] * a -> m[ELM(2, 1)]) / a_det;
+	a_inv -> m[ELM(2, 2)] = (a -> m[ELM(0, 0)] * a -> m[ELM(1, 1)] - a -> m[ELM(0, 1)] * a -> m[ELM(1, 0)]) / a_det;
+
+}
+
+
 inline void normalize_3_vec(color_3_vec * restrict v){
 
     //  Takes a color vector and normalizes it
@@ -396,6 +418,7 @@ void decompose_algebra_SU3(const mtrx_3x3 * restrict a, matrix_SU3_alg * restric
                            + creal(a -> m[ELM(1, 1)]) 
                      - 2.0 * creal(a -> m[ELM(2, 2)])) / pow(3.0, 0.5);
 }
+
 
 // inline void old_projection_SU3(mtrx_3x3 *x) {
 //     //	Projects matrix u to the group SU(3) returning SU(3) matrix x at the end.

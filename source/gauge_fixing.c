@@ -104,8 +104,7 @@ static double SU3_calculate_e2(mtrx_3x3 * restrict U) {
     return e2;
 }
 
-inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub, 
-                                                            mtrx_3x3 * restrict total_update_SU3) {
+inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub) {
     SU3_color_idx a, b;
 
     mtrx_3x3 sub_update;
@@ -141,7 +140,6 @@ inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub
 
 
     accum_left_prod_3x3(&sub_update, w);
-    accum_left_prod_3x3(&sub_update, total_update_SU3);
 }
 
 static void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w, 
@@ -151,19 +149,24 @@ static void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w,
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
     //	of "hits" to be performed one after another.
 
-    set_identity_3x3(total_update);
+    mtrx_3x3 w_inv_old;
+
+    inverse_3x3(w, &w_inv_old);
 
     for (unsigned short hits = 1; hits <= MAX_HITS; hits++) {
         //	Each hit contains the Cabbibo-Marinari subdivision
         for (submatrix sub = R; sub <= T; sub++) {
             //	Submatrices are indicated by numbers from 0 to 2
 
-            SU3_update_sub_LosAlamos(w, sub, total_update);
+            SU3_update_sub_LosAlamos(w, sub);
             
             //	Updates matrix to total_update. It is the
             //	accumulated updates from the hits.
         }
     }
+
+    prod_3x3(w, &w_inv_old, total_update);
+    
 }
 
 static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, const pos_vec position) {

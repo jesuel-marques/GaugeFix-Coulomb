@@ -245,7 +245,7 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
 
     #ifdef NEED_CONV_TO_WORKING_PRECISION
         
-        U_in = (in_cfg_data_type *) malloc(VOLUME * DIM * sizeof(in_cfg_data_type));
+        U_in = (in_cfg_data_type *) calloc(VOLUME * DIM, sizeof(in_cfg_data_type));
 	    TEST_ALLOCATION(U_in);
 
     #else
@@ -310,7 +310,7 @@ void SU3_write_config(const unsigned config_nr, mtrx_3x3 *U) {
 
     #ifdef NEED_CONV_FROM_WORKING_PRECISION
         
-        U_out = (out_cfg_data_type *) malloc(VOLUME * DIM * sizeof(out_cfg_data_type));
+        U_out = (out_cfg_data_type *) calloc(VOLUME * DIM, sizeof(out_cfg_data_type));
 	    TEST_ALLOCATION(U_out);
 
      	SU3_convert_config_work_out(U, U_out);

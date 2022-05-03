@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
 
 		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 
+
 	#endif 
 			int actual_config_nr = FIRST_CONFIG + CONFIG_STEP * config;
 			
@@ -70,7 +71,7 @@ int main(int argc, char *argv[]) {
 			
 			system(sprintf("do lime_extract_record Run1_cfg_%d.lime 2 4 /data/majorana/jesuel/Gen2/24x28/Gen2_24x28_%d.cfg",actual_config_nr,actual_config_nr));
 			
-			mtrx_3x3 * U = (mtrx_3x3 *) malloc(VOLUME * DIM * sizeof(mtrx_3x3));
+			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
 			TEST_ALLOCATION(U);
 			
 			SU3_load_config(actual_config_nr, U);

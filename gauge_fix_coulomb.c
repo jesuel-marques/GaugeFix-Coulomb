@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 
 			// extract_config(actual_config_nr);
 			
-			mtrx_3x3 * U = (mtrx_3x3 *) malloc(VOLUME * DIM * sizeof(mtrx_3x3));
+			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
 			TEST_ALLOCATION(U);
 			
 			SU3_load_config(actual_config_nr, U);

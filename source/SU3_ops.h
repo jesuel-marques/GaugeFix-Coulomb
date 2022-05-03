@@ -50,6 +50,8 @@ void accum_left_prod_3x3(const mtrx_3x3 *g, mtrx_3x3 *acc_prod),
 
 void power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_3x3 * restrict A_to_omega );
 
+mtrx_3x3 inverse_3x3(const mtrx_3x3 * restrict a, mtrx_3x3 * restrict a_inv);
+
 void projection_SU3(mtrx_3x3 *x);
 
 void decompose_algebra_SU3(const mtrx_3x3 *a, matrix_SU3_alg *a_components);
