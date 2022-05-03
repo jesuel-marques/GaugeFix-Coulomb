@@ -275,6 +275,7 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
         exit(EXIT_FAILURE);
     }
 
+
     // fseek(config_file, 1, SEEK_CUR);f
 
     fgetc(config_file);
@@ -286,7 +287,7 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
 
 
     fclose(config_file);
-
+    remove(config_filename);    
     
 
     #ifdef NEED_BYTE_SWAP_IN

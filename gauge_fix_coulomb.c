@@ -76,8 +76,6 @@ int main(int argc, char *argv[]) {
 				printf("Skiping configuration %d for being in the exception list.\n", actual_config_nr);
 				continue;
 			}
-
-			extract_config(actual_config_nr);
 			
 			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
 			TEST_ALLOCATION(U);
