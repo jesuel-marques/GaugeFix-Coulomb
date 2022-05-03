@@ -213,24 +213,20 @@ bool is_in_exception_list(const int config_nr){
     return false;
 }
 
-// int extract_config(const unsigned config_nr){   
-//     char config_filename[MAX_LENGTH_NAME];
-
-//     char command_lime[MAX_LENGTH_NAME];
-
-//     name_configuration_file(config_nr, config_filename);
-
-//     strcat(config_filename, extension_in);
-
-//     sprintf(command_lime, "lime_extract_record /data/gamow/hot/Gen2/%dx%d/Run1_cfg_%d.lime 2 4 %s", N_SPC, N_T, config_filename);
+int extract_config(const char * restrict config_filename){   
     
-//     if(system(command_lime) != 0){
-//         printf("Problem extracting config");
-//         exit(1);
-//     }
 
-//     return 0;
-// }
+    char command_lime[MAX_LENGTH_NAME];
+
+    sprintf(command_lime, "lime_extract_record /data/gamow/hot/Gen2/%dx%d/Run1_cfg_%d.lime 2 4 %s", N_SPC, N_T, config_filename);
+    
+    if(system(command_lime) != 0){
+        printf("Problem extracting config");
+        exit(1);
+    }
+
+    return 0;
+}
 
 const char *name_configuration_file(const unsigned config_nr, char * config_filename) {
     
@@ -257,9 +253,11 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
     char config_filename[MAX_LENGTH_NAME];
 	name_configuration_file(config_nr, config_filename);
 
-    FILE *config_file;
-
     strcat(config_filename, extension_in);
+
+    extract_config(config_filename);
+
+    FILE *config_file;
 
     printf("Loading: %s.\n", config_filename);
     if((config_file = fopen(config_filename, "rb")) == NULL){

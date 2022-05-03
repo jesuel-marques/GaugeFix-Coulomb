@@ -88,6 +88,8 @@ void handle_input(int argc, char *argv[]);
 
 bool is_in_exception_list(const int config_nr);
 
+int extract_config(const char * restrict config_filename);
+
 void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U),
      SU3_write_config(const unsigned config_nr, mtrx_3x3 *U);
 
