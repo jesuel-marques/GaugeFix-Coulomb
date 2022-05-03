@@ -221,7 +221,7 @@ int extract_config(const unsigned config_nr, const char * restrict config_filena
 
 
     sprintf(command_lime, "./lime_extract_record /data/gamow/hot/Gen2/%dx%d/Run1_cfg_%d.lime 2 4 %s", N_SPC, N_T, config_nr, config_filename);
-    printf("Launching command: %s", command_lime);
+    printf("\nLaunching command: %s\n", command_lime);
 
     if(system(command_lime) != 0){
         printf("Problem extracting config");
