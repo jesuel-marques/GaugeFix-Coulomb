@@ -1,7 +1,7 @@
 //  Simulation Parameters
 
 #define N_SPC 24  //   Spatial lattice size
-#define N_T 16    // Temporal lattice size
+#define N_T 28    // Temporal lattice size
 #define DIM 4     // Space-time lattice dimension
 
 #define VOLUME N_SPC * N_SPC * N_SPC * N_T  //	Number of points in the lattice
@@ -14,7 +14,7 @@
 
 #define FIRST_CONFIG 1000
 
-#define LAST_CONFIG 1010
+#define LAST_CONFIG 11000
 
 #define CONFIG_STEP 10
 
