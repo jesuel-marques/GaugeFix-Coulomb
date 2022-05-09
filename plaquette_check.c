@@ -23,20 +23,26 @@
 
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
 #include "source/SU3_ops.h"
+#include "source/config_io.h"
 
 #include "source/measurement.h"
 
-
-const char extension_in[] = "_clmbgf.cfg";
-// char extension_in[]  = ".cfg";
-char extension_out[] = "_clmbgf.cfg";
-
-const char configs_dir_name[MAX_LENGTH_NAME];	//	input from command line
+const char configs_dir_name_in[MAX_LENGTH_NAME];	//	input from command line
+const char configs_dir_name_out[MAX_LENGTH_NAME];	//	input from command line
 const char config_template[MAX_LENGTH_NAME] ;	//	input from command line
+
+const char extension_in[]  = ".cfg";
+// const char extension_out[] = "_clmb.cfg";
+
+const char extension_gt_in[] = "_clmb.gt";
+const char extension_gt_out[] = "_clmb.gt";
+
+int config_exception_list[] = {-1};
 
 int main(int argc, char *argv[]) {
 
 	handle_input(argc, argv);
+	
 
 	#ifdef MPI_CODE
 	//Starts MPI
@@ -68,9 +74,7 @@ int main(int argc, char *argv[]) {
 				printf("Skiping configuration %d for being in the exception list.", actual_config_nr);
 				continue;
 			}
-			
-			system(sprintf("do lime_extract_record Run1_cfg_%d.lime 2 4 /data/majorana/jesuel/Gen2/24x28/Gen2_24x28_%d.cfg",actual_config_nr,actual_config_nr));
-			
+					
 			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
 			TEST_ALLOCATION(U);
 			
@@ -81,6 +85,15 @@ int main(int argc, char *argv[]) {
 		
 			print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link", 10);
 			getchar();
+
+			mtrx_3x3 * G = (mtrx_3x3 *) calloc(VOLUME , sizeof(mtrx_3x3));
+			TEST_ALLOCATION(G);
+
+			SU3_load_gauge_transf(actual_config_nr, G);	
+			SU3_update_global_U_G(U, G);
+
+			SU3_calculate_e2(U);
+			
 			
 			//  calculate plaquette average
 			printf("Spatial plaquete  %.10lf\n", spatial_plaquette_average(U));
@@ -88,7 +101,10 @@ int main(int argc, char *argv[]) {
 
 			check_det_1(U);
 
+
+			free(G);
 			free(U);
+			
 		
 		}
 	#ifdef MPI_CODE

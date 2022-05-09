@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <complex.h>
-
+#include <time.h>
 
 #ifdef MPI_CODE
 
@@ -20,26 +20,32 @@
 #include "SU3_parameters.h"			//	Simulation parameters
 
 #include "source/SU3_ops.h"
+#include "source/config_io.h"
 #include "source/lattice.h"			//	Initialization functions and calculations of
 									//	positions and links on the lattice.
 
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
+#include "source/config_io.h"
 
 #include "source/measurement.h"
 
-// const char extension_in[] = "_clmbgf.cfg";
-const char extension_in[]  = ".cfg";
-const char extension_out[] = "_clmbgf.cfg";
-
-const char configs_dir_name[MAX_LENGTH_NAME];	//	input from command line
+const char configs_dir_name_in[MAX_LENGTH_NAME];	//	input from command line
+const char configs_dir_name_out[MAX_LENGTH_NAME];	//	input from command line
 const char config_template[MAX_LENGTH_NAME-30] ;	//	input from command line
+
+const char extension_in[]  = ".cfg";
+// const char extension_out[] = "_clmb.cfg";
+
+const char extension_gt_in[] = "_clmb.gt";
+const char extension_gt_out[] = "_clmb.gt";
 
 int config_exception_list[] = {-1};
 
 int main(int argc, char *argv[]) {
-
 	GREETER();
 	handle_input(argc, argv);
+
+	create_output_directory();
 
 	
 	char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
@@ -76,19 +82,34 @@ int main(int argc, char *argv[]) {
 				printf("Skiping configuration %d for being in the exception list.\n", actual_config_nr);
 				continue;
 			}
+
 			
+
 			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
 			TEST_ALLOCATION(U);
-			
-			SU3_load_config(actual_config_nr, U);
 
+			SU3_load_config(actual_config_nr, U);
+//			system("rm -r configs/24x16/");
 			SU3_reunitarize(U);	
 			//	Reunitarizing straigh away because of loss precision due to
 			//	storing config in single precision.	
+			
+			mtrx_3x3 * G = (mtrx_3x3 *) calloc(VOLUME , sizeof(mtrx_3x3));
+			TEST_ALLOCATION(G);
 
+			init_gauge_transformation(G);
+			
 			//  fix the gauge
 			
-			unsigned sweeps = SU3_gauge_fix(U, actual_config_nr);			
+			unsigned sweeps = SU3_gauge_fix(U, G, actual_config_nr);			
+			free(U);		//	Free memory allocated for the configuration.
+
+			// write the gauge fixed configuration to file
+			// SU3_write_config(actual_config_nr, U);
+
+			// write the gauge transformation to file
+			SU3_write_gauge_transf(actual_config_nr, G);
+			free(G);		//	Free memory allocated for gauge transformation.
 			
 			FILE* sweeps_to_gaugefix;
     		if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "a+")) == NULL){
@@ -100,16 +121,11 @@ int main(int argc, char *argv[]) {
 			fprintf(sweeps_to_gaugefix, "%d\t%u\n", actual_config_nr, sweeps);
 			fflush(sweeps_to_gaugefix);	
 			fclose(sweeps_to_gaugefix);
-
-			// write the gauge fixed configuration to file
-			SU3_write_config(actual_config_nr, U);
-			free(U);		//	Free memory allocated for the configuration.
-
-			
 			
 		}
 	#ifdef MPI_CODE
 		MPI_Finalise();
 	#endif
+
 	return EXIT_SUCCESS;
 }

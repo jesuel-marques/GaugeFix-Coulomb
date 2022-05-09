@@ -2,6 +2,8 @@
 #define SU3OPS_H
 
 #include "lattice.h"
+#include "SU2_ops.h"
+#include "gauge_fixing.h"
 
 #define ELM(a,b)    (a) * Nc + (b)  //  used to get the element of matrices
 
@@ -49,6 +51,9 @@ void accum_left_prod_3x3(const mtrx_3x3 *g, mtrx_3x3 *acc_prod),
      accum_right_prod_3x3(mtrx_3x3 *acc_prod, const mtrx_3x3 *g);
 
 void power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_3x3 * restrict A_to_omega );
+
+void accum_prod_SU2_3x3(matrix_2x2_ck * restrict x_ck, mtrx_3x3 * restrict g, submatrix sub );
+
 
 mtrx_3x3 inverse_3x3(const mtrx_3x3 * restrict a, mtrx_3x3 * restrict a_inv);
 

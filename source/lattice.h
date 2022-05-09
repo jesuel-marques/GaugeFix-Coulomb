@@ -34,11 +34,17 @@ typedef enum {REAR, FRONT} direction;
 
 //  Does the pointer arithmetic to get the correct index in the configuration
 
-#define GET_LINK(position, mu) ((((position.t * N_SPC \
+#define GET_LINK_U(position, mu) ((((position.t * N_SPC \
                                         + position.k) * N_SPC \
                                             + position.j) * N_SPC \
                                                 + position.i) * DIM \
                                                     + mu)
+
+#define GET_GT(position)      (((position.t * N_SPC \
+                                        + position.k) * N_SPC \
+                                            + position.j) * N_SPC \
+                                                + position.i) 
+                                                    
 
 //  Data types definitions
 
@@ -82,32 +88,22 @@ out_cfg_data_type *get_link_out(out_cfg_data_type *U_out, const pos_vec position
 
 void get_link_matrix(mtrx_3x3 * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3 * u);
 
-void greeter_function(char * program_name);
 
-void handle_input(int argc, char *argv[]);
+// void copy_3x3_config(mtrx_3x3 *U, mtrx_3x3 *U_copy);
 
-bool is_in_exception_list(const int config_nr);
+void SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *U_out),
+     SU3_convert_config_in_work (in_cfg_data_type *U_in,   work_cfg_data_type *U_work);
 
-int extract_config(const unsigned config_nr, const char * restrict config_filename);
-
-void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U),
-     SU3_write_config(const unsigned config_nr, mtrx_3x3 *U);
-
-void copy_3x3_config(mtrx_3x3 *U, mtrx_3x3 *U_copy);
-
-void SU3_convert_config_in_work(in_cfg_data_type *U_in, work_cfg_data_type *U_work),
-     SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *U_out);
-
-void check_det_1(mtrx_3x3 *U);
+int check_det_1(mtrx_3x3 *U);
 
 void SU3_reunitarize(mtrx_3x3 *U);
 
-/*============================JONIVAR'S CODE===============================*/
+mtrx_3x3 *get_gaugetransf(mtrx_3x3 *restrict G, const pos_vec position);
 
-void block_swap(int *buffer, size_t length);
+out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type *restrict G, const pos_vec position);
 
-void block_swap_double(double *buffer, size_t length);
+void SU3_convert_gaugetransf_work_out(work_cfg_data_type * restrict G_work, out_cfg_data_type * restrict G_out);
 
-int byte_swap(void* strip, size_t size, size_t length);
+
 
 #endif
