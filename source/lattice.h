@@ -1,8 +1,9 @@
 #ifndef LATTICE_H
 #define LATTICE_H
+#include <stdbool.h>
 
 #include "../SU3_parameters.h"
-#include "SU3_ops.h"
+
 
 typedef unsigned short pos_index;
 
@@ -11,56 +12,98 @@ typedef struct {
     pos_index t;
 } pos_vec;  //	struct for position vectors
 
+#define POSITION_IS_ODD(position)    ((position.i ^ position.j ^ position.k ^ position.t) & 1)
+#define POSITION_IS_EVEN(position)   !((position.i ^ position.j ^ position.k ^ position.t) & 1)
 
-typedef unsigned short lorentz_index;
+//  if position is odd, then the XOR of the first bit of each element
+//  of position must be 1. Take AND with 1 select this first bit. Take the NOT of 
+//  the odd code, because want 1 for even and 0 for odd.
 
-typedef enum {REAR, FRONT} direction; 
+//  Odd position means that the sum of the coordinates is odd and equivalente for even
 
-#define x_index 0
-#define y_index 1
-#define z_index 2
-#define t_index 3
+typedef unsigned short lorentz_idx;
 
-typedef matrix_3x3_float in_cfg_data_type;
-typedef matrix_3x3_float out_cfg_data_type;
+typedef enum {REAR, FRONT} direction;
 
+//  Associations between the numeric indices and the lorentz directions
+
+#define X_INDX 0
+#define Y_INDX 1
+#define Z_INDX 2
+#define T_INDX 3
+
+//  Does the pointer arithmetic to get the correct index in the configuration
+
+#define GET_LINK_U(position, mu) ((((position.t * N_SPC \
+                                        + position.k) * N_SPC \
+                                            + position.j) * N_SPC \
+                                                + position.i) * DIM \
+                                                    + mu)
+
+#define GET_GT(position)      (((position.t * N_SPC \
+                                        + position.k) * N_SPC \
+                                            + position.j) * N_SPC \
+                                                + position.i) 
+                                                    
+
+//  Data types definitions
+
+typedef complex float in_data_type; 
+typedef complex float out_data_type;
+typedef complex double work_data_type;
+
+typedef struct {
+   complex double m[Nc * Nc];
+} mtrx_3x3_double; 
+
+typedef struct {
+    complex float m[Nc * Nc];
+} mtrx_3x3_float;
+
+typedef mtrx_3x3_float in_cfg_data_type;
+typedef mtrx_3x3_float out_cfg_data_type;
+typedef mtrx_3x3_double work_cfg_data_type;
+
+typedef work_cfg_data_type mtrx_3x3;
+
+
+#define TEST_ALLOCATION(a) test_allocation_in_function(a, __func__) //  used to test if allocation was successful
+#define GREETER()   greeter_function(__FILE__)
 
 pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t);
 
 void print_pos_vec(const pos_vec u);
 
-inline pos_vec hop_position_positive(const pos_vec u, const lorentz_index mu),
-               hop_position_negative(const pos_vec u, const lorentz_index mu);
+pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu),
+        hop_position_negative(const pos_vec u, const lorentz_idx mu);
 
-inline unsigned short position_is_even(const pos_vec position),
-                      position_is_odd(const pos_vec position);
 
-void test_allocation(const void * pointer, const char * location );
+void test_allocation_in_function(const void * pointer, const char * location );
 
-inline matrix_3x3_double * get_link(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu);
 
-matrix_3x3_float *get_link_f(matrix_3x3_float *U, const pos_vec position, const lorentz_index mu);
+mtrx_3x3 * get_link(mtrx_3x3 *U, const pos_vec position, const lorentz_idx mu);
 
-void get_link_matrix(matrix_3x3_double * U, const pos_vec position, const lorentz_index mu, direction dir, matrix_3x3_double * u);
+in_cfg_data_type *get_link_in(in_cfg_data_type *U_in, const pos_vec position, const lorentz_idx mu);
+out_cfg_data_type *get_link_out(out_cfg_data_type *U_out, const pos_vec position, const lorentz_idx mu);
 
-void handle_input(int argc, char *argv[]);
+void get_link_matrix(mtrx_3x3 * U, const pos_vec position, const lorentz_idx mu, direction dir, mtrx_3x3 * u);
 
-void SU3_load_config(const unsigned config_nr, matrix_3x3_double *U),
-     SU3_write_config(const unsigned config_nr, matrix_3x3_double *U);
 
-void copy_3x3_config(matrix_3x3_double *U, matrix_3x3_double *U_copy);
+// void copy_3x3_config(mtrx_3x3 *U, mtrx_3x3 *U_copy);
 
-void SU3_convert_config_fd(matrix_3x3_float *U_float, matrix_3x3_double *U_double),
-     SU3_convert_config_df(matrix_3x3_double *U_double, matrix_3x3_float *U_float);
+void SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *U_out),
+     SU3_convert_config_in_work (in_cfg_data_type *U_in,   work_cfg_data_type *U_work);
 
-inline void SU3_reunitarize(matrix_3x3_double *U);
+int check_det_1(mtrx_3x3 *U);
 
-/*============================JONIVAR'S CODE===============================*/
+void SU3_reunitarize(mtrx_3x3 *U);
 
-void block_swap(int *buffer, size_t length);
+mtrx_3x3 *get_gaugetransf(mtrx_3x3 *restrict G, const pos_vec position);
 
-void block_swap_double(double *buffer, size_t length);
+out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type *restrict G, const pos_vec position);
 
-int byte_swap(void* strip, size_t size, size_t length);
+void SU3_convert_gaugetransf_work_out(work_cfg_data_type * restrict G_work, out_cfg_data_type * restrict G_out);
+
+
 
 #endif

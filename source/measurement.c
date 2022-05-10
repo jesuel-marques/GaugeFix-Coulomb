@@ -7,14 +7,16 @@
 #include "lattice.h"
 #include "SU3_ops.h"
 
-double SU3_re_tr_plaquette(matrix_3x3_double *U, const pos_vec position, const lorentz_index mu, const lorentz_index nu){
+double SU3_re_tr_plaquette(mtrx_3x3 *U, const pos_vec position, 
+                                               const lorentz_idx mu, 
+                                               const lorentz_idx nu){
 	
-    matrix_3x3_double plaquette;
+    mtrx_3x3 plaquette;
 
-    matrix_3x3_double ua;
-    matrix_3x3_double ub;
-    matrix_3x3_double uc;
-    matrix_3x3_double ud;
+    mtrx_3x3 ua;
+    mtrx_3x3 ub;
+    mtrx_3x3 uc;
+    mtrx_3x3 ud;
 
     pos_vec position_plus_mu = hop_position_positive(position, mu);
 
@@ -23,13 +25,13 @@ double SU3_re_tr_plaquette(matrix_3x3_double *U, const pos_vec position, const l
     get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, REAR , &uc);
     get_link_matrix(U, hop_position_positive(position, nu),         nu, REAR , &ud);
 
-	product_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
+	prod_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
 
     return creal(trace_3x3(&plaquette))/Nc;
 
 }
 
-double spatial_plaquette_average(matrix_3x3_double * U){
+double spatial_plaquette_average(mtrx_3x3 * U){
     double plaq_ave = 0.0;
 
 
@@ -45,11 +47,12 @@ double spatial_plaquette_average(matrix_3x3_double * U){
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
-                        for (lorentz_index mu = 0; mu < DIM - 1 ; mu++){
-                            for (lorentz_index nu = 0; nu < DIM - 1 ; nu++){
+                        for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++){
+                            for (lorentz_idx nu = 0; nu < DIM - 1 ; nu++){
                                 if( mu < nu){
 
-                                    plaq_ave_slice += SU3_re_tr_plaquette(U, position, mu, nu);                                    
+                                    plaq_ave_slice += 
+                                        SU3_re_tr_plaquette(U, position, mu, nu);                                    
                                 
                                 }
                             }
@@ -67,7 +70,7 @@ double spatial_plaquette_average(matrix_3x3_double * U){
     return plaq_ave;
 }
 
-double temporal_plaquette_average(matrix_3x3_double * U){
+double temporal_plaquette_average(mtrx_3x3 * U){
     double plaq_ave = 0.0;
 
 
@@ -83,9 +86,10 @@ double temporal_plaquette_average(matrix_3x3_double * U){
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
-                        for (lorentz_index mu = 0; mu < DIM - 1 ; mu++){
+                        for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++){
                      
-                                plaq_ave_slice += SU3_re_tr_plaquette(U, position, t_index, mu);
+                                plaq_ave_slice += 
+                                    SU3_re_tr_plaquette(U, position, T_INDX, mu);
                      
                         }    
                     }
