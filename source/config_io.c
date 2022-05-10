@@ -19,8 +19,8 @@
 extern char config_template[];
 extern char configs_dir_name_in[];
 extern char configs_dir_name_out[];
-extern char extension_in[];
-extern char extension_out[];
+extern char extension_config_in[];
+extern char extension_config_out[];
 
 extern char extension_gt_in[];
 extern char extension_gt_out[];
@@ -146,7 +146,7 @@ void create_output_directory(void) {
 static char * name_unextracted_config_file(const unsigned config_nr, char *unextracted_config_filename) {
     sprintf(unextracted_config_filename, "%s%s_%dx%d/Run1_cfg_%d.lime", configs_dir_name_in, config_template, N_SPC, N_T, config_nr);
 
-    strcat(unextracted_config_filename, extension_in);
+    strcat(unextracted_config_filename, extension_config_in);
 
     return unextracted_config_filename;
 }
@@ -194,12 +194,12 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
 
     char config_filename[MAX_LENGTH_NAME];
 
-    strcat(name_configuration_file(config_nr, config_filename), extension_in);
+    strcat(name_configuration_file(config_nr, config_filename), extension_config_in);
     char mv_command[MAX_LENGTH_NAME+100];
     sprintf(mv_command, "mv %s ./configs/%dx%d/", "./configs/Gen2_24x16_1000.cfg", N_SPC, N_T);
     system(mv_command);
 
-    // extract_config(config_nr, strcat(name_configuration_file(config_nr, config_filename), extension_in));
+    // extract_config(config_nr, strcat(name_configuration_file(config_nr, config_filename), extension_config_in));
 
     FILE *config_file;
 
@@ -271,7 +271,7 @@ void SU3_write_config(const unsigned config_nr, mtrx_3x3 *U) {
 
     FILE *config_file;
 
-    printf("Creating: %s.\n", strcat(config_filename, extension_out));
+    printf("Creating: %s.\n", strcat(config_filename, extension_config_out));
     if ((config_file = fopen(config_filename, "wb")) == NULL) {
         fprintf(stderr, "Error creating file %s for config.\n", config_filename);
         exit(EXIT_FAILURE);

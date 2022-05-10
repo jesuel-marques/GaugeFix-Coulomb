@@ -1,5 +1,5 @@
 //	srun -p DevQ -N 1 -A nuim01 -t 1:00:00 --pty bash
-//	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O4 -march=skylake -fopenmp -w
+//	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c source/config_io.c  -lm -O4 -march=skylake -fopenmp -w
 //	mpiicc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp -DMPI_CODE
 
 #include <stdio.h>					//	Standard header files in C
@@ -33,8 +33,8 @@ const char configs_dir_name_in[MAX_LENGTH_NAME];	//	input from command line
 const char configs_dir_name_out[MAX_LENGTH_NAME];	//	input from command line
 const char config_template[MAX_LENGTH_NAME-30] ;	//	input from command line
 
-const char extension_in[]  = ".cfg";
-// const char extension_out[] = "_clmb.cfg";
+const char extension_config_in[]  = ".cfg";
+const char extension_config_out[] = "_clmb.cfg";
 
 const char extension_gt_in[] = "_clmb.gt";
 const char extension_gt_out[] = "_clmb.gt";
