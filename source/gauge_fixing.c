@@ -19,25 +19,6 @@
 #define sweeps_to_next_measurement(e2)  10 + (unsigned)(INITIAL_SWEEPS_TO_MEASUREMENT_e2 \
                                         * (1.0 - log10((e2)) / log10(TOLERANCE)))
 
-// static void SU3_local_update_U(mtrx_3x3 * restrict U, const pos_vec position, 
-//                                                         const mtrx_3x3 * restrict g) {
-//     //	Updates U only at a given position
-
-//     mtrx_3x3 g_dagger;
-
-//     for (lorentz_idx mu = 0; mu < DIM; mu++) {
-//         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
-
-//         accum_left_prod_3x3(g, get_link(U, position, mu));
-
-//         //	U'_mu(x-mu)=1.U_mu(x-mu).g_dagger(x) for red-black updates
-
-//         SU3_herm_conj(g, &g_dagger);
-
-//         accum_right_prod_3x3(get_link(U, hop_position_negative(position, mu), mu), 
-//                                                                                &g_dagger);
-//     }
-// }
 
 static void SU3_local_update_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const pos_vec position, 
                                                         const mtrx_3x3 * restrict g) {
@@ -164,13 +145,6 @@ double SU3_calculate_e2(mtrx_3x3 * restrict U) {
 
 inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub) {
     SU3_color_idx a, b;
-    #ifdef OLD_VERSION
-    mtrx_3x3 sub_update;
-    
-    set_null_3x3(&sub_update);
-
-    sub_update.m[ELM(2 - sub, 2 - sub)] = 1.0;
-    #endif
 
     a = sub == T ? 1 : 0;
     b = sub == R ? 1 : 2;
@@ -187,24 +161,9 @@ inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub
                       - cimag(w -> m[ELM(b, b)]));
 
     SU2_projection(&matrix_SU2);
-    #ifdef OLD_VERSION
-    sub_update.m[ELM(a, a)] =      matrix_SU2.m[0] 
-                             + I * matrix_SU2.m[3];
-    sub_update.m[ELM(a, b)] =      matrix_SU2.m[2]
-                             + I * matrix_SU2.m[1];
-    sub_update.m[ELM(b, a)] =     -matrix_SU2.m[2] 
-                             + I * matrix_SU2.m[1];
-    sub_update.m[ELM(b, b)] =      matrix_SU2.m[0] 
-                             - I * matrix_SU2.m[3];
-
-    // print_matrix_3x3(&sub_update,"update su(3)",10);
-    // printf("sub: %u a: %u b: %u", sub, a, b);
-    // print_matrix_3x3(w, "antes", 10);
-    accum_left_prod_3x3(&sub_update, w);
-    // print_matrix_3x3(w, "depois", 10);
-    #else 
+    
     accum_prod_SU2_3x3(&matrix_SU2, w, sub);
-    #endif
+    
 }
 
 inline static void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w, 
@@ -326,10 +285,10 @@ unsigned SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsig
         }
         
 
-        !(sweep % SWEEPS_TO_REUNITARIZATION) ? SU3_reunitarize(U) : 0;
+        !(sweep % SWEEPS_TO_REUNITARIZATION) ? SU3_reunitarize(U, G) : 0;
                                                
     }
-    SU3_reunitarize(U);
+    SU3_reunitarize(U, G);
 
     printf("Sweeps needed to gauge-fix config %d: %d. e2: %3.2E \n", config, sweep, e2);
     return sweep;

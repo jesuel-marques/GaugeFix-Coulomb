@@ -96,13 +96,15 @@ void SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *
 
 int check_det_1(mtrx_3x3 *U);
 
-void SU3_reunitarize(mtrx_3x3 *U);
+void SU3_reunitarize(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G);
 
 mtrx_3x3 *get_gaugetransf(mtrx_3x3 *restrict G, const pos_vec position);
 
-out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type *restrict G, const pos_vec position);
+in_cfg_data_type *get_gaugetransf_in(in_cfg_data_type *restrict G_in, const pos_vec position);
+out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type *restrict G_out, const pos_vec position);
 
-void SU3_convert_gaugetransf_work_out(work_cfg_data_type * restrict G_work, out_cfg_data_type * restrict G_out);
+
+void SU3_convert_gaugetransf_in_work(in_cfg_data_type * restrict G_in, work_cfg_data_type * restrict G_work), SU3_convert_gaugetransf_work_out(work_cfg_data_type * restrict G_work, out_cfg_data_type * restrict G_out);
 
 
 

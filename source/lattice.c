@@ -164,9 +164,14 @@ mtrx_3x3 *get_gaugetransf(mtrx_3x3 *restrict G, const pos_vec position) {
     return G + GET_GT(position);
 }
 
-out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type *restrict G, const pos_vec position) {
+in_cfg_data_type *get_gaugetransf_in(in_cfg_data_type *restrict G_in, const pos_vec position) {
     //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
-    return G + GET_GT(position);
+    return G_in + GET_GT(position);
+}
+
+out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type *restrict G_out, const pos_vec position) {
+    //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
+    return G_out + GET_GT(position);
 }
 
 
@@ -307,7 +312,7 @@ int check_det_1(mtrx_3x3 *restrict U) {
     return det;
 }
 
-void SU3_reunitarize(mtrx_3x3 *restrict U) {
+void SU3_reunitarize(mtrx_3x3 *restrict U, mtrx_3x3 *restrict G) {
     // Reunitarizes the configuration
 
 #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
@@ -318,12 +323,29 @@ void SU3_reunitarize(mtrx_3x3 *restrict U) {
         for (position.k = 0; position.k < N_SPC; position.k++) {
             for (position.j = 0; position.j < N_SPC; position.j++) {
                 for (position.i = 0; position.i < N_SPC; position.i++) {
+                    projection_SU3(get_gaugetransf(G, position));
                     for (unsigned short mu = 0; mu < DIM; mu++) {
                         // print_matrix_3x3(get_link(U, position, mu),"link");
                         projection_SU3(get_link(U, position, mu));
                         // print_matrix_3x3(get_link(U, position, mu),"link");
                         // getchar();
                     }
+                }
+            }
+        }
+    }
+}
+
+void SU3_convert_gaugetransf_in_work(in_cfg_data_type * restrict G_in, work_cfg_data_type * restrict G_work) {
+#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+    // Paralelizing by slicing the time extent
+    for (pos_index t = 0; t < N_T; t++) {
+        pos_vec position;
+        position.t = t;
+        for (position.k = 0; position.k < N_SPC; position.k++) {
+            for (position.j = 0; position.j < N_SPC; position.j++) {
+                for (position.i = 0; position.i < N_SPC; position.i++) {                    
+                        convert_in_work_3x3(get_gaugetransf_in(G_in, position), get_gaugetransf(G_work, position));                    
                 }
             }
         }

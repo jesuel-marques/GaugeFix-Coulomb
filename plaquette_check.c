@@ -27,12 +27,8 @@
 
 #include "source/measurement.h"
 
-const char configs_dir_name_in[MAX_LENGTH_NAME];	//	input from command line
-const char configs_dir_name_out[MAX_LENGTH_NAME];	//	input from command line
-const char config_template[MAX_LENGTH_NAME] ;	//	input from command line
-
 const char extension_config_in[]  = ".cfg";
-// const char extension_config_out[] = "_clmb.cfg";
+const char extension_config_out[] = "_clmb.cfg";
 
 const char extension_gt_in[] = "_clmb.gt";
 const char extension_gt_out[] = "_clmb.gt";
@@ -92,15 +88,15 @@ int main(int argc, char *argv[]) {
 			SU3_load_gauge_transf(actual_config_nr, G);	
 			SU3_update_global_U_G(U, G);
 
-			SU3_calculate_e2(U);
+			SU3_reunitarize(U, G);
+
+			printf("\n e2: %3.2E \n", SU3_calculate_e2(U));
 			
+			check_det_1(U);
 			
 			//  calculate plaquette average
 			printf("Spatial plaquete  %.10lf\n", spatial_plaquette_average(U));
 			printf("Temporal plaquete %.10lf\n", temporal_plaquette_average(U));
-
-			check_det_1(U);
-
 
 			free(G);
 			free(U);

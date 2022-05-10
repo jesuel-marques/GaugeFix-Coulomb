@@ -29,17 +29,15 @@
 
 #include "source/measurement.h"
 
-const char configs_dir_name_in[MAX_LENGTH_NAME];	//	input from command line
-const char configs_dir_name_out[MAX_LENGTH_NAME];	//	input from command line
-const char config_template[MAX_LENGTH_NAME-30] ;	//	input from command line
-
 const char extension_config_in[]  = ".cfg";
 const char extension_config_out[] = "_clmb.cfg";
 
-const char extension_gt_in[] = "_clmb.gt";
+const char extension_gt_in [] = "_clmb.gt";
 const char extension_gt_out[] = "_clmb.gt";
 
-int config_exception_list[] = {-1};
+extern char config_template[];
+
+int config_exception_list[] = {3340,1415,-1};
 
 int main(int argc, char *argv[]) {
 	GREETER();
@@ -47,7 +45,7 @@ int main(int argc, char *argv[]) {
 
 	create_output_directory();
 
-	
+
 	char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
 	sprintf(filename_sweeps_to_gaugefix, "sweeps_to_gaugefix_%s_%dx%d.txt", config_template, N_SPC, N_T);
 	
@@ -89,8 +87,7 @@ int main(int argc, char *argv[]) {
 			TEST_ALLOCATION(U);
 
 			SU3_load_config(actual_config_nr, U);
-//			system("rm -r configs/24x16/");
-			SU3_reunitarize(U);	
+
 			//	Reunitarizing straigh away because of loss precision due to
 			//	storing config in single precision.	
 			
@@ -98,6 +95,8 @@ int main(int argc, char *argv[]) {
 			TEST_ALLOCATION(G);
 
 			init_gauge_transformation(G);
+
+			SU3_reunitarize(U, G);	
 			
 			//  fix the gauge
 			

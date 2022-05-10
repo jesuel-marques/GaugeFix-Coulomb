@@ -291,29 +291,19 @@ inline void accum_prod_SU2_3x3(matrix_2x2_ck * restrict x_ck, mtrx_3x3 * restric
     matrix_2x2 x;
     
     convert_from_ck(x_ck, &x);
-
-    // print_matrix_2x2(&x, "atualização SU(2)", 10);
-
-    // printf("(%.5lf)+I*(%.5lf) (%.5lf)+I*(%.5lf) (%.5lf)+I*(%.5lf) (%.5lf)+I*(%.5lf)\n", creal(x.m[0]), cimag(x.m[0]), creal(x.m[1]), cimag(x.m[1]), creal(x.m[2]), cimag(x.m[2]), creal(x.m[3]), cimag(x.m[3]));
-    
+   
     SU3_color_idx a = sub == T ? 1 : 0;
     SU3_color_idx b = sub == R ? 1 : 2;
 
-    // printf("sub: %u a: %u b: %u\n", sub, a, b);
-    // print_matrix_3x3(g, "antes", 5);
 
     for(SU3_color_idx c = 0 ; c < Nc ; c++){
         xg1 = x.m[0 * 2 + 0] * g -> m[ELM(a, c)] + x.m[0 * 2 + 1] * g -> m[ELM(b, c)];
         xg2 = x.m[1 * 2 + 0] * g -> m[ELM(a, c)] + x.m[1 * 2 + 1] * g -> m[ELM(b, c)];
 
-        // printf("xg1: %lf+I*(%lf), xg2: %lf+I*(%lf)\n", creal(xg1),cimag(xg1),creal(xg2),cimag(xg2));
-
         g -> m[ELM(a, c)] = xg1;
         g -> m[ELM(b, c)] = xg2;
     }
 
-    // print_matrix_3x3(g, "depois", 5);
-    // getchar();
 }
 
 inline void power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_3x3 * restrict A_to_omega ){

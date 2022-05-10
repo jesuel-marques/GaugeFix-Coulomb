@@ -16,9 +16,10 @@
 
 #include "lattice.h"  //	Initialization functions and calculations of
 
-extern char config_template[];
-extern char configs_dir_name_in[];
-extern char configs_dir_name_out[];
+char configs_dir_name_in[200];	//	input from command line
+char configs_dir_name_out[200];	//	input from command line
+char config_template[10] ;	//	input from command line
+
 extern char extension_config_in[];
 extern char extension_config_out[];
 
@@ -108,7 +109,7 @@ void handle_input(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    char size_directory[10];
+    char size_directory[20];
 
     sprintf(size_directory, "%dx%d/", N_SPC, N_T);
 
@@ -132,7 +133,7 @@ bool is_in_exception_list(const int config_nr) {
 }
 
 void create_output_directory(void) {
-    char command_create_directory[MAX_LENGTH_NAME];
+    char command_create_directory[MAX_LENGTH_NAME*2];
     sprintf(command_create_directory, "mkdir %s", configs_dir_name_out);
 
     if (system(command_create_directory)) {
@@ -195,11 +196,11 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
     char config_filename[MAX_LENGTH_NAME];
 
     strcat(name_configuration_file(config_nr, config_filename), extension_config_in);
-    char mv_command[MAX_LENGTH_NAME+100];
-    sprintf(mv_command, "mv %s ./configs/%dx%d/", "./configs/Gen2_24x16_1000.cfg", N_SPC, N_T);
-    system(mv_command);
+    // char mv_command[MAX_LENGTH_NAME*3];
+    // sprintf(mv_command, "mv %s ./configs/%dx%d/", "./configs/Gen2_24x16_1000.cfg", N_SPC, N_T);
+    // system(mv_command);
 
-    // extract_config(config_nr, strcat(name_configuration_file(config_nr, config_filename), extension_config_in));
+    extract_config(config_nr, strcat(name_configuration_file(config_nr, config_filename), extension_config_in));
 
     FILE *config_file;
 
@@ -225,10 +226,10 @@ void SU3_load_config(const unsigned config_nr, mtrx_3x3 *U) {
     }
 
     fclose(config_file);
-    sprintf(mv_command, "mv ./configs/%dx%d/%s ./configs/", N_SPC, N_T, "Gen2_24x16_1000.cfg");
-    system(mv_command);
-    // printf("Removing %s\n", config_filename);
-    // remove(config_filename);
+    // sprintf(mv_command, "mv ./configs/%dx%d/%s ./configs/", N_SPC, N_T, "Gen2_24x16_1000.cfg");
+    // system(mv_command);
+    printf("Removing %s\n", config_filename);
+    remove(config_filename);
 
 #ifdef NEED_BYTE_SWAP_IN
 
@@ -398,7 +399,7 @@ void SU3_load_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
     
 
 #ifdef NEED_CONV_TO_WORKING_PRECISION
-    SU3_convert_config_in_work(G_in, G);
+    SU3_convert_gaugetransf_in_work(G_in, G);
     free(G_in);
 #endif
 }
