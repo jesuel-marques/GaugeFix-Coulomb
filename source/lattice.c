@@ -14,28 +14,6 @@
 
 #include "lattice.h"  //	Initialization functions and calculations of
 
-pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t) {
-    //	assigns x, y, z and t to a position vector
-    pos_vec position;
-
-    position.i = x;
-    position.j = y;
-    position.k = z;
-    position.t = t;
-
-    if(!position_valid(position)){
-        fprintf(stderr, "Position {%d, %d, %d, %d} is invalid. Returning origin instead\n.");
-        return assign_position(0, 0, 0, 0);
-    }
-
-    return position;
-}
-
-void print_pos_vec(const pos_vec pos) {
-    //	prints a position to the screen
-
-    printf("x: %hu y: %hu z: %hu t: %hu\n", pos.i, pos.j, pos.k, pos.t);
-}
 
 
 inline bool position_valid(pos_vec position){
@@ -67,6 +45,29 @@ inline bool position_mu_valid(pos_vec position, lorentz_idx mu){
 
     return false;
 
+}
+
+pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t) {
+    //	assigns x, y, z and t to a position vector
+    pos_vec position;
+
+    position.i = x;
+    position.j = y;
+    position.k = z;
+    position.t = t;
+
+    if(!position_valid(position)){
+        fprintf(stderr, "Position {%d, %d, %d, %d} is invalid. Returning origin instead\n.", x, y, z, t);
+        return assign_position(0, 0, 0, 0);
+    }
+
+    return position;
+}
+
+void print_pos_vec(const pos_vec pos) {
+    //	prints a position to the screen
+
+    printf("x: %hu y: %hu z: %hu t: %hu\n", pos.i, pos.j, pos.k, pos.t);
 }
 
 inline pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu) {
