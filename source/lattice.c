@@ -23,8 +23,8 @@ pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z,
     position.k = z;
     position.t = t;
 
-    if(!position_valid){
-        printf(stderr, "Position {%d, %d, %d, %d} is invalid. Returning origin instead\n.");
+    if(!position_valid(position)){
+        fprintf(stderr, "Position {%d, %d, %d, %d} is invalid. Returning origin instead\n.");
         return assign_position(0, 0, 0, 0);
     }
 
