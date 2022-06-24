@@ -14,24 +14,25 @@ void SU3_calculate_A(mtrx_3x3 * restrict U, const pos_vec position, const lorent
     //	Calculates the vector A_mu(n) field
     // The formula is A_mu(n)=((U - U_dagger)/2i)|traceless
 
-    mtrx_3x3 *local_U = get_link(U, position, mu);
-    mtrx_3x3 U_dagger;
+    // mtrx_3x3 *local_U = get_link(U, position, mu);
+    // mtrx_3x3 U_dagger;
 
-    SU3_herm_conj(local_U, &U_dagger);
+    // herm_conj_3x3(local_U, &U_dagger);
 
-    mtrx_3x3 U_minus_Udagger;
+    mtrx_3x3 U_minus_Udagger_trless;
 
     //	(U - U_dagger)/2i
-    subtraction_3x3(local_U, &U_dagger, &U_minus_Udagger);
-    mult_by_scalar_3x3(-0.5 * I, &U_minus_Udagger, A);
+    // subtraction_3x3(local_U, &U_dagger, &U_minus_Udagger);
+    subtraction_herm_conj_traceless_3x3(get_link(U, position, mu), &U_minus_Udagger_trless);
+    mult_by_scalar_3x3(-0.5 * I, &U_minus_Udagger_trless, A);
 
     //  Subtract the trace part
-    mtrx_3x3 trace_part;
+    // mtrx_3x3 trace_part;
     
-    set_identity_3x3(&trace_part);
-    subst_mult_scalar_3x3(-( 1.0 / Nc) * trace_3x3(A), &trace_part);
+    // set_identity_3x3(&trace_part);
+    // subst_mult_scalar_3x3(-( 1.0 / Nc) * trace_3x3(A), &trace_part);
 
-    accumulate_3x3(&trace_part, A);
+    // accumulate_3x3(&trace_part, A);
 
 }
 

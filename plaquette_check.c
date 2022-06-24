@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 	for (int config = rank + 1; config <= nconfig; config += size) {
 
 	#else
-		//#pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic)
+		//omp_parallel_for
 
 		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 
@@ -82,15 +82,21 @@ int main(int argc, char *argv[]) {
 			print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link", 10);
 			getchar();
 
+			printf("\n e2: %5.4E \n", SU3_calculate_e2(U));
+			check_det_1(U);
+			printf("Spatial plaquete  %.10lf\n", spatial_plaquette_average(U));
+			printf("Temporal plaquete %.10lf\n", temporal_plaquette_average(U));
+
+
 			mtrx_3x3 * G = (mtrx_3x3 *) calloc(VOLUME , sizeof(mtrx_3x3));
 			TEST_ALLOCATION(G);
 
 			SU3_load_gauge_transf(actual_config_nr, G);	
-			SU3_update_global_U_G(U, G);
+			SU3_global_update_U(U, G);
 
-			SU3_reunitarize(U, G);
+			SU3_reunitarize_U_G(U, G);
 
-			printf("\n e2: %3.2E \n", SU3_calculate_e2(U));
+			printf("\n e2: %5.4E \n", SU3_calculate_e2(U));
 			
 			check_det_1(U);
 			
@@ -100,8 +106,7 @@ int main(int argc, char *argv[]) {
 
 			free(G);
 			free(U);
-			
-		
+					
 		}
 	#ifdef MPI_CODE
 		MPI_Finalise();

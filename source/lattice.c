@@ -23,13 +23,50 @@ pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z,
     position.k = z;
     position.t = t;
 
+    if(!position_valid){
+        printf(stderr, "Position {%d, %d, %d, %d} is invalid. Returning origin instead\n.");
+        return assign_position(0, 0, 0, 0);
+    }
+
     return position;
 }
 
 void print_pos_vec(const pos_vec pos) {
     //	prints a position to the screen
 
-    printf("%d %d %d %d\n", pos.i, pos.j, pos.k, pos.t);
+    printf("x: %hu y: %hu z: %hu t: %hu\n", pos.i, pos.j, pos.k, pos.t);
+}
+
+
+inline bool position_valid(pos_vec position){
+    if (position.t >= 0 && position.t < N_T   &&
+        position.i >= 0 && position.i < N_SPC &&
+        position.j >= 0 && position.j < N_SPC &&
+        position.k >= 0 && position.k < N_SPC    ){
+        return true;
+    }
+    else{
+        printf("Position invalid: ");
+        print_pos_vec(position);
+        printf("\n");
+        return false;
+    }
+}
+
+inline bool position_mu_valid(pos_vec position, lorentz_idx mu){
+    if (position.t >= 0 && position.t < N_T   &&
+        position.i >= 0 && position.i < N_SPC &&
+        position.j >= 0 && position.j < N_SPC &&
+        position.k >= 0 && position.k < N_SPC &&
+       (mu == T_INDX || mu == X_INDX || 
+        mu == Y_INDX || mu == Z_INDX )){
+
+        return true;
+
+    }
+
+    return false;
+
 }
 
 inline pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu) {
@@ -37,11 +74,23 @@ inline pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu) {
     //	in the direction mu, taken into account the
     //	periodic boundary conditions.
 
+    #ifdef CHECK_POSITION_BOUNDS
+        if(!position_mu_valid(u, mu)){
+            printf("Position: ");
+            print_pos_vec(u);
+            printf("\n");
+            printf("or mu: %d invalid.\n", mu);
+            exit(EXIT_FAILURE);
+        }
+    #endif
+
     pos_vec u_plus_muhat;
+
+    unsigned short v;
 
     switch (mu) {
         case X_INDX:
-            u_plus_muhat.i = ((u.i + 1) % N_SPC);
+            u_plus_muhat.i = ((v = u.i + 1) != N_SPC ? v : 0);
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
@@ -49,7 +98,7 @@ inline pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu) {
 
         case Y_INDX:
             u_plus_muhat.i = u.i;
-            u_plus_muhat.j = ((u.j + 1) % N_SPC);
+            u_plus_muhat.j = ((v = u.j + 1) != N_SPC ? v : 0);
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
             break;
@@ -57,7 +106,7 @@ inline pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu) {
         case Z_INDX:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
-            u_plus_muhat.k = ((u.k + 1) % N_SPC);
+            u_plus_muhat.k = ((v = u.k + 1) != N_SPC ? v : 0);
             u_plus_muhat.t = u.t;
             break;
 
@@ -65,12 +114,9 @@ inline pos_vec hop_position_positive(const pos_vec u, const lorentz_idx mu) {
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
-            u_plus_muhat.t = ((u.t + 1) % N_T);
+            u_plus_muhat.t = ((v = u.t + 1) != N_T   ? v : 0);
             break;
 
-        default:
-            fprintf(stderr, "mu outside of range\n");
-            exit(EXIT_FAILURE);
     }
 
     return u_plus_muhat;
@@ -81,11 +127,23 @@ inline pos_vec hop_position_negative(const pos_vec u, const lorentz_idx mu) {
     //	in the direction mu, taken into account the
     //	periodic boundary conditions.
 
+    #ifdef CHECK_POSITION_BOUNDS
+        if(!position_mu_valid(u, mu)){
+            printf("Position: ");
+            print_pos_vec(u);
+            printf("\n");
+            printf("or mu: %d invalid.\n", mu);
+            exit(EXIT_FAILURE);
+        }
+    #endif
+
     pos_vec u_minus_muhat;
 
-    switch (mu) {
+    short v ;
+
+     switch (mu) {
         case X_INDX:
-            u_minus_muhat.i = (((u.i - 1) % N_SPC + N_SPC) % N_SPC);
+            u_minus_muhat.i = ((v = u.i - 1) != -1 ? v : N_SPC - 1);
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
@@ -93,7 +151,7 @@ inline pos_vec hop_position_negative(const pos_vec u, const lorentz_idx mu) {
 
         case Y_INDX:
             u_minus_muhat.i = u.i;
-            u_minus_muhat.j = (((u.j - 1) % N_SPC + N_SPC) % N_SPC);
+            u_minus_muhat.j = ((v = u.j - 1) != -1 ? v : N_SPC - 1);
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
             break;
@@ -101,7 +159,7 @@ inline pos_vec hop_position_negative(const pos_vec u, const lorentz_idx mu) {
         case Z_INDX:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
-            u_minus_muhat.k = (((u.k - 1) % N_SPC + N_SPC) % N_SPC);
+            u_minus_muhat.k = ((v = u.k - 1) != -1 ? v : N_SPC - 1);   
             u_minus_muhat.t = u.t;
             break;
 
@@ -109,28 +167,36 @@ inline pos_vec hop_position_negative(const pos_vec u, const lorentz_idx mu) {
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
-            u_minus_muhat.t = (((u.t - 1) % N_T + N_T) % N_T);
+            u_minus_muhat.t = ((v = u.t - 1) != -1 ?   v : N_T - 1);
             break;
-
-        default:
-            fprintf(stderr, "mu outside of range\n");
-            exit(EXIT_FAILURE);
     }
 
     return u_minus_muhat;
 }
 
-void test_allocation_in_function(const void *pointer, const char *location) {
+short test_allocation_function(const void *pointer, const char *location) {
     //	Test if allocation was successful.
     if (pointer == NULL) {
         fprintf(stderr, "Memory allocation failed at %s.\n", location);
-        exit(EXIT_FAILURE);
+        return -1;
     }
+
+    return 0;
 }
+
 
 mtrx_3x3 *get_link(mtrx_3x3 *restrict U, const pos_vec position, const lorentz_idx mu) {
     //	Does the pointer arithmetic to get a pointer to link at given position and mu
-    return U + GET_LINK_U(position, mu);
+    #ifdef CHECK_POSITION_BOUNDS
+        if(position_mu_valid(position, mu))    
+    #endif
+            return U + GET_LINK_U(position, mu);
+    #ifdef CHECK_POSITION_BOUNDS
+        else{
+            printf("Program reading config outside of allowed range.\n");
+            exit(EXIT_FAILURE);
+        }
+    #endif
 }
 
 in_cfg_data_type *get_link_in(in_cfg_data_type *U, const pos_vec position, const lorentz_idx mu) {
@@ -149,37 +215,57 @@ void get_link_matrix(mtrx_3x3 *restrict U, const pos_vec position, const lorentz
 
     mtrx_3x3 u_aux;
 
-    if (dir == FRONT) {
+    if(position_mu_valid(position, mu)){
+        if (dir == FRONT) {
         copy_3x3(get_link(U, position, mu), u);
         //	Link in the positive way is what is stored in U
 
-    } else if (dir == REAR) {
-        SU3_herm_conj(get_link(U, hop_position_negative(position, mu), mu), u);
+        } else if (dir == REAR) {
+        herm_conj_3x3(get_link(U, hop_position_negative(position, mu), mu), u);
         //	U_(-mu)(n)=(U_mu(n-mu))^\dagger
+        }
+        else{
+            printf("direction is not valid.");
+            exit(EXIT_FAILURE); 
+        }
+    }    
+    else{
+        printf("Program reading config outside of allowed range.\n");
+        exit(EXIT_FAILURE);
     }
+    
 }
 
 mtrx_3x3 *get_gaugetransf(mtrx_3x3 *restrict G, const pos_vec position) {
     //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
-    return G + GET_GT(position);
+
+    #ifdef CHECK_POSITION_BOUNDS
+        if(position_valid(position))    
+    #endif
+            return G + GET_GT(position);
+    #ifdef CHECK_POSITION_BOUNDS
+        else{
+        
+            printf("Program reading gauge-transformation outside of allowed range.\n");
+            exit(EXIT_FAILURE);
+        }
+    #endif
 }
 
-in_cfg_data_type *get_gaugetransf_in(in_cfg_data_type *restrict G_in, const pos_vec position) {
+in_cfg_data_type  *get_gaugetransf_in (in_cfg_data_type  * restrict G_in,  const pos_vec position) {
     //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
     return G_in + GET_GT(position);
 }
 
-out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type *restrict G_out, const pos_vec position) {
+out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type * restrict G_out, const pos_vec position) {
     //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
     return G_out + GET_GT(position);
 }
 
-
-
 // void copy_3x3_config(mtrx_3x3 *U, mtrx_3x3 *U_copy) {
 //     // Copies configuration with pointer U to the one with pointer U_copy.
 
-// #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+// omp_parallel_for
 //     // Paralelizing by slicing the time extent
 //     for (pos_index t = 0; t < N_T; t++) {
 //         pos_vec position;
@@ -196,41 +282,79 @@ out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type *restrict G_out, const 
 //     }
 // }
 
-void SU3_convert_config_in_work(in_cfg_data_type *U_in, work_cfg_data_type *U_work) {
-#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
-    // Paralelizing by slicing the time extent
-    for (pos_index t = 0; t < N_T; t++) {
-        pos_vec position;
-        position.t = t;
-        for (position.k = 0; position.k < N_SPC; position.k++) {
-            for (position.j = 0; position.j < N_SPC; position.j++) {
-                for (position.i = 0; position.i < N_SPC; position.i++) {
-                    for (lorentz_idx mu = 0; mu < DIM; mu++) {
-                        convert_in_work_3x3(get_link_in(U_in, position, mu), get_link(U_work, position, mu));
+#ifdef NEED_CONV_TO_WORKING_PRECISION
+void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_cfg_data_type * restrict U_work) {
+    omp_parallel_for
+        // Paralelizing by slicing the time extent
+        for (pos_index t = 0; t < N_T; t++) {
+            pos_vec position;
+            position.t = t;
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (lorentz_idx mu = 0; mu < DIM; mu++) {
+                            convert_in_work_3x3(get_link_in(U_in, position, mu), get_link(U_work, position, mu));
+                        }
                     }
                 }
             }
         }
-    }
 }
 
-void SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *U_out) {
-#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
-    // Paralelizing by slicing the time extent
-    for (pos_index t = 0; t < N_T; t++) {
-        pos_vec position;
-        position.t = t;
-        for (position.k = 0; position.k < N_SPC; position.k++) {
-            for (position.j = 0; position.j < N_SPC; position.j++) {
-                for (position.i = 0; position.i < N_SPC; position.i++) {
-                    for (lorentz_idx mu = 0; mu < DIM; mu++) {
-                        convert_work_out_3x3(get_link(U_work, position, mu), get_link_out(U_out, position, mu));
+ void SU3_convert_gaugetransf_in_work(in_cfg_data_type * restrict G_in, work_cfg_data_type * restrict G_work) {
+        omp_parallel_for
+            // Paralelizing by slicing the time extent
+            for (pos_index t = 0; t < N_T; t++) {
+                pos_vec position;
+                position.t = t;
+                for (position.k = 0; position.k < N_SPC; position.k++) {
+                    for (position.j = 0; position.j < N_SPC; position.j++) {
+                        for (position.i = 0; position.i < N_SPC; position.i++) {                    
+                                convert_in_work_3x3(get_gaugetransf_in(G_in, position), get_gaugetransf(G_work, position));                    
+                        }
+                    }
+                }
+            }
+    }
+#endif
+
+#ifdef NEED_CONV_FROM_WORKING_PRECISION
+
+void SU3_convert_config_work_out(work_cfg_data_type * restrict U_work, out_cfg_data_type * restrict U_out) {
+    omp_parallel_for
+        // Paralelizing by slicing the time extent
+        for (pos_index t = 0; t < N_T; t++) {
+            pos_vec position;
+            position.t = t;
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (lorentz_idx mu = 0; mu < DIM; mu++) {
+                            convert_work_out_3x3(get_link(U_work, position, mu), get_link_out(U_out, position, mu));
+                        }
                     }
                 }
             }
         }
-    }
 }
+
+void SU3_convert_gaugetransf_work_out(work_cfg_data_type *G_work, out_cfg_data_type *G_out) {
+    omp_parallel_for
+        // Paralelizing by slicing the time extent
+        for (pos_index t = 0; t < N_T; t++) {
+            pos_vec position;
+            position.t = t;
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {                    
+                            convert_work_out_3x3(get_gaugetransf(G_work, position), get_gaugetransf_out(G_out, position));                    
+                    }
+                }
+            }
+        }
+}
+
+#endif
 
 
 
@@ -249,7 +373,7 @@ void SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *
 //     va_list arguments;
 //     va_start(arguments, num_arg+1);
 
-//     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+//     omp_parallel_for
 //         // Paralelizing by slicing the time extent
 //         for (pos_index t = 0; t < N_T; t++) {
 //             pos_vec position;
@@ -278,32 +402,32 @@ void SU3_convert_config_work_out(work_cfg_data_type *U_work, out_cfg_data_type *
 //     va_end(arguments);
 // }
 
-// void SU3_reunitarize(mtrx_3x3 *U) {
+// void SU3_reunitarize_U_G(mtrx_3x3 *U) {
 //     // Reunitarizes the configuration
 //     // printf("here\n");
 //     loop_over_links(1, projection_SU3, U, DOUBLE);
 // }
 
-int check_det_1(mtrx_3x3 *restrict U) {
+double check_det_1(mtrx_3x3 *restrict U) {
     double det = 0.0;
     // Reunitarizes the configuration
 
-#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic) reduction(+ \
-                                                                              : det)
-    // Paralelizing by slicing the time extent
-    for (unsigned short t = 0; t < N_T; t++) {
-        pos_vec position;
-        position.t = t;
-        for (position.k = 0; position.k < N_SPC; position.k++) {
-            for (position.j = 0; position.j < N_SPC; position.j++) {
-                for (position.i = 0; position.i < N_SPC; position.i++) {
-                    for (unsigned short mu = 0; mu < DIM; mu++) {
-                        det += determinant_3x3(get_link(U, position, mu));
+    #pragma omp parallel for num_threads(NUM_THREADS) \
+                        schedule(dynamic) reduction(+ : det)
+        // Paralelizing by slicing the time extent
+        for (pos_index t = 0; t < N_T; t++) {
+            pos_vec position;
+            position.t = t;
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (lorentz_idx mu = 0; mu < DIM; mu++) {
+                            det += determinant_3x3(get_link(U, position, mu));
+                        }
                     }
                 }
             }
         }
-    }
 
     det /= (DIM * VOLUME);
 
@@ -312,59 +436,72 @@ int check_det_1(mtrx_3x3 *restrict U) {
     return det;
 }
 
-void SU3_reunitarize(mtrx_3x3 *restrict U, mtrx_3x3 *restrict G) {
+short SU3_reunitarize_U_G(mtrx_3x3 *restrict U, mtrx_3x3 *restrict G) {
     // Reunitarizes the configuration
+    short exit_status = 0;
 
-#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
-    // Paralelizing by slicing the time extent
-    for (unsigned short t = 0; t < N_T; t++) {
-        pos_vec position;
-        position.t = t;
-        for (position.k = 0; position.k < N_SPC; position.k++) {
-            for (position.j = 0; position.j < N_SPC; position.j++) {
-                for (position.i = 0; position.i < N_SPC; position.i++) {
-                    projection_SU3(get_gaugetransf(G, position));
-                    for (unsigned short mu = 0; mu < DIM; mu++) {
-                        // print_matrix_3x3(get_link(U, position, mu),"link");
-                        projection_SU3(get_link(U, position, mu));
-                        // print_matrix_3x3(get_link(U, position, mu),"link");
-                        // getchar();
+    #pragma omp parallel for num_threads(NUM_THREADS) reduction (|:exit_status) schedule(dynamic)
+        // Paralelizing by slicing the time extent
+        for (pos_index t = 0; t < N_T; t++) {
+            pos_vec position;
+            position.t = t;
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        exit_status |= projection_SU3(get_gaugetransf(G, position));
+                        for (lorentz_idx mu = 0; mu < DIM; mu++) {
+                            exit_status |= projection_SU3(get_link(U, position, mu));
+                        }
                     }
                 }
             }
         }
-    }
-}
 
-void SU3_convert_gaugetransf_in_work(in_cfg_data_type * restrict G_in, work_cfg_data_type * restrict G_work) {
-#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
-    // Paralelizing by slicing the time extent
-    for (pos_index t = 0; t < N_T; t++) {
-        pos_vec position;
-        position.t = t;
-        for (position.k = 0; position.k < N_SPC; position.k++) {
-            for (position.j = 0; position.j < N_SPC; position.j++) {
-                for (position.i = 0; position.i < N_SPC; position.i++) {                    
-                        convert_in_work_3x3(get_gaugetransf_in(G_in, position), get_gaugetransf(G_work, position));                    
-                }
-            }
-        }
-    }
+    return exit_status;
 }
 
 
-void SU3_convert_gaugetransf_work_out(work_cfg_data_type *G_work, out_cfg_data_type *G_out) {
-#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
-    // Paralelizing by slicing the time extent
-    for (pos_index t = 0; t < N_T; t++) {
-        pos_vec position;
-        position.t = t;
-        for (position.k = 0; position.k < N_SPC; position.k++) {
-            for (position.j = 0; position.j < N_SPC; position.j++) {
-                for (position.i = 0; position.i < N_SPC; position.i++) {                    
-                        convert_work_out_3x3(get_gaugetransf(G_work, position), get_gaugetransf_out(G_out, position));                    
-                }
-            }
-        }
-    }
-}
+// short SU3_reunitarize_U(mtrx_3x3 *restrict U) {
+//     // Reunitarizes the configuration
+//     short exit_status = 0;
+
+//     #pragma omp parallel for num_threads(NUM_THREADS) reduction (|:exit_status) schedule(dynamic)
+//         // Paralelizing by slicing the time extent
+//         for (pos_index t = 0; t < N_T; t++) {
+//             pos_vec position;
+//             position.t = t;
+//             for (position.k = 0; position.k < N_SPC; position.k++) {
+//                 for (position.j = 0; position.j < N_SPC; position.j++) {
+//                     for (position.i = 0; position.i < N_SPC; position.i++) {
+//                         for (lorentz_idx mu = 0; mu < DIM; mu++) {
+//                             exit_status |= projection_SU3(get_link(U, position, mu));
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
+//     return exit_status;
+// }
+
+
+// short SU3_reunitarize_G(mtrx_3x3 *restrict G) {
+//     // Reunitarizes the configuration
+//     short exit_status = 0;
+
+//     #pragma omp parallel for num_threads(NUM_THREADS) reduction (|:exit_status) schedule(dynamic)
+//         // Paralelizing by slicing the time extent
+//         for (pos_index t = 0; t < N_T; t++) {
+//             pos_vec position;
+//             position.t = t;
+//             for (position.k = 0; position.k < N_SPC; position.k++) {
+//                 for (position.j = 0; position.j < N_SPC; position.j++) {
+//                     for (position.i = 0; position.i < N_SPC; position.i++) {
+//                         exit_status |= projection_SU3(get_gaugetransf(G, position));
+//                     }
+//                 }
+//             }
+//         }
+
+//     return exit_status;
+// }

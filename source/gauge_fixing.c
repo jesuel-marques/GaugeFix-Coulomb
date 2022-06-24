@@ -1,5 +1,4 @@
-#include <complex.h>
-#include <math.h>
+#include <tgmath.h>
 #include <omp.h>
 #include <stdio.h>  //	Standard header C files
 #include <stdlib.h>
@@ -10,48 +9,47 @@
                                             //	calculations of positions and
                                             //	links on the lattice.
 
+#include "math_ops.h"          //	Math operations
 #include "SU2_ops.h"           //	SU(2) operations
 #include "SU3_ops.h"           //	SU(3) operations
 #include "gauge_fixing.h"
 #include "fourvector_field.h"  //	Calculation of A_mu(n) and related things
-#include "math_ops.h"          //	Math operations
 
-#define sweeps_to_next_measurement(e2)  10 + (unsigned)(INITIAL_SWEEPS_TO_MEASUREMENT_e2 \
+
+#define SWEEPS_TO_NEXT_MEASUREMENT(e2)  10 + (unsigned)(INITIAL_SWEEPS_TO_MEASUREMENT_e2 \
                                         * (1.0 - log10((e2)) / log10(TOLERANCE)))
 
+#define CHECKERBOARD_SUBDIVISION(position, sweep) !((POSITION_IS_EVEN(position)) ^ ((sweep) & 1))
+//	Implementation of the checkerboard subdivision of the lattice.
 
 static void SU3_local_update_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const pos_vec position, 
-                                                        const mtrx_3x3 * restrict g) {
-    //	Updates U only at a given position
+                                                        const mtrx_3x3 * restrict update) {
+    //	Updates U and G only at a given position
 
-    accum_left_prod_3x3(g, get_gaugetransf(G, position));
+    accum_left_prod_3x3(update, get_gaugetransf(G, position));
 
-    mtrx_3x3 g_dagger;
+    mtrx_3x3 update_dagger;
+    herm_conj_3x3(update, &update_dagger);
 
     for (lorentz_idx mu = 0; mu < DIM; mu++) {
         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
 
-        accum_left_prod_3x3(g, get_link(U, position, mu));
+        accum_left_prod_3x3(update, get_link(U, position, mu));
 
         //	U'_mu(x-mu)=1.U_mu(x-mu).g_dagger(x) for red-black updates
 
-        SU3_herm_conj(g, &g_dagger);
-
         accum_right_prod_3x3(get_link(U, hop_position_negative(position, mu), mu), 
-                                                                               &g_dagger);
+                                                                        &update_dagger);
     }
 }
 
-void SU3_update_global_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G) {
+void SU3_global_update_U(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G) {
     //	Updates U on the whole lattice
 
-    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic) 
+    omp_parallel_for
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
             mtrx_3x3 * g;
-
-            mtrx_3x3 g_dagger_position_plus_mu;
-
             mtrx_3x3 * u;
             mtrx_3x3 u_updated;
             pos_vec position;
@@ -61,14 +59,12 @@ void SU3_update_global_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G) {
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
-                        g = get_gaugetransf(G,position);
+                        g = get_gaugetransf(G, position);
                         for (lorentz_idx mu = 0; mu < DIM; mu++) {
                             //	U'_mu(x)=g(x).U_mu(x).gdagger(x+mu)
                             u = get_link(U, position, mu);
-
-                            SU3_herm_conj(get_gaugetransf(G, hop_position_positive(position, mu)), &g_dagger_position_plus_mu);
                             
-                            prod_three_3x3(g, u, &g_dagger_position_plus_mu, &u_updated);
+                            prod_vuwdagger_3x3(g, u, get_gaugetransf(G, hop_position_positive(position, mu)), &u_updated);
                             
                             copy_3x3(&u_updated, u);
 
@@ -79,6 +75,25 @@ void SU3_update_global_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G) {
         }
 }
 
+
+static inline void accumulate_front_hear_link_3x3(mtrx_3x3 * restrict U, const pos_vec position, lorentz_idx mu, 
+                                                                                        mtrx_3x3 * restrict w) {
+    // Accumulates the value of U_mu(n) and U_-mu(n) into w
+
+    mtrx_3x3 * u_front = get_link(U, position, mu);
+    mtrx_3x3 * u_rear  = get_link(U, hop_position_negative(position, mu), mu);
+
+    for (SU3_color_idx  a = 0; a < Nc; a++) {
+        for (SU3_color_idx  b = 0; b < Nc; b++) {
+
+            w -> m[ELM3x3(a, b)] +=     u_front -> m[ELM3x3(a, b)]
+                                 + conj(u_rear  -> m[ELM3x3(b, a)]);
+        
+        }
+    }
+}
+
+
 inline static void SU3_calculate_w(mtrx_3x3 * restrict U, const pos_vec position,
                                                          mtrx_3x3 * restrict w) {
     //	Calculates 	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision, following the notation in hep-lat/9306018
@@ -86,19 +101,13 @@ inline static void SU3_calculate_w(mtrx_3x3 * restrict U, const pos_vec position
 
     set_null_3x3(w);  //	Initializing w(n)=0
 
-    mtrx_3x3 u_dagger_rear;
-
     // w(n)	calculation
 
     for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {
         //	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision
 
-        accumulate_3x3(get_link(U, position, mu), w);
+        accumulate_front_hear_link_3x3(U, position, mu, w);
 
-        SU3_herm_conj(get_link(U, hop_position_negative(position, mu), mu), 
-                                                                &u_dagger_rear);
-
-        accumulate_3x3(&u_dagger_rear, w);
     }
 }
     
@@ -112,7 +121,7 @@ double SU3_calculate_e2(mtrx_3x3 * restrict U) {
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
             mtrx_3x3 div_A;
-            matrix_SU3_alg div_A_components;
+            mtrx_SU3_alg div_A_components;
             pos_vec position;
 
             position.t = t;
@@ -124,14 +133,12 @@ double SU3_calculate_e2(mtrx_3x3 * restrict U) {
                         
                         SU3_divergence_A(U, position, &div_A);
                         decompose_algebra_SU3(&div_A, &div_A_components);
-
                         for (SU3_alg_idx a = 1; a <= POW2(Nc)-1; a++) {
                             //	Normalized sum of the squares of the color components
                             //  of the divergence of A.
-
                             e2_slice += POW2(div_A_components.m[a]);
                         }
-
+                       
                     }
                 }
             }
@@ -149,21 +156,23 @@ inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub
     a = sub == T ? 1 : 0;
     b = sub == R ? 1 : 2;
 
-    matrix_2x2_ck matrix_SU2;
+    mtrx_2x2_ck mtrx_SU2;
 
-    matrix_SU2.m[0] =  (creal(w -> m[ELM(a, a)]) 
-                      + creal(w -> m[ELM(b, b)]));
-    matrix_SU2.m[1] = -(cimag(w -> m[ELM(a, b)]) 
-                      + cimag(w -> m[ELM(b, a)]));
-    matrix_SU2.m[2] = -(creal(w -> m[ELM(a, b)]) 
-                      - creal(w -> m[ELM(b, a)]));
-    matrix_SU2.m[3] = -(cimag(w -> m[ELM(a, a)]) 
-                      - cimag(w -> m[ELM(b, b)]));
+    mtrx_SU2.m[0] =  (creal(w -> m[ELM3x3(a, a)]) 
+                      + creal(w -> m[ELM3x3(b, b)]));
+    mtrx_SU2.m[1] = -(cimag(w -> m[ELM3x3(a, b)]) 
+                      + cimag(w -> m[ELM3x3(b, a)]));
+    mtrx_SU2.m[2] = -(creal(w -> m[ELM3x3(a, b)]) 
+                      - creal(w -> m[ELM3x3(b, a)]));
+    mtrx_SU2.m[3] = -(cimag(w -> m[ELM3x3(a, a)]) 
+                      - cimag(w -> m[ELM3x3(b, b)]));
 
-    SU2_projection(&matrix_SU2);
-    
-    accum_prod_SU2_3x3(&matrix_SU2, w, sub);
-    
+    if(!SU2_projection(&mtrx_SU2)){
+        accum_prod_SU2_3x3(&mtrx_SU2, w, a, b);
+    }
+    else{
+        return;
+    }
 }
 
 inline static void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w, 
@@ -175,21 +184,24 @@ inline static void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w,
 
     mtrx_3x3 w_inv_old;
 
-    inverse_3x3(w, &w_inv_old);
+    if(inverse_3x3(w, &w_inv_old)){
 
-    for (unsigned short hits = 1; hits <= MAX_HITS; hits++) {
-        //	Each hit contains the Cabbibo-Marinari subdivision
-        for (submatrix sub = R; sub <= T; sub++) {
-            //	Submatrices are indicated by numbers from 0 to 2
+        for (unsigned short hits = 1; hits <= MAX_HITS; hits++) {
+            //	Each hit contains the Cabbibo-Marinari subdivision
+            for (submatrix sub = R; sub <= T; sub++) {
+                //	Submatrices are indicated by numbers from 0 to 2
 
-            SU3_update_sub_LosAlamos(w, sub);
-            
-            //	Updates matrix to total_update. It is the
-            //	accumulated updates from the hits.
+                SU3_update_sub_LosAlamos(w, sub);
+                
+                //	Updates matrix to total_update. It is the
+                //	accumulated updates from the hits.
+            }
         }
+        prod_3x3(w, &w_inv_old, total_update);
     }
-
-    prod_3x3(w, &w_inv_old, total_update);
+    else{
+        set_identity_3x3(total_update);
+    }
     
 }
 
@@ -217,36 +229,38 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
     mtrx_3x3 update_OR;
 
     /* update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA) */
-    power_3x3_binomial(&update_LA, OMEGA_OR, &update_OR);
-
-    projection_SU3(&update_OR);
+    
+    if(power_3x3_binomial(&update_LA, OMEGA_OR, &update_OR))
+        set_identity_3x3(&update_OR);   
+        /*  if matrix could not be projected to SU3 inside
+        power_3x3 binomial, then use identity as update */
 
     SU3_local_update_U_G(U, G, position, &update_OR);
 }
 
-unsigned SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned short config) {
+int SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned short config_nr) {
     //	Fix the gauge and follows the process by calculating e2;
 
-    pos_vec position;
 
-    double e2;
+    double last_e2, new_e2;
 
-    unsigned sweep = 0;
-    unsigned sweeps_to_measurement_e2 = INITIAL_SWEEPS_TO_MEASUREMENT_e2;
+    int sweep = 0;
+    int sweeps_to_measurement_e2 = INITIAL_SWEEPS_TO_MEASUREMENT_e2;
     //	Counter to the number of sweeps to fix config to Landau gauge
-	e2 = SU3_calculate_e2(U);
-	printf("Sweeps in config %5d: %8d. e2: %3.2E \n", config, sweep, e2);
+	new_e2 = SU3_calculate_e2(U);
+	printf("Sweeps in config %5d: %8d. e2: %3.2E \n", config_nr, sweep, new_e2);
     
     while (1) {
 
-         #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
+        omp_parallel_for
             // Paralelizing by slicing the time extent
             for (pos_index t = 0; t < N_T; t++) {
+                pos_vec position;
                 position.t = t;
                 for (position.k = 0; position.k < N_SPC; position.k++) {
                     for (position.j = 0; position.j < N_SPC; position.j++) {
                         for (position.i = 0; position.i < N_SPC; position.i++) {
-                            !((POSITION_IS_EVEN(position) + sweep) % 2) ?
+                            CHECKERBOARD_SUBDIVISION(position, sweep) ?
                                 //	Implementation of the checkerboard subdivision 
                                 //  of the lattice.
                                 
@@ -262,43 +276,66 @@ unsigned SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsig
 
         sweep++;
 
-        !(sweep % (INITIAL_SWEEPS_TO_MEASUREMENT_e2 / 5) ) ?
-            printf("Sweeps in config %5d: %8d.\n", config, sweep) : 0; 
+        if(!system("test -f stop_run")){
 
-        if(sweep == sweeps_to_measurement_e2){
-            e2 = SU3_calculate_e2(U);
-	        printf("Sweeps in config %5d: %8d. e2: %3.2E \n", config, sweep, e2);            //	Gauge-fixing index, indicates how far we are to the Landau-gauge.
+            printf("Request to stop run for config %d in sweep %d.\n", config_nr, sweep);
+            return -1;
+        
+        }
+
+
+        if(sweep == sweeps_to_measurement_e2) {
+            new_e2 = SU3_calculate_e2(U);
+
+            if (new_e2 <= TOLERANCE) {
+
+                break;
+
+            }
+            
+            else if(sweep >= 100 * INITIAL_SWEEPS_TO_MEASUREMENT_e2 || last_e2 == new_e2 ){
+
+                fprintf(stderr, "Config could not be gauge-fixed.\n SOR algorithm seems not to work or be too slow for config %d.\n", config_nr);
+                return -1;
+
+            }
+            else {
+                
+                sweeps_to_measurement_e2 += 
+                    SWEEPS_TO_NEXT_MEASUREMENT(new_e2);
+                //	No need to calculate e2 all the time
+                //	because it will take some hundreds of sweeps
+                //	to fix the gauge.
+
+            }
+            printf("Sweeps in config %5d: %8d. e2: %3.2E \n", config_nr, sweep, new_e2);            //	Gauge-fixing index, indicates how far we are to the Landau-gauge.
             //  It will be less than the TOLERANCE,
             //	when the gauge-fixing is considered to be attained.
             //	Following the notation of hep-lat/0301019v2
             
-            if (e2 <= TOLERANCE) {
-                break;
-
-            } else {
-                sweeps_to_measurement_e2 += 
-                    sweeps_to_next_measurement(e2);
-                //	No need to calculate e2 all the time
-                //	because it will take some hundreds of sweeps
-                //	to fix the gauge.
-            }
         }
-        
+        else if(!(sweep % (INITIAL_SWEEPS_TO_MEASUREMENT_e2 / 2) )) {
 
-        !(sweep % SWEEPS_TO_REUNITARIZATION) ? SU3_reunitarize(U, G) : 0;
-                                               
+            printf("Sweeps in config %5d: %8d.\n", config_nr, sweep);
+
+        }
+
+        (sweep % SWEEPS_TO_REUNITARIZATION) ? 0 : SU3_reunitarize_U_G(U, G);
+
+        last_e2 = new_e2;
     }
-    SU3_reunitarize(U, G);
+    SU3_reunitarize_U_G(U, G);
 
-    printf("Sweeps needed to gauge-fix config %d: %d. e2: %3.2E \n", config, sweep, e2);
+    printf("Sweeps needed to gauge-fix config %d: %d. e2: %3.2E \n", config_nr, sweep, new_e2);
     return sweep;
 }
 
 void init_gauge_transformation(mtrx_3x3 * restrict G){
-    pos_vec position;
-    #pragma omp parallel for num_threads(NUM_THREADS) private(position) schedule(dynamic)
+    omp_parallel_for
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
+            pos_vec position;
+
             position.t = t;
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {

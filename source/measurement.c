@@ -7,9 +7,9 @@
 #include "lattice.h"
 #include "SU3_ops.h"
 
-double SU3_re_tr_plaquette(mtrx_3x3 *U, const pos_vec position, 
-                                               const lorentz_idx mu, 
-                                               const lorentz_idx nu){
+double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position, 
+                                                    const lorentz_idx mu, 
+                                                    const lorentz_idx nu){
 	
     mtrx_3x3 plaquette;
 
@@ -20,8 +20,8 @@ double SU3_re_tr_plaquette(mtrx_3x3 *U, const pos_vec position,
 
     pos_vec position_plus_mu = hop_position_positive(position, mu);
 
-    get_link_matrix(U, position,                                    mu, FRONT, &ua);
-    get_link_matrix(U, position_plus_mu,                            nu, FRONT, &ub);
+    get_link_matrix(U,                       position,              mu, FRONT, &ua);
+    get_link_matrix(U,                       position_plus_mu,      nu, FRONT, &ub);
     get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, REAR , &uc);
     get_link_matrix(U, hop_position_positive(position, nu),         nu, REAR , &ud);
 
@@ -31,7 +31,7 @@ double SU3_re_tr_plaquette(mtrx_3x3 *U, const pos_vec position,
 
 }
 
-double spatial_plaquette_average(mtrx_3x3 * U){
+double spatial_plaquette_average(mtrx_3x3 * restrict U){
     double plaq_ave = 0.0;
 
 
@@ -70,7 +70,7 @@ double spatial_plaquette_average(mtrx_3x3 * U){
     return plaq_ave;
 }
 
-double temporal_plaquette_average(mtrx_3x3 * U){
+double temporal_plaquette_average(mtrx_3x3 * restrict U){
     double plaq_ave = 0.0;
 
 

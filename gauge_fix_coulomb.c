@@ -37,17 +37,18 @@ const char extension_gt_out[] = "_clmb.gt";
 
 extern char config_template[];
 
-int config_exception_list[] = {3340,1415,-1};
+int config_exception_list[] = {-1};	
+
+//	Configurations to be ignored in the gauge-fixing. -1 indicates the end of the list.
 
 int main(int argc, char *argv[]) {
 	GREETER();
 	handle_input(argc, argv);
 
-	create_output_directory();
-
-
-	char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
-	sprintf(filename_sweeps_to_gaugefix, "sweeps_to_gaugefix_%s_%dx%d.txt", config_template, N_SPC, N_T);
+	if(create_output_directory()){
+		printf("Some error ocurred when creating output directory. Exiting.");
+		exit(EXIT_FAILURE);
+	}
 	
 
 	#ifdef MPI_CODE
@@ -69,58 +70,100 @@ int main(int argc, char *argv[]) {
 
 	#else
 	//	If compiling for not running with MPI, then just use a simple for loop
-	// #pragma omp parallel for num_threads(NUM_THREADS) schedule (dynamic)
+	// omp_parallel_for
 		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 			
 	#endif 
 			int actual_config_nr = FIRST_CONFIG + CONFIG_STEP * config;
 			
 			if(is_in_exception_list(actual_config_nr)) {
-				//	configurations which don't actually exist
+				//	list of configurations to be skipped
 				printf("Skiping configuration %d for being in the exception list.\n", actual_config_nr);
 				continue;
 			}
 
-			
-
 			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
-			TEST_ALLOCATION(U);
+			if (TEST_ALLOCATION(U)){
+				fprintf(stderr,"Could not allocate memory for config %d. Jumping to the next config.\n", actual_config_nr);
+				continue;
+			}
 
-			SU3_load_config(actual_config_nr, U);
+			if(SU3_load_config(actual_config_nr, U)){
+				fprintf(stderr, "Config %d loading failed.\n", actual_config_nr);
+				free(U);
+				continue;
+			}
+			else{
+				printf("Config %d loaded OK.\n", actual_config_nr);
+			}
 
 			//	Reunitarizing straigh away because of loss precision due to
 			//	storing config in single precision.	
 			
 			mtrx_3x3 * G = (mtrx_3x3 *) calloc(VOLUME , sizeof(mtrx_3x3));
-			TEST_ALLOCATION(G);
+			if(TEST_ALLOCATION(G)){
+				fprintf(stderr, "Could not allocate memory for gauge-transformation of config %d.\n", actual_config_nr);
+				free(U);
+				continue;
+			}
 
 			init_gauge_transformation(G);
 
-			SU3_reunitarize(U, G);	
+			if(SU3_reunitarize_U_G(U, G)){
+				fprintf(stderr, "Configuration %d or its gauge-transformation could not be reunitarized.\n", actual_config_nr);
+				free(U);
+				free(G);
+				continue;
+			}
 			
 			//  fix the gauge
 			
-			unsigned sweeps = SU3_gauge_fix(U, G, actual_config_nr);			
-			free(U);		//	Free memory allocated for the configuration.
+			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);			
+			
+
+			//	checking if a request to stop has been made
+			if(!system("test -f stop_run")){
+				printf("Exiting after request to stop.\n");
+				free(U);
+				free(G);
+				remove("stop_run");
+				exit(EXIT_SUCCESS);
+			}
 
 			// write the gauge fixed configuration to file
 			// SU3_write_config(actual_config_nr, U);
+			free(U);		//	Free memory allocated for the configuration.
 
 			// write the gauge transformation to file
-			SU3_write_gauge_transf(actual_config_nr, G);
+			if(SU3_write_gauge_transf(actual_config_nr, G)){
+				fprintf(stderr, "Gauge transformation writing failed for config %d.\n", actual_config_nr);
+			}
+			else{
+				printf("G written OK for config %d.\n", actual_config_nr);
+			}
+			
 			free(G);		//	Free memory allocated for gauge transformation.
 			
-			FILE* sweeps_to_gaugefix;
-    		if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "a+")) == NULL){
-        
-				fprintf(stderr, "Error creating file %s for config.\n", filename_sweeps_to_gaugefix);
-				exit(EXIT_FAILURE);
+			if(sweeps != -1){
+				FILE* sweeps_to_gaugefix;
+				char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
+				sprintf(filename_sweeps_to_gaugefix, "sweeps_to_gaugefix_%s_%dx%d.txt", config_template, N_SPC, N_T);
 
-			}
-			fprintf(sweeps_to_gaugefix, "%d\t%u\n", actual_config_nr, sweeps);
-			fflush(sweeps_to_gaugefix);	
-			fclose(sweeps_to_gaugefix);
+				if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "a+")) == NULL){
 			
+					fprintf(stderr, "Error opening file %s for config.\n", filename_sweeps_to_gaugefix);
+					continue;
+				}
+				else{
+					fprintf(sweeps_to_gaugefix, "%d\t%d\n", actual_config_nr, sweeps);
+					fflush(sweeps_to_gaugefix);	
+					fclose(sweeps_to_gaugefix);
+				}
+			}
+			else{
+				printf("Configuration %d could not be gauge-fixed.\n", actual_config_nr);
+			}
+
 		}
 	#ifdef MPI_CODE
 		MPI_Finalise();
