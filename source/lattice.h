@@ -67,22 +67,32 @@ typedef struct {
     complex float m[Nc * Nc];
 } mtrx_3x3_float;
 
-typedef mtrx_3x3_double work_cfg_data_type;
-typedef work_cfg_data_type mtrx_3x3;
+typedef mtrx_3x3_double work_mtrx_data_type;
+typedef work_mtrx_data_type mtrx_3x3;
 
-#ifdef NEED_CONV_TO_WORKING_PRECISION
-typedef mtrx_3x3_float in_cfg_data_type;
+#ifdef CONV_TO_WORKING_PRECISION
+typedef mtrx_3x3_float      in_cfg_data_type;
 #else
-typedef work_cfg_data_type in_cfg_data_type;
+typedef work_mtrx_data_type in_cfg_data_type;
 #endif
 
-#ifdef NEED_CONV_FROM_WORKING_PRECISION
-typedef mtrx_3x3_float out_cfg_data_type;
+#ifdef CONV_GT_TO_WORKING_PRECISION
+typedef mtrx_3x3_float  in_gt_data_type;
 #else
-typedef work_cfg_data_type out_cfg_data_type;
+typedef mtrx_3x3_double in_gt_data_type;
 #endif
 
+#ifdef CONV_FROM_WORKING_PRECISION
+typedef mtrx_3x3_float  out_cfg_data_type;
+#else
+typedef mtrx_3x3_double out_cfg_data_type;
+#endif
 
+#ifdef CONV_GT_FROM_WORKING_PRECISION
+typedef mtrx_3x3_float  out_gt_data_type;
+#else
+typedef mtrx_3x3_double out_gt_data_type;
+#endif
 
 #define TEST_ALLOCATION(a) test_allocation_function(a, __func__) //  used to test if allocation was successful
 #define GREETER()   greeter_function(__FILE__)
@@ -106,18 +116,31 @@ void get_link_matrix(mtrx_3x3 * restrict U, const pos_vec position, const lorent
 
 // void copy_3x3_config(mtrx_3x3 *U, mtrx_3x3 *U_copy);
 
-#ifdef NEED_CONV_TO_WORKING_PRECISION
-    void SU3_convert_config_work_out(work_cfg_data_type * restrict U_work, out_cfg_data_type * restrict U_out);
-    void SU3_convert_gaugetransf_in_work (in_cfg_data_type * restrict G_in,     work_cfg_data_type * restrict G_work);
+#ifdef CONV_TO_WORKING_PRECISION
+    
+    void SU3_convert_config_in_work (in_cfg_data_type * restrict U_in,   work_mtrx_data_type * restrict U_work);
 
 #endif
 
-#ifdef NEED_CONV_FROM_WORKING_PRECISION
-    void SU3_convert_config_in_work (in_cfg_data_type * restrict U_in,   work_cfg_data_type * restrict U_work);
-    void SU3_convert_gaugetransf_work_out(work_cfg_data_type * restrict G_work,  out_cfg_data_type * restrict G_out );
+#ifdef CONV_GT_TO_WORKING_PRECISION
+
+    void SU3_convert_gaugetransf_in_work (in_cfg_data_type * restrict G_in,     work_mtrx_data_type * restrict G_work);
+
 #endif
 
-double check_det_1(mtrx_3x3 * restrict U);
+#ifdef CONV_FROM_WORKING_PRECISION
+
+    void SU3_convert_config_work_out(work_mtrx_data_type * restrict U_work, out_cfg_data_type * restrict U_out);
+
+#endif
+
+#ifdef CONV_GT_FROM_WORKING_PRECISION
+
+    void SU3_convert_gaugetransf_work_out(work_mtrx_data_type * restrict G_work,  out_cfg_data_type * restrict G_out );
+
+#endif
+
+double average_det(mtrx_3x3 * restrict U);
 
 short SU3_reunitarize_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G);
 // short SU3_reunitarize_U(mtrx_3x3 *restrict U) ;
@@ -126,8 +149,8 @@ short SU3_reunitarize_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G);
 
 mtrx_3x3 *get_gaugetransf(mtrx_3x3 * restrict G, const pos_vec position);
 
-in_cfg_data_type  *get_gaugetransf_in (in_cfg_data_type  * restrict G_in,  const pos_vec position);
-out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type * restrict G_out, const pos_vec position);
+in_gt_data_type  *get_gaugetransf_in (in_gt_data_type  * restrict G_in,  const pos_vec position);
+out_gt_data_type *get_gaugetransf_out(out_gt_data_type * restrict G_out, const pos_vec position);
 
 
 

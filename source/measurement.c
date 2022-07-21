@@ -8,15 +8,12 @@
 #include "SU3_ops.h"
 
 double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position, 
-                                                    const lorentz_idx mu, 
-                                                    const lorentz_idx nu){
+                                                  const lorentz_idx mu, 
+                                                  const lorentz_idx nu){
 	
     mtrx_3x3 plaquette;
 
-    mtrx_3x3 ua;
-    mtrx_3x3 ub;
-    mtrx_3x3 uc;
-    mtrx_3x3 ud;
+    mtrx_3x3 ua, ub, uc, ud;
 
     pos_vec position_plus_mu = hop_position_positive(position, mu);
 
@@ -32,6 +29,7 @@ double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position,
 }
 
 double spatial_plaquette_average(mtrx_3x3 * restrict U){
+    //  Calculates the spatial plaquette average
     double plaq_ave = 0.0;
 
 
@@ -88,8 +86,8 @@ double temporal_plaquette_average(mtrx_3x3 * restrict U){
                     for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++){
                      
-                                plaq_ave_slice += 
-                                    SU3_re_tr_plaquette(U, position, T_INDX, mu);
+                            plaq_ave_slice += 
+                                SU3_re_tr_plaquette(U, position, T_INDX, mu);
                      
                         }    
                     }

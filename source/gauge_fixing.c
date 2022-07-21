@@ -17,7 +17,7 @@
 
 
 #define SWEEPS_TO_NEXT_MEASUREMENT(e2)  10 + (unsigned)(INITIAL_SWEEPS_TO_MEASUREMENT_e2 \
-                                        * (1.0 - log10((e2)) / log10(TOLERANCE)))
+                                              * (1.0 - log10((e2)) / log10(TOLERANCE)))
 
 #define CHECKERBOARD_SUBDIVISION(position, sweep) !((POSITION_IS_EVEN(position)) ^ ((sweep) & 1))
 //	Implementation of the checkerboard subdivision of the lattice.
@@ -151,10 +151,14 @@ double SU3_calculate_e2(mtrx_3x3 * restrict U) {
 }
 
 inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub) {
+    
     SU3_color_idx a, b;
 
     a = sub == T ? 1 : 0;
     b = sub == R ? 1 : 2;
+
+    //  a and b will be the line and colums index
+    //  for each Cabbibo-Marinari matrix, 
 
     mtrx_2x2_ck mtrx_SU2;
 
@@ -167,10 +171,23 @@ inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub
     mtrx_SU2.m[3] = -(cimag(w -> m[ELM3x3(a, a)]) 
                       - cimag(w -> m[ELM3x3(b, b)]));
 
+    //  The SU(2) matrix corresponding to the Cabbibo Marinari 
+    //  submatrix is built from w according to the formulae above.
+    //  This is what maximizes the functional locally for each
+    //  submatrix. This can be proven using maximization with 
+    //  constrains, where the constraint is that mtrx_SU2 has 
+    //  to be an SU(2) matrix.
+
     if(!SU2_projection(&mtrx_SU2)){
+        //  If SU2_projection is succesful, it will return 0
+        //  Then w can be updated
         accum_prod_SU2_3x3(&mtrx_SU2, w, a, b);
     }
     else{
+        //  If SU2_projection is unsuccesful, this means
+        //  that mtrx_SU2 was 0 and w remains what it was.
+        //  The program will then carry on to the next 
+        //  submatrix update.
         return;
     }
 }
@@ -182,27 +199,37 @@ inline static void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w,
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
     //	of "hits" to be performed one after another.
 
-    mtrx_3x3 w_inv_old;
+    mtrx_3x3 w_inv_old; 
+    //  Calculates the inverse of w in the beginning.
+    //  The program will update w successively and to
+    //  extract what was the combined update, we can 
+    //  multiply from the right by the old inverse.
 
+       
     if(inverse_3x3(w, &w_inv_old)){
 
+        //  Local maximization is attained iteratively in SU(3),
+        //  thus we need to make many hits ...
         for (unsigned short hits = 1; hits <= MAX_HITS; hits++) {
-            //	Each hit contains the Cabbibo-Marinari subdivision
+
+            //	... and each hit contains the Cabbibo-Marinari subdivision
             for (submatrix sub = R; sub <= T; sub++) {
                 //	Submatrices are indicated by numbers from 0 to 2
+                //  with codenames R, S and T
 
                 SU3_update_sub_LosAlamos(w, sub);
                 
-                //	Updates matrix to total_update. It is the
-                //	accumulated updates from the hits.
             }
         }
-        prod_3x3(w, &w_inv_old, total_update);
     }
     else{
+        //  if w has no inverse, update will be given by the identity
         set_identity_3x3(total_update);
     }
     
+    prod_3x3(w, &w_inv_old, total_update);
+    //	Updates matrix to total_update. It is the
+    //	accumulated updates from the hits.
 }
 
 inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const pos_vec position) {
@@ -308,7 +335,8 @@ int SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned s
                 //	to fix the gauge.
 
             }
-            printf("Sweeps in config %5d: %8d. e2: %3.2E \n", config_nr, sweep, new_e2);            //	Gauge-fixing index, indicates how far we are to the Landau-gauge.
+            printf("Sweeps in config %5d: %8d. e2: %3.2E \n", config_nr, sweep, new_e2);            
+            //	Gauge-fixing index, indicates how far we are to the Landau-gauge.
             //  It will be less than the TOLERANCE,
             //	when the gauge-fixing is considered to be attained.
             //	Following the notation of hep-lat/0301019v2

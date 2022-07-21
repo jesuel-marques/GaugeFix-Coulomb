@@ -102,10 +102,10 @@ void greeter_function(const char * restrict program_name) {
 
 void handle_input(int argc, char *argv[]) {
     if (argc != 4) {
-        fprintf(stderr, "Input names for input and output config directory and template");
+        fprintf(stdout, "Usage: Input names for input and output config directory and nametag");
 
         if (argc > 4) {
-            fprintf(stderr, " only");
+            fprintf(stdout, " only");
         }
     }
 
@@ -145,7 +145,7 @@ int create_output_directory(void) {
     
     switch (system(command)){
         case 0:
-            printf("Directory already exists.\n");
+            printf("Warning: Directory already exists.\n");
             return 0;
 
         case 1:
@@ -153,14 +153,14 @@ int create_output_directory(void) {
             int exit_status = system(command);
             
             if(exit_status){
-                fprintf(stderr, "Some error occured when creating output directory.\n");
+                fprintf(stderr, "Error: Some problem occured when creating output directory.\n");
                 fprintf(stderr, "Exit code of command '%s': %d.\n", command, exit_status);
             }
             return exit_status;
 
             
         default:
-            fprintf(stderr, "Problem with command %s. Could not test existence of directory.\n", command);
+            fprintf(stderr, "Error: Problem with command %s. Could not test existence of directory.\n", command);
             return -1;
     }
 
@@ -188,7 +188,7 @@ static int extract_config(const unsigned config_nr, const char * restrict config
                                 name_unextracted_config_file(config_nr, unextracted_config_filename), config_filename);
 
     if(exit_status < 0){
-        fprintf(stderr, "Problem creating lime command.\n");
+        fprintf(stderr, "Error: Problem creating lime command.\n");
         return -1;
     }
     
@@ -223,7 +223,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     char config_filename[MAX_LENGTH_NAME];
 
     if( name_configuration_file(config_nr, config_filename) == '\0'){
-        fprintf(stderr, "Problem naming configuration.\n");
+        fprintf(stderr, "Error: Problem naming configuration.\n");
         return -1;
     }
 
@@ -234,7 +234,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     // system(mv_command);
 
     if(extract_config(config_nr, strcat(name_configuration_file(config_nr, config_filename), extension_config_in))){
-        fprintf(stderr, "Problem extracting config %d.\n", config_nr);
+        fprintf(stderr, "Error: Problem extracting config %d.\n", config_nr);
         return -1;
     }
     printf("Config %d extracted OK.\n", config_nr);
@@ -243,14 +243,14 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     if ((config_file = fopen(config_filename, "rb")) == NULL) {
 
-        fprintf(stderr, "Error opening config file %s.\n", config_filename);
+        fprintf(stderr, "Error: Problem opening config file %s.\n", config_filename);
 
         return -1;
     }
 
     in_cfg_data_type *U_in;
 
-    #ifdef NEED_CONV_TO_WORKING_PRECISION
+    #ifdef CONV_TO_WORKING_PRECISION
 
         U_in = (in_cfg_data_type *)calloc(VOLUME * DIM, sizeof(in_cfg_data_type));
         if(TEST_ALLOCATION(U_in)){
@@ -268,8 +268,8 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     if (fread(U_in, sizeof(in_cfg_data_type), VOLUME * DIM, config_file) != VOLUME * DIM) {
 
-        fprintf(stderr, "Reading from file failed for config %d.\n", config_nr);
-        #ifdef NEED_CONV_TO_WORKING_PRECISION 
+        fprintf(stderr, "Error: Reading from file failed for config %d.\n", config_nr);
+        #ifdef CONV_TO_WORKING_PRECISION 
              free(U_in);
         #endif
         fclose(config_file);
@@ -280,8 +280,8 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     fgetc(config_file);
 
     if (!feof(config_file)) {
-        fprintf(stderr, "File has not been read till the end. Check lattice sizes.\n");
-        #ifdef NEED_CONV_TO_WORKING_PRECISION 
+        fprintf(stderr, "Error: File has not been read till the end. Check lattice sizes.\n");
+        #ifdef CONV_TO_WORKING_PRECISION 
              free(U_in);
         #endif
         fclose(config_file);
@@ -293,7 +293,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     // system(mv_command);
     printf("Removing %s\n", config_filename); 
     if(remove(config_filename)){
-        fprintf(stderr, "WARNING: Error removing %s.\n", config_filename);
+        fprintf(stderr, "Error: Problem removing %s.\n", config_filename);
     }
     else{
         printf("%s succesfully removed.\n", config_filename);
@@ -302,8 +302,8 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     #ifdef NEED_BYTE_SWAP_IN
 
         if(byte_swap(U_in, sizeof(in_data_type) / 2, VOLUME * DIM * sizeof(in_cfg_data_type))){
-            fprintf(stderr, "Error with the byte_swap. Unknown size.\n");
-            #ifdef NEED_CONV_TO_WORKING_PRECISION
+            fprintf(stderr, "Error: Problem with the byte_swap. Unknown size.\n");
+            #ifdef CONV_TO_WORKING_PRECISION
                 free(U_in);
             #endif
             return -1;
@@ -311,7 +311,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     #endif
 
-    #ifdef NEED_CONV_TO_WORKING_PRECISION
+    #ifdef CONV_TO_WORKING_PRECISION
         SU3_convert_config_in_work(U_in, U);
         free(U_in);
     #endif
@@ -324,7 +324,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     out_cfg_data_type *U_out;
 
-    #ifdef NEED_CONV_FROM_WORKING_PRECISION
+    #ifdef CONV_FROM_WORKING_PRECISION
 
         U_out = (out_cfg_data_type *)calloc(VOLUME * DIM, sizeof(out_cfg_data_type));
         TEST_ALLOCATION(U_out);
@@ -339,8 +339,8 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     #ifdef NEED_BYTE_SWAP_OUT
         if (byte_swap(U_out, sizeof(out_data_type) / 2, VOLUME * DIM * sizeof(out_cfg_data_type))){
-            fprintf(stderr, "Error with the byte_swap. Unknown size.\n");
-            #ifdef NEED_CONV_FROM_WORKING_PRECISION
+            fprintf(stderr, "Error: Problem with the byte_swap. Unknown size.\n");
+            #ifdef CONV_FROM_WORKING_PRECISION
                 free(U_out);
             #endif
             return -1;
@@ -356,9 +356,9 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     printf("Creating: %s.\n", strcat(config_filename, extension_config_out));
     if ((config_file = fopen(config_filename, "wb")) == NULL) {
 
-        fprintf(stderr, "Error creating file %s for config.\n", config_filename);
+        fprintf(stderr, "Error: Problem creating file %s for config.\n", config_filename);
 
-        #ifdef NEED_CONV_FROM_WORKING_PRECISION
+        #ifdef CONV_FROM_WORKING_PRECISION
             free(U_out);
         #endif
 
@@ -370,7 +370,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
         fclose(config_file);
 
-        #ifdef NEED_CONV_FROM_WORKING_PRECISION
+        #ifdef CONV_FROM_WORKING_PRECISION
             free(U_out);
         #endif
 
@@ -379,7 +379,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     fclose(config_file);
 
-    #ifdef NEED_CONV_FROM_WORKING_PRECISION
+    #ifdef CONV_FROM_WORKING_PRECISION
         free(U_out);
     #endif
 
@@ -406,11 +406,11 @@ static char * name_gaugetransf_file(const unsigned config_nr, char * restrict ga
 int SU3_write_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
     //  Loads a link configuration from the file with filename to U.
 
-    out_cfg_data_type *G_out;
+    out_gt_data_type *G_out;
 
-    #ifdef NEED_CONV_FROM_WORKING_PRECISION
+    #ifdef CONV_FROM_WORKING_PRECISION
 
-        G_out = (out_cfg_data_type *)calloc(VOLUME, sizeof(out_cfg_data_type));
+        G_out = (out_gt_data_type *)calloc(VOLUME, sizeof(out_gt_data_type));
         if(TEST_ALLOCATION(G_out)){
             
             return -1;
@@ -420,7 +420,7 @@ int SU3_write_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
 
     #else
 
-        G_out = (out_cfg_data_type *)G;
+        G_out = (out_gt_data_type *)G;
 
     #endif
 
@@ -432,64 +432,67 @@ int SU3_write_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
     printf("Creating: %s.\n", strcat(gaugetransf_filename, extension_gt_out));
     if ((gaugetransf_file = fopen(gaugetransf_filename, "wb")) == NULL) {
 
-        fprintf(stderr, "Error opening file %s to store gauge transformation.\n", gaugetransf_filename);
+        fprintf(stderr, "Error: Problem opening file %s to store gauge transformation.\n", gaugetransf_filename);
         
-        #ifdef NEED_CONV_FROM_WORKING_PRECISION
+        #ifdef CONV_GT_FROM_WORKING_PRECISION
 
-        free(G_out);
+            free(G_out);
         
         #endif
-        
-        return -1;
 
+        return -1;
     }
 
-    if (fwrite(G_out, sizeof(out_cfg_data_type), VOLUME, gaugetransf_file) != VOLUME ) {
+    if (fwrite(G_out, sizeof(out_gt_data_type), VOLUME, gaugetransf_file) != VOLUME ) {
+
+        fprintf(stderr, "Error: Problem writing gauge transformation to file %s.\n", gaugetransf_filename);
 
         fclose(gaugetransf_file);
 
-        #ifdef NEED_CONV_FROM_WORKING_PRECISION
+        #ifdef CONV_GT_FROM_WORKING_PRECISION
 
             free(G_out);
             
         #endif
+
         return -1;
     }
 
     fclose(gaugetransf_file);
 
-    #ifdef NEED_CONV_FROM_WORKING_PRECISION
+    #ifdef CONV_GT_FROM_WORKING_PRECISION
 
         free(G_out);
         
     #endif
+
     return 0;
 }
 
 int SU3_load_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
     //	Loads a link configuration from the file with filename to U.
 
-    in_cfg_data_type *G_in;
+    in_gt_data_type *G_in;
 
-    #ifdef NEED_CONV_TO_WORKING_PRECISION
+    #ifdef CONV_GT_TO_WORKING_PRECISION
 
-        G_in = (in_cfg_data_type *)calloc( VOLUME , sizeof(in_cfg_data_type));
+        G_in = (in_gt_data_type *)calloc( VOLUME , sizeof(in_gt_data_type));
         if(TEST_ALLOCATION(G_in)){
             return -1;
         }
 
     #else
 
-        G_in = (in_cfg_data_type *)G;
+        G_in = (in_gt_data_type *)G;
 
     #endif
 
     char gaugetransf_filename[MAX_LENGTH_NAME];
 
     if(name_gaugetransf_file(config_nr, gaugetransf_filename) == '\0'){
-        fprintf(stderr, "Problem naming gauge transformation.\n");
+        fprintf(stderr, "Error: Problem naming gauge transformation.\n");
         
-        #ifdef NEED_CONV_TO_WORKING_PRECISION
+        #ifdef CONV_GT_TO_WORKING_PRECISION
             free(G_in);
         #endif
 
@@ -504,18 +507,25 @@ int SU3_load_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
     printf("Loading: %s.\n", gaugetransf_filename);
     if ((gaugetransf_file = fopen(gaugetransf_filename, "rb")) == NULL) {
 
-        fprintf(stderr, "Error opening file %s to load gauge transformation.\n", gaugetransf_filename);
-        
+        fprintf(stderr, "Error: Problem opening file %s to load gauge transformation.\n", gaugetransf_filename);
+
+        #ifdef CONV_GT_TO_WORKING_PRECISION
+            free(G_in);
+        #endif
+
         return -1;
 
     }
 
-    if (fread(G_in, sizeof(in_cfg_data_type), VOLUME, gaugetransf_file) != VOLUME ) {
+    if (fread(G_in, sizeof(in_gt_data_type), VOLUME, gaugetransf_file) != VOLUME ) {
 
-        #ifdef NEED_CONV_TO_WORKING_PRECISION
+        fprintf(stderr, "Error: Problem reading file %s to load gauge transformation.\n", gaugetransf_filename);
+
+        #ifdef CONV_GT_TO_WORKING_PRECISION
             free(G_in);
-        #endif    
-        
+        #endif
+
+        fclose(gaugetransf_file);
         return -1;
 
     }
@@ -524,22 +534,22 @@ int SU3_load_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
 
     if (!feof(gaugetransf_file)) {
 
-        fprintf(stderr, "File has not been read till the end. Check lattice sizes.\n");
+        fprintf(stderr, "Error: File has not been read till the end. Check lattice sizes.\n");
         
-        #ifdef NEED_CONV_TO_WORKING_PRECISION
+        #ifdef CONV_GT_TO_WORKING_PRECISION
             free(G_in);
-        #endif        
-        
+        #endif
+
+        fclose(gaugetransf_file);
         return -1;
     }
 
     fclose(gaugetransf_file);
 
-    #ifdef NEED_CONV_TO_WORKING_PRECISION
+    #ifdef CONV_GT_TO_WORKING_PRECISION
         SU3_convert_gaugetransf_in_work(G_in, G);
         free(G_in);
     #endif
 
     return 0;
 }
-

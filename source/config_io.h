@@ -22,5 +22,4 @@ int SU3_load_config (const unsigned config_nr, mtrx_3x3 * restrict U),
 int SU3_load_gauge_transf (const unsigned config_nr, mtrx_3x3 * restrict G),
     SU3_write_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G);
 
-
 #endif

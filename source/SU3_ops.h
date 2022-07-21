@@ -22,8 +22,11 @@ void print_matrix_3x3(const mtrx_3x3 *u, const char *name, const unsigned short 
 
 void copy_3x3(const mtrx_3x3 *u, mtrx_3x3 *u_copy);
 
-void convert_in_work_3x3(const in_cfg_data_type *u_in, work_cfg_data_type *u_work),
-     convert_work_out_3x3(const work_cfg_data_type *u_work, out_cfg_data_type *u_out);
+void convert_in_cfg_work_3x3 (const in_cfg_data_type    *u_in, work_mtrx_data_type *u_work),
+     convert_work_out_cfg_3x3(const work_mtrx_data_type *u_work,  out_cfg_data_type *u_out);
+
+void convert_in_gt_work_3x3 (const in_gt_data_type *g_in,    work_mtrx_data_type *g_work),
+     convert_work_out_gt_3x3(const work_mtrx_data_type *g_work,  out_gt_data_type *g_out);
 
 void set_null_3x3    (mtrx_3x3 *u),
      set_identity_3x3(mtrx_3x3 *u);

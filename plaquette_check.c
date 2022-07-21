@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 			getchar();
 
 			printf("\n e2: %5.4E \n", SU3_calculate_e2(U));
-			check_det_1(U);
+			average_det(U);
 			printf("Spatial plaquete  %.10lf\n", spatial_plaquette_average(U));
 			printf("Temporal plaquete %.10lf\n", temporal_plaquette_average(U));
 
@@ -92,17 +92,20 @@ int main(int argc, char *argv[]) {
 			TEST_ALLOCATION(G);
 
 			SU3_load_gauge_transf(actual_config_nr, G);	
-			SU3_global_update_U(U, G);
+
+			//  calculate plaquette average
+			printf("Spatial plaquete before reunitarization: %.10lf\n", spatial_plaquette_average(U));
+			printf("Temporal plaquete before reunitarization: %.10lf\n", temporal_plaquette_average(U));
 
 			SU3_reunitarize_U_G(U, G);
+			SU3_global_update_U(U, G);
 
+			printf("average determinant: %.15lf\n",	average_det(U));
 			printf("\n e2: %5.4E \n", SU3_calculate_e2(U));
-			
-			check_det_1(U);
-			
+
 			//  calculate plaquette average
-			printf("Spatial plaquete  %.10lf\n", spatial_plaquette_average(U));
-			printf("Temporal plaquete %.10lf\n", temporal_plaquette_average(U));
+			printf("Spatial plaquete after reunitarization:  %.10lf\n", spatial_plaquette_average(U));
+			printf("Temporal plaquete after reunitarization:  %.10lf\n", temporal_plaquette_average(U));
 
 			free(G);
 			free(U);

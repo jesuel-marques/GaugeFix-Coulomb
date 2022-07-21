@@ -42,14 +42,7 @@ int config_exception_list[] = {-1};
 //	Configurations to be ignored in the gauge-fixing. -1 indicates the end of the list.
 
 int main(int argc, char *argv[]) {
-	GREETER();
-	handle_input(argc, argv);
 
-	if(create_output_directory()){
-		printf("Some error ocurred when creating output directory. Exiting.");
-		exit(EXIT_FAILURE);
-	}
-	
 
 	#ifdef MPI_CODE
 	//	If compiling for running with MPI, then these things have to be defined
@@ -65,8 +58,22 @@ int main(int argc, char *argv[]) {
 	const int nconfig = MAX_CONFIGS;
 	//Calculate the number of configs per rank
 	int config_per_rank = nconfig / size;
-	// The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
-	for (int config = rank ; config < nconfig; config += size) {
+	if(!rank){
+	#endif
+	
+		GREETER();
+		handle_input(argc, argv);
+
+		if(create_output_directory()){
+			printf("Some error ocurred when creating output directory. Exiting.");
+			exit(EXIT_FAILURE);
+		}
+	
+	#ifdef MPI_CODE	
+		}
+		MPI_Barrier(comm);
+		// The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
+		for (int config = rank ; config < nconfig; config += size) {
 
 	#else
 	//	If compiling for not running with MPI, then just use a simple for loop
@@ -163,9 +170,10 @@ int main(int argc, char *argv[]) {
 			else{
 				printf("Configuration %d could not be gauge-fixed.\n", actual_config_nr);
 			}
-
+	#ifndef MPI_CODE
 		}
-	#ifdef MPI_CODE
+	#else
+		}
 		MPI_Finalise();
 	#endif
 

@@ -214,8 +214,6 @@ void get_link_matrix(mtrx_3x3 *restrict U, const pos_vec position, const lorentz
     // Gets forward or backward link at given position and mu
     // and copies it to u.
 
-    mtrx_3x3 u_aux;
-
     if(position_mu_valid(position, mu)){
         if (dir == FRONT) {
         copy_3x3(get_link(U, position, mu), u);
@@ -229,7 +227,7 @@ void get_link_matrix(mtrx_3x3 *restrict U, const pos_vec position, const lorentz
             printf("direction is not valid.");
             exit(EXIT_FAILURE); 
         }
-    }    
+    }
     else{
         printf("Program reading config outside of allowed range.\n");
         exit(EXIT_FAILURE);
@@ -241,24 +239,25 @@ mtrx_3x3 *get_gaugetransf(mtrx_3x3 *restrict G, const pos_vec position) {
     //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
 
     #ifdef CHECK_POSITION_BOUNDS
-        if(position_valid(position))    
+        if(position_valid(position)){
     #endif
             return G + GET_GT(position);
     #ifdef CHECK_POSITION_BOUNDS
+        }
         else{
         
-            printf("Program reading gauge-transformation outside of allowed range.\n");
+            printf("Program reading gauge-transformation outside of allowed position range.\n");
             exit(EXIT_FAILURE);
         }
     #endif
 }
 
-in_cfg_data_type  *get_gaugetransf_in (in_cfg_data_type  * restrict G_in,  const pos_vec position) {
+in_gt_data_type  *get_gaugetransf_in (in_gt_data_type  * restrict G_in,  const pos_vec position) {
     //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
     return G_in + GET_GT(position);
 }
 
-out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type * restrict G_out, const pos_vec position) {
+out_gt_data_type *get_gaugetransf_out(out_gt_data_type * restrict G_out, const pos_vec position) {
     //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
     return G_out + GET_GT(position);
 }
@@ -283,8 +282,8 @@ out_cfg_data_type *get_gaugetransf_out(out_cfg_data_type * restrict G_out, const
 //     }
 // }
 
-#ifdef NEED_CONV_TO_WORKING_PRECISION
-void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_cfg_data_type * restrict U_work) {
+#ifdef CONV_TO_WORKING_PRECISION
+void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_mtrx_data_type * restrict U_work) {
     omp_parallel_for
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
@@ -294,7 +293,7 @@ void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_cfg_data_
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_idx mu = 0; mu < DIM; mu++) {
-                            convert_in_work_3x3(get_link_in(U_in, position, mu), get_link(U_work, position, mu));
+                            convert_in_cfg_work_3x3(get_link_in(U_in, position, mu), get_link(U_work, position, mu));
                         }
                     }
                 }
@@ -302,7 +301,11 @@ void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_cfg_data_
         }
 }
 
- void SU3_convert_gaugetransf_in_work(in_cfg_data_type * restrict G_in, work_cfg_data_type * restrict G_work) {
+#endif
+
+#ifdef CONV_GT_TO_WORKING_PRECISION
+
+ void SU3_convert_gaugetransf_in_work(in_gt_data_type * restrict G_in, work_mtrx_data_type * restrict G_work) {
         omp_parallel_for
             // Paralelizing by slicing the time extent
             for (pos_index t = 0; t < N_T; t++) {
@@ -311,7 +314,7 @@ void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_cfg_data_
                 for (position.k = 0; position.k < N_SPC; position.k++) {
                     for (position.j = 0; position.j < N_SPC; position.j++) {
                         for (position.i = 0; position.i < N_SPC; position.i++) {                    
-                                convert_in_work_3x3(get_gaugetransf_in(G_in, position), get_gaugetransf(G_work, position));                    
+                                convert_in_gt_work_3x3(get_gaugetransf_in(G_in, position), get_gaugetransf(G_work, position));                    
                         }
                     }
                 }
@@ -319,9 +322,10 @@ void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_cfg_data_
     }
 #endif
 
-#ifdef NEED_CONV_FROM_WORKING_PRECISION
 
-void SU3_convert_config_work_out(work_cfg_data_type * restrict U_work, out_cfg_data_type * restrict U_out) {
+#ifdef CONV_FROM_WORKING_PRECISION
+
+void SU3_convert_config_work_out(work_mtrx_data_type * restrict U_work, out_cfg_data_type * restrict U_out) {
     omp_parallel_for
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
@@ -339,7 +343,11 @@ void SU3_convert_config_work_out(work_cfg_data_type * restrict U_work, out_cfg_d
         }
 }
 
-void SU3_convert_gaugetransf_work_out(work_cfg_data_type *G_work, out_cfg_data_type *G_out) {
+#endif
+
+#ifdef CONV_GT_FROM_WORKING_PRECISION
+
+void SU3_convert_gaugetransf_work_out(work_mtrx_data_type *G_work, out_gt_data_type *G_out) {
     omp_parallel_for
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
@@ -356,8 +364,6 @@ void SU3_convert_gaugetransf_work_out(work_cfg_data_type *G_work, out_cfg_data_t
 }
 
 #endif
-
-
 
 // typedef void (*loop_f)(mtrx_3x3 *, ...);
 
@@ -409,7 +415,7 @@ void SU3_convert_gaugetransf_work_out(work_cfg_data_type *G_work, out_cfg_data_t
 //     loop_over_links(1, projection_SU3, U, DOUBLE);
 // }
 
-double check_det_1(mtrx_3x3 *restrict U) {
+double average_det(mtrx_3x3 *restrict U) {
     double det = 0.0;
     // Reunitarizes the configuration
 
@@ -431,8 +437,6 @@ double check_det_1(mtrx_3x3 *restrict U) {
         }
 
     det /= (DIM * VOLUME);
-
-    printf("average determinant: %.15lf\n", det);
 
     return det;
 }

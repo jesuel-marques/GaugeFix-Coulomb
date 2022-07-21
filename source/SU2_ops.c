@@ -47,17 +47,17 @@ void copy_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck * restrict u_copy) {
 
 inline void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, matrix_2x2 * restrict u){
     
-    u -> m[ELM2x2(0, 0)] =   u_ck -> m[0] 
-                       + I * u_ck -> m[3];
+    u -> m[ELM2x2(0, 0)] =      u_ck -> m[0] 
+                          + I * u_ck -> m[3];
 
-    u -> m[ELM2x2(0, 1)] =   u_ck -> m[2]
-                       + I * u_ck -> m[1];
+    u -> m[ELM2x2(0, 1)] =      u_ck -> m[2]
+                          + I * u_ck -> m[1];
 
-    u -> m[ELM2x2(1, 0)] =-  u_ck -> m[2] 
-                       + I * u_ck -> m[1];
+    u -> m[ELM2x2(1, 0)] =   -  u_ck -> m[2] 
+                          + I * u_ck -> m[1];
 
-    u -> m[ELM2x2(1, 1)] =   u_ck -> m[0] 
-                       - I * u_ck -> m[3];
+    u -> m[ELM2x2(1, 1)] =      u_ck -> m[0] 
+                          - I * u_ck -> m[3];
 
 }
 // void set_null_2x2(mtrx_2x2_ck * restrict u) {
