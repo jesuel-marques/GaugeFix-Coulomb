@@ -180,11 +180,12 @@ static char * name_unextracted_config_file(const unsigned config_nr, char * rest
 
 static int extract_config(const unsigned config_nr, const char * restrict config_filename) {
     char unextracted_config_filename[MAX_LENGTH_NAME];
-    char command_lime[MAX_LENGTH_NAME];
+    char command_lime[MAX_LENGTH_NAME+1000];
 
     name_unextracted_config_file(config_nr, unextracted_config_filename);
 
-    int exit_status = sprintf(command_lime, "lime_extract_record %s 2 4 %s", 
+
+    int exit_status = sprintf(command_lime, "cd /ichec/home/users/jesuel/chroma-install/install-files/qdp++/bin; lime_extract_record %s 2 4 %s; cd -", 
                                 name_unextracted_config_file(config_nr, unextracted_config_filename), config_filename);
 
     if(exit_status < 0){
