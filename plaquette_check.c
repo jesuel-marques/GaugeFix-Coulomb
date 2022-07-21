@@ -85,8 +85,8 @@ int main(int argc, char *argv[]) {
 			printf("\n e2 before reunitarization and gauge transformation: %5.4E \n", SU3_calculate_e2(U));
 			printf("average determinant before reunitarization: %.15lf\n",	average_det(U));
 			//  calculate plaquette average
-			printf("Spatial plaquete before reunitarization: %.10lf\n", spatial_plaquette_average(U));
-			printf("Temporal plaquete before reunitarization: %.10lf\n", temporal_plaquette_average(U));
+			printf("Spatial plaquette before reunitarization: %.10lf\n", spatial_plaquette_average(U));
+			printf("Temporal plaquette before reunitarization: %.10lf\n", temporal_plaquette_average(U));
 
 
 			mtrx_3x3 * G = (mtrx_3x3 *) calloc(VOLUME , sizeof(mtrx_3x3));
@@ -94,17 +94,19 @@ int main(int argc, char *argv[]) {
 
 			SU3_load_gauge_transf(actual_config_nr, G);	
 
-			
-
 			SU3_reunitarize_U_G(U, G);
+
+			printf("Spatial plaquette before gauge transformation: %.10lf\n", spatial_plaquette_average(U));
+			printf("Temporal plaquette before gauge transformation: %.10lf\n", temporal_plaquette_average(U));
+
 			SU3_global_update_U(U, G);
 
 			printf("average determinant: %.15lf\n",	average_det(U));
 			printf("\n e2: %5.4E \n", SU3_calculate_e2(U));
 
 			//  calculate plaquette average
-			printf("Spatial plaquete after reunitarization:  %.10lf\n", spatial_plaquette_average(U));
-			printf("Temporal plaquete after reunitarization:  %.10lf\n", temporal_plaquette_average(U));
+			printf("Spatial plaquette after reunitarization:  %.10lf\n", spatial_plaquette_average(U));
+			printf("Temporal plaquette after reunitarization:  %.10lf\n", temporal_plaquette_average(U));
 
 			free(G);
 			free(U);
