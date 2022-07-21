@@ -19,6 +19,8 @@ char configs_dir_name_in[200];	//	input from command line
 char configs_dir_name_out[200];	//	input from command line
 char config_template[10] ;	//	input from command line
 
+char gaugetransf_dir_name_out[200];
+
 extern char extension_config_in[];
 extern char extension_config_out[];
 
@@ -102,7 +104,7 @@ void greeter_function(const char * restrict program_name) {
 
 void handle_input(int argc, char *argv[]) {
     if (argc != 4) {
-        fprintf(stdout, "Usage: Input names for input and output config directory and nametag");
+        fprintf(stdout, "Usage: Input names for input and output config directory and basename.\n");
 
         if (argc > 4) {
             fprintf(stdout, " only");
@@ -174,6 +176,7 @@ static char * name_unextracted_config_file(const unsigned config_nr, char * rest
         return '\0';
     }
     else{
+        printf("Unextracted config file name is %s", unextracted_config_filename);
         return unextracted_config_filename;
     }
 }
@@ -183,7 +186,7 @@ static int extract_config(const unsigned config_nr, const char * restrict config
     char command_lime[MAX_LENGTH_NAME+1000];
 
     name_unextracted_config_file(config_nr, unextracted_config_filename);
-
+    
 
     int exit_status = sprintf(command_lime, "cd /ichec/home/users/jesuel/chroma-install/install-files/qdp++/bin; lime_extract_record %s 2 4 %s; cd -", 
                                 name_unextracted_config_file(config_nr, unextracted_config_filename), config_filename);
@@ -389,7 +392,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
 
 static char * name_gaugetransf_file(const unsigned config_nr, char * restrict gaugetransf_filename) {
-    int exit_status = sprintf(gaugetransf_filename, "%s%s_%d", configs_dir_name_out, config_template, config_nr);
+    int exit_status = sprintf(gaugetransf_filename, "%s%s_%d", gaugetransf_dir_name_out, config_template, config_nr);
     
     if(exit_status < 0){
 
