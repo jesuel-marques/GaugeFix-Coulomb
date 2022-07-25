@@ -118,7 +118,7 @@ void get_link_matrix(mtrx_3x3 * restrict U, const pos_vec position, const lorent
 
 #ifdef CONV_TO_WORKING_PRECISION
     
-    void SU3_convert_config_in_work (in_cfg_data_type * restrict U_in,   work_mtrx_data_type * restrict U_work);
+    void SU3_convert_cfg_in_work (in_cfg_data_type * restrict U_in,   work_mtrx_data_type * restrict U_work);
 
 #endif
 
@@ -130,7 +130,7 @@ void get_link_matrix(mtrx_3x3 * restrict U, const pos_vec position, const lorent
 
 #ifdef CONV_FROM_WORKING_PRECISION
 
-    void SU3_convert_config_work_out(work_mtrx_data_type * restrict U_work, out_cfg_data_type * restrict U_out);
+    void SU3_convert_cfg_work_out(work_mtrx_data_type * restrict U_work, out_cfg_data_type * restrict U_out);
 
 #endif
 

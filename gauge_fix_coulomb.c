@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
 					continue;
 				}
 				else{
-					fprintf(sweeps_to_gaugefix, "%d\t%d\n", actual_config_nr, sweeps);
+					// fprintf(sweeps_to_gaugefix, "%d\t%d\n", actual_config_nr, sweeps);
 					fflush(sweeps_to_gaugefix);	
 					fclose(sweeps_to_gaugefix);
 				}

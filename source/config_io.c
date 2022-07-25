@@ -316,7 +316,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     #endif
 
     #ifdef CONV_TO_WORKING_PRECISION
-        SU3_convert_config_in_work(U_in, U);
+        SU3_convert_cfg_in_work(U_in, U);
         free(U_in);
     #endif
 
@@ -333,7 +333,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
         U_out = (out_cfg_data_type *)calloc(VOLUME * DIM, sizeof(out_cfg_data_type));
         TEST_ALLOCATION(U_out);
 
-        SU3_convert_config_work_out(U, U_out);
+        SU3_convert_cfg_work_out(U, U_out);
 
     #else
 
