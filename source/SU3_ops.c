@@ -45,7 +45,7 @@ void copy_3x3(const mtrx_3x3 * restrict u, mtrx_3x3 * restrict u_copy) {
     }
 }
 
-void convert_in_cfg_work_3x3(const in_cfg_data_type * restrict u_in, 
+void convert_in_work_cfg_3x3(const in_cfg_data_type * restrict u_in, 
                                 work_mtrx_data_type * restrict u_work) {
 
     for (SU3_color_idx  a = 0; a < Nc; a++) {
@@ -71,7 +71,7 @@ void convert_work_out_cfg_3x3(const work_mtrx_data_type * restrict u_work,
 }
 
 
-void convert_in_gt_work_3x3(const in_gt_data_type * restrict g_in, 
+void convert_in_work_gt_3x3(const in_gt_data_type * restrict g_in, 
                               work_mtrx_data_type * restrict g_work) {
 
     for (SU3_color_idx  a = 0; a < Nc; a++) {

@@ -293,7 +293,7 @@ void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_mtrx_data
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_idx mu = 0; mu < DIM; mu++) {
-                            convert_in_cfg_work_3x3(get_link_in(U_in, position, mu), get_link(U_work, position, mu));
+                            convert_in_work_cfg_3x3(get_link_in(U_in, position, mu), get_link(U_work, position, mu));
                         }
                     }
                 }
@@ -314,7 +314,7 @@ void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_mtrx_data
                 for (position.k = 0; position.k < N_SPC; position.k++) {
                     for (position.j = 0; position.j < N_SPC; position.j++) {
                         for (position.i = 0; position.i < N_SPC; position.i++) {                    
-                                convert_in_gt_work_3x3(get_gaugetransf_in(G_in, position), get_gaugetransf(G_work, position));                    
+                                convert_in_work_gt_3x3(get_gaugetransf_in(G_in, position), get_gaugetransf(G_work, position));                    
                         }
                     }
                 }
@@ -335,7 +335,7 @@ void SU3_convert_config_work_out(work_mtrx_data_type * restrict U_work, out_cfg_
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
                         for (lorentz_idx mu = 0; mu < DIM; mu++) {
-                            convert_work_out_3x3(get_link(U_work, position, mu), get_link_out(U_out, position, mu));
+                            convert_work_out_cfg_3x3(get_link(U_work, position, mu), get_link_out(U_out, position, mu));
                         }
                     }
                 }
@@ -356,7 +356,7 @@ void SU3_convert_gaugetransf_work_out(work_mtrx_data_type *G_work, out_gt_data_t
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {                    
-                            convert_work_out_3x3(get_gaugetransf(G_work, position), get_gaugetransf_out(G_out, position));                    
+                            convert_work_out_gt_3x3(get_gaugetransf(G_work, position), get_gaugetransf_out(G_out, position));                    
                     }
                 }
             }
