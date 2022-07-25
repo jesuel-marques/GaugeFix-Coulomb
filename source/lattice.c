@@ -283,7 +283,7 @@ out_gt_data_type *get_gaugetransf_out(out_gt_data_type * restrict G_out, const p
 // }
 
 #ifdef CONV_TO_WORKING_PRECISION
-void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_mtrx_data_type * restrict U_work) {
+void SU3_convert_cfg_in_work(in_cfg_data_type * restrict U_in, work_mtrx_data_type * restrict U_work) {
     omp_parallel_for
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
@@ -325,7 +325,7 @@ void SU3_convert_config_in_work(in_cfg_data_type * restrict U_in, work_mtrx_data
 
 #ifdef CONV_FROM_WORKING_PRECISION
 
-void SU3_convert_config_work_out(work_mtrx_data_type * restrict U_work, out_cfg_data_type * restrict U_out) {
+void SU3_convert_cfg_work_out(work_mtrx_data_type * restrict U_work, out_cfg_data_type * restrict U_out) {
     omp_parallel_for
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {

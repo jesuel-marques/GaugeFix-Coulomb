@@ -412,7 +412,7 @@ int SU3_write_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
 
     out_gt_data_type *G_out;
 
-    #ifdef CONV_FROM_WORKING_PRECISION
+    #ifdef CONV_GT_FROM_WORKING_PRECISION
 
         G_out = (out_gt_data_type *)calloc(VOLUME, sizeof(out_gt_data_type));
         if(TEST_ALLOCATION(G_out)){
