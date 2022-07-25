@@ -521,7 +521,6 @@ inline short projection_SU3(mtrx_3x3 * restrict x) {
         return EXIT_SUCCESS;
     }
     else{
-        fprintf(stderr, "A matrix could not be projected to SU(3)\n");
         return -1;
     }
 }
