@@ -23,7 +23,7 @@
 
 #define MAX_LENGTH_NAME 2000
 
-#define NUM_THREADS 8
+#define NUM_THREADS 1
 
 
 #define     NEED_BYTE_SWAP_IN

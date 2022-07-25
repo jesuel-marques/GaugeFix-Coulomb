@@ -301,14 +301,16 @@ int SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned s
                 }
             }
 
+        printf("sweep: %d\n", sweep);
+
         sweep++;
 
-        if(!system("test -f stop_run")){
+        // if(!system("test -f stop_run")){
 
-            printf("Request to stop run for config %d in sweep %d.\n", config_nr, sweep);
-            return -1;
+        //     printf("Request to stop run for config %d in sweep %d.\n", config_nr, sweep);
+        //     return -1;
         
-        }
+        // }
 
 
         if(sweep == sweeps_to_measurement_e2) {

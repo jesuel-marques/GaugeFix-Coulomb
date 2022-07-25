@@ -64,10 +64,10 @@ int main(int argc, char *argv[]) {
 		GREETER();
 		handle_input(argc, argv);
 
-		if(create_output_directory()){
-			printf("Some error ocurred when creating output directory. Exiting.");
-			exit(EXIT_FAILURE);
-		}
+		// if(create_output_directory()){
+		// 	printf("Some error ocurred when creating output directory. Exiting.");
+		// 	exit(EXIT_FAILURE);
+		// }
 	
 	#ifdef MPI_CODE	
 		}
@@ -83,11 +83,11 @@ int main(int argc, char *argv[]) {
 	#endif 
 			int actual_config_nr = FIRST_CONFIG + CONFIG_STEP * config;
 			
-			if(is_in_exception_list(actual_config_nr)) {
-				//	list of configurations to be skipped
-				printf("Skiping configuration %d for being in the exception list.\n", actual_config_nr);
-				continue;
-			}
+			// if(is_in_exception_list(actual_config_nr)) {
+			// 	//	list of configurations to be skipped
+			// 	printf("Skiping configuration %d for being in the exception list.\n", actual_config_nr);
+			// 	continue;
+			// }
 
 			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
 			if (TEST_ALLOCATION(U)){
@@ -129,13 +129,13 @@ int main(int argc, char *argv[]) {
 			
 
 			//	checking if a request to stop has been made
-			if(!system("test -f stop_run")){
-				printf("Exiting after request to stop.\n");
-				free(U);
-				free(G);
-				remove("stop_run");
-				exit(EXIT_SUCCESS);
-			}
+			// if(!system("test -f stop_run")){
+			// 	printf("Exiting after request to stop.\n");
+			// 	free(U);
+			// 	free(G);
+			// 	remove("stop_run");
+			// 	exit(EXIT_SUCCESS);
+			// }
 
 			// write the gauge fixed configuration to file,
 			if(SU3_write_config(actual_config_nr, U)){

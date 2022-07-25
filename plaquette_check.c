@@ -75,7 +75,6 @@ int main(int argc, char *argv[]) {
 			TEST_ALLOCATION(U);
 			
 			SU3_load_config(actual_config_nr, U);
-
 			print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link", 10);
 			getchar();
 		
