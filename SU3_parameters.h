@@ -1,7 +1,7 @@
 //  Simulation Parameters
 
-#define N_SPC   24  //   Spatial lattice size
-#define N_T     16    // Temporal lattice size
+#define N_SPC   16  //   Spatial lattice size
+#define N_T     128    // Temporal lattice size
 #define DIM     4     // Space-time lattice dimension
 
 #define SPATIAL_VOLUME  N_SPC * N_SPC * N_SPC
@@ -33,7 +33,7 @@
 
 #define     CONV_TO_WORKING_PRECISION
 
-// #define  CONV_FROM_WORKING_PRECISION
+#define     CONV_FROM_WORKING_PRECISION
 
 // #define  CONV_GT_TO_WORKING_PRECISION
 

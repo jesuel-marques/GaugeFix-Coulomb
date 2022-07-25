@@ -71,7 +71,7 @@ typedef mtrx_3x3_double work_mtrx_data_type;
 typedef work_mtrx_data_type mtrx_3x3;
 
 #ifdef CONV_TO_WORKING_PRECISION
-typedef mtrx_3x3_float      in_cfg_data_type;
+typedef mtrx_3x3_float in_cfg_data_type;
 #else
 typedef work_mtrx_data_type in_cfg_data_type;
 #endif

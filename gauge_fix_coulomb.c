@@ -137,17 +137,22 @@ int main(int argc, char *argv[]) {
 				exit(EXIT_SUCCESS);
 			}
 
-			// write the gauge fixed configuration to file
-			// SU3_write_config(actual_config_nr, U);
+			// write the gauge fixed configuration to file,
+			if(SU3_write_config(actual_config_nr, U)){
+				fprintf(stderr, "Config writing failed for config %d.\n", actual_config_nr);
+			}
+			else{
+				printf("U written OK for config %d.\n", actual_config_nr);
+			}
 			free(U);		//	Free memory allocated for the configuration.
 
 			// write the gauge transformation to file
-			if(SU3_write_gauge_transf(actual_config_nr, G)){
-				fprintf(stderr, "Gauge transformation writing failed for config %d.\n", actual_config_nr);
-			}
-			else{
-				printf("G written OK for config %d.\n", actual_config_nr);
-			}
+			// if(SU3_write_gauge_transf(actual_config_nr, G)){
+			// 	fprintf(stderr, "Gauge transformation writing failed for config %d.\n", actual_config_nr);
+			// }
+			// else{
+			// 	printf("G written OK for config %d.\n", actual_config_nr);
+			// }
 			
 			free(G);		//	Free memory allocated for gauge transformation.
 			

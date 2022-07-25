@@ -462,6 +462,9 @@ short SU3_reunitarize_U_G(mtrx_3x3 *restrict U, mtrx_3x3 *restrict G) {
             }
         }
 
+    if(!exit_status)
+        fprintf(stderr, "At least one matrix could not be projected to SU(3)\n");
+
     return exit_status;
 }
 
