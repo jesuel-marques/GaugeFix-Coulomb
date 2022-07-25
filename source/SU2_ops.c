@@ -21,8 +21,8 @@ void print_matrix_2x2(const matrix_2x2 * restrict u, const char *name, const uns
         printf("{");
 
         for (SU2_color_idx  b = 0; b < 2; b++) {
-            printf("%.*lf+I(%.*lf)", decimal_places, creal(u->m[ELM2x2(a, b)]), 
-                                     decimal_places, cimag(u->m[ELM2x2(a, b)]));
+            printf("%.*lf + I(%.*lf)", decimal_places, creal(u -> m[ELM2x2(a, b)]), 
+                                     decimal_places, cimag(u -> m[ELM2x2(a, b)]));
             
             b != 2 -1 ?  printf(",") : 0 ;
         }

@@ -171,6 +171,8 @@ inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub
     mtrx_SU2.m[3] = -(cimag(w -> m[ELM3x3(a, a)]) 
                       - cimag(w -> m[ELM3x3(b, b)]));
 
+    
+
     //  The SU(2) matrix corresponding to the Cabbibo Marinari 
     //  submatrix is built from w according to the formulae above.
     //  This is what maximizes the functional locally for each
@@ -236,7 +238,6 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
     //	Generalization of the algorithm described in hep-lat/0301019v2, using the
     //	Cabbibo-Marinari submatrices trick.
     //	It updates the g at the given position.
-
     mtrx_3x3 w;
 
     SU3_calculate_w(U, position, &w);  //	Calculating w(n)=h(n) for red black subdivision

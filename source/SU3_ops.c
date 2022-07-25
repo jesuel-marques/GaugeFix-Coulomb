@@ -350,7 +350,7 @@ inline void accum_prod_SU2_3x3(const mtrx_2x2_ck * restrict x_ck, mtrx_3x3 * res
     
     convert_from_ck(x_ck, &x);
    
-    for(SU3_color_idx c = 0 ; c < Nc ; c){
+    for(SU3_color_idx c = 0 ; c < Nc ; c++){
 
         //  Modifying only the terms in g that will actually receive contributions
 
