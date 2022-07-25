@@ -420,7 +420,7 @@ int SU3_write_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
             return -1;
         
         }
-        SU3_convert_gaugetransf_work_out(G, G_out);
+        SU3_convert_gt_work_out(G, G_out);
 
     #else
 
@@ -551,7 +551,7 @@ int SU3_load_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
     fclose(gaugetransf_file);
 
     #ifdef CONV_GT_TO_WORKING_PRECISION
-        SU3_convert_gaugetransf_in_work(G_in, G);
+        SU3_convert_gt_in_work(G_in, G);
         free(G_in);
     #endif
 

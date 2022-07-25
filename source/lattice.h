@@ -124,7 +124,7 @@ void get_link_matrix(mtrx_3x3 * restrict U, const pos_vec position, const lorent
 
 #ifdef CONV_GT_TO_WORKING_PRECISION
 
-    void SU3_convert_gaugetransf_in_work (in_cfg_data_type * restrict G_in,     work_mtrx_data_type * restrict G_work);
+    void SU3_convert_gt_in_work (in_cfg_data_type * restrict G_in,     work_mtrx_data_type * restrict G_work);
 
 #endif
 
@@ -136,7 +136,7 @@ void get_link_matrix(mtrx_3x3 * restrict U, const pos_vec position, const lorent
 
 #ifdef CONV_GT_FROM_WORKING_PRECISION
 
-    void SU3_convert_gaugetransf_work_out(work_mtrx_data_type * restrict G_work,  out_cfg_data_type * restrict G_out );
+    void SU3_convert_gt_work_out(work_mtrx_data_type * restrict G_work,  out_cfg_data_type * restrict G_out );
 
 #endif
 
