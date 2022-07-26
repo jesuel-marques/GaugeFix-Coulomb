@@ -19,6 +19,7 @@ char configs_dir_name_in[200];	//	input from command line
 char configs_dir_name_out[200];	//	input from command line
 char config_template[10] ;	//	input from command line
 
+char gaugetransf_dir_name_in[200];
 char gaugetransf_dir_name_out[200];
 
 extern char extension_config_in[];
@@ -123,8 +124,14 @@ void handle_input(int argc, char *argv[]) {
     strcpy(configs_dir_name_in,  argv[1]);
     strcpy(configs_dir_name_out, argv[2]);
 
+    strcpy(gaugetransf_dir_name_in , argv[1]);
+    strcpy(gaugetransf_dir_name_out, argv[2]);
+
     strcat(configs_dir_name_in , size_directory);
     strcat(configs_dir_name_out, size_directory);
+
+    strcat(gaugetransf_dir_name_in , size_directory);
+    strcat(gaugetransf_dir_name_out, size_directory);
 
     strcpy(config_template, argv[3]);
 }
@@ -474,7 +481,7 @@ int SU3_write_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
 }
 
 int SU3_load_gauge_transf(const unsigned config_nr, mtrx_3x3 * restrict G) {
-    //	Loads a link configuration from the file with filename to U.
+    //	Loads a gauge transformation to G.
 
     in_gt_data_type *G_in;
 

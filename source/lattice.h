@@ -71,27 +71,27 @@ typedef mtrx_3x3_double work_mtrx_data_type;
 typedef work_mtrx_data_type mtrx_3x3;
 
 #ifdef CONV_TO_WORKING_PRECISION
-typedef mtrx_3x3_float in_cfg_data_type;
+    typedef mtrx_3x3_float in_cfg_data_type;
 #else
-typedef work_mtrx_data_type in_cfg_data_type;
+    typedef work_mtrx_data_type in_cfg_data_type;
 #endif
 
 #ifdef CONV_GT_TO_WORKING_PRECISION
-typedef mtrx_3x3_float  in_gt_data_type;
+    typedef mtrx_3x3_float  in_gt_data_type;
 #else
-typedef mtrx_3x3_double in_gt_data_type;
+    typedef mtrx_3x3_double in_gt_data_type;
 #endif
 
 #ifdef CONV_FROM_WORKING_PRECISION
-typedef mtrx_3x3_float  out_cfg_data_type;
+    typedef mtrx_3x3_float  out_cfg_data_type;
 #else
-typedef mtrx_3x3_double out_cfg_data_type;
+    typedef mtrx_3x3_double out_cfg_data_type;
 #endif
 
 #ifdef CONV_GT_FROM_WORKING_PRECISION
-typedef mtrx_3x3_float  out_gt_data_type;
+    typedef mtrx_3x3_float  out_gt_data_type;
 #else
-typedef mtrx_3x3_double out_gt_data_type;
+    typedef mtrx_3x3_double out_gt_data_type;
 #endif
 
 #define TEST_ALLOCATION(a) test_allocation_function(a, __func__) //  used to test if allocation was successful

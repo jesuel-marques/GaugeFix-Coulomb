@@ -162,14 +162,14 @@ inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub
 
     mtrx_2x2_ck mtrx_SU2;
 
-    mtrx_SU2.m[0] =  (creal(w -> m[ELM3x3(a, a)]) 
-                      + creal(w -> m[ELM3x3(b, b)]));
-    mtrx_SU2.m[1] = -(cimag(w -> m[ELM3x3(a, b)]) 
-                      + cimag(w -> m[ELM3x3(b, a)]));
-    mtrx_SU2.m[2] = -(creal(w -> m[ELM3x3(a, b)]) 
-                      - creal(w -> m[ELM3x3(b, a)]));
-    mtrx_SU2.m[3] = -(cimag(w -> m[ELM3x3(a, a)]) 
-                      - cimag(w -> m[ELM3x3(b, b)]));
+    mtrx_SU2.m[0] =  creal(w -> m[ELM3x3(a, a)]
+                         + w -> m[ELM3x3(b, b)]);
+    mtrx_SU2.m[1] = -cimag(w -> m[ELM3x3(a, b)] 
+                         + w -> m[ELM3x3(b, a)]);
+    mtrx_SU2.m[2] = -creal(w -> m[ELM3x3(a, b)]
+                         + w -> m[ELM3x3(b, a)]);
+    mtrx_SU2.m[3] = -cimag(w -> m[ELM3x3(a, a)] 
+                         + w -> m[ELM3x3(b, b)]);
 
     
 
