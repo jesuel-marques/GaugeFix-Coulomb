@@ -32,10 +32,10 @@ typedef enum {REAR, FRONT} direction;
 
 //  Associations between the numeric indices and the lorentz directions
 
-#define X_INDX 3
-#define Y_INDX 2
-#define Z_INDX 1
-#define T_INDX 0
+#define X_INDX 0
+#define Y_INDX 1
+#define Z_INDX 2
+#define T_INDX 3
 
 //  Does the pointer arithmetic to get the correct index in the configuration
 

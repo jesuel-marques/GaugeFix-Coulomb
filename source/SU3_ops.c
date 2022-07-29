@@ -307,10 +307,10 @@ void prod_four_3x3(const mtrx_3x3 * restrict u,
                 for (SU3_color_idx  e = 0; e < Nc; e++) {        //  dummy index 2
                     for (SU3_color_idx  f = 0; f < Nc; f++) {    //  dummy index 3
 
-                    uvwx -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
-                                               * (v -> m[ELM3x3(c, e)]) 
-                                               * (w -> m[ELM3x3(e, f)]) 
-                                               * (x -> m[ELM3x3(f, b)]);
+                        uvwx -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
+                                                * (v -> m[ELM3x3(c, e)]) 
+                                                * (w -> m[ELM3x3(e, f)]) 
+                                                * (x -> m[ELM3x3(f, b)]);
                     //  Usual matrix multiplication.
                     }
                 }

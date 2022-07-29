@@ -103,7 +103,7 @@ inline static void SU3_calculate_w(mtrx_3x3 * restrict U, const pos_vec position
 
     // w(n)	calculation
 
-    for (lorentz_idx mu = 1; mu < DIM ; mu++) {
+    for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {
         //	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision
 
         accumulate_front_hear_link_3x3(U, position, mu, w);

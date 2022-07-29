@@ -32,8 +32,8 @@ void SU3_divergence_A(mtrx_3x3 * restrict U, const pos_vec position,
     mtrx_3x3 term_divA;
 
     set_null_3x3(div_A);
-    for (lorentz_idx mu = 1; mu < DIM ; mu++) {
-        SU3_calculate_A(U, position, mu, &A1);
+    for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {
+        SU3_calculate_A(U, position,                            mu, &A1);
         SU3_calculate_A(U, hop_position_negative(position, mu), mu, &A2);
 
         subtraction_3x3(&A1, &A2, &term_divA);

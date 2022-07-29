@@ -13,7 +13,7 @@ typedef struct {
 
 typedef struct {
     work_data_type m[2 * 2];
-}matrix_2x2;
+} matrix_2x2;
 
 // void print_matrix_2x2(const matrix_2x2 * restrict u, const char *name, const unsigned short decimal_places);
 
