@@ -110,6 +110,52 @@ inline static void SU3_calculate_w(mtrx_3x3 * restrict U, const pos_vec position
 
     }
 }
+
+double SU3_calculate_F(mtrx_3x3 * restrict U){
+
+    pos_vec position;
+
+    mtrx_3x3 U_acc;
+    set_null_3x3(&U_acc);
+    
+    for (position.t = 0; position.t < N_T; position.t++)  {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {                        
+                            accumulate_3x3(get_link(U, position, mu), &U_acc);                    
+                        }
+                    }
+                }
+            }
+        }
+
+    return creal(trace_3x3(&U_acc));
+}
+
+double SU3_calculate_theta(mtrx_3x3 * restrict U){
+    
+    pos_vec position;
+
+    mtrx_3x3 div_A, div_A_dagger, prod;
+
+    double theta = 0.0;
+
+    for (position.t = 0; position.t < N_T; position.t++)  {
+            for (position.k = 0; position.k < N_SPC; position.k++) {
+                for (position.j = 0; position.j < N_SPC; position.j++) {
+                    for (position.i = 0; position.i < N_SPC; position.i++) {
+                        SU3_divergence_A(U, position, &div_A);
+                        herm_conj_3x3(&div_A, &div_A_dagger);
+                        prod_3x3(&div_A, &div_A_dagger, &prod);
+                        theta += trace_3x3(&prod);
+                    }
+                }
+            }
+        }
+
+    return creal(theta) / (Nc * VOLUME);
+}
     
 double SU3_calculate_e2(mtrx_3x3 * restrict U) {
     //	Calculates e2 (defined in hep-lat/0301019v2),
