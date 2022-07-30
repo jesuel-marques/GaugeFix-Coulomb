@@ -76,10 +76,8 @@ int main(int argc, char *argv[]) {
 			
 			SU3_load_config(actual_config_nr, U);
 			print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link", 10);
-			getchar();
 		
 			print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link", 10);
-			getchar();
 
 			printf("\n e2 before reunitarization and gauge transformation: %5.4E \n", SU3_calculate_e2(U));
 			printf("average determinant before reunitarization: %.15lf\n",	average_det(U));
@@ -93,12 +91,22 @@ int main(int argc, char *argv[]) {
 
 			SU3_load_gauge_transf(actual_config_nr, G);	
 
-			SU3_reunitarize_U_G(U, G);
+			printf("F before reunitarization: e2: %5.4E\n",SU3_calculate_F(U));
+			printf("theta before reunitarization: %5.4E\n", SU3_calculate_theta(U));
+
+			// SU3_reunitarize_U_G(U, G);
 
 			printf("Spatial plaquette before gauge transformation: %.10lf\n", spatial_plaquette_average(U));
 			printf("Temporal plaquette before gauge transformation: %.10lf\n", temporal_plaquette_average(U));
+			
+			printf("F before gt: e2: %5.4E\n",SU3_calculate_F(U));
+			printf("theta before gt: %5.4E\n", SU3_calculate_theta(U));
 
 			SU3_global_update_U(U, G);
+
+			printf("F after gt: %5.4E\n",SU3_calculate_F(U));
+			printf("theta after gt: %5.4E\n", SU3_calculate_theta(U));
+
 
 			printf("average determinant: %.15lf\n",	average_det(U));
 			printf("\n e2: %5.4E \n", SU3_calculate_e2(U));

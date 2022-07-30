@@ -130,7 +130,7 @@ double SU3_calculate_F(mtrx_3x3 * restrict U){
             }
         }
 
-    return creal(trace_3x3(&U_acc));
+    return creal(trace_3x3(&U_acc))/(VOLUME * Nc * (DIM-1));
 }
 
 double SU3_calculate_theta(mtrx_3x3 * restrict U){
