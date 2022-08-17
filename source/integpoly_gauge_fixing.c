@@ -19,12 +19,12 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
 
     for(pos_index k = 0; k < N_SPC; k++)
         for(pos_index j = 0; j < N_SPC; j++)
-            for(pos_index i = 0; i < N_SPC; i++)
-                print_matrix_3x3(get_link(U, assign_position(i, j, k, t), T_INDX),"U",20);
-                getchar();
+            for(pos_index i = 0; i < N_SPC; i++){
+                // print_matrix_3x3(get_link(U, assign_position(i, j, k, t), T_INDX),"U",20);
+                // getchar();
 
                 accumulate_3x3(get_link(U, assign_position(i, j, k, t), T_INDX), &u_timeslice_sum);
-    
+            }
     mult_by_scalar_3x3(1.0 / SPATIAL_VOLUME, &u_timeslice_sum, &u_timeslice_ave);
 
     printf("average u temporal: %d", t);
