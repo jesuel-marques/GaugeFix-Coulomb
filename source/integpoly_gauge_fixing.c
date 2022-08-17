@@ -28,8 +28,7 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
                 accumulate_3x3(get_link(U, assign_position(i, j, k, t), T_INDX), &u_timeslice_sum);
             }
     print_matrix_3x3(&u_timeslice_sum, "u_timeslice_sum", 16);
-
-    work_data_type one_over_spatial_volume = 1.0 / SPATIAL_VOLUME;
+    work_data_type one_over_spatial_volume = (double) 1.0 / SPATIAL_VOLUME;
 
     printf("%lf + I * (%lf)\n", creal(one_over_spatial_volume),cimag(one_over_spatial_volume));
 
