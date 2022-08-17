@@ -6,7 +6,7 @@
 
 #define omp_parallel_basic "omp parallel for num_threads(NUM_THREADS) schedule(dynamic)"
 #define omp_parallel_for  _Pragma(omp_parallel_basic)
-#define omp_parallel_for_reduction(op, x) _Pragma(omp_parallel_basic ## " reduction(" ## op:x ## ")")
+// #define omp_parallel_for_reduction(op, x) _Pragma(omp_parallel_basic ## " reduction(" ## op:x ## ")")
 
 
 typedef unsigned short pos_index;

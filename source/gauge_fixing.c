@@ -241,7 +241,7 @@ inline static void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub
 }
 
 inline static void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w, 
-                                            mtrx_3x3 * restrict total_update) {
+                                              mtrx_3x3 * restrict total_update) {
     //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
     //	algorithm for SU(3), with a division of the update matrix in submatrices
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
