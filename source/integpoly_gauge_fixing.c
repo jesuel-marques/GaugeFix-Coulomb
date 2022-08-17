@@ -27,10 +27,12 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
 
                 accumulate_3x3(get_link(U, assign_position(i, j, k, t), T_INDX), &u_timeslice_sum);
             }
-    mult_by_scalar_3x3(1.0 / SPATIAL_VOLUME, &u_timeslice_sum, &u_timeslice_ave);
+    print_matrix_3x3(&u_timeslice_sum, "u_timeslice_sum", 16);
+
+    mult_by_scalar_3x3((work_data_type) 1.0 / SPATIAL_VOLUME, &u_timeslice_sum, &u_timeslice_ave);
 
     printf("average u temporal: %d", t);
-    print_matrix_3x3(&u_timeslice_ave, "", 16);
+    print_matrix_3x3(&u_timeslice_ave, "u_timeslice_ave", 16);
     return u_timeslice_ave;
 }
 
