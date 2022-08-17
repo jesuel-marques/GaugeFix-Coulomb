@@ -125,6 +125,8 @@ int main(int argc, char *argv[]) {
 			}
 			
 			//  fix the gauge
+
+			integpolyakov_gauge_fix(U, G, actual_config_nr);
 			
 			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);			
 			
