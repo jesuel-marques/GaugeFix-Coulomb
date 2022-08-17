@@ -211,13 +211,12 @@ inline void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub) {
     mtrx_SU2.m[0] =  creal( w -> m[ELM3x3(a, a)]
                           + w -> m[ELM3x3(b, b)]);
     mtrx_SU2.m[1] = -cimag( w -> m[ELM3x3(a, b)] 
-                          - w -> m[ELM3x3(b, a)]);
-    mtrx_SU2.m[2] = -creal( w -> m[ELM3x3(a, b)]
                           + w -> m[ELM3x3(b, a)]);
+    mtrx_SU2.m[2] = -creal( w -> m[ELM3x3(a, b)]
+                          - w -> m[ELM3x3(b, a)]);
     mtrx_SU2.m[3] = -cimag( w -> m[ELM3x3(a, a)] 
-                          + w -> m[ELM3x3(b, b)]);
-
-    
+                          - w -> m[ELM3x3(b, b)]);
+  
 
     //  The SU(2) matrix corresponding to the Cabbibo Marinari 
     //  submatrix is built from w according to the formulae above.
@@ -348,7 +347,7 @@ int SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned s
                 }
             }
 
-        printf("sweep: %d\n", sweep);
+        // printf("sweep: %d\n", sweep);
 
         sweep++;
 
