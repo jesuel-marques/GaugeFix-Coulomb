@@ -15,6 +15,8 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
     mtrx_3x3 u_timeslice_sum;
     mtrx_3x3 u_timeslice_ave;
 
+    set_null_3x3(&u_timeslice_sum);
+
     for(pos_index k = 0; k < N_SPC; k++)
         for(pos_index j = 0; j < N_SPC; j++)
             for(pos_index i = 0; i < N_SPC; i++)
@@ -75,7 +77,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
     mtrx_3x3 u_timeslice_ave[N_T];
     mtrx_3x3 tempave_proj_u[N_T];
     
-    omp_parallel_for
+    // omp_parallel_for
     for(pos_index t = 0; t < N_T; t++){
 
 
