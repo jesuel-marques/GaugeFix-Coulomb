@@ -3,6 +3,9 @@
 #include "SU3_ops.h"
 #include "SU2_ops.h"
 
+#include "../SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
+#include "../SU3_parameters.h"              //	Simulation parameters
+
 #include "lattice.h"
 #include "gauge_fixing.h"
 #include "integpoly_gauge_fixing.h"
