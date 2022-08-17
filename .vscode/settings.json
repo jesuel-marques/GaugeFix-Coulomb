@@ -13,6 +13,8 @@
         "stdio.h": "c",
         "measurement.h": "c",
         "stdbool.h": "c",
-        "math_ops.h": "c"
+        "math_ops.h": "c",
+        "*.tcc": "c",
+        "cstdio": "c"
     }
 }

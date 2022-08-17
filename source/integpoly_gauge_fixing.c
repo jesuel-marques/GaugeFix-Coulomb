@@ -67,15 +67,27 @@ inline static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict u) {
 
 int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned short config_nr) {
 
+    printf("Integrated Polyakov Gauge-Fixing for config %d\n", config_nr);
+
     mtrx_3x3 u_timeslice_ave[N_T];
     mtrx_3x3 tempave_proj_u[N_T];
     
     omp_parallel_for
     for(pos_index t = 0; t < N_T; t++){
 
+
         u_timeslice_ave[t] = average_u_temporal(U, t);
+        
+        printf("average u temporal: %d", t);
+        print_matrix_3x3(u_timeslice_ave+t, "", 16);
+
         SU3_CabbiboMarinari_projection(u_timeslice_ave + t);
+        print_matrix_3x3(u_timeslice_ave+t, "SU3 CM projected", 16);
+
+        getchar();
     }
+
+
 
     double Pto1overNT = pow(integ_polyakovloop(u_timeslice_ave), 1.0 / N_T);
 
@@ -86,6 +98,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
     set_identity_3x3(gt);
 
     for(pos_index t = 0; t < N_T - 1 ; t++){
+        
         herm_conj_3x3(u_timeslice_ave + t, &u_dag); // transformar em função própria
         prod_3x3(&u_dag, gdaggert + t, gdaggert + t + 1);
         mult_by_scalar_3x3(Pto1overNT, gdaggert + t + 1, &aux);  // fazer multiplicação com acumulação

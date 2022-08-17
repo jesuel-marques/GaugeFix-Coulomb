@@ -25,6 +25,7 @@
 									//	positions and links on the lattice.
 
 #include "source/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
+#include "source/integpoly_gauge_fixing.h"
 #include "source/config_io.h"
 
 #include "source/measurement.h"
@@ -127,6 +128,7 @@ int main(int argc, char *argv[]) {
 			
 			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);			
 			
+			integpolyakov_gauge_fix(U, G, actual_config_nr);
 
 			//	checking if a request to stop has been made
 			// if(!system("test -f stop_run")){
@@ -138,21 +140,21 @@ int main(int argc, char *argv[]) {
 			// }
 
 			// write the gauge fixed configuration to file,
-			if(SU3_write_config(actual_config_nr, U)){
-				fprintf(stderr, "Config writing failed for config %d.\n", actual_config_nr);
-			}
-			else{
-				printf("U written OK for config %d.\n", actual_config_nr);
-			}
-			free(U);		//	Free memory allocated for the configuration.
-
-			// write the gauge transformation to file
-			// if(SU3_write_gauge_transf(actual_config_nr, G)){
-			// 	fprintf(stderr, "Gauge transformation writing failed for config %d.\n", actual_config_nr);
+			// if(SU3_write_config(actual_config_nr, U)){
+			// 	fprintf(stderr, "Config writing failed for config %d.\n", actual_config_nr);
 			// }
 			// else{
-			// 	printf("G written OK for config %d.\n", actual_config_nr);
+			// 	printf("U written OK for config %d.\n", actual_config_nr);
 			// }
+			// free(U);		//	Free memory allocated for the configuration.
+
+			// write the gauge transformation to file
+			if(SU3_write_gauge_transf(actual_config_nr, G)){
+				fprintf(stderr, "Gauge transformation writing failed for config %d.\n", actual_config_nr);
+			}
+			else{
+				printf("G written OK for config %d.\n", actual_config_nr);
+			}
 			
 			free(G);		//	Free memory allocated for gauge transformation.
 			
