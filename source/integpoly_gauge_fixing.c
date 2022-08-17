@@ -88,6 +88,8 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
 
     mtrx_3x3 u_timeslice_ave[N_T];
     mtrx_3x3 tempave_proj_u[N_T];
+
+    mtrx_3x3 uavedag;
     
     // omp_parallel_for
     for(pos_index t = 0; t < N_T; t++){
@@ -97,9 +99,9 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         
         printf("average u temporal: %d", t);
         print_matrix_3x3(u_timeslice_ave+t, "", 16);
-
-        SU3_CabbiboMarinari_projection(u_timeslice_ave + t);
-        print_matrix_3x3(u_timeslice_ave+t, "SU3 CM projected", 16);
+        herm_conj_3x3(u_timeslice_ave + t, &uavedag);
+        SU3_CabbiboMarinari_projection(&uavedag);
+        print_matrix_3x3(&uavedag, "SU3 CM projected", 16);
 
         getchar();
     }
