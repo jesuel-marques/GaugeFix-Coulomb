@@ -73,7 +73,7 @@ static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict w,
 
         //  Local maximization is attained iteratively in SU(3),
         //  thus we need to make many hits ...
-        for (unsigned short hits = 1; hits <= 32; hits++) {
+        for (unsigned short hits = 1; hits <= 1000; hits++) {
 
             //	... and each hit contains the Cabbibo-Marinari subdivision
             for (submatrix sub = R; sub <= T; sub++) {
