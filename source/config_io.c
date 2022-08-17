@@ -183,7 +183,7 @@ static char * name_unextracted_config_file(const unsigned config_nr, char * rest
         return '\0';
     }
     else{
-        printf("Unextracted config file name is %s", unextracted_config_filename);
+        printf("Unextracted config file name is %s\n", unextracted_config_filename);
         return unextracted_config_filename;
     }
 }
