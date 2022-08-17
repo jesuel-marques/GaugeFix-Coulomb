@@ -114,7 +114,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         printf("average u temporal: %d", t);
         print_matrix_3x3(u_timeslice_ave+t, "", 16);
         herm_conj_3x3(u_timeslice_ave + t, &uavedag);
-        SU3_LosAlamos_common_block(&uavedag,&uaveproj);
+        SU3_CabbiboMarinari_projection(&uavedag,&uaveproj);
         // SU3_CabbiboMarinari_projection(&uavedag);
         print_matrix_3x3(&uaveproj, "SU3 CM projected", 16);
 
