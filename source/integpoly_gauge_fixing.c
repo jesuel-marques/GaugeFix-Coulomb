@@ -55,31 +55,44 @@ work_data_type integ_polyakovloop(mtrx_3x3 * tempave_proj_u){
 
 
 
-inline static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict u) {
+static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict w, 
+                                              mtrx_3x3 * restrict total_update) {
     //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
     //	algorithm for SU(3), with a division of the update matrix in submatrices
     //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
     //	of "hits" to be performed one after another.
 
+    mtrx_3x3 w_inv_old; 
     //  Calculates the inverse of w in the beginning.
     //  The program will update w successively and to
     //  extract what was the combined update, we can 
     //  multiply from the right by the old inverse.
 
+       
+    if(inverse_3x3(w, &w_inv_old)){
 
-    //  Local maximization is attained iteratively in SU(3),
-    //  thus we need to make many hits ...
-    for (unsigned short hits = 1; hits <= 32; hits++) {
+        //  Local maximization is attained iteratively in SU(3),
+        //  thus we need to make many hits ...
+        for (unsigned short hits = 1; hits <= 32; hits++) {
 
-        //	... and each hit contains the Cabbibo-Marinari subdivision
-        for (submatrix sub = R; sub <= T; sub++) {
-            //	Submatrices are indicated by numbers from 0 to 2
-            //  with codenames R, S and T
+            //	... and each hit contains the Cabbibo-Marinari subdivision
+            for (submatrix sub = R; sub <= T; sub++) {
+                //	Submatrices are indicated by numbers from 0 to 2
+                //  with codenames R, S and T
 
-            SU3_update_sub_LosAlamos(u, sub);
-            
+                SU3_update_sub_LosAlamos(w, sub);
+                
+            }
         }
     }
+    else{
+        //  if w has no inverse, update will be given by the identity
+        set_identity_3x3(total_update);
+    }
+    
+    prod_3x3(w, &w_inv_old, total_update);
+    //	Updates matrix to total_update. It is the
+    //	accumulated updates from the hits.
 }
 
 int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned short config_nr) {
