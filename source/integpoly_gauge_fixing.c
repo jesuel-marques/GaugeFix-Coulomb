@@ -17,6 +17,8 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
 
     set_null_3x3(&u_timeslice_sum);
 
+    print_matrix_3x3(get_link(U,assign_position(0,0,0,0),T_INDX), "U_t(0,0,0,0)", 16);
+
     for(pos_index k = 0; k < N_SPC; k++)
         for(pos_index j = 0; j < N_SPC; j++)
             for(pos_index i = 0; i < N_SPC; i++){
