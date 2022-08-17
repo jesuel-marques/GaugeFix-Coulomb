@@ -69,7 +69,7 @@ inline static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict u) {
 
     //  Local maximization is attained iteratively in SU(3),
     //  thus we need to make many hits ...
-    for (unsigned short hits = 1; hits <= 8; hits++) {
+    for (unsigned short hits = 1; hits <= 32; hits++) {
 
         //	... and each hit contains the Cabbibo-Marinari subdivision
         for (submatrix sub = R; sub <= T; sub++) {
@@ -90,6 +90,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
     mtrx_3x3 tempave_proj_u[N_T];
 
     mtrx_3x3 uavedag;
+    mtrx_3x3 uaveproj;
     
     // omp_parallel_for
     for(pos_index t = 0; t < N_T; t++){
@@ -100,8 +101,9 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         printf("average u temporal: %d", t);
         print_matrix_3x3(u_timeslice_ave+t, "", 16);
         herm_conj_3x3(u_timeslice_ave + t, &uavedag);
-        SU3_CabbiboMarinari_projection(&uavedag);
-        print_matrix_3x3(&uavedag, "SU3 CM projected", 16);
+        SU3_LosAlamos_common_block(&uavedag,&uaveproj);
+        // SU3_CabbiboMarinari_projection(&uavedag);
+        print_matrix_3x3(&uaveproj, "SU3 CM projected", 16);
 
         getchar();
     }
