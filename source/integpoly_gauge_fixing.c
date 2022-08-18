@@ -27,15 +27,15 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
 
                 accumulate_3x3(get_link(U, assign_position(i, j, k, t), T_INDX), &u_timeslice_sum);
             }
-    print_matrix_3x3(&u_timeslice_sum, "u_timeslice_sum", 16);
+    // print_matrix_3x3(&u_timeslice_sum, "u_timeslice_sum", 16);
     work_data_type one_over_spatial_volume = 1.0 / pow(N_SPC, 3.0);
 
-    printf("%lf + I * (%lf)\n", creal(one_over_spatial_volume), cimag(one_over_spatial_volume));
+    // printf("%lf + I * (%lf)\n", creal(one_over_spatial_volume), cimag(one_over_spatial_volume));
 
     mult_by_scalar_3x3( one_over_spatial_volume, &u_timeslice_sum, &u_timeslice_ave);
 
-    printf("average u temporal: %d", t);
-    print_matrix_3x3(&u_timeslice_ave, "u_timeslice_ave", 16);
+    // printf("average u temporal: %d", t);
+    // print_matrix_3x3(&u_timeslice_ave, "u_timeslice_ave", 16);
     return u_timeslice_ave;
 }
 
@@ -117,9 +117,9 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         // print_matrix_3x3(u_timeslice_ave+t, "", 16);
         herm_conj_3x3(u_timeslice_ave + t, &uavedag);
         SU3_CabbiboMarinari_projection(&uavedag,tempave_proj_u+t);
-        print_matrix_3x3(tempave_proj_u+t, "SU3 CM projected", 16);
+        // print_matrix_3x3(tempave_proj_u+t, "SU3 CM projected", 16);
 
-        getchar();
+        // getchar();
     }
 
     double Pto1overNT = cpow(integ_polyakovloop(tempave_proj_u), 1.0 / (double) N_T);
