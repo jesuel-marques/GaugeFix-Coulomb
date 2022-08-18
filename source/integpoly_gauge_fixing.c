@@ -1,4 +1,5 @@
 #include <tgmath.h>
+#include <stdio.h>
 
 #include "SU3_ops.h"
 #include "SU2_ops.h"
@@ -30,7 +31,7 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
     print_matrix_3x3(&u_timeslice_sum, "u_timeslice_sum", 16);
     work_data_type one_over_spatial_volume = 1.0 / pow(16.0, 3);
 
-    printf("%lf + I * (%lf)\n", creal(one_over_spatial_volume),cimag(one_over_spatial_volume));
+    printf("%lf + I * (%lf)\n", creal(one_over_spatial_volume), cimag(one_over_spatial_volume));
 
     mult_by_scalar_3x3( one_over_spatial_volume, &u_timeslice_sum, &u_timeslice_ave);
 
@@ -73,7 +74,7 @@ static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict w,
 
         //  Local maximization is attained iteratively in SU(3),
         //  thus we need to make many hits ...
-        for (unsigned short hits = 1; hits <= 1000; hits++) {
+        for (unsigned short hits = 1; hits <= 100; hits++) {
 
             //	... and each hit contains the Cabbibo-Marinari subdivision
             for (submatrix sub = R; sub <= T; sub++) {
@@ -81,6 +82,8 @@ static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict w,
                 //  with codenames R, S and T
 
                 SU3_update_sub_LosAlamos(w, sub);
+                projection_SU3(w);
+                printf("re Tr w: %.20lf\n", creal(trace_3x3(w)));
                 
             }
         }
