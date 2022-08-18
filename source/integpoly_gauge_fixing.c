@@ -73,7 +73,7 @@ static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict w,
 
         //  Local maximization is attained iteratively in SU(3),
         //  thus we need to make many hits ...
-        for (unsigned short hits = 1; hits <= 100; hits++) {
+        for (unsigned short hits = 1; hits <= 300; hits++) {
 
             //	... and each hit contains the Cabbibo-Marinari subdivision
             for (submatrix sub = R; sub <= T; sub++) {
@@ -131,7 +131,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
 
     set_identity_3x3(gdaggert);
     set_identity_3x3(gt);
-
+    mtrx_3x3 result;
     for(pos_index t = 0; t < N_T - 1 ; t++){
         
         herm_conj_3x3(tempave_proj_u + t, &u_dag); // transformar em função própria
@@ -139,11 +139,12 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         mult_by_scalar_3x3(Pto1overNT, gdaggert + t + 1, &aux);  // fazer multiplicação com acumulação
         copy_3x3(&aux, gdaggert + t + 1);
         herm_conj_3x3(gdaggert + t + 1, gt + t + 1);
+
+        prod_three_3x3(gt, tempave_proj_u ,gdaggert + 1,&result);
+        print_matrix_3x3(&result,"g(t).u(t).gdag(t+1)",20);
+        getchar();
     }
-    mtrx_3x3 result;
-    prod_three_3x3(gt, tempave_proj_u ,gdaggert + 1,&result);
-    print_matrix_3x3(&result,"g(t).u(t).gdag(t+1)",20);
-    getchar();
+
     omp_parallel_for
     for(pos_index t = 0; t < N_T; t++){
         pos_vec position;
