@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
 			
 			//  fix the gauge
 
-			integpolyakov_gauge_fix(U, G, actual_config_nr);
+			// integpolyakov_gauge_fix(U, G, actual_config_nr);
 			
 			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);			
 			printf("Config before integpoly %5d: e2: %3.2E \n", actual_config_nr, SU3_calculate_e2(U));
