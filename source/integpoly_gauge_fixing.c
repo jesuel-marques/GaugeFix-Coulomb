@@ -116,15 +116,17 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         // printf("average u temporal: %d", t);
         // print_matrix_3x3(u_timeslice_ave+t, "", 16);
         herm_conj_3x3(u_timeslice_ave + t, &uavedag);
-        SU3_CabbiboMarinari_projection(&uavedag,tempave_proj_u+t);
+        SU3_CabbiboMarinari_projection(&uavedag, tempave_proj_u + t);
         // print_matrix_3x3(tempave_proj_u+t, "SU3 CM projected", 16);
 
         // getchar();
     }
 
+    printf("P: %.16lf\n", integ_polyakovloop(tempave_proj_u));
+
     work_data_type Pto1overNT = cpow(integ_polyakovloop(tempave_proj_u), 1.0 / (double) N_T);
 
-    printf("%lf+I*%lf\n",creal(Pto1overNT),cimag(Pto1overNT));
+    printf("P^1/N_T: %.16lf+I*%.16lf\n",creal(Pto1overNT),cimag(Pto1overNT));
 
     mtrx_3x3 gt[N_T], gdaggert[N_T];
     mtrx_3x3 u_dag, aux;
@@ -141,7 +143,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         herm_conj_3x3(gdaggert + t + 1, gt + t + 1);
 
         prod_three_3x3(gt, tempave_proj_u ,gdaggert + 1,&result);
-        print_matrix_3x3(&result,"g(t).u(t).gdag(t+1)",20);
+        print_matrix_3x3(&result,"g(t).u(t).gdag(t+1)", 16);
         getchar();
     }
 
@@ -149,18 +151,17 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
     for(pos_index t = 0; t < N_T; t++){
         pos_vec position;
         position.t = t;
+        printf("t: %d %.16lf\n", t, creal(determinant_3x3(gt+t)));
         for(position.k = 0; position.k < N_SPC; position.k++){
             for(position.j = 0; position.j < N_SPC; position.j++){
                 for(position.i = 0; position.i < N_SPC; position.i++){
-
-                    accum_left_prod_3x3(gt + t, get_gaugetransf(G,position));
+                    
+                    accum_left_prod_3x3(gt + t, get_gaugetransf(G, position));
 
                 }
             }
         }
     }
-
-    // prod_three_3x3(gt,)
 
     SU3_global_update_U(U, G);
 
