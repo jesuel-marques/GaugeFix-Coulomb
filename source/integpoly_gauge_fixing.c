@@ -118,7 +118,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         // print_matrix_3x3(u_timeslice_ave+t, "", 16);
         herm_conj_3x3(u_timeslice_ave + t, &uavedag);
         SU3_CabbiboMarinari_projection(&uavedag,&tempave_proj_u+t);
-        print_matrix_3x3(&uaveproj, "SU3 CM projected", 16);
+        print_matrix_3x3(&tempave_proj_u+t, "SU3 CM projected", 16);
 
         getchar();
     }
