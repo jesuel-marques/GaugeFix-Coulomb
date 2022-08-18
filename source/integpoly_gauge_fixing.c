@@ -122,7 +122,9 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         // getchar();
     }
 
-    double Pto1overNT = cpow(integ_polyakovloop(tempave_proj_u), 1.0 / (double) N_T);
+    work_data_type Pto1overNT = cpow(integ_polyakovloop(tempave_proj_u), 1.0 / (double) N_T);
+
+    printf("%lf+I*%lf\n",creal(Pto1overNT),cimag(Pto1overNT));
 
     mtrx_3x3 gt[N_T], gdaggert[N_T];
     mtrx_3x3 u_dag, aux;
@@ -132,7 +134,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
 
     for(pos_index t = 0; t < N_T - 1 ; t++){
         
-        herm_conj_3x3(u_timeslice_ave + t, &u_dag); // transformar em função própria
+        herm_conj_3x3(tempave_proj_u + t, &u_dag); // transformar em função própria
         prod_3x3(&u_dag, gdaggert + t, gdaggert + t + 1);
         mult_by_scalar_3x3(Pto1overNT, gdaggert + t + 1, &aux);  // fazer multiplicação com acumulação
         copy_3x3(&aux, gdaggert + t + 1);
@@ -152,6 +154,8 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
             }
         }
     }
+
+    // prod_three_3x3(gt,)
 
     SU3_global_update_U(U, G);
 
