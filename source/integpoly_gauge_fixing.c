@@ -44,9 +44,9 @@ work_data_type integ_polyakovloop(mtrx_3x3 * tempave_proj_u){
     mtrx_3x3 integ_polyakov_loop;
     set_identity_3x3(&integ_polyakov_loop);
     
-    for(pos_index t = 0; t < N_T; tempave_proj_u++){
+    for(pos_index t = 0; t < N_T; t++){
 
-        accum_left_prod_3x3(tempave_proj_u, &integ_polyakov_loop);
+        accum_left_prod_3x3(tempave_proj_u+t, &integ_polyakov_loop);
 
     }
 
