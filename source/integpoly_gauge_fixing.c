@@ -140,6 +140,10 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         copy_3x3(&aux, gdaggert + t + 1);
         herm_conj_3x3(gdaggert + t + 1, gt + t + 1);
     }
+    mtrx_3x3 result;
+    prod_three_3x3(gt, tempave_proj_u ,gdaggert + 1,&result);
+    print_matrix_3x3(&result,"g(t).u(t).gdag(t+1)",20);
+    getchar();
     omp_parallel_for
     for(pos_index t = 0; t < N_T; t++){
         pos_vec position;
