@@ -15,6 +15,9 @@
         "stdbool.h": "c",
         "math_ops.h": "c",
         "*.tcc": "c",
-        "cstdio": "c"
+        "cstdio": "c",
+        "config_io.h": "c",
+        "integpoly_gauge_fixing.h": "c",
+        "fourvector_field.h": "c"
     }
 }

@@ -6,3 +6,4 @@ hostfile
 *.dbg
 *.txt
 *.cfg
+src/obj/
