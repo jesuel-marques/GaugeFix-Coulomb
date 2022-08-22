@@ -3,8 +3,8 @@
 #include <stdio.h>  //	Standard header C files
 #include <stdlib.h>
 
-#include "../include/SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
-#include "../include/SU3_parameters.h"              //	Simulation parameters
+#include <SU3_gaugefixing_parameters.h>  //	Gauge-fixing specific parameters
+#include <SU3_parameters.h>              //	Simulation parameters
 #include <lattice.h>                        //	Initialization functions and
                                             //	calculations of positions and
                                             //	links on the lattice.

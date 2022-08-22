@@ -10,7 +10,7 @@
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
 //	where sigma[i] are the Pauli matrices.
 
-void print_matrix_2x2(const matrix_2x2 * restrict u, const char *name, const unsigned short decimal_places) {
+void print_mtrx_2x2(const mtrx_2x2 * restrict u, const char *name, const unsigned short decimal_places) {
     // Prints the matrix on screen with a given number of decimal places and 
     // adds a name on the top
 
@@ -45,7 +45,7 @@ void copy_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck * restrict u_copy) {
     }
 }
 
-inline void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, matrix_2x2 * restrict u){
+inline void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, mtrx_2x2 * restrict u){
     
     u -> m[ELM2x2(0, 0)] =      u_ck -> m[0] 
                           + I * u_ck -> m[3];

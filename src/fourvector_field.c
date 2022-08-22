@@ -9,6 +9,7 @@
 
 #include <SU3_ops.h>  //	SU(3) operations
 
+
 void SU3_calculate_A(mtrx_3x3 * restrict U, const pos_vec position, const lorentz_idx mu,
                                                                      mtrx_3x3 * restrict A) {
     //	Calculates the vector A_mu(n) field

@@ -345,7 +345,7 @@ inline void accum_prod_SU2_3x3(const mtrx_2x2_ck * restrict x_ck, mtrx_3x3 * res
     work_data_type xg1, xg2;
     //  Auxiliary variables
     
-    matrix_2x2 x;
+    mtrx_2x2 x;
     //  the Cayley-Klein matrix will be first converted to a regular 2x2 matrix
     
     convert_from_ck(x_ck, &x);

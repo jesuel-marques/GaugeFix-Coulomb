@@ -12,7 +12,7 @@
 #include <SU3_ops.h>                        //	SU(3) operations
                                             //	positions and links on the lattice.
 
-#include "../include/lattice.h"  //	Initialization functions and calculations of
+#include <lattice.h>  //	Initialization functions and calculations of
 
 
 

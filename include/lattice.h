@@ -37,7 +37,17 @@ typedef enum {REAR, FRONT} direction;
 #define Z_INDX 2
 #define T_INDX 3
 
+//  Does the pointer arithmetic to get the correct index in the gauge transformation
+
+#define GET_GT(position)      (((position.t * N_SPC \
+                                        + position.k) * N_SPC \
+                                            + position.j) * N_SPC \
+                                                + position.i) 
+
+
 //  Does the pointer arithmetic to get the correct index in the configuration
+
+
 
 #define GET_LINK_U(position, mu) ((((position.t * N_SPC \
                                         + position.k) * N_SPC \
@@ -45,12 +55,6 @@ typedef enum {REAR, FRONT} direction;
                                                 + position.i) * DIM \
                                                     + mu)
 
-//  Does the pointer arithmetic to get the correct index in the gauge transformation
-
-#define GET_GT(position)      (((position.t * N_SPC \
-                                        + position.k) * N_SPC \
-                                            + position.j) * N_SPC \
-                                                + position.i) 
                                                     
 
 //  Data types definitions

@@ -193,7 +193,7 @@ static int extract_config(const unsigned config_nr, const char * restrict config
     name_unextracted_config_file(config_nr, unextracted_config_filename);
     
 
-    int exit_status = sprintf(command_lime, "cd /ichec/home/users/jesuel/chroma-install/install-files/qdp++/bin; ./lime_extract_record %s 2 4 %s; cd -", 
+    int exit_status = sprintf(command_lime, "/ichec/home/users/jesuel/chroma-install/install-files/qdp++/bin/lime_extract_record %s 2 4 %s", 
                                 name_unextracted_config_file(config_nr, unextracted_config_filename), config_filename);
 
     // int exit_status = sprintf(command_lime, "./lime_extract_record %s 2 4 %s", 

@@ -1,4 +1,3 @@
-configs/
 gauge_fix_coulomb
 plaquette_check
 hostfile
@@ -6,4 +5,4 @@ hostfile
 *.dbg
 *.txt
 *.cfg
-src/obj/
+obj/

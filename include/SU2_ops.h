@@ -8,18 +8,19 @@
 typedef unsigned short SU2_color_idx;
 
 typedef struct {
+    work_data_type m[2 * 2];
+} mtrx_2x2;
+
+typedef struct {
     double m[4];
 } mtrx_2x2_ck;
 
-typedef struct {
-    work_data_type m[2 * 2];
-} matrix_2x2;
 
-// void print_matrix_2x2(const matrix_2x2 * restrict u, const char *name, const unsigned short decimal_places);
+// void print_mtrx_2x2(const mtrx_2x2 * restrict u, const char *name, const unsigned short decimal_places);
 
 // void copy_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck* restrict u_copy);
 
-void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, matrix_2x2 * restrict u);
+void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, mtrx_2x2 * restrict u);
 
 // void set_null_2x2(mtrx_2x2_ck * u), set_identity_2x2(mtrx_2x2_ck * u);
 
