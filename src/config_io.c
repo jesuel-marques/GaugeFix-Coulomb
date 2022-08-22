@@ -5,15 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
-#include "../SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
-#include "../SU3_parameters.h"              //	Simulation parameters
-#include "../include/SU2_ops.h"                        //	SU(2) operations
-#include "../include/SU3_ops.h"                        //	SU(3) operations
+#include <SU3_gaugefixing_parameters.h>  //	Gauge-fixing specific parameters
+#include <SU3_parameters.h>              //	Simulation parameters
+#include <SU2_ops.h>                        //	SU(2) operations
+#include <SU3_ops.h>                        //	SU(3) operations
                                             //	positions and links on the lattice.
 
-#include "../include/lattice.h"  //	Initialization functions and calculations of
+#include <lattice.h>  //	Initialization functions and calculations of
 
 char configs_dir_name_in[200];	//	input from command line
 char configs_dir_name_out[200];	//	input from command line

@@ -4,10 +4,10 @@
 #include <complex.h>
 #include <omp.h>
 
-#include "../SU3_parameters.h"
+#include  <SU3_parameters.h>
 
-#include "../include/lattice.h"
-#include "../include/SU3_ops.h"
+#include <lattice.h>
+#include <SU3_ops.h>
 
 double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position, 
                                                   const lorentz_idx mu, 

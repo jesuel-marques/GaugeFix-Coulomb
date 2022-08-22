@@ -1,7 +1,7 @@
 #ifndef SU2OPS_H
 #define SU2OPS_H
 
-#include "lattice.h"
+#include <lattice.h>
 
 #define ELM2x2(a,b)    (a) * 2 + (b)  //  used to get the element of matrices
 

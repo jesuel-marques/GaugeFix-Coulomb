@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>  //	Standard C header files
 
-#include "../include/math_ops.h"  //	Math operations
-#include "../include/lattice.h"
-#include "../include/SU2_ops.h"
+#include <math_ops.h>  //	Math operations
+#include <lattice.h>
+#include <SU2_ops.h>
 
 // All matrices are in the Cayley-Klein representation
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]

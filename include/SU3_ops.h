@@ -1,9 +1,9 @@
 #ifndef SU3OPS_H
 #define SU3OPS_H
 
-#include "lattice.h"
-#include "SU2_ops.h"
-#include "gauge_fixing.h"
+#include <lattice.h>
+#include <SU2_ops.h>
+#include <gauge_fixing.h>
 
 #define ELM3x3(a,b)    (a) * Nc + (b)  //  used to get the element of matrices
 

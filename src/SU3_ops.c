@@ -2,11 +2,11 @@
 #include <stdio.h>  //	Standard header files in C
 #include <stdlib.h>
 
-#include "../include/math_ops.h"  //	Math operations
-#include "../include/lattice.h"
-#include "../include/SU2_ops.h"
-#include "../include/SU3_ops.h"
-#include "../include/gauge_fixing.h"
+#include <math_ops.h>  //	Math operations
+#include <lattice.h>
+#include <SU2_ops.h>
+#include <SU3_ops.h>
+#include <gauge_fixing.h>
 
 void print_matrix_3x3(const mtrx_3x3 * restrict u, const char *name, const unsigned short decimal_places) {
     // Prints the matrix on screen with a given number of decimal places and 

@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../SU3_parameters.h"  //	Simulation parameters
-#include "../include/lattice.h"            //	Initialization functions and
+#include <SU3_parameters.h>  //	Simulation parameters
+#include <lattice.h>            //	Initialization functions and
                                 //	calculations of positions and
                                 //	links on the lattice.
 
-#include "../include/SU3_ops.h"  //	SU(3) operations
+#include <SU3_ops.h>  //	SU(3) operations
 
 void SU3_calculate_A(mtrx_3x3 * restrict U, const pos_vec position, const lorentz_idx mu,
                                                                      mtrx_3x3 * restrict A) {

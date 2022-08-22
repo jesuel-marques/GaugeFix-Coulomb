@@ -3,17 +3,17 @@
 #include <stdio.h>  //	Standard header C files
 #include <stdlib.h>
 
-#include "../SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
-#include "../SU3_parameters.h"              //	Simulation parameters
-#include "../include/lattice.h"                        //	Initialization functions and
+#include "../include/SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
+#include "../include/SU3_parameters.h"              //	Simulation parameters
+#include <lattice.h>                        //	Initialization functions and
                                             //	calculations of positions and
                                             //	links on the lattice.
 
-#include "../include/math_ops.h"          //	Math operations
-#include "../include/SU2_ops.h"           //	SU(2) operations
-#include "../include/SU3_ops.h"           //	SU(3) operations
-#include "../include/gauge_fixing.h"
-#include "../include/fourvector_field.h"  //	Calculation of A_mu(n) and related things
+#include <math_ops.h>          //	Math operations
+#include <SU2_ops.h>           //	SU(2) operations
+#include <SU3_ops.h>           //	SU(3) operations
+#include <gauge_fixing.h>
+#include <fourvector_field.h>  //	Calculation of A_mu(n) and related things
 
 
 #define SWEEPS_TO_NEXT_MEASUREMENT(e2)  10 + (unsigned)(INITIAL_SWEEPS_TO_MEASUREMENT_e2 \
@@ -52,6 +52,7 @@ void SU3_global_update_U(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G) {
             mtrx_3x3 * g;
             mtrx_3x3 * u;
             mtrx_3x3 u_updated;
+
             pos_vec position;
 
             position.t = t;
@@ -130,7 +131,7 @@ double SU3_calculate_F(mtrx_3x3 * restrict U){
             }
         }
 
-    return creal(trace_3x3(&U_acc))/(VOLUME * Nc * (DIM-1));
+    return creal(trace_3x3(&U_acc)) / (VOLUME * Nc * (DIM - 1));
 }
 
 double SU3_calculate_theta(mtrx_3x3 * restrict U){
@@ -145,10 +146,12 @@ double SU3_calculate_theta(mtrx_3x3 * restrict U){
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {
                     for (position.i = 0; position.i < N_SPC; position.i++) {
+
                         SU3_divergence_A(U, position, &div_A);
                         herm_conj_3x3(&div_A, &div_A_dagger);
                         prod_3x3(&div_A, &div_A_dagger, &prod);
                         theta += trace_3x3(&prod);
+
                     }
                 }
             }

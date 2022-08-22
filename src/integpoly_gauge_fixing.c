@@ -1,15 +1,15 @@
 #include <tgmath.h>
 #include <stdio.h>
 
-#include "../SU3_gaugefixing_parameters.h"  //	Gauge-fixing specific parameters
-#include "../SU3_parameters.h"              //	Simulation parameters
+#include  <SU3_gaugefixing_parameters.h>  //	Gauge-fixing specific parameters
+#include  <SU3_parameters.h>              //	Simulation parameters
 
-#include "../include/SU3_ops.h"
-#include "../include/SU2_ops.h"
+#include <SU3_ops.h>
+#include <SU2_ops.h>
 
-#include "../include/lattice.h"
-#include "../include/gauge_fixing.h"
-#include "../include/integpoly_gauge_fixing.h"
+#include <lattice.h>
+#include <gauge_fixing.h>
+#include <integpoly_gauge_fixing.h>
 
 mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
 

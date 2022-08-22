@@ -2,9 +2,9 @@
 #define CONFIGIO_H
 
 #include <stdlib.h>
-#include "lattice.h"
+#include <lattice.h>
 
-#include "../SU3_parameters.h"
+#include <SU3_parameters.h>
 
 enum config_io_error {swap_error = 1, load_error = 2, write_error = 4, command_error = 8, naming_error = 16, allocation_error = 32};
 

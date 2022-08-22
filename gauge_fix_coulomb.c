@@ -17,18 +17,18 @@
 #endif
 //#include <omp.h>
 
-#include "../SU3_parameters.h"			//	Simulation parameters
+#include <SU3_parameters.h>			//	Simulation parameters
 
-#include "../include/SU3_ops.h"
-#include "../include/config_io.h"
-#include "../include/lattice.h"			//	Initialization functions and calculations of
+#include <SU3_ops.h>
+#include <config_io.h>
+#include <lattice.h>			//	Initialization functions and calculations of
 									//	positions and links on the lattice.
 
-#include "../include/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
-#include "../include/integpoly_gauge_fixing.h"
-#include "../include/config_io.h"
+#include <gauge_fixing.h>	//	Specific functions involved in the gauge-fixing
+#include <integpoly_gauge_fixing.h>
+#include <config_io.h>
 
-#include "../include/measurement.h"
+#include <measurement.h>
 
 const char extension_config_in[]  = ".cfg";
 const char extension_config_out[] = "_clmb.cfg";

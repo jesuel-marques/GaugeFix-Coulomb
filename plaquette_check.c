@@ -15,17 +15,17 @@
 #endif
 
 
-#include "SU3_parameters.h"			//	Simulation parameters
+#include <SU3_parameters.h>			//	Simulation parameters
 
 
-#include "include/lattice.h"			//	Initialization functions and calculations of
+#include <lattice.h>			//	Initialization functions and calculations of
 									//	positions and links on the lattice.
 
-#include "include/gauge_fixing.h"	//	Specific functions involved in the gauge-fixing
-#include "include/SU3_ops.h"
-#include "include/config_io.h"
+#include <gauge_fixing.h>	//	Specific functions involved in the gauge-fixing
+#include <SU3_ops.h>
+#include <config_io.h>
 
-#include "include/measurement.h"
+#include <measurement.h>
 
 const char extension_config_in[]  = ".cfg";
 const char extension_config_out[] = "_clmb.cfg";

@@ -2,7 +2,7 @@
 #define LATTICE_H
 #include <stdbool.h>
 
-#include "../SU3_parameters.h"
+#include <SU3_parameters.h>
 
 #define omp_parallel_basic "omp parallel for num_threads(NUM_THREADS) schedule(dynamic)"
 #define omp_parallel_for  _Pragma(omp_parallel_basic)
