@@ -214,7 +214,9 @@ void get_link_matrix(mtrx_3x3 *restrict U, const pos_vec position, const lorentz
     // Gets forward or backward link at given position and mu
     // and copies it to u.
 
+    #ifdef CHECK_POSITION_BOUNDS
     if(position_mu_valid(position, mu)){
+    #endif
         if (dir == FRONT) {
         copy_3x3(get_link(U, position, mu), u);
         //	Link in the positive way is what is stored in U
@@ -227,11 +229,13 @@ void get_link_matrix(mtrx_3x3 *restrict U, const pos_vec position, const lorentz
             printf("direction is not valid.");
             exit(EXIT_FAILURE); 
         }
+    #ifdef CHECK_POSITION_BOUNDS
     }
     else{
         printf("Program reading config outside of allowed range.\n");
         exit(EXIT_FAILURE);
     }
+    #endif
     
 }
 
@@ -282,7 +286,7 @@ out_gt_data_type *get_gaugetransf_out(out_gt_data_type * restrict G_out, const p
 //     }
 // }
 
-#ifdef CONV_TO_WORKING_PRECISION
+#ifdef CONV_CFG_TO_WORKING_PRECISION
 void SU3_convert_cfg_in_work(in_cfg_data_type * restrict U_in, work_mtrx_data_type * restrict U_work) {
     omp_parallel_for
         // Paralelizing by slicing the time extent
@@ -323,7 +327,7 @@ void SU3_convert_cfg_in_work(in_cfg_data_type * restrict U_in, work_mtrx_data_ty
 #endif
 
 
-#ifdef CONV_FROM_WORKING_PRECISION
+#ifdef CONV_CFG_FROM_WORKING_PRECISION
 
 void SU3_convert_cfg_work_out(work_mtrx_data_type * restrict U_work, out_cfg_data_type * restrict U_out) {
     omp_parallel_for

@@ -5,4 +5,5 @@ hostfile
 *.dbg
 *.txt
 *.cfg
-obj/
+*.o
+build/

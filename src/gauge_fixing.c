@@ -171,10 +171,12 @@ double SU3_calculate_e2(mtrx_3x3 * restrict U) {
         for (pos_index t = 0; t < N_T; t++) {
             mtrx_3x3 div_A;
             mtrx_SU3_alg div_A_components;
+
+            double e2_slice = 0.0;
+
             pos_vec position;
 
             position.t = t;
-            double e2_slice = 0.0;
 
             for (position.k = 0; position.k < N_SPC; position.k++) {
                 for (position.j = 0; position.j < N_SPC; position.j++) {

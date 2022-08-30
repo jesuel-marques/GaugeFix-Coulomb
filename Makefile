@@ -1,7 +1,6 @@
 INCLUDE_DIR := include
 SOURCE_DIR := src
 BUILD_DIR := build
-DEPENDS_DIR := dep
 
 CC := gcc
 CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w
@@ -9,8 +8,6 @@ CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx
 WARNINGS:= -Wall -Wextra
 
 LIBS := -lm
-
-DEPENDENCIES = $(wildcard $(INCLUDE_DIR)/*.h)
 
 SOURCES := $(wildcard $(SOURCE_DIR)/*.c)
 

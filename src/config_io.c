@@ -262,7 +262,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     in_cfg_data_type *U_in;
 
-    #ifdef CONV_TO_WORKING_PRECISION
+    #ifdef CONV_CFG_TO_WORKING_PRECISION
 
         U_in = (in_cfg_data_type *)calloc(VOLUME * DIM, sizeof(in_cfg_data_type));
         if(TEST_ALLOCATION(U_in)){
@@ -281,7 +281,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     if (fread(U_in, sizeof(in_cfg_data_type), VOLUME * DIM, config_file) != VOLUME * DIM) {
 
         fprintf(stderr, "Error: Reading from file failed for config %d.\n", config_nr);
-        #ifdef CONV_TO_WORKING_PRECISION 
+        #ifdef CONV_CFG_TO_WORKING_PRECISION 
              free(U_in);
         #endif
         fclose(config_file);
@@ -293,7 +293,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     if (!feof(config_file)) {
         fprintf(stderr, "Error: File has not been read till the end. Check lattice sizes.\n");
-        #ifdef CONV_TO_WORKING_PRECISION 
+        #ifdef CONV_CFG_TO_WORKING_PRECISION 
              free(U_in);
         #endif
         fclose(config_file);
@@ -315,7 +315,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
         if(byte_swap(U_in, sizeof(in_data_type) / 2, VOLUME * DIM * sizeof(in_cfg_data_type))){
             fprintf(stderr, "Error: Problem with the byte_swap. Unknown size.\n");
-            #ifdef CONV_TO_WORKING_PRECISION
+            #ifdef CONV_CFG_TO_WORKING_PRECISION
                 free(U_in);
             #endif
             return -1;
@@ -323,7 +323,7 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     #endif
 
-    #ifdef CONV_TO_WORKING_PRECISION
+    #ifdef CONV_CFG_TO_WORKING_PRECISION
         SU3_convert_cfg_in_work(U_in, U);
         free(U_in);
     #endif
@@ -336,7 +336,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     out_cfg_data_type *U_out;
 
-    #ifdef CONV_FROM_WORKING_PRECISION
+    #ifdef CONV_CFG_FROM_WORKING_PRECISION
 
         U_out = (out_cfg_data_type *)calloc(VOLUME * DIM, sizeof(out_cfg_data_type));
         TEST_ALLOCATION(U_out);
@@ -352,7 +352,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     #ifdef NEED_BYTE_SWAP_OUT
         if (byte_swap(U_out, sizeof(out_data_type) / 2, VOLUME * DIM * sizeof(out_cfg_data_type))){
             fprintf(stderr, "Error: Problem with the byte_swap. Unknown size.\n");
-            #ifdef CONV_FROM_WORKING_PRECISION
+            #ifdef CONV_CFG_FROM_WORKING_PRECISION
                 free(U_out);
             #endif
             return -1;
@@ -370,7 +370,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
         fprintf(stderr, "Error: Problem creating file %s for config.\n", config_filename);
 
-        #ifdef CONV_FROM_WORKING_PRECISION
+        #ifdef CONV_CFG_FROM_WORKING_PRECISION
             free(U_out);
         #endif
 
@@ -382,7 +382,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
         fclose(config_file);
 
-        #ifdef CONV_FROM_WORKING_PRECISION
+        #ifdef CONV_CFG_FROM_WORKING_PRECISION
             free(U_out);
         #endif
 
@@ -391,7 +391,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     fclose(config_file);
 
-    #ifdef CONV_FROM_WORKING_PRECISION
+    #ifdef CONV_CFG_FROM_WORKING_PRECISION
         free(U_out);
     #endif
 

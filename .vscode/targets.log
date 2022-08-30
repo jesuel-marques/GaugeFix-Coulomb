@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Aug 22 18:08:53 2022
+# Make data base, printed on Fri Aug 26 13:26:12 2022
 
 # Variables
 
@@ -26,7 +26,7 @@ LC_NAME = en_IE.UTF-8
 LC_NUMERIC = en_IE.UTF-8
 # environment
 VSCODE_CWD = /home/jesuel
-# makefile (from 'Makefile', line 11)
+# makefile (from 'Makefile', line 10)
 LIBS := -lm
 # environment
 LC_ADDRESS = en_IE.UTF-8
@@ -57,7 +57,7 @@ VSCODE_CODE_CACHE_PATH = /home/jesuel/.config/Code/CachedData/e4503b30fc78200f84
 # environment
 LANG = C
 # environment
-XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.BD2ER1
+XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.DUB6Q1
 # default
 .LOADED := 
 # default
@@ -66,10 +66,10 @@ XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.BD2ER1
 MAKEFLAGS = pqrR
 # makefile
 CURDIR := /home/jesuel/Documentos/Maynooth/GaugeFix-Coulomb-RedBlack-MPI
-# makefile (from 'Makefile', line 21)
+# makefile (from 'Makefile', line 18)
 DEPENDS = $(patsubst %, $(BUILD_DIR)/%, $(_DEPENDS))
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # environment
 LESSOPEN = | /usr/bin/lesspipe %s
 # automatic
@@ -92,18 +92,18 @@ XDG_SESSION_DESKTOP = ubuntu
 MAKEFILE_LIST := Makefile build/SU2_ops.d build/SU3_ops.d build/config_io.d build/convert_precision.d build/fourvector_field.d build/gauge_fixing.d build/integpoly_gauge_fixing.d build/lattice.d build/measurement.d
 # automatic
 @F = $(notdir $@)
-# makefile (from 'Makefile', line 9)
+# makefile (from 'Makefile', line 8)
 WARNINGS := -Wall -Wextra
-# makefile (from 'Makefile', line 17)
+# makefile (from 'Makefile', line 14)
 _OBJECTS = $(patsubst $(SOURCE_DIR)/%.c, %.o, $(SOURCES))
 # environment
-VSCODE_PID = 24618
+VSCODE_PID = 10636
 # environment
 XDG_SESSION_TYPE = wayland
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
-SESSION_MANAGER = local/jesuel-dell-notebook:@/tmp/.ICE-unix/1465,unix/jesuel-dell-notebook:/tmp/.ICE-unix/1465
+SESSION_MANAGER = local/jesuel-dell-notebook:@/tmp/.ICE-unix/1533,unix/jesuel-dell-notebook:/tmp/.ICE-unix/1533
 # automatic
 *F = $(notdir $*)
 # environment
@@ -114,7 +114,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 <D = $(patsubst %/,%,$(dir $<))
 # environment
 VSCODE_NLS_CONFIG = {"locale":"pt-br","availableLanguages":{"*":"pt-br"},"_languagePackId":"8e7a008e83c664b9876a8f72ff0490ae.pt-br","_translationsConfigFile":"/home/jesuel/.config/Code/clp/8e7a008e83c664b9876a8f72ff0490ae.pt-br/tcf.json","_cacheRoot":"/home/jesuel/.config/Code/clp/8e7a008e83c664b9876a8f72ff0490ae.pt-br","_resolvedLanguagePackCoreLocation":"/home/jesuel/.config/Code/clp/8e7a008e83c664b9876a8f72ff0490ae.pt-br/e4503b30fc78200f846c62cf8091b76ff5547662","_corruptedFile":"/home/jesuel/.config/Code/clp/8e7a008e83c664b9876a8f72ff0490ae.pt-br/corrupted.info","_languagePackSupport":true}
-# makefile (from 'Makefile', line 20)
+# makefile (from 'Makefile', line 17)
 _DEPENDS = $(patsubst $(SOURCE_DIR)/%.c, %.d, $(SOURCES))
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
@@ -125,7 +125,6 @@ SHELL = /bin/sh
 # default
 MAKECMDGOALS := all
 # environment
- 
 XMODIFIERS = @im=ibus
 # environment
 GJS_DEBUG_TOPICS = JS ERROR;JS LOG
@@ -147,16 +146,12 @@ LANGUAGE = pt_BR:pt:pt_PT:en
 LC_MONETARY = en_IE.UTF-8
 # automatic
 ^F = $(notdir $^)
-# makefile (from 'Makefile', line 13)
-DEPENDENCIES = $(wildcard $(INCLUDE_DIR)/*.h)
-# makefile (from 'Makefile', line 4)
-DEPENDS_DIR := dep
 # environment
 LC_TIME = en_IE.UTF-8
-# makefile (from 'Makefile', line 24)
+# makefile (from 'Makefile', line 20)
 BINARIES = gauge_fix_coulomb plaquette_check
 # environment
-INVOCATION_ID = bd539080b7714ba5857ca91847340957
+INVOCATION_ID = 10f0d002cd9341ceab80c7b43618fffb
 # environment
 USERNAME = jesuel
 # environment
@@ -177,7 +172,7 @@ LS_COLORS =
 DESKTOP_SESSION = ubuntu
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
-# makefile (from 'Makefile', line 18)
+# makefile (from 'Makefile', line 15)
 OBJECTS = $(patsubst %, $(BUILD_DIR)/%, $(_OBJECTS))
 # 'override' directive
 GNUMAKEFLAGS := 
@@ -190,7 +185,7 @@ SOURCE_DIR := src
 # makefile
 .DEFAULT_GOAL := all
 # environment
-SYSTEMD_EXEC_PID = 1496
+SYSTEMD_EXEC_PID = 1552
 # environment
 DISPLAY = :0
 # environment
@@ -200,21 +195,21 @@ GTK_MODULES = gail:atk-bridge
 # default
 MAKE_VERSION := 4.3
 # environment
-MANAGERPID = 1330
+MANAGERPID = 1385
 # environment
 LC_MEASUREMENT = en_IE.UTF-8
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 24618
+GIO_LAUNCHED_DESKTOP_FILE_PID = 10636
 # environment
 _ = /usr/share/code/code
 # environment
 LC_PAPER = en_IE.UTF-8
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
-# makefile (from 'Makefile', line 7)
+# makefile (from 'Makefile', line 6)
 CFLAGS := -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w
 # environment
-JOURNAL_STREAM = 8:28274
+JOURNAL_STREAM = 8:32132
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -241,9 +236,9 @@ IM_CONFIG_PHASE = 1
 SUFFIXES := 
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
-# makefile (from 'Makefile', line 6)
+# makefile (from 'Makefile', line 5)
 CC := gcc
-# makefile (from 'Makefile', line 15)
+# makefile (from 'Makefile', line 12)
 SOURCES := src/SU2_ops.c src/SU3_ops.c src/config_io.c src/convert_precision.c src/fourvector_field.c src/gauge_fixing.c src/integpoly_gauge_fixing.c src/lattice.c src/measurement.c
 # environment
 XDG_MENU_PREFIX = gnome-
@@ -252,7 +247,7 @@ GDMSESSION = ubuntu
 # environment
 LC_IDENTIFICATION = en_IE.UTF-8
 # variable set hash-table stats:
-# Load=120/1024=12%, Rehash=0, Collisions=8/188=4%
+# Load=118/1024=12%, Rehash=0, Collisions=8/192=4%
 
 # Pattern-specific Variable Values
 
@@ -261,14 +256,14 @@ LC_IDENTIFICATION = en_IE.UTF-8
 # Directories
 
 # src (device 66311, inode 10356927): 11 files, no impossibilities.
-# . (device 66311, inode 10230907): 26 files, no impossibilities.
+# . (device 66311, inode 10230907): 17 files, no impossibilities.
 
-# 37 files, no impossibilities in 2 directories.
+# 28 files, no impossibilities in 2 directories.
 
 # Implicit Rules
 
 build/%.o: src/%.c Makefile
-#  recipe to execute (from 'Makefile', line 43):
+#  recipe to execute (from 'Makefile', line 35):
 	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
 
 # 1 implicit rules, 0 (0.0%) terminal.
@@ -276,135 +271,133 @@ build/%.o: src/%.c Makefile
 
 # Not a target:
 src/measurement.c:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-22 15:14:24.863079275
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
-build/SU3_ops.o: src/SU3_ops.c Makefile src/SU3_ops.c include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'SU3_ops'
-#  Last modified 2022-08-22 18:07:58.18297999
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
-	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
+build/SU3_ops.o: src/SU3_ops.c include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 src/lattice.c:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-22 17:40:25.302316604
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 src/SU3_ops.c:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-22 16:57:23.128891787
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 src/convert_precision.c:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-19 17:22:15.241064281
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 build/SU3_ops.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:58.174980004
+ 
+#  Last modified 2022-08-22 18:32:32.075390142
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 src/fourvector_field.c:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-22 17:44:03.229741179
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 src/config_io.c:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-22 17:49:39.216989613
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
-build/lattice.o: src/lattice.c Makefile src/lattice.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/lattice.h include/SU3_ops.h include/gauge_fixing.h
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'lattice'
-#  Last modified 2022-08-22 18:07:57.518981125
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
-	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
+build/lattice.o: src/lattice.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/lattice.h include/SU3_ops.h include/gauge_fixing.h
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:30.031028134
+#  Last modified 2022-08-22 18:12:48.054435076
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 build/lattice.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:57.514981131
+#  Last modified 2022-08-22 18:32:31.451391466
 #  File has been updated.
 #  Successfully updated.
 
-build/gauge_fixing.o: src/gauge_fixing.c Makefile src/gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/lattice.h include/math_ops.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h include/fourvector_field.h
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'gauge_fixing'
-#  Last modified 2022-08-22 18:07:57.342981425
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
-	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
+build/gauge_fixing.o: src/gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/lattice.h include/math_ops.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h include/fourvector_field.h
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 include/SU3_ops.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-22 15:09:34.75711484
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 clean:
 #  Phony target (prerequisite of .PHONY).
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 46):
+#  recipe to execute (from 'Makefile', line 38):
 	rm -f $(BINARIES) $(BUILD_DIR)/*.[od] *~ */*~ 
 
 build/SU2_ops.o: src/SU2_ops.c Makefile src/SU2_ops.c include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'SU2_ops'
-#  Last modified 2022-08-22 18:07:57.606980974
+#  Last modified 2022-08-22 18:32:31.539391279
 #  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
+#  Needs to be updated (-q is set).
+# automatic
+# @ := build/SU2_ops.o
+# automatic
+# * := SU2_ops
+# automatic
+# < := src/SU2_ops.c
+# automatic
+# + := src/SU2_ops.c Makefile src/SU2_ops.c include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h
+# automatic
+# % := 
+# automatic
+# ^ := src/SU2_ops.c Makefile include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h
+# automatic
+# ? := include/lattice.h
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/16=12%
+#  recipe to execute (from 'Makefile', line 35):
 	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
 
 include/gauge_fixing.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-17 14:08:50.510461959
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 build/config_io.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:57.17098172
+#  Last modified 2022-08-22 18:32:31.111392188
 #  File has been updated.
 #  Successfully updated.
 
 include/integpoly_gauge_fixing.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-17 13:21:29.497159882
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 .DEFAULT:
@@ -418,29 +411,25 @@ all: gauge_fix_coulomb plaquette_check
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has been updated.
-#  Successfully updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/6=0%
 
 # Not a target:
 src/integpoly_gauge_fixing.c:
-#  Implicit rule search has been done.
- 
-#  Last modified 2022-08-22 15:13:30.106613341
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
-build/measurement.o: src/measurement.c Makefile src/measurement.c include/SU3_parameters.h include/lattice.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'measurement'
-#  Last modified 2022-08-22 18:07:57.570981036
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
-	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
+build/measurement.o: src/measurement.c include/SU3_parameters.h include/lattice.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 build/SU2_ops.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:57.606980974
+#  Last modified 2022-08-22 18:32:31.535391287
 #  File has been updated.
 #  Successfully updated.
 
@@ -454,7 +443,7 @@ src/SU2_ops.c:
 # Not a target:
 build/integpoly_gauge_fixing.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:57.406981316
+#  Last modified 2022-08-22 18:32:31.355391669
 #  File has been updated.
 #  Successfully updated.
 
@@ -464,19 +453,15 @@ include/SU3_parameters.h:
 #  File has been updated.
 #  Successfully updated.
 
-build/config_io.o: src/config_io.c Makefile src/config_io.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/lattice.h include/SU3_ops.h include/gauge_fixing.h
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'config_io'
-#  Last modified 2022-08-22 18:07:57.174981712
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
-	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
+build/config_io.o: src/config_io.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/lattice.h include/SU3_ops.h include/gauge_fixing.h
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 build/convert_precision.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:57.178981706
+#  Last modified 2022-08-22 18:32:31.119392171
 #  File has been updated.
 #  Successfully updated.
 
@@ -487,52 +472,44 @@ include/SU2_ops.h:
 #  Successfully updated.
 
 include/fourvector_field.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-05-11 11:14:02.914181758
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
-build/convert_precision.o: src/convert_precision.c Makefile src/convert_precision.c
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'convert_precision'
-#  Last modified 2022-08-22 18:07:57.182981699
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
-	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
+build/convert_precision.o: src/convert_precision.c
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 plaquette_check: build/SU2_ops.o build/SU3_ops.o build/config_io.o build/convert_precision.o build/fourvector_field.o build/gauge_fixing.o build/integpoly_gauge_fixing.o build/lattice.o build/measurement.o
 #  Implicit rule search has not been done.
-#  Last modified 2022-08-22 18:07:58.278979827
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 34):
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 30):
 	$(CC) -o $@ $@.c $^ $(CFLAGS) $(WARNINGS) $(LIBS)
 
 # Not a target:
 build/measurement.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:57.566981042
+#  Last modified 2022-08-22 18:32:31.499391363
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 src/gauge_fixing.c:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-22 17:41:07.762197079
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 include/SU3_gaugefixing_parameters.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-17 15:21:35.885554165
-#  File has been updated.
-#  Successfully updated.
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # Not a target:
 build/gauge_fixing.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:57.338981433
+#  Last modified 2022-08-22 18:32:31.299391788
 #  File has been updated.
 #  Successfully updated.
 
@@ -544,7 +521,7 @@ include/math_ops.h:
 
 include/lattice.h:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 17:51:43.944737352
+#  Last modified 2022-08-23 18:24:45.058719121
 #  File has been updated.
 #  Successfully updated.
 
@@ -556,50 +533,44 @@ include/lattice.h:
 # Not a target:
 build/fourvector_field.d:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-22 18:07:57.202981664
+#  Last modified 2022-08-22 18:32:31.147392111
 #  File has been updated.
 #  Successfully updated.
 
-build/fourvector_field.o: src/fourvector_field.c Makefile src/fourvector_field.c include/SU3_parameters.h include/lattice.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'fourvector_field'
-#  Last modified 2022-08-22 18:07:57.206981658
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
-	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
+build/fourvector_field.o: src/fourvector_field.c include/SU3_parameters.h include/lattice.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 gauge_fix_coulomb: build/SU2_ops.o build/SU3_ops.o build/config_io.o build/convert_precision.o build/fourvector_field.o build/gauge_fixing.o build/integpoly_gauge_fixing.o build/lattice.o build/measurement.o
 #  Implicit rule search has not been done.
-#  Last modified 2022-08-22 18:07:58.234979901
+#  Last modified 2022-08-22 18:32:32.147389989
 #  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 31):
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/6=0%
+#  recipe to execute (from 'Makefile', line 27):
 	$(CC) -o $@ $@.c $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
 
-build/integpoly_gauge_fixing.o: src/integpoly_gauge_fixing.c Makefile src/integpoly_gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU3_ops.h include/lattice.h include/SU2_ops.h include/gauge_fixing.h include/integpoly_gauge_fixing.h
-#  Implicit rule search has been done.
-#  Implicit/static pattern stem: 'integpoly_gauge_fixing'
-#  Last modified 2022-08-22 18:07:57.41098131
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'Makefile', line 43):
-	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
+build/integpoly_gauge_fixing.o: src/integpoly_gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU3_ops.h include/lattice.h include/SU2_ops.h include/gauge_fixing.h include/integpoly_gauge_fixing.h
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
 
 # files hash-table stats:
-# Load=44/1024=4%, Rehash=0, Collisions=15/237=6%
+# Load=44/1024=4%, Rehash=0, Collisions=15/205=7%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 89 / storage = 1433 B / avg = 16 B
-# current buf: size = 8162 B / used = 1433 B / count = 89 / avg = 16 B
+# strcache buffers: 1 (0) / strings = 72 / storage = 1167 B / avg = 16 B
+# current buf: size = 8162 B / used = 1167 B / count = 72 / avg = 16 B
 
-# strcache performance: lookups = 313 / hit rate = 71%
+# strcache performance: lookups = 264 / hit rate = 72%
 # hash-table stats:
-# Load=89/8192=1%, Rehash=0, Collisions=24/313=8%
-# Finished Make data base on Mon Aug 22 18:08:53 2022
+# Load=72/8192=1%, Rehash=0, Collisions=24/264=9%
+# Finished Make data base on Fri Aug 26 13:26:12 2022
 
  

@@ -129,9 +129,9 @@ int main(int argc, char *argv[]) {
 			// integpolyakov_gauge_fix(U, G, actual_config_nr);
 			
 			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);			
-			printf("Config before integpoly %5d: e2: %3.2E \n", actual_config_nr, SU3_calculate_e2(U));
-			integpolyakov_gauge_fix(U, G, actual_config_nr);
-			printf("Config depois integpoly %5d: e2: %3.2E \n", actual_config_nr, SU3_calculate_e2(U));
+			// printf("Config before integpoly %5d: e2: %3.2E \n", actual_config_nr, SU3_calculate_e2(U));
+			// integpolyakov_gauge_fix(U, G, actual_config_nr);
+			// printf("Config depois integpoly %5d: e2: %3.2E \n", actual_config_nr, SU3_calculate_e2(U));
 
 			//	checking if a request to stop has been made
 			// if(!system("test -f stop_run")){

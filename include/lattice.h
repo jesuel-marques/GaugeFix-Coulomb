@@ -41,8 +41,8 @@ typedef enum {REAR, FRONT} direction;
 
 #define GET_GT(position)      (((position.t * N_SPC \
                                         + position.k) * N_SPC \
-                                            + position.j) * N_SPC \
-                                                + position.i) 
+                                                  + position.j) * N_SPC \
+                                                            + position.i) 
 
 
 //  Does the pointer arithmetic to get the correct index in the configuration
@@ -50,16 +50,16 @@ typedef enum {REAR, FRONT} direction;
 
 
 #define GET_LINK_U(position, mu) ((((position.t * N_SPC \
-                                        + position.k) * N_SPC \
-                                            + position.j) * N_SPC \
-                                                + position.i) * DIM \
-                                                    + mu)
+                                            + position.k) * N_SPC \
+                                                      + position.j) * N_SPC \
+                                                                + position.i) * DIM \
+                                                                                + mu)
 
                                                     
 
 //  Data types definitions
 
-typedef complex float  in_data_type; 
+typedef complex float  in_data_type;
 typedef complex float  out_data_type;
 typedef complex double work_data_type;
 
@@ -74,7 +74,7 @@ typedef struct {
 typedef mtrx_3x3_double work_mtrx_data_type;
 typedef work_mtrx_data_type mtrx_3x3;
 
-#ifdef CONV_TO_WORKING_PRECISION
+#ifdef CONV_CFG_TO_WORKING_PRECISION
     typedef mtrx_3x3_float in_cfg_data_type;
 #else
     typedef work_mtrx_data_type in_cfg_data_type;
@@ -86,7 +86,7 @@ typedef work_mtrx_data_type mtrx_3x3;
     typedef mtrx_3x3_double in_gt_data_type;
 #endif
 
-#ifdef CONV_FROM_WORKING_PRECISION
+#ifdef CONV_CFG_FROM_WORKING_PRECISION
     typedef mtrx_3x3_float  out_cfg_data_type;
 #else
     typedef mtrx_3x3_double out_cfg_data_type;
@@ -120,7 +120,7 @@ void get_link_matrix(mtrx_3x3 * restrict U, const pos_vec position, const lorent
 
 // void copy_3x3_config(mtrx_3x3 *U, mtrx_3x3 *U_copy);
 
-#ifdef CONV_TO_WORKING_PRECISION
+#ifdef CONV_CFG_TO_WORKING_PRECISION
     
     void SU3_convert_cfg_in_work (in_cfg_data_type * restrict U_in,   work_mtrx_data_type * restrict U_work);
 
@@ -132,7 +132,7 @@ void get_link_matrix(mtrx_3x3 * restrict U, const pos_vec position, const lorent
 
 #endif
 
-#ifdef CONV_FROM_WORKING_PRECISION
+#ifdef CONV_CFG_FROM_WORKING_PRECISION
 
     void SU3_convert_cfg_work_out(work_mtrx_data_type * restrict U_work, out_cfg_data_type * restrict U_out);
 
