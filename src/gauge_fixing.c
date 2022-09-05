@@ -15,6 +15,8 @@
 #include <gauge_fixing.h>
 #include <fourvector_field.h>  //	Calculation of A_mu(n) and related things
 
+#include <stdio.h>
+
 
 #define SWEEPS_TO_NEXT_MEASUREMENT(e2)  10 + (unsigned)(INITIAL_SWEEPS_TO_MEASUREMENT_e2 \
                                               * (1.0 - log10((e2)) / log10(TOLERANCE)))
