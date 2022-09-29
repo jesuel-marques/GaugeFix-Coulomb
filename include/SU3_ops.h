@@ -3,9 +3,8 @@
 
 #include <lattice.h>
 #include <SU2_ops.h>
-#include <gauge_fixing.h>
 
-#define ELM3x3(a,b)    (a) * Nc + (b)  //  used to get the element of matrices
+#define ELM3x3(a, b)    (a) * Nc + (b)  //  used to get the element of matrices
 
 typedef unsigned short SU3_color_idx;
 typedef unsigned short SU3_alg_idx;

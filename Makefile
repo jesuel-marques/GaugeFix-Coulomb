@@ -7,7 +7,7 @@ CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx
 
 WARNINGS:= -Wall -Wextra
 
-LIBS := -lm
+LIBS := -lm -llapacke
 
 SOURCES := $(wildcard $(SOURCE_DIR)/*.c)
 
@@ -17,7 +17,7 @@ OBJECTS = $(patsubst %, $(BUILD_DIR)/%, $(_OBJECTS))
 _DEPENDS = $(patsubst $(SOURCE_DIR)/%.c, %.d, $(SOURCES))
 DEPENDS = $(patsubst %, $(BUILD_DIR)/%, $(_DEPENDS))
 
-BINARIES = gauge_fix_coulomb plaquette_check
+BINARIES = gauge_fix_coulomb plaquette_check test_matrix_power
 
 .PHONY: all clean
 
@@ -27,6 +27,9 @@ gauge_fix_coulomb: $(OBJECTS)
 	$(CC) -o $@ $@.c $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
 
 plaquette_check: $(OBJECTS)
+	$(CC) -o $@ $@.c $^ $(CFLAGS) $(WARNINGS) $(LIBS)
+
+test_matrix_power: $(OBJECTS)
 	$(CC) -o $@ $@.c $^ $(CFLAGS) $(WARNINGS) $(LIBS)
 
 -include $(DEPENDS)

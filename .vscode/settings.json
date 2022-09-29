@@ -18,6 +18,9 @@
         "cstdio": "c",
         "config_io.h": "c",
         "integpoly_gauge_fixing.h": "c",
-        "fourvector_field.h": "c"
+        "fourvector_field.h": "c",
+        "lapack.h": "c",
+        "matrix_power.h": "c",
+        "lapacke.h": "c"
     }
 }

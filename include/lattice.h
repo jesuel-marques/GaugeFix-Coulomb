@@ -156,7 +156,4 @@ mtrx_3x3 *get_gaugetransf(mtrx_3x3 * restrict G, const pos_vec position);
 in_gt_data_type  *get_gaugetransf_in (in_gt_data_type  * restrict G_in,  const pos_vec position);
 out_gt_data_type *get_gaugetransf_out(out_gt_data_type * restrict G_out, const pos_vec position);
 
-
-
-
 #endif

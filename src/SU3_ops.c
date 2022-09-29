@@ -6,7 +6,6 @@
 #include <lattice.h>
 #include <SU2_ops.h>
 #include <SU3_ops.h>
-#include <gauge_fixing.h>
 
 void print_matrix_3x3(const mtrx_3x3 * restrict u, const char *name, const unsigned short decimal_places) {
     // Prints the matrix on screen with a given number of decimal places and 
@@ -19,8 +18,8 @@ void print_matrix_3x3(const mtrx_3x3 * restrict u, const char *name, const unsig
         printf("{");
 
         for (SU3_color_idx  b = 0; b < Nc; b++) {
-            printf("%.*lf+I(%.*lf)", decimal_places, creal(u->m[ELM3x3(a, b)]), 
-                                     decimal_places, cimag(u->m[ELM3x3(a, b)]));
+            printf("%.*lf + I*(%.*lf)", decimal_places, creal(u -> m[ELM3x3(a, b)]), 
+                                        decimal_places, cimag(u -> m[ELM3x3(a, b)]));
             
             b != Nc -1 ?  printf(",") : 0 ;
         }
