@@ -21,7 +21,7 @@ void print_matrix_3x3(const mtrx_3x3 * restrict u, const char *name, const unsig
             printf("%.*lf + I*(%.*lf)", decimal_places, creal(u -> m[ELM3x3(a, b)]), 
                                         decimal_places, cimag(u -> m[ELM3x3(a, b)]));
             
-            b != Nc -1 ?  printf(",") : 0 ;
+            b != Nc -1 ?  printf(", ") : 0 ;
         }
 
         a != Nc - 1 ?  printf("},\n") : 0 ;

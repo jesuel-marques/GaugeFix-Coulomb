@@ -6,7 +6,7 @@
 #include <lattice.h>
 #include <SU3_ops.h>
 
-static int eigensystem_3x3(const mtrx_3x3 * restrict a, mtrx_3x3 * restrict eigenvalues_mat, mtrx_3x3 * restrict eigenvectors){
+static int eigensystem_3x3(mtrx_3x3 * restrict a, mtrx_3x3 * restrict eigenvalues_mat, mtrx_3x3 * restrict eigenvectors){
 
     double complex eigenvalues[Nc];
     
@@ -38,7 +38,7 @@ static int eigensystem_3x3(const mtrx_3x3 * restrict a, mtrx_3x3 * restrict eige
     return info;
 }
 
-static int power_diagonal_mtrx_3x3(const mtrx_3x3 * restrict diag_mtrx, const work_data_type power, 
+static int power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, work_data_type power, 
                                     mtrx_3x3 * restrict diag_mtrx_to_power){
     set_null_3x3(diag_mtrx_to_power);    
     for(int a = 0; a < Nc; a++)

@@ -6,4 +6,5 @@ hostfile
 *.txt
 *.cfg
 *.o
+*.d
 build/
