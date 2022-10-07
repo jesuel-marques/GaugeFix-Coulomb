@@ -7,11 +7,15 @@
 #include <SU3_ops.h>
 #include <SU2_ops.h>
 
+#include <misc.h>
 #include <lattice.h>
+#include <fields.h>
 #include <gauge_fixing.h>
 #include <matrix_power.h>
 #include <integpoly_gauge_fixing.h>
 
+#define TESTING_POWER_MATRIX
+// #undef TESTING_POWER_MATRIX
 
 mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
 
@@ -30,7 +34,7 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
                 accumulate_3x3(get_link(U, assign_position(i, j, k, t), T_INDX), &u_timeslice_sum);
             }
     // print_matrix_3x3(&u_timeslice_sum, "u_timeslice_sum", 16);
-    work_data_type one_over_spatial_volume = 1.0 / pow(N_SPC, 3.0);
+    scalar one_over_spatial_volume = 1.0 / pow(N_SPC, 3.0);
 
     // printf("%lf + I * (%lf)\n", creal(one_over_spatial_volume), cimag(one_over_spatial_volume));
 
@@ -57,47 +61,6 @@ mtrx_3x3 integ_polyakovloop(mtrx_3x3 * tempave_proj_u){
 
 
 
-static void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict w, 
-                                              mtrx_3x3 * restrict total_update) {
-    //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
-    //	algorithm for SU(3), with a division of the update matrix in submatrices
-    //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
-    //	of "hits" to be performed one after another.
-
-    mtrx_3x3 w_inv_old; 
-    //  Calculates the inverse of w in the beginning.
-    //  The program will update w successively and to
-    //  extract what was the combined update, we can 
-    //  multiply from the right by the old inverse.
-
-       
-    if(inverse_3x3(w, &w_inv_old)){
-
-        //  Local maximization is attained iteratively in SU(3),
-        //  thus we need to make many hits ...
-        for (unsigned short hits = 1; hits <= 300; hits++) {
-
-            //	... and each hit contains the Cabbibo-Marinari subdivision
-            for (submatrix sub = R; sub <= T; sub++) {
-                //	Submatrices are indicated by numbers from 0 to 2
-                //  with codenames R, S and T
-
-                SU3_update_sub_LosAlamos(w, sub);
-                // projection_SU3(w);
-                // printf("re Tr w: %.20lf\n", creal(trace_3x3(w)));
-                
-            }
-        }
-    }
-    else{
-        //  if w has no inverse, update will be given by the identity
-        set_identity_3x3(total_update);
-    }
-    
-    prod_3x3(w, &w_inv_old, total_update);
-    //	Updates matrix to total_update. It is the
-    //	accumulated updates from the hits.
-}
 
 int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned short config_nr) {
 
@@ -109,7 +72,7 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
     mtrx_3x3 uavedag;
     mtrx_3x3 uaveproj;
     
-    // omp_parallel_for
+    // OMP_PARALLEL_FOR
     for(pos_index t = 0; t < N_T; t++){
 
 
@@ -119,50 +82,81 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
         // print_matrix_3x3(u_timeslice_ave+t, "", 16);
         herm_conj_3x3(u_timeslice_ave + t, &uavedag);
         SU3_CabbiboMarinari_projection(&uavedag, tempave_proj_u + t);
+       
         // print_matrix_3x3(tempave_proj_u+t, "SU3 CM projected", 16);
 
         // getchar();
+        #ifdef TESTING_POWER_MATRIX
+            if(t == N_T / 2){
+                print_matrix_3x3(tempave_proj_u + t, "u average middle time slice of lattice", 18);
+            }
+        #endif 
     }
 
     mtrx_3x3 P = integ_polyakovloop(tempave_proj_u);
-    print_matrix_3x3(&P, "P", 16);
-    mtrx_3x3 Pto1overNT;
+    
+    #ifdef TESTING_POWER_MATRIX
+        print_matrix_3x3(&P, "P", 18);
+    #endif
+    mtrx_3x3 Pto1overNT, logP;
     matrix_power_3x3(&P, 1.0 / (double) N_T, &Pto1overNT);
-    print_matrix_3x3(&P, "P to 1/Nt", 16);
+    matrix_log_3x3(&P,  
+                            &logP);
+    #ifdef TESTING_POWER_MATRIX
+        print_matrix_3x3(&Pto1overNT, "P to 1/Nt", 18);
+        print_matrix_3x3(&logP, "log of P", 18);
+    #endif
 
-    mtrx_3x3 gt[N_T], gdaggert[N_T];
+    mtrx_3x3 gt[N_T + 1 ], gdaggert[N_T + 1];
     mtrx_3x3 u_dag, aux;
+
+    
 
     set_identity_3x3(gdaggert);
     set_identity_3x3(gt);
-    mtrx_3x3 result;
+    
+    set_identity_3x3(gdaggert + N_T);
+    set_identity_3x3(gt + N_T);
+    
     for(pos_index t = 0; t < N_T - 1 ; t++){
         
         herm_conj_3x3(tempave_proj_u + t, &u_dag); // transformar em função própria
         prod_three_3x3(&u_dag, gdaggert + t, &Pto1overNT, gdaggert + t + 1);
         herm_conj_3x3(gdaggert + t + 1, gt + t + 1);
 
-        prod_three_3x3(gt, tempave_proj_u, gdaggert + 1, &result);
-        print_matrix_3x3(&result, "g(t).u(t).gdag(t+1)", 16);
-        getchar();
+        // #ifdef TESTING_POWER_MATRIX
+        //     print_matrix_3x3(gt + t + 1, "g(t).u(t).gdag(t+1)", 16);
+        // #endif
     }
 
-    omp_parallel_for
+    print_matrix_3x3(gt + N_T / 2, "matrix update middle", 18);
+
+    OMP_PARALLEL_FOR
     for(pos_index t = 0; t < N_T; t++){
+        mtrx_3x3 updated_u;
         pos_vec position;
         position.t = t;
-        printf("t: %d %.16lf\n", t, creal(determinant_3x3(gt+t)));
+        // #ifdef TESTING_POWER_MATRIX
+        //     printf("t: %d %.16lf\n", t, creal(determinant_3x3(gt+t)));
+        // #endif
         for(position.k = 0; position.k < N_SPC; position.k++){
             for(position.j = 0; position.j < N_SPC; position.j++){
                 for(position.i = 0; position.i < N_SPC; position.i++){
-                    
+                                        
                     accum_left_prod_3x3(gt + t, get_gaugetransf(G, position));
+                                        
+                    prod_three_3x3(gt + t, get_link(U, position, T_INDX), gdaggert + t + 1, &updated_u); //TRANSFORMAR EM FUNÇÃO
+                    copy_3x3(&updated_u, get_link(U, position, T_INDX));
 
+                    for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {
+
+                        prod_three_3x3(gt + t, get_link(U, position, mu), gdaggert + t, &updated_u); 
+                        copy_3x3(&updated_u, get_link(U, position, mu));
+
+                    }
                 }
             }
         }
     }
-
-    SU3_global_update_U(U, G);
 
 }

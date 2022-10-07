@@ -1,9 +1,9 @@
+#include <stdio.h>  //	Standard C header files
+#include <stdlib.h>
 #include <tgmath.h>
-#include <stdio.h>
-#include <stdlib.h>  //	Standard C header files
 
+#include <types.h>
 #include <math_ops.h>  //	Math operations
-#include <lattice.h>
 #include <SU2_ops.h>
 
 // All matrices are in the Cayley-Klein representation
@@ -111,10 +111,10 @@ inline void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, mtrx_2x2 * restri
 //     //	twice the 0th component.
 // }
 
-inline work_data_type determinant_2x2(const mtrx_2x2_ck * restrict u) {
+inline scalar determinant_2x2(const mtrx_2x2_ck * restrict u) {
     //  Calculates the determinant of the matrix u
 
-    work_data_type det_u = 0.0;
+    scalar det_u = 0.0;
 
     for (SU2_color_idx i = 0; i <= 3; i++) {
 
@@ -144,7 +144,7 @@ void herm_conj_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck * restrict u_dagg
     }
 }
 
-void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const work_data_type alpha, 
+void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const scalar alpha, 
                                                     mtrx_2x2_ck * restrict alpha_times_u) {
     //  Calculates multiplication of Cayley-Klein 2x2 matrix u by scalar alpha
     //  and returns result in alpha_times_u.
@@ -157,12 +157,12 @@ void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const work_data_type alpha,
     }
 }
 
-// static work_data_type SU2_inner_prod(const mtrx_2x2_ck * restrict u, const mtrx_2x2_ck * restrict v) {
+// static scalar SU2_inner_prod(const mtrx_2x2_ck * restrict u, const mtrx_2x2_ck * restrict v) {
 //     //	Calculates the "scalar product" of two Cayley-Klein 2x2 matrices
 //     //	in the Cayley-Klein representation.
 //     //	Used in the product of two Cayley-Klein 2x2 matrices.
 
-//     work_data_type inner_prod = (u -> m[0]) * (v -> m[0]);
+//     scalar inner_prod = (u -> m[0]) * (v -> m[0]);
 //     //	The 0th component has a plus sign ...
 
 //     for (SU2_color_idx b = 1; b < 4; b++) {
@@ -254,7 +254,7 @@ inline short SU2_projection(mtrx_2x2_ck * restrict u) {
     //	Projects matrix a to the group SU(2) returning SU(2) matrix a_SU2.
 
     mtrx_2x2_ck u_SU2;
-    work_data_type det_u = determinant_2x2(u);
+    scalar det_u = determinant_2x2(u);
     if(det_u != 0){
 
         mult_scalar_2x2(u, 1.0 / sqrt(det_u), &u_SU2);

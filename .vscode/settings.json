@@ -16,9 +16,9 @@
         "math_ops.h": "c",
         "*.tcc": "c",
         "cstdio": "c",
-        "config_io.h": "c",
+        "fields_io.h": "c",
         "integpoly_gauge_fixing.h": "c",
-        "fourvector_field.h": "c",
+        "four_potential.h": "c",
         "lapack.h": "c",
         "matrix_power.h": "c",
         "lapacke.h": "c"

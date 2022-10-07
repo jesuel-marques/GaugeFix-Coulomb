@@ -1,9 +1,9 @@
 #ifndef MEASUREMENT_H
 #define MEASUREMENT_H
 
-#include <lattice.h>
+#include <types.h>
 
-double  spatial_plaquette_average(mtrx_3x3 * U),
+double spatial_plaquette_average(mtrx_3x3 * U),
        temporal_plaquette_average(mtrx_3x3 * U);
 
 #endif

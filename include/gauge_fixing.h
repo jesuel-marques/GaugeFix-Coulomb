@@ -1,7 +1,7 @@
 #ifndef GAUGEFIXING_H
 #define GAUGEFIXING_H
 
-typedef enum {R, S, T} submatrix;
+#include <types.h>
 
 void SU3_global_update_U(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G);
 

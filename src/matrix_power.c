@@ -1,9 +1,9 @@
 #include <tgmath.h>
 
 #include <lapack.h>
-
 #include <lapacke.h>
-#include <lattice.h>
+
+#include <types.h>
 #include <SU3_ops.h>
 
 static int eigensystem_3x3(mtrx_3x3 * restrict a, mtrx_3x3 * restrict eigenvalues_mat, mtrx_3x3 * restrict eigenvectors){
@@ -38,7 +38,17 @@ static int eigensystem_3x3(mtrx_3x3 * restrict a, mtrx_3x3 * restrict eigenvalue
     return info;
 }
 
-static int power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, work_data_type power, 
+
+static int log_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx,  
+                                    mtrx_3x3 * restrict log_of_diag_mtrx){
+    set_null_3x3(log_of_diag_mtrx);    
+    for(int a = 0; a < Nc; a++)
+        log_of_diag_mtrx -> m[ELM3x3(a, a)] = log(diag_mtrx -> m[ELM3x3(a, a)]);
+    
+}
+
+
+static int power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, scalar power, 
                                     mtrx_3x3 * restrict diag_mtrx_to_power){
     set_null_3x3(diag_mtrx_to_power);    
     for(int a = 0; a < Nc; a++)
@@ -46,7 +56,7 @@ static int power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, work_data_type
     
 }
 
-int matrix_power_3x3(mtrx_3x3 * restrict a, const work_data_type power, 
+int matrix_power_3x3(mtrx_3x3 * restrict a, const scalar power, 
                             mtrx_3x3 * restrict a_to_power){
 
     mtrx_3x3 eigenvalues, eigenvalues_to_power;
@@ -72,6 +82,39 @@ int matrix_power_3x3(mtrx_3x3 * restrict a, const work_data_type power,
     // print_matrix_3x3(&eigenvalues_to_power, "eigenvalues to power", 16);
 
     prod_three_3x3(&eigenvectors, &eigenvalues_to_power, &eigenvectors_inv, a_to_power);
+
+    // print_matrix_3x3(a_to_power, "power of matrix", 18);
+
+    return status;
+}
+
+
+int matrix_log_3x3(mtrx_3x3 * restrict a,  
+                            mtrx_3x3 * restrict log_of_a){
+
+    mtrx_3x3 eigenvalues, log_of_eigenvalues;
+    mtrx_3x3 eigenvectors, eigenvectors_inv;
+
+    mtrx_3x3 a_copy; //because lapack overwrites it
+
+    copy_3x3(a, &a_copy);
+
+    int status;
+    
+    // print_matrix_3x3(a, "matrix", 18);
+
+    status = eigensystem_3x3(&a_copy, &eigenvalues, &eigenvectors);
+
+    inverse_3x3(&eigenvectors, &eigenvectors_inv);
+
+    // print_matrix_3x3(&eigenvalues, "eigenvalues", 16);
+    // print_matrix_3x3(&eigenvectors, "eigenvectors", 16);
+    // print_matrix_3x3(&eigenvectors_inv, "eigenvectors_inv", 16);
+    
+    log_diagonal_mtrx_3x3(&eigenvalues, &log_of_eigenvalues);
+    // print_matrix_3x3(&eigenvalues_to_power, "eigenvalues to power", 16);
+
+    prod_three_3x3(&eigenvectors, &log_of_eigenvalues, &eigenvectors_inv, log_of_a);
 
     // print_matrix_3x3(a_to_power, "power of matrix", 18);
 

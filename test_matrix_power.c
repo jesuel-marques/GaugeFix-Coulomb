@@ -1,4 +1,4 @@
-//	gcc -o plaquette_check plaquette_check.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  source/measurement.c source/config_io.c -lm -O4 -march=skylake -fopenmp
+//	gcc -o plaquette_check plaquette_check.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/four_potential.c  source/measurement.c source/fields_io.c -lm -O4 -march=skylake -fopenmp
 
 #include <stdio.h>					//	Standard header files in C
 #include <stdlib.h>
@@ -7,8 +7,6 @@
 
 #include <SU3_parameters.h>			//	Simulation parameters
 
-#include <lattice.h>			//	Initialization functions and calculations of
-									//	positions and links on the lattice.
 
 #include <SU3_ops.h>
 

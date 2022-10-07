@@ -89,7 +89,7 @@ XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
 # environment
 XDG_SESSION_DESKTOP = ubuntu
 # makefile (from 'build/measurement.d', line 1)
-MAKEFILE_LIST := Makefile build/SU2_ops.d build/SU3_ops.d build/config_io.d build/convert_precision.d build/fourvector_field.d build/gauge_fixing.d build/integpoly_gauge_fixing.d build/lattice.d build/measurement.d
+MAKEFILE_LIST := Makefile build/SU2_ops.d build/SU3_ops.d build/fields_io.d build/convert_precision.d build/four_potential.d build/gauge_fixing.d build/integpoly_gauge_fixing.d build/lattice.d build/measurement.d
 # automatic
 @F = $(notdir $@)
 # makefile (from 'Makefile', line 8)
@@ -239,7 +239,7 @@ SUFFIXES :=
 # makefile (from 'Makefile', line 5)
 CC := gcc
 # makefile (from 'Makefile', line 12)
-SOURCES := src/SU2_ops.c src/SU3_ops.c src/config_io.c src/convert_precision.c src/fourvector_field.c src/gauge_fixing.c src/integpoly_gauge_fixing.c src/lattice.c src/measurement.c
+SOURCES := src/SU2_ops.c src/SU3_ops.c src/fields_io.c src/convert_precision.c src/four_potential.c src/gauge_fixing.c src/integpoly_gauge_fixing.c src/lattice.c src/measurement.c
 # environment
 XDG_MENU_PREFIX = gnome-
 # environment
@@ -307,13 +307,13 @@ build/SU3_ops.d:
 #  Successfully updated.
 
 # Not a target:
-src/fourvector_field.c:
+src/four_potential.c:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
 # Not a target:
-src/config_io.c:
+src/fields_io.c:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -337,7 +337,7 @@ build/lattice.d:
 #  File has been updated.
 #  Successfully updated.
 
-build/gauge_fixing.o: src/gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/lattice.h include/math_ops.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h include/fourvector_field.h
+build/gauge_fixing.o: src/gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/lattice.h include/math_ops.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h include/four_potential.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -388,7 +388,7 @@ include/gauge_fixing.h:
 #  File has not been updated.
 
 # Not a target:
-build/config_io.d:
+build/fields_io.d:
 #  Implicit rule search has been done.
 #  Last modified 2022-08-22 18:32:31.111392188
 #  File has been updated.
@@ -453,7 +453,7 @@ include/SU3_parameters.h:
 #  File has been updated.
 #  Successfully updated.
 
-build/config_io.o: src/config_io.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/lattice.h include/SU3_ops.h include/gauge_fixing.h
+build/fields_io.o: src/fields_io.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/lattice.h include/SU3_ops.h include/gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -471,7 +471,7 @@ include/SU2_ops.h:
 #  File has been updated.
 #  Successfully updated.
 
-include/fourvector_field.h:
+include/four_potential.h:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -481,7 +481,7 @@ build/convert_precision.o: src/convert_precision.c
 #  Modification time never checked.
 #  File has not been updated.
 
-plaquette_check: build/SU2_ops.o build/SU3_ops.o build/config_io.o build/convert_precision.o build/fourvector_field.o build/gauge_fixing.o build/integpoly_gauge_fixing.o build/lattice.o build/measurement.o
+plaquette_check: build/SU2_ops.o build/SU3_ops.o build/fields_io.o build/convert_precision.o build/four_potential.o build/gauge_fixing.o build/integpoly_gauge_fixing.o build/lattice.o build/measurement.o
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -531,18 +531,18 @@ include/lattice.h:
 #  File has not been updated.
 
 # Not a target:
-build/fourvector_field.d:
+build/four_potential.d:
 #  Implicit rule search has been done.
 #  Last modified 2022-08-22 18:32:31.147392111
 #  File has been updated.
 #  Successfully updated.
 
-build/fourvector_field.o: src/fourvector_field.c include/SU3_parameters.h include/lattice.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
+build/four_potential.o: src/four_potential.c include/SU3_parameters.h include/lattice.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
 
-gauge_fix_coulomb: build/SU2_ops.o build/SU3_ops.o build/config_io.o build/convert_precision.o build/fourvector_field.o build/gauge_fixing.o build/integpoly_gauge_fixing.o build/lattice.o build/measurement.o
+gauge_fix_coulomb: build/SU2_ops.o build/SU3_ops.o build/fields_io.o build/convert_precision.o build/four_potential.o build/gauge_fixing.o build/integpoly_gauge_fixing.o build/lattice.o build/measurement.o
 #  Implicit rule search has not been done.
 #  Last modified 2022-08-22 18:32:32.147389989
 #  File has been updated.

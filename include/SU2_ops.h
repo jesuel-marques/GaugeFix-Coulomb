@@ -1,20 +1,9 @@
 #ifndef SU2OPS_H
 #define SU2OPS_H
 
-#include <lattice.h>
+#include <types.h>
 
 #define ELM2x2(a,b)    (a) * 2 + (b)  //  used to get the element of matrices
-
-typedef unsigned short SU2_color_idx;
-
-typedef struct {
-    work_data_type m[2 * 2];
-} mtrx_2x2;
-
-typedef struct {
-    double m[4];
-} mtrx_2x2_ck;
-
 
 // void print_mtrx_2x2(const mtrx_2x2 * restrict u, const char *name, const unsigned short decimal_places);
 

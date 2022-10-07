@@ -1,0 +1,20 @@
+#ifndef FLAGS_H
+#define FLAGS_H
+
+#define     NEED_BYTE_SWAP_IN
+
+// #define  NEED_BYTE_SWAP_OUT
+
+
+#define     CONV_CFG_TO_WORKING_PRECISION
+
+// #define     CONV_CFG_FROM_WORKING_PRECISION
+
+// #define  CONV_GT_TO_WORKING_PRECISION
+
+// #define  CONV_GT_FROM_WORKING_PRECISION
+
+
+// #define CHECK_POSITION_BOUNDS
+
+#endif

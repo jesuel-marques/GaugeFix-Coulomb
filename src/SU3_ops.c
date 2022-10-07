@@ -1,9 +1,9 @@
-#include <tgmath.h>
 #include <stdio.h>  //	Standard header files in C
 #include <stdlib.h>
+#include <tgmath.h>
 
+#include <types.h>
 #include <math_ops.h>  //	Math operations
-#include <lattice.h>
 #include <SU2_ops.h>
 #include <SU3_ops.h>
 
@@ -39,57 +39,6 @@ void copy_3x3(const mtrx_3x3 * restrict u, mtrx_3x3 * restrict u_copy) {
         for (SU3_color_idx  b = 0; b < Nc; b++) {
 
             u_copy -> m[ELM3x3(a, b)] = u -> m[ELM3x3(a, b)];
-
-        }
-    }
-}
-
-void convert_in_work_cfg_3x3(const in_cfg_data_type * restrict u_in, 
-                                work_mtrx_data_type * restrict u_work) {
-
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
-
-            u_work -> m[ELM3x3(a, b)] = (work_data_type) u_in -> m[ELM3x3(a, b)];
-
-        }
-    }
-}
-
-void convert_work_out_cfg_3x3(const work_mtrx_data_type * restrict u_work, 
-                                      out_cfg_data_type * restrict u_out) {
-
-
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
-
-            u_out -> m[ELM3x3(a, b)] = (out_data_type) u_work -> m[ELM3x3(a, b)];
-
-        }
-    }
-}
-
-
-void convert_in_work_gt_3x3(const in_gt_data_type * restrict g_in, 
-                              work_mtrx_data_type * restrict g_work) {
-
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
-
-            g_work -> m[ELM3x3(a, b)] = (work_data_type) g_in -> m[ELM3x3(a, b)];
-
-        }
-    }
-}
-
-void convert_work_out_gt_3x3(const work_mtrx_data_type * restrict g_work, 
-                                      out_gt_data_type * restrict g_out) {
-
-
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
-
-            g_out -> m[ELM3x3(a, b)] = (out_data_type) g_work -> m[ELM3x3(a, b)];
 
         }
     }
@@ -149,7 +98,7 @@ void subtraction_3x3(const mtrx_3x3 * restrict u,
     }
 }
 
-work_data_type trace_3x3(const mtrx_3x3 * restrict u) {
+scalar trace_3x3(const mtrx_3x3 * restrict u) {
     //	Calculates the trace of the matrix u
     //  and returns result (complex) in tr
 
@@ -158,7 +107,7 @@ work_data_type trace_3x3(const mtrx_3x3 * restrict u) {
            + u -> m[ELM3x3(2, 2)];
 }
 
-inline work_data_type determinant_3x3(const mtrx_3x3 * restrict u) {
+inline scalar determinant_3x3(const mtrx_3x3 * restrict u) {
     //  Calculates the determinant of the matrix u
     //  and returns result, a complex number, in det.
 
@@ -194,7 +143,7 @@ inline void herm_conj_3x3(const mtrx_3x3 * restrict u,
 
 inline void subtraction_herm_conj_traceless_3x3(const mtrx_3x3 * restrict u, mtrx_3x3 * restrict u_minus_udag_trless) {
     
-    work_data_type tr;
+    scalar tr;
     tr  = u_minus_udag_trless -> m[ELM3x3(0, 0)] = 2 * I * cimag(u -> m[ELM3x3(0, 0)]) ;
     tr += u_minus_udag_trless -> m[ELM3x3(1, 1)] = 2 * I * cimag(u -> m[ELM3x3(1, 1)]) ;
     tr += u_minus_udag_trless -> m[ELM3x3(2, 2)] = 2 * I * cimag(u -> m[ELM3x3(2, 2)]) ;
@@ -219,7 +168,7 @@ inline void subtraction_herm_conj_traceless_3x3(const mtrx_3x3 * restrict u, mtr
 
 }
 
-inline void mult_by_scalar_3x3(const work_data_type alpha, const mtrx_3x3 * restrict u,
+inline void mult_by_scalar_3x3(const scalar alpha, const mtrx_3x3 * restrict u,
                                             mtrx_3x3 * restrict alpha_times_u) {
     //  Calculates multiplication of 3x3 matrix u by scalar alpha
     //  and returns result in alphatimesu.
@@ -234,8 +183,8 @@ inline void mult_by_scalar_3x3(const work_data_type alpha, const mtrx_3x3 * rest
     }
 }
 
-inline void subst_mult_scalar_3x3(const work_data_type alpha, 
-                                                                mtrx_3x3 * restrict u) {
+inline void subst_mult_scalar_3x3(const scalar alpha, 
+                                        mtrx_3x3 * restrict u) {
     //  Calculates multiplication of 3x3 matrix u by scalar alpha
     //  and returns result in u.
 
@@ -341,7 +290,7 @@ inline void accum_prod_SU2_3x3(const mtrx_2x2_ck * restrict x_ck, mtrx_3x3 * res
     //  submatrix in Cayley-Klein form x_ck with g
     //  The Cabbibo-Marinari have corresponding line a and column b in 3x3 notation.
 
-    work_data_type xg1, xg2;
+    scalar xg1, xg2;
     //  Auxiliary variables
     
     mtrx_2x2 x;
@@ -406,7 +355,7 @@ inline double inverse_3x3(const mtrx_3x3 * restrict a, mtrx_3x3 * restrict a_inv
 	//	Calculates the inverse of a 3 by 3 matrix x explicitly
     //  and returns result in a_inv.
 
-	work_data_type a_det = determinant_3x3(a);
+	scalar a_det = determinant_3x3(a);
     
     if(a_det != 0.0) {
 
@@ -557,4 +506,50 @@ void decompose_algebra_SU3(const mtrx_3x3 * restrict a, mtrx_SU3_alg * restrict 
     a_components -> m[8] =       ( creal(a -> m[ELM3x3(0, 0)]) 
                                  + creal(a -> m[ELM3x3(1, 1)]) 
                            - 2.0 * creal(a -> m[ELM3x3(2, 2)])) / sqrt(3);
+}
+
+void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict w, 
+                                              mtrx_3x3 * restrict total_update) {
+    //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
+    //	algorithm for SU(3), with a division of the update matrix in submatrices
+    //	following the Cabbibo-Marinari trick. Actual update is obtained after a number
+    //	of "hits" to be performed one after another.
+
+    mtrx_3x3 w_inv_old;
+    mtrx_3x3 total_update_conj;
+    //  Calculates the inverse of w in the beginning.
+    //  The program will update w successively and to
+    //  extract what was the combined update, we can 
+    //  multiply from the right by the old inverse.
+
+       
+    if(inverse_3x3(w, &w_inv_old)){
+
+        //  Local maximization is attained iteratively in SU(3),
+        //  thus we need to make many hits ...
+        for (unsigned short hits = 1; hits <= 300; hits++) {
+
+            //	... and each hit contains the Cabbibo-Marinari subdivision
+            for (submatrix sub = R; sub <= T; sub++) {
+                //	Submatrices are indicated by numbers from 0 to 2
+                //  with codenames R, S and T
+
+                SU3_update_sub_LosAlamos(w, sub);
+                // projection_SU3(w);
+                // printf("re Tr w: %.20lf\n", creal(trace_3x3(w)));
+                
+            }
+        }
+    }
+    else{
+        //  if w has no inverse, update will be given by the identity
+        set_identity_3x3(total_update);
+        return;
+    }
+    
+    prod_3x3(w, &w_inv_old, &total_update_conj);
+    herm_conj_3x3(&total_update_conj, total_update);
+
+    //	Updates matrix to total_update. It is the
+    //	accumulated updates from the hits.
 }

@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <complex.h>
 #include <omp.h>
@@ -7,6 +5,7 @@
 #include  <SU3_parameters.h>
 
 #include <lattice.h>
+#include <fields.h>
 #include <SU3_ops.h>
 
 double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position, 
@@ -17,12 +16,12 @@ double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position,
 
     mtrx_3x3 ua, ub, uc, ud;
 
-    pos_vec position_plus_mu = hop_position_positive(position, mu);
+    pos_vec position_plus_mu = hop_pos_plus(position, mu);
 
-    get_link_matrix(U,                       position,              mu, FRONT, &ua);
-    get_link_matrix(U,                       position_plus_mu,      nu, FRONT, &ub);
-    get_link_matrix(U, hop_position_positive(position_plus_mu, nu), mu, REAR , &uc);
-    get_link_matrix(U, hop_position_positive(position, nu),         nu, REAR , &ud);
+    get_link_matrix(U,              position,              mu, FRONT, &ua);
+    get_link_matrix(U,              position_plus_mu,      nu, FRONT, &ub);
+    get_link_matrix(U, hop_pos_plus(position_plus_mu, nu), mu, REAR , &uc);
+    get_link_matrix(U, hop_pos_plus(position, nu),         nu, REAR , &ud);
 
 	prod_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
 

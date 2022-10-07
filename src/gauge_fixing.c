@@ -1,19 +1,23 @@
-#include <tgmath.h>
-#include <omp.h>
 #include <stdio.h>  //	Standard header C files
 #include <stdlib.h>
+#include <tgmath.h>
 
-#include <SU3_gaugefixing_parameters.h>  //	Gauge-fixing specific parameters
+#include <omp.h>
+
 #include <SU3_parameters.h>              //	Simulation parameters
-#include <lattice.h>                        //	Initialization functions and
+#include <SU3_gaugefixing_parameters.h>  //	Gauge-fixing specific parameters
+#include <fields.h>                        //	Initialization functions and
                                             //	calculations of positions and
                                             //	links on the lattice.
 
 #include <math_ops.h>          //	Math operations
 #include <SU2_ops.h>           //	SU(2) operations
 #include <SU3_ops.h>           //	SU(3) operations
+#include <four_potential.h>  //	Calculation of A_mu(n) and related things
 #include <gauge_fixing.h>
-#include <fourvector_field.h>  //	Calculation of A_mu(n) and related things
+#include <misc.h>
+#include <lattice.h>
+
 
 #define SWEEPS_TO_NEXT_MEASUREMENT(e2)  10 + (unsigned)(INITIAL_SWEEPS_TO_MEASUREMENT_e2 \
                                               * (1.0 - log10((e2)) / log10(TOLERANCE)))
@@ -37,7 +41,7 @@ static void SU3_local_update_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, c
 
         //	U'_mu(x-mu)=1.U_mu(x-mu).g_dagger(x) for red-black updates
 
-        accum_right_prod_3x3(get_link(U, hop_position_negative(position, mu), mu), 
+        accum_right_prod_3x3(get_link(U, hop_pos_minus(position, mu), mu), 
                                                                         &update_dagger);
     }
 }
@@ -45,7 +49,7 @@ static void SU3_local_update_U_G(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, c
 void SU3_global_update_U(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G) {
     //	Updates U on the whole lattice
 
-    omp_parallel_for
+    OMP_PARALLEL_FOR
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
             mtrx_3x3 * g;
@@ -64,7 +68,7 @@ void SU3_global_update_U(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G) {
                             //	U'_mu(x)=g(x).U_mu(x).gdagger(x+mu)
                             u = get_link(U, position, mu);
                             
-                            prod_vuwdagger_3x3(g, u, get_gaugetransf(G, hop_position_positive(position, mu)), &u_updated);
+                            prod_vuwdagger_3x3(g, u, get_gaugetransf(G, hop_pos_plus(position, mu)), &u_updated);
                             
                             copy_3x3(&u_updated, u);
 
@@ -80,8 +84,8 @@ static inline void accumulate_front_hear_link_3x3(mtrx_3x3 * restrict U, const p
                                                                                         mtrx_3x3 * restrict w) {
     // Accumulates the value of U_mu(n) and U_-mu(n) into w
 
-    mtrx_3x3 * u_front = get_link(U, position, mu);
-    mtrx_3x3 * u_rear  = get_link(U, hop_position_negative(position, mu), mu);
+    mtrx_3x3 * u_front = get_link(U,               position,      mu);
+    mtrx_3x3 * u_rear  = get_link(U, hop_pos_minus(position, mu), mu);
 
     for (SU3_color_idx  a = 0; a < Nc; a++) {
         for (SU3_color_idx  b = 0; b < Nc; b++) {
@@ -119,16 +123,16 @@ double SU3_calculate_F(mtrx_3x3 * restrict U){
     set_null_3x3(&U_acc);
     
     for (position.t = 0; position.t < N_T; position.t++)  {
-            for (position.k = 0; position.k < N_SPC; position.k++) {
-                for (position.j = 0; position.j < N_SPC; position.j++) {
-                    for (position.i = 0; position.i < N_SPC; position.i++) {
-                        for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {                        
-                            accumulate_3x3(get_link(U, position, mu), &U_acc);                    
-                        }
+        for (position.k = 0; position.k < N_SPC; position.k++) {
+            for (position.j = 0; position.j < N_SPC; position.j++) {
+                for (position.i = 0; position.i < N_SPC; position.i++) {
+                    for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {                        
+                        accumulate_3x3(get_link(U, position, mu), &U_acc);                    
                     }
                 }
             }
         }
+    }
 
     return creal(trace_3x3(&U_acc)) / (VOLUME * Nc * (DIM - 1));
 }
@@ -142,19 +146,19 @@ double SU3_calculate_theta(mtrx_3x3 * restrict U){
     double theta = 0.0;
 
     for (position.t = 0; position.t < N_T; position.t++)  {
-            for (position.k = 0; position.k < N_SPC; position.k++) {
-                for (position.j = 0; position.j < N_SPC; position.j++) {
-                    for (position.i = 0; position.i < N_SPC; position.i++) {
+        for (position.k = 0; position.k < N_SPC; position.k++) {
+            for (position.j = 0; position.j < N_SPC; position.j++) {
+                for (position.i = 0; position.i < N_SPC; position.i++) {
 
-                        SU3_divergence_A(U, position, &div_A);
-                        herm_conj_3x3(&div_A, &div_A_dagger);
-                        prod_3x3(&div_A, &div_A_dagger, &prod);
-                        theta += trace_3x3(&prod);
+                    SU3_divergence_A(U, position, &div_A);
+                    herm_conj_3x3(&div_A, &div_A_dagger);
+                    prod_3x3(&div_A, &div_A_dagger, &prod);
+                    theta += trace_3x3(&prod);
 
-                    }
                 }
             }
         }
+    }
 
     return creal(theta) / (Nc * VOLUME);
 }
@@ -255,9 +259,12 @@ inline void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w,
     //  The program will update w successively and to
     //  extract what was the combined update, we can 
     //  multiply from the right by the old inverse.
+    
 
        
     if(inverse_3x3(w, &w_inv_old)){
+
+        
 
         //  Local maximization is attained iteratively in SU(3),
         //  thus we need to make many hits ...
@@ -290,6 +297,16 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
     mtrx_3x3 w;
 
     SU3_calculate_w(U, position, &w);  //	Calculating w(n)=h(n) for red black subdivision
+
+    // mtrx_3x3 proj;
+    // if(position.i == 10, position.j==2, position.k==13, position.t==120){
+    // print_matrix_3x3(get_link(U,position,3), "U", 19);
+    // SU3_CabbiboMarinari_projection(get_link(U,position,3), &proj);
+    // print_matrix_3x3(&proj, "projected U", 19);
+    // SU3_CabbiboMarinari_projection(&w, &proj);
+    // print_matrix_3x3(&w, "before", 19);
+    // print_matrix_3x3(&proj, "after", 19);
+    // getchar();}
 
     mtrx_3x3 update_LA;
 
@@ -324,12 +341,13 @@ int SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned s
     int sweep = 0;
     int sweeps_to_measurement_e2 = INITIAL_SWEEPS_TO_MEASUREMENT_e2;
     //	Counter to the number of sweeps to fix config to Landau gauge
+
 	new_e2 = SU3_calculate_e2(U);
 	printf("Sweeps in config %5d: %8d. e2: %3.2E \n", config_nr, sweep, new_e2);
-    
+
     while (1) {
 
-        omp_parallel_for
+        OMP_PARALLEL_FOR
             // Paralelizing by slicing the time extent
             for (pos_index t = 0; t < N_T; t++) {
                 pos_vec position;
@@ -411,7 +429,8 @@ int SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned s
 }
 
 void init_gauge_transformation(mtrx_3x3 * restrict G){
-    omp_parallel_for
+    
+    OMP_PARALLEL_FOR
         // Paralelizing by slicing the time extent
         for (pos_index t = 0; t < N_T; t++) {
             pos_vec position;

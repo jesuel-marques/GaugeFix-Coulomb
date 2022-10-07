@@ -1,6 +1,6 @@
 //	srun -p DevQ -N 1 -A nuim01 -t 1:00:00 --pty bash
-//	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c source/config_io.c  -lm -O4 -march=skylake -fopenmp -w
-//	mpiicc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  -lm -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp -DMPI_CODE
+//	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/four_potential.c source/fields_io.c  -lm -O4 -march=skylake -fopenmp -w
+//	mpiicc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/four_potential.c  -lm -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp -DMPI_CODE
 
 #include <stdio.h>					//	Standard header files in C
 #include <stdlib.h>
@@ -20,13 +20,14 @@
 #include <SU3_parameters.h>			//	Simulation parameters
 
 #include <SU3_ops.h>
-#include <config_io.h>
-#include <lattice.h>			//	Initialization functions and calculations of
+#include <fields_io.h>
+#include <fields.h>			//	Initialization functions and calculations of
 									//	positions and links on the lattice.
 
 #include <gauge_fixing.h>	//	Specific functions involved in the gauge-fixing
 #include <integpoly_gauge_fixing.h>
-#include <config_io.h>
+#include <fields_io.h>
+#include <misc.h>
 
 #include <measurement.h>
 
@@ -78,7 +79,7 @@ int main(int argc, char *argv[]) {
 
 	#else
 	//	If compiling for not running with MPI, then just use a simple for loop
-	// omp_parallel_for
+	// OMP_PARALLEL_FOR
 		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 			
 	#endif 
@@ -107,6 +108,7 @@ int main(int argc, char *argv[]) {
 
 			//	Reunitarizing straigh away because of loss precision due to
 			//	storing config in single precision.	
+
 			
 			mtrx_3x3 * G = (mtrx_3x3 *) calloc(VOLUME , sizeof(mtrx_3x3));
 			if(TEST_ALLOCATION(G)){
@@ -117,6 +119,7 @@ int main(int argc, char *argv[]) {
 
 			init_gauge_transformation(G);
 
+
 			if(SU3_reunitarize_U_G(U, G)){
 				fprintf(stderr, "Configuration %d or its gauge-transformation could not be reunitarized.\n", actual_config_nr);
 				free(U);
@@ -126,13 +129,15 @@ int main(int argc, char *argv[]) {
 			
 			//  fix the gauge
 
-			// integpolyakov_gauge_fix(U, G, actual_config_nr);
-			
-			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);			
-			// printf("Config before integpoly %5d: e2: %3.2E \n", actual_config_nr, SU3_calculate_e2(U));
-			// integpolyakov_gauge_fix(U, G, actual_config_nr);
-			// printf("Config depois integpoly %5d: e2: %3.2E \n", actual_config_nr, SU3_calculate_e2(U));
+			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);		
 
+
+			
+			printf("e2 before integpoly %3.2E \n", SU3_calculate_e2(U));
+			for ( int i = 1; i < 10; i ++){
+				integpolyakov_gauge_fix(U, G, actual_config_nr);
+				printf("e2 after integpoly %d-th time: %3.2E \n", i, SU3_calculate_e2(U));
+			}
 			//	checking if a request to stop has been made
 			// if(!system("test -f stop_run")){
 			// 	printf("Exiting after request to stop.\n");

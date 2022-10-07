@@ -1,4 +1,4 @@
-//	gcc -o plaquette_check plaquette_check.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/fourvector_field.c  source/measurement.c source/config_io.c -lm -O4 -march=skylake -fopenmp
+//	gcc -o plaquette_check plaquette_check.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/four_potential.c  source/measurement.c source/fields_io.c -lm -O4 -march=skylake -fopenmp
 
 #include <stdio.h>					//	Standard header files in C
 #include <stdlib.h>
@@ -20,11 +20,11 @@
 
 #include <lattice.h>			//	Initialization functions and calculations of
 									//	positions and links on the lattice.
-
+#include <fields.h>
 #include <gauge_fixing.h>	//	Specific functions involved in the gauge-fixing
 #include <SU3_ops.h>
-#include <config_io.h>
-
+#include <fields_io.h>
+#include <misc.h>
 #include <measurement.h>
 
 const char extension_config_in[]  = ".cfg";
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 	for (int config = rank + 1; config <= nconfig; config += size) {
 
 	#else
-		//omp_parallel_for
+		//OMP_PARALLEL_FOR
 
 		for (unsigned config = 0; config < MAX_CONFIGS; config ++) {
 
