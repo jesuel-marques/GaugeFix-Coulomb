@@ -5,12 +5,12 @@
 
 #include <flags.h>
 
-#define N_SPC   16  //   Spatial lattice size
-#define N_T     128    // Temporal lattice size
-#define DIM     4     // Space-time lattice dimension
+#define N_SPC   16     //   Spatial lattice size
+#define N_T     128    //   Temporal lattice size
+#define DIM     4      //   Space-time lattice dimension
 
 #define SPATIAL_VOLUME  N_SPC * N_SPC * N_SPC
-#define VOLUME          N_SPC * N_SPC * N_SPC * N_T  //	Number of points in the lattice
+#define VOLUME          N_SPC * N_SPC * N_SPC * N_T  //	Number of sites in the lattice
 
 #define AMOUNT_OF_LINKS  DIM*VOLUME
 #define AMOUNT_OF_POINTS VOLUME

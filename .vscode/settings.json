@@ -21,6 +21,7 @@
         "four_potential.h": "c",
         "lapack.h": "c",
         "matrix_power.h": "c",
-        "lapacke.h": "c"
+        "lapacke.h": "c",
+        "numbers": "c"
     }
 }

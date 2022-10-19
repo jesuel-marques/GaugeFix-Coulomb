@@ -15,7 +15,7 @@
 #include <integpoly_gauge_fixing.h>
 
 #define TESTING_POWER_MATRIX
-// #undef TESTING_POWER_MATRIX
+#undef TESTING_POWER_MATRIX
 
 mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
 

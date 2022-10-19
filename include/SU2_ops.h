@@ -9,7 +9,8 @@
 
 // void copy_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck* restrict u_copy);
 
-void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, mtrx_2x2 * restrict u);
+void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, 
+                           mtrx_2x2 * restrict u);
 
 // void set_null_2x2(mtrx_2x2_ck * u), set_identity_2x2(mtrx_2x2_ck * u);
 

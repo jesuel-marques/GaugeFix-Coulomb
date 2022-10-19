@@ -14,10 +14,12 @@ void print_matrix_3x3(const mtrx_3x3 * restrict u, const char *name, const unsig
     printf("\n\n %s \n", name);
 
     printf("{");
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
+    SU3_color_idx a, b;
+    
+    LOOP_COLOR_3(a){
         printf("{");
 
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+        LOOP_COLOR_3(b){
             printf("%.*lf + I*(%.*lf)", decimal_places, creal(u -> m[ELM3x3(a, b)]), 
                                         decimal_places, cimag(u -> m[ELM3x3(a, b)]));
             
@@ -35,48 +37,44 @@ void print_matrix_3x3(const mtrx_3x3 * restrict u, const char *name, const unsig
 void copy_3x3(const mtrx_3x3 * restrict u, mtrx_3x3 * restrict u_copy) {
     // Copies u to u_copy
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
-            u_copy -> m[ELM3x3(a, b)] = u -> m[ELM3x3(a, b)];
+        u_copy -> m[ELM3x3(a, b)] = u -> m[ELM3x3(a, b)];
 
-        }
     }
 }
 
 inline void set_null_3x3(mtrx_3x3 * restrict u) {
     // Sets u to be the 3x3 null matrix
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
-            u -> m[ELM3x3(a, b)] = 0.0;
+        u -> m[ELM3x3(a, b)] = 0.0;
 
-        }
     }
 }
 
 inline void set_identity_3x3(mtrx_3x3 * restrict u) {
     // Sets u to be the identity matrix in SU(3)
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
                 u -> m[ELM3x3(a, b)] = a != b ? 0.0 : 1.0 ;
 
-        }
     }
 }
 
 inline void accumulate_3x3(const mtrx_3x3 * restrict u, mtrx_3x3 * restrict acc) {
     // Accumulates the value of u into acc
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             acc -> m[ELM3x3(a, b)] += u -> m[ELM3x3(a, b)];
         
-        }
     }
 }
 
@@ -88,13 +86,12 @@ void subtraction_3x3(const mtrx_3x3 * restrict u,
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             u_minus_v -> m[ELM3x3(a, b)] =   u -> m[ELM3x3(a, b)] 
                                            - v -> m[ELM3x3(a, b)];
 
-        }
     }
 }
 
@@ -131,14 +128,14 @@ inline void herm_conj_3x3(const mtrx_3x3 * restrict u,
     u_dagger -> m[ELM3x3(1, 1)] = conj(u -> m[ELM3x3(1, 1)]);
     u_dagger -> m[ELM3x3(2, 2)] = conj(u -> m[ELM3x3(2, 2)]);
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < a; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             u_dagger -> m[ELM3x3(b, a)] = conj(u -> m[ELM3x3(a, b)]);
             u_dagger -> m[ELM3x3(a, b)] = conj(u -> m[ELM3x3(b, a)]);
 
-        }
     }
+
 }
 
 inline void subtraction_herm_conj_traceless_3x3(const mtrx_3x3 * restrict u, mtrx_3x3 * restrict u_minus_udag_trless) {
@@ -154,15 +151,14 @@ inline void subtraction_herm_conj_traceless_3x3(const mtrx_3x3 * restrict u, mtr
     u_minus_udag_trless -> m[ELM3x3(1, 1)] -= tr;
     u_minus_udag_trless -> m[ELM3x3(2, 2)] -= tr;
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < a; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
             
-            u_minus_udag_trless -> m[ELM3x3(a, b)] =       u -> m[ELM3x3(a, b)] 
-                                                    - conj(u -> m[ELM3x3(b, a)]);
-            u_minus_udag_trless -> m[ELM3x3(b, a)] =       u -> m[ELM3x3(b, a)] 
+        u_minus_udag_trless -> m[ELM3x3(a, b)] =       u -> m[ELM3x3(a, b)] 
+                                                - conj(u -> m[ELM3x3(b, a)]);
+        u_minus_udag_trless -> m[ELM3x3(b, a)] =       u -> m[ELM3x3(b, a)] 
                                                     - conj(u -> m[ELM3x3(a, b)]);
         
-        }
     }
 
 
@@ -173,13 +169,12 @@ inline void mult_by_scalar_3x3(const scalar alpha, const mtrx_3x3 * restrict u,
     //  Calculates multiplication of 3x3 matrix u by scalar alpha
     //  and returns result in alphatimesu.
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             alpha_times_u -> m[ELM3x3(a, b)] = alpha * u -> m[ELM3x3(a, b)];
             //	Mutiplying each entry.
 
-        }
     }
 }
 
@@ -188,14 +183,14 @@ inline void subst_mult_scalar_3x3(const scalar alpha,
     //  Calculates multiplication of 3x3 matrix u by scalar alpha
     //  and returns result in u.
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
-            u -> m[ELM3x3(a, b)] *= alpha;
-            //	Mutiplying each entry.
-            
-        }
+        u -> m[ELM3x3(a, b)] *= alpha;
+        //	Mutiplying each entry.
+        
     }
+
 }
 
 inline void prod_3x3(const mtrx_3x3 * restrict u, 
@@ -204,18 +199,18 @@ inline void prod_3x3(const mtrx_3x3 * restrict u,
     // Calculates product of 2 3x3 matrices u e v
     // and returns result in uv.
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {          //  lines
-        for (SU3_color_idx  b = 0; b < Nc; b++) {      //  columns
-            uv -> m[ELM3x3(a, b)] = 0.0;
-            for (SU3_color_idx  c = 0; c < Nc; c++) {  //  dummy index
+    SU3_color_idx a, b, c;
+    LOOP_COLOR_3x3(a, b){
+        uv -> m[ELM3x3(a, b)] = 0.0;
+        LOOP_COLOR_3(c){
 
-                uv -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
-                                         * (v -> m[ELM3x3(c, b)]);
-                //  Usual matrix multiplication.
-            }
+            uv -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
+                                     * (v -> m[ELM3x3(c, b)]);
+            //  Usual matrix multiplication.
         }
     }
 }
+
 
 void prod_three_3x3(const mtrx_3x3 * restrict u, 
                     const mtrx_3x3 * restrict v,
@@ -224,20 +219,18 @@ void prod_three_3x3(const mtrx_3x3 * restrict u,
     //  Calculates product of 3 3x3 matrices u, v and w
     //  and returns result in uvw.
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {              //  lines
-        for (SU3_color_idx  b = 0; b < Nc; b++) {          //  columns
-            uvw -> m[ELM3x3(a, b)] = 0.0;
-            for (SU3_color_idx  c = 0; c < Nc; c++) {      //  dummy index 1
-                for (SU3_color_idx  e = 0; e < Nc; e++) {  //  dummy index 2
+    SU3_color_idx a, b, c, d;
+    LOOP_COLOR_3x3(a, b){
+        uvw -> m[ELM3x3(a, b)] = 0.0;
+        LOOP_COLOR_3x3(c, d){    
 
-                    uvw -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
-                                              * (v -> m[ELM3x3(c, e)]) 
-                                              * (w -> m[ELM3x3(e, b)]);
-                    //  Usual matrix multiplication.
-                }
+                uvw -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
+                                          * (v -> m[ELM3x3(c, d)]) 
+                                          * (w -> m[ELM3x3(d, b)]);
+                //  Usual matrix multiplication.
             }
         }
-    }
+
 }
 
 void prod_four_3x3(const mtrx_3x3 * restrict u, 
@@ -248,19 +241,18 @@ void prod_four_3x3(const mtrx_3x3 * restrict u,
     //  Calculates product of 3 3x3 matrices u, v and w
     //  and returns result in uvw.
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {              //  lines
-        for (SU3_color_idx  b = 0; b < Nc; b++) {          //  columns
-            uvwx -> m[ELM3x3(a, b)] = 0.0;
-            for (SU3_color_idx  c = 0; c < Nc; c++) {            //  dummy index 1
-                for (SU3_color_idx  e = 0; e < Nc; e++) {        //  dummy index 2
-                    for (SU3_color_idx  f = 0; f < Nc; f++) {    //  dummy index 3
+    SU3_color_idx a, b, c, d, e;
+    LOOP_COLOR_3x3(a, b){
+        uvwx -> m[ELM3x3(a, b)] = 0.0;
+        LOOP_COLOR_3(c){
+            LOOP_COLOR_3(d){
+                LOOP_COLOR_3(e){
 
-                        uvwx -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
-                                                   * (v -> m[ELM3x3(c, e)]) 
-                                                   * (w -> m[ELM3x3(e, f)]) 
-                                                   * (x -> m[ELM3x3(f, b)]);
-                    //  Usual matrix multiplication.
-                    }
+                    uvwx -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
+                                                * (v -> m[ELM3x3(c, d)]) 
+                                                * (w -> m[ELM3x3(d, e)]) 
+                                                * (x -> m[ELM3x3(e, b)]);
+                //  Usual matrix multiplication.
                 }
             }
         }
@@ -297,8 +289,8 @@ inline void accum_prod_SU2_3x3(const mtrx_2x2_ck * restrict x_ck, mtrx_3x3 * res
     //  the Cayley-Klein matrix will be first converted to a regular 2x2 matrix
     
     convert_from_ck(x_ck, &x);
-   
-    for(SU3_color_idx c = 0 ; c < Nc ; c++){
+    SU3_color_idx c;
+    LOOP_COLOR_3(c){
 
         //  Modifying only the terms in g that will actually receive contributions
 
@@ -316,18 +308,16 @@ inline void accum_prod_SU2_3x3(const mtrx_2x2_ck * restrict x_ck, mtrx_3x3 * res
 inline void prod_vuwdagger_3x3(const mtrx_3x3 * restrict v, const mtrx_3x3 * restrict u, const mtrx_3x3 * restrict w, mtrx_3x3 * restrict vuwdagger ){
      //	Calculates matrix product between v, u and w dagger.
      
-     for (SU3_color_idx  a = 0; a < Nc; a++) {              //  lines
-        for (SU3_color_idx  b = 0; b < Nc; b++) {          //  columns
-            vuwdagger -> m[ELM3x3(a, b)] = 0.0;
-            for (SU3_color_idx  c = 0; c < Nc; c++) {      //  dummy index 1
-                for (SU3_color_idx  e = 0; e < Nc; e++) {  //  dummy index 2
+    SU3_color_idx a, b, c, d;
+    LOOP_COLOR_3x3(a, b){
+        vuwdagger -> m[ELM3x3(a, b)] = 0.0;
+        LOOP_COLOR_3x3(c, d){
 
-                    vuwdagger -> m[ELM3x3(a, b)] +=       (v -> m[ELM3x3(a, c)]) 
-                                                    *     (u -> m[ELM3x3(c, e)]) 
-                                                    * conj(w -> m[ELM3x3(b, e)]);
-                                                    //  wdagger_eb is conj(w_be)
-                }
-            }
+            vuwdagger -> m[ELM3x3(a, b)] +=       (v -> m[ELM3x3(a, c)]) 
+                                            *     (u -> m[ELM3x3(c, d)]) 
+                                            * conj(w -> m[ELM3x3(b, d)]);
+                                            //  wdagger_eb is conj(w_be)
+            
         }
     }
 }
@@ -336,14 +326,13 @@ inline short power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_
     //  Calculates A^omega according to the formula (which works well for A close to identity)
     // A^omega = Proj_SU3(I + omega * (A-I) + ...)
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             A_to_omega -> m[ELM3x3(a, b)] = a == b ? 
                                             1.0 + omega * (A -> m[ELM3x3(a, b)]- 1.0):
                                                   omega * (A -> m[ELM3x3(a, b)]     );
             
-        }
     }
 
     return projection_SU3(A_to_omega);
@@ -394,7 +383,9 @@ inline static int normalize_3_vec(color_3_vec * restrict v){
 
     double r = 0.0;
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
+    SU3_color_idx a;
+
+    LOOP_COLOR_3(a){
         //  Calculates the sum of the absolute
         //  value squared of each component
         r += POW2(fabs(v -> m[a]));
@@ -404,7 +395,7 @@ inline static int normalize_3_vec(color_3_vec * restrict v){
         //  If vector is not null, then normalizes it
         r = 1.0 / sqrt(r);
 
-        for (SU3_color_idx  a = 0; a < Nc; a++) {
+        LOOP_COLOR_3(a){
 
             v -> m[a] *= r;
 
@@ -444,7 +435,8 @@ inline short projection_SU3(mtrx_3x3 * restrict x) {
 
     color_3_vec v0, v1, v2;
 
-    for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx b;
+    LOOP_COLOR_3(b){
 
         v0.m[b] = x -> m[ELM3x3(0, b)];
         v1.m[b] = x -> m[ELM3x3(1, b)];
@@ -457,7 +449,7 @@ inline short projection_SU3(mtrx_3x3 * restrict x) {
     exit_status |= normalize_3_vec(&v2);
     cross_product_conj(v2, v0, &v1);
 
-    for (SU3_color_idx  b = 0; b < Nc; b++) {
+    LOOP_COLOR_3(b){
 
         x -> m[ELM3x3(0, b)] = v0.m[b];
         x -> m[ELM3x3(1, b)] = v1.m[b];

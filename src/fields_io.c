@@ -111,11 +111,11 @@ static int extract_config(const unsigned config_nr, const char * restrict config
     name_unextracted_config_file(config_nr, unextracted_config_filename);
     
 
-    int exit_status = sprintf(command_lime, "/ichec/home/users/jesuel/chroma-install/install-files/qdp++/bin/lime_extract_record %s 2 4 %s", 
-                                name_unextracted_config_file(config_nr, unextracted_config_filename), config_filename);
-
-    // int exit_status = sprintf(command_lime, "./lime_extract_record %s 2 4 %s", 
+    // int exit_status = sprintf(command_lime, "/ichec/home/users/jesuel/chroma-install/install-files/qdp++/bin/lime_extract_record %s 2 4 %s", 
     //                             name_unextracted_config_file(config_nr, unextracted_config_filename), config_filename);
+
+    int exit_status = sprintf(command_lime, "lime_extract_record %s 2 4 %s", 
+                                name_unextracted_config_file(config_nr, unextracted_config_filename), config_filename);
 
     if(exit_status < 0){
         fprintf(stderr, "Error: Problem creating lime command.\n");
@@ -320,7 +320,7 @@ int SU3_write_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
 
 static char * name_gaugetransf_file(const unsigned config_nr, char * restrict gaugetransf_filename) {
-    int exit_status = sprintf(gaugetransf_filename, "%s%s_%d", gaugetransf_dir_name_out, config_template, config_nr);
+    int exit_status = sprintf(gaugetransf_filename, "%s%s_%d_e2_%3.2E", gaugetransf_dir_name_out, config_template, config_nr, TOLERANCE);
     
     if(exit_status < 0){
 

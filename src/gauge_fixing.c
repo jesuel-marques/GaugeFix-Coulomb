@@ -87,13 +87,13 @@ static inline void accumulate_front_hear_link_3x3(mtrx_3x3 * restrict U, const p
     mtrx_3x3 * u_front = get_link(U,               position,      mu);
     mtrx_3x3 * u_rear  = get_link(U, hop_pos_minus(position, mu), mu);
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             w -> m[ELM3x3(a, b)] +=     u_front -> m[ELM3x3(a, b)]
                                  + conj(u_rear  -> m[ELM3x3(b, a)]);
         
-        }
+        
     }
 }
 

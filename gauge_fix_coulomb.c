@@ -25,7 +25,7 @@
 									//	positions and links on the lattice.
 
 #include <gauge_fixing.h>	//	Specific functions involved in the gauge-fixing
-#include <integpoly_gauge_fixing.h>
+// #include <integpoly_gauge_fixing.h>
 #include <fields_io.h>
 #include <misc.h>
 
@@ -133,11 +133,11 @@ int main(int argc, char *argv[]) {
 
 
 			
-			printf("e2 before integpoly %3.2E \n", SU3_calculate_e2(U));
-			for ( int i = 1; i < 10; i ++){
-				integpolyakov_gauge_fix(U, G, actual_config_nr);
-				printf("e2 after integpoly %d-th time: %3.2E \n", i, SU3_calculate_e2(U));
-			}
+			// printf("e2 before integpoly %3.2E \n", SU3_calculate_e2(U));
+			// for ( int i = 1; i < 10; i ++){
+			// 	integpolyakov_gauge_fix(U, G, actual_config_nr);
+			// 	printf("e2 after integpoly %d-th time: %3.2E \n", i, SU3_calculate_e2(U));
+			// }
 			//	checking if a request to stop has been made
 			// if(!system("test -f stop_run")){
 			// 	printf("Exiting after request to stop.\n");
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			else{
-				printf("Configuration %d could not be gauge-fixed.\n", actual_config_nr);
+				fprintf(stderr, "Configuration %d could not be gauge-fixed.\n", actual_config_nr);
 			}
 	#ifndef MPI_CODE
 		}

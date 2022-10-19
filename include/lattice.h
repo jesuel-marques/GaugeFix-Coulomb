@@ -23,11 +23,16 @@
 #define Z_INDX 2
 #define T_INDX 3
 
-pos_vec assign_position(const pos_index x, const pos_index y, const pos_index z, const pos_index t);
+pos_vec assign_position(const pos_index x, 
+                        const pos_index y, 
+                        const pos_index z, 
+                        const pos_index t);
 
 void print_pos_vec(const pos_vec u);
 
-pos_vec hop_pos_plus (const pos_vec u, const lorentz_idx mu),
-        hop_pos_minus(const pos_vec u, const lorentz_idx mu);
+pos_vec hop_pos_plus (const pos_vec u, 
+                      const lorentz_idx mu),
+        hop_pos_minus(const pos_vec u, 
+                      const lorentz_idx mu);
 
 #endif

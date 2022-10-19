@@ -5,10 +5,16 @@
 
 #define ELM3x3(a, b)    (a) * Nc + (b)  //  used to get the element of matrices
 
+#define LOOP_COLOR_3(a)         for ( a = 0; a < Nc; a++)
+
+#define LOOP_COLOR_3x3(a, b)    for ( a = 0; a < Nc; a++)  \
+                                for ( b = 0; b < Nc; b++)
+
 
 void print_matrix_3x3(const mtrx_3x3 *u, const char *name, const unsigned short decimal_places);
 
-void copy_3x3(const mtrx_3x3 *u, mtrx_3x3 *u_copy);
+void copy_3x3(const mtrx_3x3 *u, 
+                    mtrx_3x3 *u_copy);
 
 void set_null_3x3    (mtrx_3x3 *u),
      set_identity_3x3(mtrx_3x3 *u);
@@ -17,7 +23,7 @@ void accumulate_3x3(const mtrx_3x3 *u, mtrx_3x3 *acc);
 
 void subtraction_3x3(const mtrx_3x3 *u, 
                      const mtrx_3x3 *v, 
-                                mtrx_3x3 *u_minus_v);
+                           mtrx_3x3 *u_minus_v);
 
 scalar trace_3x3(const mtrx_3x3 *u),
        determinant_3x3(const mtrx_3x3 *u);
@@ -31,10 +37,17 @@ void subst_mult_scalar_3x3(const scalar alpha, mtrx_3x3 *u);
 
 void prod_3x3(const mtrx_3x3 *u, const mtrx_3x3 *v, mtrx_3x3 *uv);
 
-void prod_three_3x3(const mtrx_3x3 *u, const mtrx_3x3 *v, const mtrx_3x3 *w, mtrx_3x3 *uvw),
-     prod_four_3x3(const mtrx_3x3 *u, const mtrx_3x3 *v, const mtrx_3x3 *w, const mtrx_3x3 *x, mtrx_3x3 *uvwx);
+void prod_three_3x3(const mtrx_3x3 *u, 
+                    const mtrx_3x3 *v, 
+                    const mtrx_3x3 *w, 
+                          mtrx_3x3 *uvw),
+     prod_four_3x3 (const mtrx_3x3 *u, 
+                    const mtrx_3x3 *v, 
+                    const mtrx_3x3 *w, 
+                    const mtrx_3x3 *x, 
+                          mtrx_3x3 *uvwx);
 
-void accum_left_prod_3x3(const mtrx_3x3 *g, mtrx_3x3 *acc_prod),
+void accum_left_prod_3x3 (const mtrx_3x3 *g, mtrx_3x3 *acc_prod),
      accum_right_prod_3x3(mtrx_3x3 *acc_prod, const mtrx_3x3 *g);
 
 short power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_3x3 * restrict A_to_omega );

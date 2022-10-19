@@ -8,49 +8,43 @@
 static void convert_in_work_cfg_3x3(const in_cfg_data_type * restrict u_in, 
                                 work_mtrx_data_type * restrict u_work) {
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             u_work -> m[ELM3x3(a, b)] = (work_data_type) u_in -> m[ELM3x3(a, b)];
 
-        }
     }
 }
 
 static void convert_work_out_cfg_3x3(const work_mtrx_data_type * restrict u_work, 
                                       out_cfg_data_type * restrict u_out) {
-
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             u_out -> m[ELM3x3(a, b)] = (out_data_type) u_work -> m[ELM3x3(a, b)];
 
-        }
     }
 }
 
 
 static void convert_in_work_gt_3x3(const in_gt_data_type * restrict g_in, 
                               work_mtrx_data_type * restrict g_work) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+        g_work -> m[ELM3x3(a, b)] = (work_data_type) g_in -> m[ELM3x3(a, b)];
 
-            g_work -> m[ELM3x3(a, b)] = (work_data_type) g_in -> m[ELM3x3(a, b)];
-
-        }
     }
 }
 
 static void convert_work_out_gt_3x3(const work_mtrx_data_type * restrict g_work, 
                                       out_gt_data_type * restrict g_out) {
 
-    for (SU3_color_idx  a = 0; a < Nc; a++) {
-        for (SU3_color_idx  b = 0; b < Nc; b++) {
+    SU3_color_idx a, b;
+    LOOP_COLOR_3x3(a, b){
 
             g_out -> m[ELM3x3(a, b)] = (out_data_type) g_work -> m[ELM3x3(a, b)];
 
-        }
     }
 }
 
