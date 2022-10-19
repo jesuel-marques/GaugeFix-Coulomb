@@ -2,17 +2,16 @@ INCLUDE_DIR := include
 SOURCE_DIR := src
 BUILD_DIR := build
 
-LAPACK_ROOT_DIR := /home/postgrad/jesuel/lapack/lapack-3.10.1/
+LAPACK_ROOT_DIR := /home/postgrad/jesuel/lapack/lapack-3.10.1
 LAPACK_INCLUDE_DIR := $(LAPACK_ROOT_DIR)/LAPACKE/include
-LAPACK_OBJS := LAPACK_ROOT_DIR/liblapacke.a LAPACK_ROOT_DIR/liblapack.a  LAPACK_ROOT_DIR/librefblas.a LAPACK_ROOT_DIR/libtmglib.a
+LAPACK_OBJS := $(LAPACK_ROOT_DIR)/liblapacke.a $(LAPACK_ROOT_DIR)/liblapack.a $(LAPACK_ROOT_DIR)/librefblas.a $(LAPACK_ROOT_DIR)/libtmglib.a
 
 CC := mpiicc
 CFLAGS := -I$(INCLUDE_DIR) -I$(LAPACK_INCLUDE_DIR) -std=c99 -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp -DMPI_CODE
 
 WARNINGS:= -Wall -Wextra
 
-LIBS := -lm -llapacke -lgfortran
-
+LIBS := -lm -lgfortran
 
 SOURCES := $(wildcard $(SOURCE_DIR)/*.c)
 
@@ -44,6 +43,3 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c Makefile
 
 clean:
 	rm -f $(BINARIES) $(BUILD_DIR)/*.[od] *~ */*~ 
-
-
-/home/postgrad/jesuel/lapack/lapack-3.10.1
