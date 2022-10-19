@@ -56,7 +56,7 @@ static void power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, scalar power,
     
 }
 
-void matrix_power_3x3(mtrx_3x3 * restrict a, const scalar power, 
+int matrix_power_3x3(mtrx_3x3 * restrict a, const scalar power, 
                             mtrx_3x3 * restrict a_to_power){
 
     mtrx_3x3 eigenvalues, eigenvalues_to_power;

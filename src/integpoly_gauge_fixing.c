@@ -62,7 +62,7 @@ mtrx_3x3 integ_polyakovloop(mtrx_3x3 * tempave_proj_u){
 
 
 
-int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned short config_nr) {
+int integ_polyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned short config_nr) {
 
     printf("Integrated Polyakov Gauge-Fixing for config %d\n", config_nr);
 
@@ -91,6 +91,8 @@ int integpolyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const 
                 print_matrix_3x3(tempave_proj_u + t, "u average middle time slice of lattice", 18);
             }
         #endif 
+
+        return 0;
     }
 
     mtrx_3x3 P = integ_polyakovloop(tempave_proj_u);

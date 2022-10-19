@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 			
 			// printf("e2 before integpoly %3.2E \n", SU3_calculate_e2(U));
 			// for ( int i = 1; i < 10; i ++){
-			// 	integpolyakov_gauge_fix(U, G, actual_config_nr);
+			// 	integ_polyakov_gauge_fix(U, G, actual_config_nr);
 			// 	printf("e2 after integpoly %d-th time: %3.2E \n", i, SU3_calculate_e2(U));
 			// }
 			//	checking if a request to stop has been made
