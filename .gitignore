@@ -9,3 +9,4 @@ hostfile
 *.o
 *.d
 build/
+Makefile

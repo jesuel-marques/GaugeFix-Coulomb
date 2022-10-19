@@ -7,6 +7,8 @@
 #include <SU2_ops.h>
 #include <SU3_ops.h>
 
+#include <gauge_fixing.h> // CHANGE THIS. HERE ONLY TO USE SU3_update_sub_Los_Alamos
+
 void print_matrix_3x3(const mtrx_3x3 * restrict u, const char *name, const unsigned short decimal_places) {
     // Prints the matrix on screen with a given number of decimal places and 
     // adds a name on the top

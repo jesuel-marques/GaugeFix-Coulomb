@@ -336,7 +336,7 @@ int SU3_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned s
     //	Fix the gauge and follows the process by calculating e2;
 
 
-    double last_e2, new_e2;
+    double last_e2 = 10, new_e2 = 10;
 
     int sweep = 0;
     int sweeps_to_measurement_e2 = INITIAL_SWEEPS_TO_MEASUREMENT_e2;

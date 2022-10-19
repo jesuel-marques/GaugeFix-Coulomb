@@ -16,8 +16,10 @@ void greeter_function(const char * restrict program_name);
 
 void handle_input(int argc, char *argv[]);
 
-int create_output_directory(void);
+// int create_output_directory(void);
 
 bool is_in_exception_list(const int config_nr);
+
+short test_allocation_function(const void *pointer, const char *location);
 
 #endif

@@ -39,7 +39,7 @@ static int eigensystem_3x3(mtrx_3x3 * restrict a, mtrx_3x3 * restrict eigenvalue
 }
 
 
-static int log_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx,  
+static void log_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx,  
                                     mtrx_3x3 * restrict log_of_diag_mtrx){
     set_null_3x3(log_of_diag_mtrx);    
     for(int a = 0; a < Nc; a++)
@@ -48,7 +48,7 @@ static int log_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx,
 }
 
 
-static int power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, scalar power, 
+static void power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, scalar power, 
                                     mtrx_3x3 * restrict diag_mtrx_to_power){
     set_null_3x3(diag_mtrx_to_power);    
     for(int a = 0; a < Nc; a++)
@@ -56,7 +56,7 @@ static int power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, scalar power,
     
 }
 
-int matrix_power_3x3(mtrx_3x3 * restrict a, const scalar power, 
+void matrix_power_3x3(mtrx_3x3 * restrict a, const scalar power, 
                             mtrx_3x3 * restrict a_to_power){
 
     mtrx_3x3 eigenvalues, eigenvalues_to_power;

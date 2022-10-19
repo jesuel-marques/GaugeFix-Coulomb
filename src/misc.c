@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <misc.h>
 #include <SU3_parameters.h>
@@ -79,37 +80,37 @@ bool is_in_exception_list(const int config_nr) {
 
 }
 
-int create_output_directory(void) {
+// int create_output_directory(void) {
 
-    printf("Creating %s.\n", configs_dir_name_out);
+//     printf("Creating %s.\n", configs_dir_name_out);
     
-    char command[MAX_LENGTH_NAME * 2];
-    sprintf(command, "test -d %s", configs_dir_name_out);
+//     char command[MAX_LENGTH_NAME * 2];
+//     sprintf(command, "test -d %s", configs_dir_name_out);
     
-    switch (system(command)){
-        case 0:
-            printf("Warning: Directory already exists.\n");
-            return 0;
+//     switch (system(command)){
+//         case 0:
+//             printf("Warning: Directory already exists.\n");
+//             return 0;
 
-        case 1:
-            sprintf(command, "mkdir %s", configs_dir_name_out);
-            int exit_status = system(command);
+//         case 1:
+//             sprintf(command, "mkdir %s", configs_dir_name_out);
+//             int exit_status = system(command);
             
-            if(exit_status){
-                fprintf(stderr, "Error: Some problem occured when creating output directory.\n");
-                fprintf(stderr, "Exit code of command '%s': %d.\n", command, exit_status);
-            }
-            return exit_status;
+//             if(exit_status){
+//                 fprintf(stderr, "Error: Some problem occured when creating output directory.\n");
+//                 fprintf(stderr, "Exit code of command '%s': %d.\n", command, exit_status);
+//             }
+//             return exit_status;
 
             
-        default:
-            fprintf(stderr, "Error: Problem with command %s. Could not test existence of directory.\n", command);
-            return -1;
-    }
+//         default:
+//             fprintf(stderr, "Error: Problem with command %s. Could not test existence of directory.\n", command);
+//             return -1;
+//     }
 
-    return -1;
+//     return -1;
 
-}
+// }
 
 short test_allocation_function(const void *pointer, const char *location) {
     //	Test if allocation was successful.
