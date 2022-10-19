@@ -5,8 +5,8 @@
 
 #include <flags.h>
 
-#define N_SPC   16     //   Spatial lattice size
-#define N_T     128    //   Temporal lattice size
+#define N_SPC   24     //   Spatial lattice size
+#define N_T     16    //   Temporal lattice size
 #define DIM     4      //   Space-time lattice dimension
 
 #define SPATIAL_VOLUME  N_SPC * N_SPC * N_SPC
@@ -20,8 +20,8 @@
 
 // Other parameters
 
-#define FIRST_CONFIG    1000
-#define LAST_CONFIG     1010
+#define FIRST_CONFIG    500
+#define LAST_CONFIG     11000
 #define CONFIG_STEP     10
 
 #define MAX_CONFIGS (LAST_CONFIG - FIRST_CONFIG) / CONFIG_STEP

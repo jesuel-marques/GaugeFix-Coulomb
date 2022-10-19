@@ -159,15 +159,15 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
 
     strcat(config_filename, extension_config_in);
 
-    char mv_command[MAX_LENGTH_NAME*3];
-    sprintf(mv_command, "mv %s ./configs/%dx%d/", "./configs/Run1_16x128_1000.cfg", N_SPC, N_T);
-    system(mv_command);
+    // char mv_command[MAX_LENGTH_NAME*3];
+    // sprintf(mv_command, "mv %s ./configs/%dx%d/", "./configs/Run1_16x128_1000.cfg", N_SPC, N_T);
+    // system(mv_command);
 
-    // if(extract_config(config_nr, strcat(name_configuration_file(config_nr, config_filename), extension_config_in))){
-    //     fprintf(stderr, "Error: Problem extracting config %d.\n", config_nr);
-    //     return -1;
-    // }
-    // printf("Config %d extracted OK.\n", config_nr);
+    if(extract_config(config_nr, strcat(name_configuration_file(config_nr, config_filename), extension_config_in))){
+        fprintf(stderr, "Error: Problem extracting config %d.\n", config_nr);
+        return -1;
+    }
+    printf("Config %d extracted OK.\n", config_nr);
 
     FILE *config_file;
 
@@ -221,15 +221,15 @@ int SU3_load_config(const unsigned config_nr, mtrx_3x3 * restrict U) {
     }
 
     fclose(config_file);
-    sprintf(mv_command, "mv ./configs/%dx%d/%s ./configs/", N_SPC, N_T, "Run1_16x128_1000.cfg");
-    system(mv_command);
+    // sprintf(mv_command, "mv ./configs/%dx%d/%s ./configs/", N_SPC, N_T, "Run1_16x128_1000.cfg");
+    // system(mv_command);
     printf("Removing %s\n", config_filename); 
-    // if(remove(config_filename)){
-    //     fprintf(stderr, "Error: Problem removing %s.\n", config_filename);
-    // }
-    // else{
-    //     printf("%s succesfully removed.\n", config_filename);
-    // }
+    if(remove(config_filename)){
+        fprintf(stderr, "Error: Problem removing %s.\n", config_filename);
+    }
+    else{
+        printf("%s succesfully removed.\n", config_filename);
+    }
 
     #ifdef NEED_BYTE_SWAP_IN
 
