@@ -14,10 +14,10 @@
 #include <lattice.h>  //	Initialization functions and calculations of
 
 inline bool position_valid(pos_vec position){
-    if (position.t >= 0 && position.t < N_T   &&
-        position.i >= 0 && position.i < N_SPC &&
-        position.j >= 0 && position.j < N_SPC &&
-        position.k >= 0 && position.k < N_SPC    ){
+    if ( position.t < N_T   &&
+         position.i < N_SPC &&
+         position.j < N_SPC &&
+         position.k < N_SPC    ){
         return true;
     }
     else{
