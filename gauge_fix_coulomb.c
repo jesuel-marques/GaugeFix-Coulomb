@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 	#endif
 	
 		GREETER();
-		handle_input(argc, argv);
+		
 
 		// if(create_output_directory()){
 		// 	printf("Some error ocurred when creating output directory. Exiting.");
@@ -74,6 +74,7 @@ int main(int argc, char *argv[]) {
 	#ifdef MPI_CODE	
 		}
 		MPI_Barrier(comm);
+		handle_input(argc, argv);
 		// The for loop divides the work up manually. Instead of using config++ we iterate by the number of configs per rank
 		for (int config = rank ; config < nconfig; config += size) {
 

@@ -21,7 +21,7 @@
 // Other parameters
 
 #define FIRST_CONFIG    500
-#define LAST_CONFIG     11000
+#define LAST_CONFIG     600
 #define CONFIG_STEP     10
 
 #define MAX_CONFIGS (LAST_CONFIG - FIRST_CONFIG) / CONFIG_STEP
