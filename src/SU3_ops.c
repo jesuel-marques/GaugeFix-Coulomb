@@ -327,7 +327,7 @@ inline void prod_vuwdagger_3x3(const mtrx_3x3 * restrict v, const mtrx_3x3 * res
     }
 }
 
-inline short power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_3x3 * restrict A_to_omega ){
+inline short power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_3x3 * restrict A_to_omega, pos_vec position ){
     //  Calculates A^omega according to the formula (which works well for A close to identity)
     // A^omega = Proj_SU3(I + omega * (A-I) + ...)
 
@@ -339,6 +339,11 @@ inline short power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_
                                                   omega * (A -> m[ELM3x3(a, b)]      );
             
     }
+
+    if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
+        print_matrix_3x3(A_to_omega, "A to omega", 18);
+    }
+
 
     return projection_SU3(A_to_omega);
 }
