@@ -39,7 +39,9 @@ const char extension_gt_out[] = "_clmb.gt";
 
 extern char config_template[];
 
-int config_exception_list[] = {-1};	
+int config_exception_list[] = {
+	#include "already_fixed.txt"
+	-1};	
 
 //	Configurations to be ignored in the gauge-fixing. -1 indicates the end of the list.
 
@@ -86,11 +88,11 @@ int main(int argc, char *argv[]) {
 	#endif 
 			int actual_config_nr = FIRST_CONFIG + CONFIG_STEP * config;
 			
-			// if(is_in_exception_list(actual_config_nr)) {
-			// 	//	list of configurations to be skipped
-			// 	printf("Skiping configuration %d for being in the exception list.\n", actual_config_nr);
-			// 	continue;
-			// }
+			if(is_in_exception_list(actual_config_nr)) {
+				//	list of configurations to be skipped
+				printf("Skiping configuration %d for being in the exception list.\n", actual_config_nr);
+				continue;
+			}
 
 			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
 			if (TEST_ALLOCATION(U)){

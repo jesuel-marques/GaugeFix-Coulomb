@@ -300,10 +300,6 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
 
     mtrx_3x3 update_LA;
 
-     if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
-        print_matrix_3x3(&w, "w", 18);
-    }
-
     SU3_LosAlamos_common_block(&w, &update_LA);
 
     /*	The above function determines update_LA which would be the naïve
@@ -317,20 +313,11 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
     mtrx_3x3 update_OR;
 
     /* update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA) */
-    if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
-        print_matrix_3x3(&update_LA, "update LA", 18);
-        projection_SU3(&update_LA);
-        print_matrix_3x3(&update_LA, "update LA projected", 18);
-    }
     
-    if(power_3x3_binomial(&update_LA, OMEGA_OR, &update_OR, position ))
+    if(power_3x3_binomial(&update_LA, OMEGA_OR, &update_OR))
         set_identity_3x3(&update_OR);   
         /*  if matrix could not be projected to SU3 inside
         power_3x3 binomial, then use identity as update */
-
-    if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
-        print_matrix_3x3(&update_OR, "update OR", 18);
-    }
 
     SU3_local_update_U_G(U, G, position, &update_OR);
 }
