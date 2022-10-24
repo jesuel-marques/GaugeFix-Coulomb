@@ -321,9 +321,9 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
         set_identity_3x3(&update_OR);   
         /*  if matrix could not be projected to SU3 inside
         power_3x3 binomial, then use identity as update */
-        
+
     if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
-        print_matrix_3x3(&update_LA, "update OR", 18);
+        print_matrix_3x3(&update_OR, "update OR", 18);
     }
 
     SU3_local_update_U_G(U, G, position, &update_OR);
