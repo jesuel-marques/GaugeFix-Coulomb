@@ -159,7 +159,7 @@ inline void subtraction_herm_conj_traceless_3x3(const mtrx_3x3 * restrict u, mtr
         u_minus_udag_trless -> m[ELM3x3(a, b)] =       u -> m[ELM3x3(a, b)] 
                                                 - conj(u -> m[ELM3x3(b, a)]);
         u_minus_udag_trless -> m[ELM3x3(b, a)] =       u -> m[ELM3x3(b, a)] 
-                                                    - conj(u -> m[ELM3x3(a, b)]);
+                                                - conj(u -> m[ELM3x3(a, b)]);
         
     }
 
@@ -224,14 +224,17 @@ void prod_three_3x3(const mtrx_3x3 * restrict u,
     SU3_color_idx a, b, c, d;
     LOOP_COLOR_3x3(a, b){
         uvw -> m[ELM3x3(a, b)] = 0.0;
-        LOOP_COLOR_3x3(c, d){    
+        LOOP_COLOR_3(c){
+            LOOP_COLOR_3(d){
 
                 uvw -> m[ELM3x3(a, b)] +=   (u -> m[ELM3x3(a, c)]) 
                                           * (v -> m[ELM3x3(c, d)]) 
                                           * (w -> m[ELM3x3(d, b)]);
                 //  Usual matrix multiplication.
+            
             }
         }
+    }
 
 }
 
@@ -293,7 +296,6 @@ inline void accum_prod_SU2_3x3(const mtrx_2x2_ck * restrict x_ck, mtrx_3x3 * res
     convert_from_ck(x_ck, &x);
     SU3_color_idx c;
     LOOP_COLOR_3(c){
-
         //  Modifying only the terms in g that will actually receive contributions
 
         xg1 =   x.m[ELM2x2(0, 0)] * g -> m[ELM3x3(a, c)] 
@@ -313,13 +315,14 @@ inline void prod_vuwdagger_3x3(const mtrx_3x3 * restrict v, const mtrx_3x3 * res
     SU3_color_idx a, b, c, d;
     LOOP_COLOR_3x3(a, b){
         vuwdagger -> m[ELM3x3(a, b)] = 0.0;
-        LOOP_COLOR_3x3(c, d){
+        LOOP_COLOR_3(c){
+            LOOP_COLOR_3(d){
 
-            vuwdagger -> m[ELM3x3(a, b)] +=       (v -> m[ELM3x3(a, c)]) 
-                                            *     (u -> m[ELM3x3(c, d)]) 
-                                            * conj(w -> m[ELM3x3(b, d)]);
-                                            //  wdagger_eb is conj(w_be)
-            
+                vuwdagger -> m[ELM3x3(a, b)] +=       (v -> m[ELM3x3(a, c)]) 
+                                                *     (u -> m[ELM3x3(c, d)]) 
+                                                * conj(w -> m[ELM3x3(b, d)]);
+                                                //  wdagger_db is conj(w_bd)
+            }
         }
     }
 }
@@ -332,8 +335,8 @@ inline short power_3x3_binomial(mtrx_3x3 * restrict A, const double omega, mtrx_
     LOOP_COLOR_3x3(a, b){
 
             A_to_omega -> m[ELM3x3(a, b)] = a == b ? 
-                                            1.0 + omega * (A -> m[ELM3x3(a, b)]- 1.0):
-                                                  omega * (A -> m[ELM3x3(a, b)]     );
+                                            1.0 + omega * (A -> m[ELM3x3(a, b)] - 1.0):
+                                                  omega * (A -> m[ELM3x3(a, b)]      );
             
     }
 
@@ -499,7 +502,7 @@ void decompose_algebra_SU3(const mtrx_3x3 * restrict a, mtrx_SU3_alg * restrict 
 
     a_components -> m[8] =       ( creal(a -> m[ELM3x3(0, 0)]) 
                                  + creal(a -> m[ELM3x3(1, 1)]) 
-                           - 2.0 * creal(a -> m[ELM3x3(2, 2)])) / sqrt(3);
+                           - 2.0 * creal(a -> m[ELM3x3(2, 2)])) / sqrt(3.0);
 }
 
 void SU3_CabbiboMarinari_projection(mtrx_3x3 * restrict w, 

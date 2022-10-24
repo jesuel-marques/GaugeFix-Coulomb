@@ -130,9 +130,7 @@ int main(int argc, char *argv[]) {
 			
 			//  fix the gauge
 
-			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);		
-
-
+			int sweeps = SU3_gauge_fix(U, G, actual_config_nr);	
 			
 			// printf("e2 before integpoly %3.2E \n", SU3_calculate_e2(U));
 			// for ( int i = 1; i < 10; i ++){
@@ -155,7 +153,7 @@ int main(int argc, char *argv[]) {
 			// else{
 			// 	printf("U written OK for config %d.\n", actual_config_nr);
 			// }
-			// free(U);		//	Free memory allocated for the configuration.
+			free(U);		//	Free memory allocated for the configuration.
 
 			// write the gauge transformation to file
 			if(SU3_write_gauge_transf(actual_config_nr, G)){

@@ -22,7 +22,7 @@ void print_mtrx_2x2(const mtrx_2x2 * restrict u, const char *name, const unsigne
 
         for (SU2_color_idx  b = 0; b < 2; b++) {
             printf("%.*lf + I(%.*lf)", decimal_places, creal(u -> m[ELM2x2(a, b)]), 
-                                     decimal_places, cimag(u -> m[ELM2x2(a, b)]));
+                                       decimal_places, cimag(u -> m[ELM2x2(a, b)]));
             
             b != 2 -1 ?  printf(",") : 0 ;
         }
@@ -116,9 +116,9 @@ inline scalar determinant_2x2(const mtrx_2x2_ck * restrict u) {
 
     scalar det_u = 0.0;
 
-    for (SU2_color_idx i = 0; i <= 3; i++) {
+    for (SU2_color_idx a = 0; a <= 3; a++) {
 
-        det_u += POW2(u -> m[i]);
+        det_u += POW2(u -> m[a]);
         //	In the Cayley-Klein representation, the determinant
         //	is the sum of the squares of the components.
 
@@ -135,9 +135,9 @@ void herm_conj_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck * restrict u_dagg
     //	In the Cayley-Klein representation, the 0th
     //	component of the conjugate is the same...
 
-    for (SU2_color_idx i = 1; i <= 3; i++) {
+    for (SU2_color_idx a = 1; a <= 3; a++) {
 
-        u_dagger -> m[i] = -(u -> m[i]);
+        u_dagger -> m[a] = -(u -> m[a]);
         //	And the 1, 2 and 3 components are the
         //	same up to a minus sign.
 

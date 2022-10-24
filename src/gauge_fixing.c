@@ -226,7 +226,7 @@ inline void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub) {
                           - w -> m[ELM3x3(b, b)]);
   
 
-    //  The SU(2) matrix corresponding to the Cabbibo Marinari 
+    //  The SU(2) matrix corresponding to the Cabbibo-Marinari 
     //  submatrix is built from w according to the formulae above.
     //  This is what maximizes the functional locally for each
     //  submatrix. This can be proven using maximization with 
@@ -298,16 +298,6 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
 
     SU3_calculate_w(U, position, &w);  //	Calculating w(n)=h(n) for red black subdivision
 
-    // mtrx_3x3 proj;
-    // if(position.i == 10, position.j==2, position.k==13, position.t==120){
-    // print_matrix_3x3(get_link(U,position,3), "U", 19);
-    // SU3_CabbiboMarinari_projection(get_link(U,position,3), &proj);
-    // print_matrix_3x3(&proj, "projected U", 19);
-    // SU3_CabbiboMarinari_projection(&w, &proj);
-    // print_matrix_3x3(&w, "before", 19);
-    // print_matrix_3x3(&proj, "after", 19);
-    // getchar();}
-
     mtrx_3x3 update_LA;
 
     SU3_LosAlamos_common_block(&w, &update_LA);
@@ -323,11 +313,18 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
     mtrx_3x3 update_OR;
 
     /* update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA) */
+    if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
+        print_matrix_3x3(&update_LA, "update LA", 18);
+    }
     
     if(power_3x3_binomial(&update_LA, OMEGA_OR, &update_OR))
         set_identity_3x3(&update_OR);   
         /*  if matrix could not be projected to SU3 inside
         power_3x3 binomial, then use identity as update */
+        
+    if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
+        print_matrix_3x3(&update_LA, "update OR", 18);
+    }
 
     SU3_local_update_U_G(U, G, position, &update_OR);
 }

@@ -25,7 +25,7 @@ double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position,
 
 	prod_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
 
-    return creal(trace_3x3(&plaquette))/Nc;
+    return creal(trace_3x3(&plaquette)) / Nc;
 
 }
 

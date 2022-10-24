@@ -20,7 +20,7 @@
 
 // Other parameters
 
-#define FIRST_CONFIG    610
+#define FIRST_CONFIG    500
 #define LAST_CONFIG     720
 #define CONFIG_STEP     10
 

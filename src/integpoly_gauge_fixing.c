@@ -109,7 +109,7 @@ int integ_polyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const
         print_matrix_3x3(&logP, "log of P", 18);
     #endif
 
-    mtrx_3x3 gt[N_T + 1 ], gdaggert[N_T + 1];
+    mtrx_3x3 gt[N_T + 1], gdaggert[N_T + 1];
     mtrx_3x3 u_dag, aux;
 
     
