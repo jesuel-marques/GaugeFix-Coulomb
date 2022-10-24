@@ -300,6 +300,10 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
 
     mtrx_3x3 update_LA;
 
+     if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
+        print_matrix_3x3(&w, "w", 18);
+    }
+
     SU3_LosAlamos_common_block(&w, &update_LA);
 
     /*	The above function determines update_LA which would be the naïve
