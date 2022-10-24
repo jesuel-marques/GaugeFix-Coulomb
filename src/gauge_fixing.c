@@ -314,6 +314,7 @@ inline static void SU3_gaugefixing_overrelaxation(mtrx_3x3 * restrict U, mtrx_3x
 
     /* update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA) */
     if(position.i == N_SPC/2 , position.j == N_SPC/2, position.k==N_SPC/2, position.t==N_T/2){
+        print_matrix_3x3(&w, "w", 18);
         print_matrix_3x3(&update_LA, "update LA", 18);
     }
     
