@@ -16,7 +16,7 @@
 
 
 #include <SU3_parameters.h>			//	Simulation parameters
-
+#include <SU3_gaugefixing_parameters.h>
 
 #include <lattice.h>			//	Initialization functions and calculations of
 									//	positions and links on the lattice.
@@ -65,25 +65,25 @@ int main(int argc, char *argv[]) {
 	#endif 
 			int actual_config_nr = FIRST_CONFIG + CONFIG_STEP * config;
 			
-			if(is_in_exception_list(actual_config_nr)) {
-				//	configurations which don't actually exist
-				printf("Skiping configuration %d for being in the exception list.", actual_config_nr);
-				continue;
-			}
+			// if(is_in_exception_list(actual_config_nr)) {
+			// 	//	configurations which don't actually exist
+			// 	printf("Skiping configuration %d for being in the exception list.", actual_config_nr);
+			// 	continue;
+			// }
 					
 			mtrx_3x3 * U = (mtrx_3x3 *) calloc(VOLUME * DIM, sizeof(mtrx_3x3));
 			TEST_ALLOCATION(U);
 			
 			SU3_load_config(actual_config_nr, U);
-			print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link", 10);
+			// print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link", 10);
 		
-			print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link", 10);
+			// print_matrix_3x3(get_link(U, assign_position(N_SPC - 1, N_SPC - 1 , N_SPC - 1 , N_T - 1), DIM - 1), "Last link", 10);
 
-			printf("\n e2 before reunitarization and gauge transformation: %5.4E \n", SU3_calculate_e2(U));
-			printf("average determinant before reunitarization: %.15lf\n",	average_det(U));
-			//  calculate plaquette average
-			printf("Spatial plaquette before reunitarization: %.10lf\n", spatial_plaquette_average(U));
-			printf("Temporal plaquette before reunitarization: %.10lf\n", temporal_plaquette_average(U));
+			// printf("\n e2 before reunitarization and gauge transformation: %5.4E \n", SU3_calculate_e2(U));
+			// printf("average determinant before reunitarization: %.15lf\n",	average_det(U));
+			// //  calculate plaquette average
+			// printf("Spatial plaquette before reunitarization: %.10lf\n", spatial_plaquette_average(U));
+			// printf("Temporal plaquette before reunitarization: %.10lf\n", temporal_plaquette_average(U));
 
 
 			mtrx_3x3 * G = (mtrx_3x3 *) calloc(VOLUME , sizeof(mtrx_3x3));
@@ -91,29 +91,33 @@ int main(int argc, char *argv[]) {
 
 			SU3_load_gauge_transf(actual_config_nr, G);	
 
-			printf("F before reunitarization: e2: %5.4E\n",SU3_calculate_F(U));
-			printf("theta before reunitarization: %5.4E\n", SU3_calculate_theta(U));
+			// printf("F before reunitarization: e2: %5.4E\n",SU3_calculate_F(U));
+			// printf("theta before reunitarization: %5.4E\n", SU3_calculate_theta(U));
 
-			// SU3_reunitarize_U_G(U, G);
+			SU3_reunitarize_U_G(U, G);
 
-			printf("Spatial plaquette before gauge transformation: %.10lf\n", spatial_plaquette_average(U));
-			printf("Temporal plaquette before gauge transformation: %.10lf\n", temporal_plaquette_average(U));
+			// printf("Spatial plaquette before gauge transformation: %.10lf\n", spatial_plaquette_average(U));
+			// printf("Temporal plaquette before gauge transformation: %.10lf\n", temporal_plaquette_average(U));
 			
-			printf("F before gt: e2: %5.4E\n",SU3_calculate_F(U));
-			printf("theta before gt: %5.4E\n", SU3_calculate_theta(U));
+			// printf("F before gt: e2: %5.4E\n",SU3_calculate_F(U));
+			// printf("theta before gt: %5.4E\n", SU3_calculate_theta(U));
 
 			SU3_global_update_U(U, G);
 
-			printf("F after gt: %5.4E\n",SU3_calculate_F(U));
-			printf("theta after gt: %5.4E\n", SU3_calculate_theta(U));
+			// printf("F after gt: %5.4E\n",SU3_calculate_F(U));
+			// printf("theta after gt: %5.4E\n", SU3_calculate_theta(U));
 
 
-			printf("average determinant: %.15lf\n",	average_det(U));
-			printf("\n e2: %5.4E \n", SU3_calculate_e2(U));
+			// printf("average determinant: %.15lf\n",	average_det(U));
+			{	
+				double e2 = SU3_calculate_e2(U);
+				if(e2 > TOLERANCE)
+					printf("\nWARNING e2: %5.4E TOO LARGE \n", SU3_calculate_e2(U));
 
+			}
 			//  calculate plaquette average
-			printf("Spatial plaquette after reunitarization:  %.10lf\n", spatial_plaquette_average(U));
-			printf("Temporal plaquette after reunitarization:  %.10lf\n", temporal_plaquette_average(U));
+			// printf("Spatial plaquette after reunitarization:  %.10lf\n", spatial_plaquette_average(U));
+			// printf("Temporal plaquette after reunitarization:  %.10lf\n", temporal_plaquette_average(U));
 
 			free(G);
 			free(U);
