@@ -68,7 +68,7 @@ double average_field_det(Mtrx3x3 *restrict field,
 
             det += determinant_3x3(field + i);
 
-    det /= (DIM * volume);
+    det /= (double)elements;
 
     return det;
 }

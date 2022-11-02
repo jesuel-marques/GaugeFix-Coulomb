@@ -12,9 +12,6 @@
 short n_SPC;	//   Spatial lattice size
 short n_T;		//   Temporal lattice size
 
-int volume;		//	Number of sites in the lattice
-int spatial_volume;	
-
 int amount_of_links;
 int amount_of_points;
 

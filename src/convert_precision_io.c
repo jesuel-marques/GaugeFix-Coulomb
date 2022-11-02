@@ -13,8 +13,6 @@
 extern short n_SPC;
 extern short n_T;
 
-extern int volume;
-
 #ifdef CONV_CFG_TO_WORKING_PRECISION
 static void convert_in_work_cfg_3x3(const InCfgMtrx * restrict u_in, 
                                           WorkMtrx  * restrict u_work) {

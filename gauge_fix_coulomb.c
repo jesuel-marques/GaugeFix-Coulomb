@@ -26,19 +26,35 @@ int spatial_volume;
 
 int amount_of_links;
 int amount_of_points;
-	
-int main(int argc, char *argv[]) {
 
-	char config_filename[MAX_LENGTH_NAME] = "";
-	char gauge_transf_filename[MAX_LENGTH_NAME] = "";
+char config_filename[MAX_LENGTH_NAME];
+char gauge_transf_filename[MAX_LENGTH_NAME];
+
+double tolerance;
+float omega_OR;
+
+void handle_input(int argc, char *argv[]){
 
 	strcpy(config_filename		, argv[1]);
 	strcpy(gauge_transf_filename, argv[2]);
 
-	n_SPC = atoi(argv[3]);
-	n_T   =	atoi(argv[4]);
-	double tolerance =	atof(argv[5]);
-	float omega_OR = atof(argv[6]);
+	n_SPC 		= atoi(argv[3]);
+	n_T   		= atoi(argv[4]);
+
+	tolerance 	= atof(argv[5]);
+	omega_OR 	= atof(argv[6]);
+
+	volume 	       = n_SPC * n_SPC * n_SPC * n_T;
+	spatial_volume = n_SPC * n_SPC * n_SPC;	//	Number of sites in the lattice
+
+	amount_of_links = DIM * volume;
+	amount_of_points = volume;	
+
+}
+	
+int main(int argc, char *argv[]) {
+
+	handle_input(argc, argv);
 
 	int exit_status;
 
@@ -53,7 +69,8 @@ int main(int argc, char *argv[]) {
 
 	Mtrx3x3 * U = allocate_field(amount_of_links, sizeof(Mtrx3x3));
 	if(U == NULL){
-		fprintf(stderr, "Could not allocate memory for config in file %s.\n", config_filename);
+		fprintf(stderr, "Could not allocate memory for config in file %s.\n", \
+						config_filename);
 		return -1;
 	}
 
@@ -70,7 +87,8 @@ int main(int argc, char *argv[]) {
 	//	storing config in single precision.	
 
 	if(reunitarize_field(U,  amount_of_links)){
-		fprintf(stderr, "Configuration in file %s or its gauge-transformation could not be reunitarized.\n", config_filename);
+		fprintf(stderr, "Configuration in file %s or its gauge-transformation \
+						 could not be reunitarized.\n", config_filename);
 		free(U);
 		return -1;
 	}
@@ -84,11 +102,15 @@ int main(int argc, char *argv[]) {
 		
 	//  fix the gauge
 
-	int sweeps = SU3_gaugefix_overrelaxation(U, G, config_filename, tolerance, omega_OR);
+	int sweeps = SU3_gaugefix_overrelaxation(U, G, 
+											config_filename,
+											tolerance,
+											omega_OR);
 
 	if(sweeps == -1){
 		fprintf(stderr, "Configuration in file %s could not be gauge-fixed.\n \
-						 SOR algorithm seems not to work or be too slow\n", config_filename);
+						 SOR algorithm seems not to work or be too slow\n", 
+						 config_filename);
 		
 		free(U);
 		free(G);
@@ -97,7 +119,10 @@ int main(int argc, char *argv[]) {
 
 	//	Record the effort to gauge-fix
 	
-	printf("Sweeps needed to gauge-fix config from file %s: %d. e2: %3.2E \n", config_filename, sweeps, SU3_calculate_e2(U));
+	printf("Sweeps needed to gauge-fix config from file %s: %d. e2: %3.2E \n", 
+			config_filename,
+			sweeps,
+			SU3_calculate_e2(U));
 	write_sweeps_to_gaugefix(config_filename, sweeps);
 	
 	// write the gauge fixed configuration to file,
@@ -112,10 +137,15 @@ int main(int argc, char *argv[]) {
 
 	// write the gauge transformation to file
 	if(SU3_write_gauge_transf(G, gauge_transf_filename)){
-		fprintf(stderr, "Gauge transformation writing to file %s failed for configuration %s .\n", gauge_transf_filename, config_filename);
+		fprintf(stderr, "Gauge transformation writing to file %s \
+						 failed for configuration %s .\n",
+						 gauge_transf_filename,
+						 config_filename);
 	}
 	else{
-		printf("G written OK for config %s to file %s.\n", config_filename, gauge_transf_filename);
+		printf("G written OK for config %s to file %s.\n", 
+				config_filename,
+				gauge_transf_filename);
 	}
 	
 	free(G);		//	Free memory allocated for gauge transformation.

@@ -7,6 +7,7 @@
 extern short n_SPC;
 extern short n_T;
 
+
 void greeter_function(const char * restrict program_name) {
     
     printf("Hello %s!\n", getenv("USER"));

@@ -549,9 +549,6 @@ void SU3_CabbiboMarinari_projection(Mtrx3x3 * restrict w,
                 //  with codenames R, S and T
 
                 SU3_update_sub_LosAlamos(w, sub);
-                // projection_SU3(w);
-                // printf("re Tr w: %.20lf\n", creal(trace_3x3(w)));
-                
             }
         }
     }
