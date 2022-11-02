@@ -10,7 +10,6 @@
 static int eigensystem_3x3(Mtrx3x3 * restrict a, 
                            Mtrx3x3 * restrict eigenvalues_mat, 
                            Mtrx3x3 * restrict eigenvectors){
-
     double complex eigenvalues[Nc];
     
     Mtrx3x3 left_eigenvectors; /*not used*/
@@ -66,10 +65,10 @@ static void power_diagonal_mtrx_3x3(Mtrx3x3 * restrict diag_mtrx, Scalar power,
     }
 }
 
+
 int matrix_power_3x3(      Mtrx3x3 * restrict a, 
                      const Scalar power, 
                            Mtrx3x3 * restrict a_to_power){
-
     Mtrx3x3 eigenvalues, eigenvalues_to_power;
     Mtrx3x3 eigenvectors, eigenvectors_inv;
 
@@ -102,7 +101,6 @@ int matrix_power_3x3(      Mtrx3x3 * restrict a,
 
 int matrix_log_3x3(Mtrx3x3 * restrict a,  
                    Mtrx3x3 * restrict log_of_a){
-
     Mtrx3x3 eigenvalues, log_of_eigenvalues;
     Mtrx3x3 eigenvectors, eigenvectors_inv;
 

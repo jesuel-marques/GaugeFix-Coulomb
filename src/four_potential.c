@@ -13,9 +13,8 @@ void SU3_calculate_A(      Mtrx3x3 * restrict U,
                      const PosVec position, 
                      const LorentzIdx mu,
                            Mtrx3x3 * restrict A) {
-    //	Calculates the vector A_mu(n) field
-    // The formula is A_mu(n)=((U - U_dagger)/2i)|traceless
-
+    /*  Calculates the vector A_mu(n) field
+     The formula is A_mu(n)=((U - U_dagger)/2i)|traceless */
     Mtrx3x3 U_minus_Udagger_trless;
 
     subtraction_herm_conj_trless_3x3(get_link(U, position, mu), &U_minus_Udagger_trless);
@@ -23,12 +22,12 @@ void SU3_calculate_A(      Mtrx3x3 * restrict U,
 
 }
 
+
 void SU3_divergence_A(      Mtrx3x3 * restrict U, 
                       const PosVec position, 
                             Mtrx3x3 * restrict div_A) {
-    //	Calculates the divergence of the field A on the lattice
-    //  and returns it in div_A.
-
+    /* Calculates the divergence of the field A on the lattice
+    and returns it in div_A. */
     Mtrx3x3 A1;
     Mtrx3x3 A2;
 

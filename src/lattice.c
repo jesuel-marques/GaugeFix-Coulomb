@@ -23,6 +23,7 @@ inline bool position_valid(PosVec position){
     }
 }
 
+
 inline bool position_mu_valid(PosVec position, 
                               LorentzIdx mu){
     if (position.t < n_T   &&
@@ -36,33 +37,35 @@ inline bool position_mu_valid(PosVec position,
     return false;
 }
 
+
 PosVec assign_position(const PosIndex x, 
                        const PosIndex y, 
                        const PosIndex z, 
                        const PosIndex t) {
-    //	assigns x, y, z and t to a position vector
+    /* assigns x, y, z and t to a position vector */
     PosVec position = {.i = x, .j = y, .k = z, .t = t};
 
     if(!position_valid(position)){
-        fprintf(stderr, "Position {%d, %d, %d, %d} is invalid. \
-                         Returning origin instead\n.", x, y, z, t);
+        fprintf(stderr, "Position {%d, %d, %d, %d} is invalid. "
+                        "Returning origin instead\n.", x, y, z, t);
         return assign_position(0, 0, 0, 0);
     }
 
     return position;
 }
 
+
 void print_pos_vec(const PosVec pos) {
-    //	prints a position to the screen
+    /* prints a position to the screen*/
     printf("x: %hu y: %hu z: %hu t: %hu\n", pos.i, pos.j, pos.k, pos.t);
 }
 
+
 inline PosVec hop_pos_plus(const PosVec u, 
                            const LorentzIdx mu) {
-    //	Calculates the position immediately forward
-    //	in the direction mu, taken into account the
-    //	periodic boundary conditions.
-
+    /* 	Calculates the position immediately forward
+    	in the direction mu, taken into account the
+    	periodic boundary conditions. */
     #ifdef CHECK_POSITION_BOUNDS
         if(!position_mu_valid(u, mu)){
             printf("Position: ");
@@ -111,12 +114,12 @@ inline PosVec hop_pos_plus(const PosVec u,
     return u_plus_muhat;
 }
 
+
 inline PosVec hop_pos_minus(const PosVec u, 
                             const LorentzIdx mu) {
-    //	Calculates the position immediately behind
-    //	in the direction mu, taken into account the
-    //	periodic boundary conditions.
-
+    /* Calculates the position immediately behind
+    in the direction mu, taken into account the
+    periodic boundary conditions. */
     #ifdef CHECK_POSITION_BOUNDS
         if(!position_mu_valid(u, mu)){
             printf("Position: ");

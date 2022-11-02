@@ -80,7 +80,6 @@ double inverse_3x3(const Mtrx3x3 * restrict a,
 
 short projection_SU3(Mtrx3x3 *x);
 
-
 void decompose_algebra_SU3(const Mtrx3x3 *a, 
                                  MtrxSU3Alg *a_components);
 

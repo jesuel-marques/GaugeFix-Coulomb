@@ -8,8 +8,7 @@ extern short n_SPC;
 extern short n_T;
 
 
-void greeter_function(const char * restrict program_name) {
-    
+void greeter_function(const char * restrict program_name) {  
     printf("Hello %s!\n", getenv("USER"));
     printf("Program %s compiled at %s on %s\n", program_name, __TIME__, __DATE__);
     printf("Using C version: %ld\n", __STDC_VERSION__);
@@ -17,6 +16,7 @@ void greeter_function(const char * restrict program_name) {
     printf("\n");
 
 }
+
 
 short test_allocation_function(const void *pointer, 
                                const char *location) {
@@ -29,9 +29,9 @@ short test_allocation_function(const void *pointer,
     return 0;
 }
 
+
 int write_sweeps_to_gaugefix(char * config_filename, 
                              int sweeps){
-
     FILE* sweeps_to_gaugefix;
     char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
     sprintf(filename_sweeps_to_gaugefix, "sweeps_to_gaugefix_%dx%d.txt", n_SPC, n_T);

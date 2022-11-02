@@ -50,7 +50,8 @@ int main(int argc, char *argv[]) {
 
 	Mtrx3x3 * U = (Mtrx3x3 *) calloc(volume * DIM, sizeof(Mtrx3x3));
 	if (TEST_ALLOCATION(U)){
-		fprintf(stderr,"Could not allocate memory for config filename %s. Jumping to the next config.\n", config_filename);
+		fprintf(stderr,"Could not allocate memory for config filename %s",
+						config_filename);
 		return -1;
 	}
 

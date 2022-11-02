@@ -53,23 +53,15 @@ void handle_input(int argc, char *argv[]){
 }
 	
 int main(int argc, char *argv[]) {
-
-	handle_input(argc, argv);
-
 	int exit_status;
 
-	volume 	       = n_SPC * n_SPC * n_SPC * n_T;
-	spatial_volume = n_SPC * n_SPC * n_SPC;	//	Number of sites in the lattice
-
-	amount_of_links = DIM * volume;
-	amount_of_points = volume;
-	
+	handle_input(argc, argv);
 	
 	// GREETER();		
 
 	Mtrx3x3 * U = allocate_field(amount_of_links, sizeof(Mtrx3x3));
 	if(U == NULL){
-		fprintf(stderr, "Could not allocate memory for config in file %s.\n", \
+		fprintf(stderr, "Could not allocate memory for config in file %s.\n",
 						config_filename);
 		return -1;
 	}
@@ -87,8 +79,8 @@ int main(int argc, char *argv[]) {
 	//	storing config in single precision.	
 
 	if(reunitarize_field(U,  amount_of_links)){
-		fprintf(stderr, "Configuration in file %s or its gauge-transformation \
-						 could not be reunitarized.\n", config_filename);
+		fprintf(stderr, "Configuration in file %s or its gauge-transformation"
+						"could not be reunitarized.\n", config_filename);
 		free(U);
 		return -1;
 	}
@@ -103,13 +95,13 @@ int main(int argc, char *argv[]) {
 	//  fix the gauge
 
 	int sweeps = SU3_gaugefix_overrelaxation(U, G, 
-											config_filename,
-											tolerance,
-											omega_OR);
+											 config_filename,
+											 tolerance,
+											 omega_OR);
 
 	if(sweeps == -1){
-		fprintf(stderr, "Configuration in file %s could not be gauge-fixed.\n \
-						 SOR algorithm seems not to work or be too slow\n", 
+		fprintf(stderr, "Configuration in file %s could not be gauge-fixed.\n"	
+						 "SOR algorithm seems not to work or be too slow\n", 
 						 config_filename);
 		
 		free(U);
@@ -137,8 +129,8 @@ int main(int argc, char *argv[]) {
 
 	// write the gauge transformation to file
 	if(SU3_write_gauge_transf(G, gauge_transf_filename)){
-		fprintf(stderr, "Gauge transformation writing to file %s \
-						 failed for configuration %s .\n",
+		fprintf(stderr, "Gauge transformation writing to file %s"
+						"failed for configuration %s .\n",
 						 gauge_transf_filename,
 						 config_filename);
 	}

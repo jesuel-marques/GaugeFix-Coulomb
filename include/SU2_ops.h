@@ -23,14 +23,13 @@ void convert_from_ck(const Mtrx2x2CK * restrict u_ck,
 
 //void accumulate_2x2(const Mtrx2x2CK * u, 
 //                          Mtrx2x2CK* acc);
-
 //void subtraction_2x2(const Mtrx2x2CK* u, 
 //                     const Mtrx2x2CK* v, 
 //                           Mtrx2x2CK* u_minus_v);
 
 //Scalar SU2_trace(const Mtrx2x2CK *u);
-Scalar determinant_2x2(const Mtrx2x2CK *u);
 
+Scalar determinant_2x2(const Mtrx2x2CK *u);
 //void herm_conj_2x2(const Mtrx2x2CK* u, 
 //                         Mtrx2x2CK* u_dagger);
 

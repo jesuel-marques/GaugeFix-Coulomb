@@ -15,11 +15,8 @@
 extern short n_SPC;
 extern short n_T;
 
-extern int volume;
-
 Mtrx3x3 average_u_temporal(Mtrx3x3 * restrict U, 
                            PosIndex t){
-
     Mtrx3x3 u_timeslice_sum;
     Mtrx3x3 u_timeslice_ave;
 
@@ -45,8 +42,8 @@ Mtrx3x3 average_u_temporal(Mtrx3x3 * restrict U,
     return u_timeslice_ave;
 }
 
+
 Mtrx3x3 integ_polyakovloop(Mtrx3x3 * tempave_proj_u){
-    
     Mtrx3x3 integ_polyakov_loop;
     set_identity_3x3(&integ_polyakov_loop);
     
@@ -61,10 +58,7 @@ Mtrx3x3 integ_polyakovloop(Mtrx3x3 * tempave_proj_u){
 
 
 int integ_polyakov_gaugefix(      Mtrx3x3 * restrict U, 
-                                  Mtrx3x3 * restrict G, 
-                            const unsigned short config_nr) {
-
-    printf("Integrated Polyakov Gauge-Fixing for config %d\n", config_nr);
+                                  Mtrx3x3 * restrict G) {
 
     Mtrx3x3 u_timeslice_ave[n_T];
     Mtrx3x3 tempave_proj_u[n_T];

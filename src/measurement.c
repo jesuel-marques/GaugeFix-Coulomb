@@ -18,7 +18,6 @@ double SU3_re_tr_plaquette(      Mtrx3x3 * restrict U,
                            const PosVec position, 
                            const LorentzIdx mu, 
                            const LorentzIdx nu){
-	
     Mtrx3x3 plaquette;
 
     Mtrx3x3 ua, ub, uc, ud;
@@ -35,6 +34,7 @@ double SU3_re_tr_plaquette(      Mtrx3x3 * restrict U,
     return creal(trace_3x3(&plaquette)) / Nc;
 
 }
+
 
 double spatial_plaquette_average(Mtrx3x3 * restrict U){
     //  Calculates the spatial plaquette average
@@ -72,10 +72,12 @@ double spatial_plaquette_average(Mtrx3x3 * restrict U){
     return plaq_ave;
 }
 
+
 double temporal_plaquette_average(Mtrx3x3 * restrict U){
     double plaq_ave = 0.0;
 
-    #pragma omp parallel for reduction (+:plaq_ave) num_threads(NUM_THREADS) schedule(dynamic) 
+    #pragma omp parallel for reduction (+:plaq_ave) \
+            num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
         for (PosIndex t = 0; t < n_T; t++) {
 

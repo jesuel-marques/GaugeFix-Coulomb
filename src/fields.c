@@ -9,16 +9,12 @@
 #include <SU3_parameters.h>
 #include <types.h>
 
-
 extern short n_SPC;
 extern short n_T;
-
-extern int volume;
 
 
 Mtrx3x3 *allocate_field(int elements, 
                         int size_of_elements){
-
     Mtrx3x3 *field = (Mtrx3x3 *) calloc(elements, size_of_elements);
 	if(field == NULL){		
 		return NULL;
@@ -27,12 +23,14 @@ Mtrx3x3 *allocate_field(int elements,
     return field;
 }
 
+
 void set_field_to_identity(Mtrx3x3 * restrict field, 
                            int elements){
     OMP_PARALLEL_FOR
     for(int i = 0; i < elements; i++)
         set_identity_3x3(field + i);
 }
+
 
 void copy_field(Mtrx3x3 * restrict field, 
                 int elements, 
@@ -42,10 +40,12 @@ void copy_field(Mtrx3x3 * restrict field,
         copy_3x3(field + i, field_copy + i);
 }
 
+
 int reunitarize_field(Mtrx3x3 * restrict field,
                       int elements){
     int exit_status = 0;
-    #pragma omp parallel for num_threads(NUM_THREADS) reduction (|:exit_status) schedule(dynamic)
+    #pragma omp parallel for num_threads(NUM_THREADS) \
+            reduction (|:exit_status) schedule(dynamic)
     for(int i = 0; i < elements; i++)
 
         exit_status |= projection_SU3(field + i);
@@ -56,13 +56,14 @@ int reunitarize_field(Mtrx3x3 * restrict field,
     return 0;
 }
 
+
 double average_field_det(Mtrx3x3 *restrict field,
                          int elements) {
     double det = 0.0;
-    // Reunitarizes the configuration
+    /* Reunitarizes the field*/
 
     #pragma omp parallel for num_threads(NUM_THREADS) \
-                        schedule(dynamic) reduction(+ : det)
+            schedule(dynamic) reduction(+ : det)
         // Paralelizing by slicing the time extent
         for(int i = 0; i < elements; i++)
 
@@ -77,7 +78,7 @@ double average_field_det(Mtrx3x3 *restrict field,
 Mtrx3x3 *get_link(Mtrx3x3 *restrict U, 
                   const PosVec position, 
                   const LorentzIdx mu) {
-    //	Does the pointer arithmetic to get a pointer to link at given position and mu
+    /* Does the pointer arithmetic to get a pointer to link at given position and mu */
     #ifdef CHECK_POSITION_BOUNDS
         if(position_mu_valid(position, mu))    
     #endif  //CHECK_POSITION_BOUNDS
@@ -90,14 +91,14 @@ Mtrx3x3 *get_link(Mtrx3x3 *restrict U,
     #endif  //CHECK_POSITION_BOUNDS
 }
 
+
 void get_link_matrix(      Mtrx3x3 *restrict U, 
                      const PosVec position, 
                      const LorentzIdx mu, 
                            Direction dir, 
                            Mtrx3x3 *restrict u) {
-    // Gets forward or backward link at given position and mu
-    // and copies it to u.
-
+    /* Gets forward or backward link at given position and mu
+    and copies it to u. */
     #ifdef CHECK_POSITION_BOUNDS
     if(position_mu_valid(position, mu)){
     #endif  //CHECK_POSITION_BOUNDS
@@ -123,10 +124,11 @@ void get_link_matrix(      Mtrx3x3 *restrict U,
     
 }
 
+
 Mtrx3x3 *get_gaugetransf(Mtrx3x3 *restrict G, 
                          const PosVec position) {
-    //	Does the pointer arithmetic to get a pointer to a gaugea transformation at given position
-
+    /* Does the pointer arithmetic to get a pointer to 
+       a gauge transformation at given position */
     #ifdef CHECK_POSITION_BOUNDS
         if(position_valid(position)){
     #endif  //CHECK_POSITION_BOUNDS
@@ -135,8 +137,10 @@ Mtrx3x3 *get_gaugetransf(Mtrx3x3 *restrict G,
         }
         else{
         
-            printf("Program reading gauge-transformation outside of allowed position range.\n");
+            fprintf(stderr, "Program reading gauge-transformation"
+                            "outside of allowed position range.\n");
             exit(EXIT_FAILURE);
+            
         }
     #endif  //CHECK_POSITION_BOUNDS
 }

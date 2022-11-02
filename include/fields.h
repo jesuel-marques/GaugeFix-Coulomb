@@ -35,8 +35,6 @@ int reunitarize_field(Mtrx3x3 * restrict field,
 double average_field_det(Mtrx3x3 *restrict field,
                          int elements) ;
 
-
-
 Mtrx3x3 * get_link(Mtrx3x3 *U, 
                    const PosVec position,
                    const LorentzIdx mu);

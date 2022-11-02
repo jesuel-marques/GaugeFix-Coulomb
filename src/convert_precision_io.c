@@ -16,7 +16,6 @@ extern short n_T;
 #ifdef CONV_CFG_TO_WORKING_PRECISION
 static void convert_in_work_cfg_3x3(const InCfgMtrx * restrict u_in, 
                                           WorkMtrx  * restrict u_work) {
-
     MtrxIdx3 a, b;
     LOOP_3X3(a, b){
 
@@ -25,6 +24,7 @@ static void convert_in_work_cfg_3x3(const InCfgMtrx * restrict u_in,
     }
 }
 #endif  //CONV_CFG_TO_WORKING_PRECISION
+
 
 #ifdef CONV_CFG_FROM_WORKING_PRECISION
 static void convert_work_out_cfg_3x3(const WorkMtrx   * restrict u_work, 
@@ -38,8 +38,8 @@ static void convert_work_out_cfg_3x3(const WorkMtrx   * restrict u_work,
 }
 #endif  //CONV_CFG_FROM_WORKING_PRECISION
 
-#ifdef CONV_GT_TO_WORKING_PRECISION
 
+#ifdef CONV_GT_TO_WORKING_PRECISION
 static void convert_in_work_gt_3x3(const InGTMtrx * restrict g_in, 
                                          WorkMtrx * restrict g_work) {
     MtrxIdx3 a, b;
@@ -51,10 +51,10 @@ static void convert_in_work_gt_3x3(const InGTMtrx * restrict g_in,
 }
 #endif  //CONV_GT_TO_WORKING_PRECISION
 
+
 #ifdef CONV_GT_FROM_WORKING_PRECISION
 static void convert_work_out_gt_3x3(const WorkMtrx  * restrict g_work, 
                                           OutGTMtrx * restrict g_out) {
-
     MtrxIdx3 a, b;
     LOOP_3X3(a, b){
 
@@ -64,10 +64,10 @@ static void convert_work_out_gt_3x3(const WorkMtrx  * restrict g_work,
 }
 #endif  // CONV_GT_FROM_WORKING_PRECISION
 
+
 #ifdef CONV_CFG_TO_WORKING_PRECISION
 void SU3_convert_cfg_in_work(InCfgMtrx * restrict U_in, 
                               WorkMtrx * restrict U_work) {
-
     PosIndex t;
     LOOP_TEMPORAL_PARALLEL(t){
         PosVec position;
@@ -83,12 +83,10 @@ void SU3_convert_cfg_in_work(InCfgMtrx * restrict U_in,
         }
     }
 }
-
 #endif  //CONV_CFG_TO_WORKING_PRECISION
 
 
 #ifdef CONV_CFG_FROM_WORKING_PRECISION
-
 void SU3_convert_cfg_work_out(WorkMtrx   * restrict U_work, 
                               OutCfgMtrx * restrict U_out) {
     PosIndex t;
@@ -106,11 +104,10 @@ void SU3_convert_cfg_work_out(WorkMtrx   * restrict U_work,
         }
     }
 }
-
 #endif  //CONV_CFG_FROM_WORKING_PRECISION
 
-#ifdef CONV_GT_TO_WORKING_PRECISION
 
+#ifdef CONV_GT_TO_WORKING_PRECISION
  void SU3_convert_gt_in_work(InGTMtrx * restrict G_in, 
                              WorkMtrx * restrict G_work) {
     PosIndex t;
@@ -129,7 +126,6 @@ void SU3_convert_cfg_work_out(WorkMtrx   * restrict U_work,
 
 
 #ifdef CONV_GT_FROM_WORKING_PRECISION
-
 void SU3_convert_gt_work_out(WorkMtrx  *G_work, 
                              OutGTMtrx *G_out) {
     PosIndex t;
@@ -144,5 +140,4 @@ void SU3_convert_gt_work_out(WorkMtrx  *G_work,
         }
     }
 }
-
 #endif  //CONV_GT_FROM_WORKING_PRECISION
