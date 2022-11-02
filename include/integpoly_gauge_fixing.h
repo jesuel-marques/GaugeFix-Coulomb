@@ -3,7 +3,8 @@
 
 #include <types.h>
 
-int integ_polyakov_gauge_fix(mtrx_3x3 * restrict U, 
-                            mtrx_3x3 * restrict G, const unsigned short config_nr);
+int integ_polyakov_gaugefix(Mtrx3x3 * restrict U, 
+                            Mtrx3x3 * restrict G, 
+                            const unsigned short config_nr);
 
-#endif
+#endif  //INTEGPOLYGAUGEFIXING_H

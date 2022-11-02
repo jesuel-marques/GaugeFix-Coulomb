@@ -6,86 +6,59 @@
 
 //  Geometric types definitions
 
-typedef unsigned short pos_index;
+typedef unsigned short PosIndex;
 
 typedef struct {
-    pos_index i, j, k;
-    pos_index t;
-} pos_vec;  //	struct for position vectors
+    PosIndex i, j, k;
+    PosIndex t;
+} PosVec;  //	struct for position vectors
 
 
-typedef unsigned short lorentz_idx;
+typedef unsigned short LorentzIdx;
 
-typedef enum {REAR, FRONT} direction;
+typedef enum {REAR, FRONT} Direction;
 
 //  Data types definitions
 
-typedef complex float  in_data_type;
-typedef complex float  out_data_type;
-typedef complex double work_data_type;
-typedef work_data_type scalar;
+typedef complex double WorkScalarType;
+typedef WorkScalarType Scalar;
 
 // 2x2 types
 
-typedef unsigned short SU2_color_idx;
+typedef unsigned short SU2ColorIdx;
 
 typedef struct {
-    scalar m[2 * 2];
-} mtrx_2x2;
+    Scalar m[2 * 2];
+} Mtrx2x2;
 
 typedef struct {
     double m[4];
-} mtrx_2x2_ck;
+} Mtrx2x2CK;
 
 // 3x3 types
 
-typedef unsigned short SU3_color_idx;
-typedef unsigned short SU3_alg_idx;
+typedef unsigned short MtrxIdx3;
+typedef unsigned short SU3AlgIdx;
 
 typedef struct {
    complex double m[Nc * Nc];
-} mtrx_3x3_double; 
+} Mtrx3x3Dbl; 
 
 typedef struct {
     complex float m[Nc * Nc];
-} mtrx_3x3_float;
+} Mtrx3x3Flt;
 
 typedef struct {
-   scalar m[Nc];
-} color_3_vec;
+   Scalar m[Nc];
+} Vec3;
 
 typedef struct {
-    scalar m[(Nc * Nc - 1) + 1];
-} mtrx_SU3_alg;
+    Scalar m[(Nc * Nc - 1) + 1];
+} MtrxSU3Alg;
 
+typedef Mtrx3x3Dbl WorkMtrx;
+typedef WorkMtrx Mtrx3x3;
 
-typedef mtrx_3x3_double work_mtrx_data_type;
-typedef work_mtrx_data_type mtrx_3x3;
+typedef enum {R, S, T} Submtrx;
 
-typedef enum {R, S, T} submatrix;
-
-#ifdef CONV_CFG_TO_WORKING_PRECISION
-    typedef mtrx_3x3_float in_cfg_data_type;
-#else
-    typedef work_mtrx_data_type in_cfg_data_type;
-#endif
-
-#ifdef CONV_GT_TO_WORKING_PRECISION
-    typedef mtrx_3x3_float  in_gt_data_type;
-#else
-    typedef mtrx_3x3_double in_gt_data_type;
-#endif
-
-#ifdef CONV_CFG_FROM_WORKING_PRECISION
-    typedef mtrx_3x3_float  out_cfg_data_type;
-#else
-    typedef mtrx_3x3_double out_cfg_data_type;
-#endif
-
-#ifdef CONV_GT_FROM_WORKING_PRECISION
-    typedef mtrx_3x3_float  out_gt_data_type;
-#else
-    typedef mtrx_3x3_double out_gt_data_type;
-#endif
-
-#endif
+#endif  //TYPES_H

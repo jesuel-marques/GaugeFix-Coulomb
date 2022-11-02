@@ -3,21 +3,26 @@
 
 #include <types.h>
 
-void SU3_global_update_U(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G);
+void SU3_global_update_U(Mtrx3x3 * restrict U, 
+                         Mtrx3x3 * restrict G);
 
-void SU3_update_sub_LosAlamos(mtrx_3x3 * restrict w, submatrix sub);
+double SU3_calculate_F    (Mtrx3x3 * restrict U);
+double SU3_calculate_theta(Mtrx3x3 * restrict U);
+double SU3_calculate_e2   (Mtrx3x3 * restrict U);
 
-void SU3_LosAlamos_common_block(mtrx_3x3 * restrict w, 
-                                mtrx_3x3 * restrict total_update);
+void SU3_update_sub_LosAlamos(Mtrx3x3 * restrict w, 
+                              Submtrx sub); 
+//GET THIS OUT OF HERE. THIS SHOULD NOT BE IN A .H FILE. ONLY HERE BECAUSE USING IN SU3_OPS
 
-double SU3_calculate_F(mtrx_3x3 * restrict U);
+void SU3_LosAlamos(Mtrx3x3 * restrict w, 
+                   Mtrx3x3 * restrict total_update);
 
-double SU3_calculate_theta(mtrx_3x3 * restrict U);
 
-double SU3_calculate_e2(mtrx_3x3 * restrict U);
 
-int SU3_gauge_fix(mtrx_3x3 * restrict U,  mtrx_3x3 * restrict G, const unsigned short config);
+int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U, 
+                                Mtrx3x3 * restrict G, 
+                                char * config_filename, 
+                                double tolerance, 
+                                double omega_OR);
 
-void init_gauge_transformation(mtrx_3x3 * restrict G);
-
-#endif
+#endif  //GAUGEFIXING_H

@@ -3,22 +3,29 @@
 #include <lapack.h>
 #include <lapacke.h>
 
-#include <types.h>
 #include <SU3_ops.h>
+#include <types.h>
 
-static int eigensystem_3x3(mtrx_3x3 * restrict a, mtrx_3x3 * restrict eigenvalues_mat, mtrx_3x3 * restrict eigenvectors){
+
+static int eigensystem_3x3(Mtrx3x3 * restrict a, 
+                           Mtrx3x3 * restrict eigenvalues_mat, 
+                           Mtrx3x3 * restrict eigenvectors){
 
     double complex eigenvalues[Nc];
     
-    mtrx_3x3 left_eigenvectors; /*not used*/
+    Mtrx3x3 left_eigenvectors; /*not used*/
 
     lapack_int info;
     
-    info = LAPACKE_zgeev(LAPACK_ROW_MAJOR, 'N', 'V', Nc, a -> m, Nc, eigenvalues, &(left_eigenvectors.m), Nc, eigenvectors -> m, Nc);
+    info = LAPACKE_zgeev(LAPACK_ROW_MAJOR, 'N', 'V', Nc, a -> m, Nc, 
+                        eigenvalues, 
+                        &(left_eigenvectors).m, Nc, 
+                             eigenvectors -> m, Nc);
     
     set_null_3x3(eigenvalues_mat);
-    for(int a = 0; a < Nc; a++){
-        eigenvalues_mat -> m[ELM3x3(a, a)] = eigenvalues[a];
+    MtrxIdx3 c;
+    LOOP_3(c){
+        eigenvalues_mat -> m[ELEM_3X3(c, c)] = eigenvalues[c];
     }
     // // print_matrix_3x3(eigenvalues_mat, "eigenvalues interno", 16);
     // // print_matrix_3x3(eigenvalues_mat, "eigenvalues interno", 16);
@@ -39,30 +46,34 @@ static int eigensystem_3x3(mtrx_3x3 * restrict a, mtrx_3x3 * restrict eigenvalue
 }
 
 
-static void log_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx,  
-                                    mtrx_3x3 * restrict log_of_diag_mtrx){
+static void log_diagonal_mtrx_3x3(Mtrx3x3 * restrict diag_mtrx,  
+                                  Mtrx3x3 * restrict log_of_diag_mtrx){
     set_null_3x3(log_of_diag_mtrx);    
-    for(int a = 0; a < Nc; a++)
-        log_of_diag_mtrx -> m[ELM3x3(a, a)] = log(diag_mtrx -> m[ELM3x3(a, a)]);
-    
+    MtrxIdx3 a;
+    LOOP_3(a){
+        log_of_diag_mtrx -> m[ELEM_3X3(a, a)] = log(diag_mtrx -> m[ELEM_3X3(a, a)]);
+    }
 }
 
 
-static void power_diagonal_mtrx_3x3(mtrx_3x3 * restrict diag_mtrx, scalar power, 
-                                    mtrx_3x3 * restrict diag_mtrx_to_power){
+static void power_diagonal_mtrx_3x3(Mtrx3x3 * restrict diag_mtrx, Scalar power, 
+                                    Mtrx3x3 * restrict diag_mtrx_to_power){
     set_null_3x3(diag_mtrx_to_power);    
-    for(int a = 0; a < Nc; a++)
-        diag_mtrx_to_power -> m[ELM3x3(a, a)] = pow(diag_mtrx -> m[ELM3x3(a, a)], power);
-    
+    MtrxIdx3 a;
+    LOOP_3(a){
+        diag_mtrx_to_power -> m[ELEM_3X3(a, a)] = pow(diag_mtrx -> m[ELEM_3X3(a, a)], 
+                                                      power);
+    }
 }
 
-int matrix_power_3x3(mtrx_3x3 * restrict a, const scalar power, 
-                            mtrx_3x3 * restrict a_to_power){
+int matrix_power_3x3(      Mtrx3x3 * restrict a, 
+                     const Scalar power, 
+                           Mtrx3x3 * restrict a_to_power){
 
-    mtrx_3x3 eigenvalues, eigenvalues_to_power;
-    mtrx_3x3 eigenvectors, eigenvectors_inv;
+    Mtrx3x3 eigenvalues, eigenvalues_to_power;
+    Mtrx3x3 eigenvectors, eigenvectors_inv;
 
-    mtrx_3x3 a_copy; //because lapack overwrites it
+    Mtrx3x3 a_copy; //because lapack overwrites it
 
     copy_3x3(a, &a_copy);
 
@@ -89,13 +100,13 @@ int matrix_power_3x3(mtrx_3x3 * restrict a, const scalar power,
 }
 
 
-int matrix_log_3x3(mtrx_3x3 * restrict a,  
-                            mtrx_3x3 * restrict log_of_a){
+int matrix_log_3x3(Mtrx3x3 * restrict a,  
+                   Mtrx3x3 * restrict log_of_a){
 
-    mtrx_3x3 eigenvalues, log_of_eigenvalues;
-    mtrx_3x3 eigenvectors, eigenvectors_inv;
+    Mtrx3x3 eigenvalues, log_of_eigenvalues;
+    Mtrx3x3 eigenvectors, eigenvectors_inv;
 
-    mtrx_3x3 a_copy; //because lapack overwrites it
+    Mtrx3x3 a_copy; //because lapack overwrites it
 
     copy_3x3(a, &a_copy);
 

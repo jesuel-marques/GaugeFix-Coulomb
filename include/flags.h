@@ -17,4 +17,4 @@
 
 // #define CHECK_POSITION_BOUNDS
 
-#endif
+#endif  //FLAGS_H

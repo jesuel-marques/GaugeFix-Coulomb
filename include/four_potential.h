@@ -3,10 +3,13 @@
 
 #include <types.h>
 
-void SU3_calculate_A (mtrx_3x3 * restrict U, const pos_vec position, const lorentz_idx mu, 
-                                                                    mtrx_3x3 * restrict A);
+void SU3_calculate_A (Mtrx3x3 * restrict U, 
+                      const PosVec position,
+                      const LorentzIdx mu, 
+                      Mtrx3x3 * restrict A);
 
-void SU3_divergence_A(mtrx_3x3 * restrict U, const pos_vec position, 
-                                                                mtrx_3x3 * restrict div_A);
+void SU3_divergence_A(Mtrx3x3 * restrict U,
+                      const PosVec position, 
+                      Mtrx3x3 * restrict div_A);
 
-#endif
+#endif  //FOURVECTORFIELD_H

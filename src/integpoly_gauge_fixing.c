@@ -1,42 +1,42 @@
-#include <tgmath.h>
 #include <stdio.h>
+#include <tgmath.h>
 
-#include  <SU3_gaugefixing_parameters.h>  //	Gauge-fixing specific parameters
-#include  <SU3_parameters.h>              //	Simulation parameters
-
-#include <SU3_ops.h>
-#include <SU2_ops.h>
-
-#include <misc.h>
-#include <lattice.h>
-#include <fields.h>
-#include <gauge_fixing.h>
-#include <matrix_power.h>
 #include <integpoly_gauge_fixing.h>
+#include <lattice.h>
+#include <matrix_power.h>
+#include <misc.h>
+#include <SU3_ops.h>
+#include <types.h>
+
 
 #define TESTING_POWER_MATRIX
 #undef TESTING_POWER_MATRIX
 
-mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
+extern short n_SPC;
+extern short n_T;
 
-    mtrx_3x3 u_timeslice_sum;
-    mtrx_3x3 u_timeslice_ave;
+extern int volume;
+
+Mtrx3x3 average_u_temporal(Mtrx3x3 * restrict U, 
+                           PosIndex t){
+
+    Mtrx3x3 u_timeslice_sum;
+    Mtrx3x3 u_timeslice_ave;
 
     set_null_3x3(&u_timeslice_sum);
 
+    PosVec position = {.t = t};
+    LOOP_SPATIAL(position){
+        // print_matrix_3x3(get_link(U, assign_position(i, j, k, t), T_INDX),"U",20);
+        // getchar();
 
-    for(pos_index k = 0; k < N_SPC; k++)
-        for(pos_index j = 0; j < N_SPC; j++)
-            for(pos_index i = 0; i < N_SPC; i++){
-                // print_matrix_3x3(get_link(U, assign_position(i, j, k, t), T_INDX),"U",20);
-                // getchar();
-
-                accumulate_3x3(get_link(U, assign_position(i, j, k, t), T_INDX), &u_timeslice_sum);
-            }
+        accumulate_3x3(get_link(U, position, T_INDX), &u_timeslice_sum);
+    }
     // print_matrix_3x3(&u_timeslice_sum, "u_timeslice_sum", 16);
-    scalar one_over_spatial_volume = 1.0 / pow(N_SPC, 3.0);
+    Scalar one_over_spatial_volume = 1.0 / pow(n_SPC, 3.0);
 
-    // printf("%lf + I * (%lf)\n", creal(one_over_spatial_volume), cimag(one_over_spatial_volume));
+    // printf("%lf + I * (%lf)\n", creal(one_over_spatial_volume), 
+    //                             cimag(one_over_spatial_volume));
 
     mult_by_scalar_3x3( one_over_spatial_volume, &u_timeslice_sum, &u_timeslice_ave);
 
@@ -45,12 +45,12 @@ mtrx_3x3 average_u_temporal(mtrx_3x3 * restrict U, pos_index t){
     return u_timeslice_ave;
 }
 
-mtrx_3x3 integ_polyakovloop(mtrx_3x3 * tempave_proj_u){
+Mtrx3x3 integ_polyakovloop(Mtrx3x3 * tempave_proj_u){
     
-    mtrx_3x3 integ_polyakov_loop;
+    Mtrx3x3 integ_polyakov_loop;
     set_identity_3x3(&integ_polyakov_loop);
     
-    for(pos_index t = 0; t < N_T; t++){
+    for(PosIndex t = 0; t < n_T; t++){
 
         accum_left_prod_3x3(tempave_proj_u+t, &integ_polyakov_loop);
 
@@ -60,20 +60,20 @@ mtrx_3x3 integ_polyakovloop(mtrx_3x3 * tempave_proj_u){
 }
 
 
-
-
-int integ_polyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const unsigned short config_nr) {
+int integ_polyakov_gaugefix(      Mtrx3x3 * restrict U, 
+                                  Mtrx3x3 * restrict G, 
+                            const unsigned short config_nr) {
 
     printf("Integrated Polyakov Gauge-Fixing for config %d\n", config_nr);
 
-    mtrx_3x3 u_timeslice_ave[N_T];
-    mtrx_3x3 tempave_proj_u[N_T];
+    Mtrx3x3 u_timeslice_ave[n_T];
+    Mtrx3x3 tempave_proj_u[n_T];
 
-    mtrx_3x3 uavedag;
-    mtrx_3x3 uaveproj;
+    Mtrx3x3 uavedag;
+    Mtrx3x3 uaveproj;
     
     // OMP_PARALLEL_FOR
-    for(pos_index t = 0; t < N_T; t++){
+    for(PosIndex t = 0; t < n_T; t++){
 
 
         u_timeslice_ave[t] = average_u_temporal(U, t);
@@ -87,40 +87,38 @@ int integ_polyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const
 
         // getchar();
         #ifdef TESTING_POWER_MATRIX
-            if(t == N_T / 2){
-                print_matrix_3x3(tempave_proj_u + t, "u average middle time slice of lattice", 18);
+            if(t == n_T / 2){
+                print_matrix_3x3(tempave_proj_u + t, \
+                                 "u average middle time slice of lattice", 18);
             }
-        #endif 
-
+        #endif  //TESTING_POWER_MATRIX
         return 0;
     }
 
-    mtrx_3x3 P = integ_polyakovloop(tempave_proj_u);
+    Mtrx3x3 P = integ_polyakovloop(tempave_proj_u);
     
     #ifdef TESTING_POWER_MATRIX
         print_matrix_3x3(&P, "P", 18);
-    #endif
-    mtrx_3x3 Pto1overNT, logP;
-    matrix_power_3x3(&P, 1.0 / (double) N_T, &Pto1overNT);
+    #endif  //TESTING_POWER_MATRIX
+    Mtrx3x3 Pto1overNT, logP;
+    matrix_power_3x3(&P, 1.0 / (double) n_T, &Pto1overNT);
     matrix_log_3x3(&P,  
                             &logP);
     #ifdef TESTING_POWER_MATRIX
         print_matrix_3x3(&Pto1overNT, "P to 1/Nt", 18);
         print_matrix_3x3(&logP, "log of P", 18);
-    #endif
+    #endif  //TESTING_POWER_MATRIX
 
-    mtrx_3x3 gt[N_T + 1], gdaggert[N_T + 1];
-    mtrx_3x3 u_dag, aux;
-
-    
+    Mtrx3x3 gt[n_T + 1], gdaggert[n_T + 1];
+    Mtrx3x3 u_dag, aux;
 
     set_identity_3x3(gdaggert);
     set_identity_3x3(gt);
     
-    set_identity_3x3(gdaggert + N_T);
-    set_identity_3x3(gt + N_T);
+    set_identity_3x3(gdaggert + n_T);
+    set_identity_3x3(gt + n_T);
     
-    for(pos_index t = 0; t < N_T - 1 ; t++){
+    for(PosIndex t = 0; t < n_T - 1 ; t++){
         
         herm_conj_3x3(tempave_proj_u + t, &u_dag); // transformar em função própria
         prod_three_3x3(&u_dag, gdaggert + t, &Pto1overNT, gdaggert + t + 1);
@@ -128,35 +126,34 @@ int integ_polyakov_gauge_fix(mtrx_3x3 * restrict U, mtrx_3x3 * restrict G, const
 
         // #ifdef TESTING_POWER_MATRIX
         //     print_matrix_3x3(gt + t + 1, "g(t).u(t).gdag(t+1)", 16);
-        // #endif
+        // #endif   //TESTING_POWER_MATRIX
     }
 
-    print_matrix_3x3(gt + N_T / 2, "matrix update middle", 18);
+    print_matrix_3x3(gt + n_T / 2, "matrix update middle", 18);
 
     OMP_PARALLEL_FOR
-    for(pos_index t = 0; t < N_T; t++){
-        mtrx_3x3 updated_u;
-        pos_vec position;
+    for(PosIndex t = 0; t < n_T; t++){
+        Mtrx3x3 updated_u;
+        PosVec position;
         position.t = t;
         // #ifdef TESTING_POWER_MATRIX
         //     printf("t: %d %.16lf\n", t, creal(determinant_3x3(gt+t)));
-        // #endif
-        for(position.k = 0; position.k < N_SPC; position.k++){
-            for(position.j = 0; position.j < N_SPC; position.j++){
-                for(position.i = 0; position.i < N_SPC; position.i++){
+        // #endif   //TESTING_POWER_MATRIX
+        LOOP_SPATIAL(position){
                                         
-                    accum_left_prod_3x3(gt + t, get_gaugetransf(G, position));
-                                        
-                    prod_three_3x3(gt + t, get_link(U, position, T_INDX), gdaggert + t + 1, &updated_u); //TRANSFORMAR EM FUNÇÃO
-                    copy_3x3(&updated_u, get_link(U, position, T_INDX));
+            accum_left_prod_3x3(gt + t, get_gaugetransf(G, position));
+                                
+            prod_three_3x3(gt + t, get_link(U, position, T_INDX), gdaggert + t + 1, 
+                           &updated_u); //TRANSFORMAR EM FUNÇÃO
+            copy_3x3(&updated_u, get_link(U, position, T_INDX));
+            LorentzIdx mu;
 
-                    for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++) {
+            LOOP_LORENTZ_SPATIAL(mu){
 
-                        prod_three_3x3(gt + t, get_link(U, position, mu), gdaggert + t, &updated_u); 
-                        copy_3x3(&updated_u, get_link(U, position, mu));
+                prod_three_3x3(gt + t, get_link(U, position, mu), gdaggert + t, 
+                               &updated_u); 
+                copy_3x3(&updated_u, get_link(U, position, mu));
 
-                    }
-                }
             }
         }
     }

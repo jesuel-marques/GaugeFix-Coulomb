@@ -1,22 +1,29 @@
 #include <stdio.h>
-#include <complex.h>
+
 #include <omp.h>
 
-#include  <SU3_parameters.h>
-
-#include <lattice.h>
 #include <fields.h>
+#include <lattice.h>
 #include <SU3_ops.h>
+#include <SU3_parameters.h>
+#include <types.h>
 
-double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position, 
-                                                  const lorentz_idx mu, 
-                                                  const lorentz_idx nu){
+
+extern short n_SPC;
+extern short n_T;
+
+extern int volume;
+
+double SU3_re_tr_plaquette(      Mtrx3x3 * restrict U, 
+                           const PosVec position, 
+                           const LorentzIdx mu, 
+                           const LorentzIdx nu){
 	
-    mtrx_3x3 plaquette;
+    Mtrx3x3 plaquette;
 
-    mtrx_3x3 ua, ub, uc, ud;
+    Mtrx3x3 ua, ub, uc, ud;
 
-    pos_vec position_plus_mu = hop_pos_plus(position, mu);
+    PosVec position_plus_mu = hop_pos_plus(position, mu);
 
     get_link_matrix(U,              position,              mu, FRONT, &ua);
     get_link_matrix(U,              position_plus_mu,      nu, FRONT, &ub);
@@ -29,32 +36,28 @@ double SU3_re_tr_plaquette(mtrx_3x3 * restrict U, const pos_vec position,
 
 }
 
-double spatial_plaquette_average(mtrx_3x3 * restrict U){
+double spatial_plaquette_average(Mtrx3x3 * restrict U){
     //  Calculates the spatial plaquette average
     double plaq_ave = 0.0;
 
-
     #pragma omp parallel for reduction (+:plaq_ave) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        for (pos_index t = 0; t < N_T; t++) {
+        for (PosIndex t = 0; t < n_T; t++) {
 
-            pos_vec position;
+            PosVec position;
 
             position.t = t;
             double plaq_ave_slice = 0.0;
 
-            for (position.k = 0; position.k < N_SPC; position.k++) {
-                for (position.j = 0; position.j < N_SPC; position.j++) {
-                    for (position.i = 0; position.i < N_SPC; position.i++) {
-                        for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++){
-                            for (lorentz_idx nu = 0; nu < DIM - 1 ; nu++){
-                                if( mu < nu){
+            LOOP_SPATIAL(position){
+                LorentzIdx mu;
+                LOOP_LORENTZ_SPATIAL(mu){
+                    for (LorentzIdx nu = 0; nu < DIM - 1 ; nu++){
+                        if( mu < nu){
 
-                                    plaq_ave_slice += 
-                                        SU3_re_tr_plaquette(U, position, mu, nu);                                    
-                                
-                                }
-                            }
+                            plaq_ave_slice += 
+                                SU3_re_tr_plaquette(U, position, mu, nu);                                    
+                        
                         }
                     }
                 }
@@ -64,34 +67,30 @@ double spatial_plaquette_average(mtrx_3x3 * restrict U){
 
         }
 
-    plaq_ave /= ((DIM - 1.0) * VOLUME);
+    plaq_ave /= ((DIM - 1.0) * volume);
 
     return plaq_ave;
 }
 
-double temporal_plaquette_average(mtrx_3x3 * restrict U){
+double temporal_plaquette_average(Mtrx3x3 * restrict U){
     double plaq_ave = 0.0;
-
 
     #pragma omp parallel for reduction (+:plaq_ave) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        for (pos_index t = 0; t < N_T; t++) {
+        for (PosIndex t = 0; t < n_T; t++) {
 
-            pos_vec position;
+            PosVec position;
 
             position.t = t;
             double plaq_ave_slice = 0.0;
 
-            for (position.k = 0; position.k < N_SPC; position.k++) {
-                for (position.j = 0; position.j < N_SPC; position.j++) {
-                    for (position.i = 0; position.i < N_SPC; position.i++) {
-                        for (lorentz_idx mu = 0; mu < DIM - 1 ; mu++){
-                     
-                            plaq_ave_slice += 
-                                SU3_re_tr_plaquette(U, position, T_INDX, mu);
-                     
-                        }    
-                    }
+            LOOP_SPATIAL(position){
+                LorentzIdx mu;
+                LOOP_LORENTZ_SPATIAL(mu){
+                
+                    plaq_ave_slice += 
+                        SU3_re_tr_plaquette(U, position, T_INDX, mu);
+                
                 }
             }
 
@@ -99,7 +98,7 @@ double temporal_plaquette_average(mtrx_3x3 * restrict U){
 
         }
 
-    plaq_ave /= ((DIM - 1.0) * VOLUME);
+    plaq_ave /= ((DIM - 1.0) * volume);
 
     return plaq_ave;
 }

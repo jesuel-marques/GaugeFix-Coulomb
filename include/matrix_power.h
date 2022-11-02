@@ -3,10 +3,11 @@
 
 #include <types.h>
 
-void matrix_log_3x3  (mtrx_3x3 * restrict a,  
-                            mtrx_3x3 * restrict log_of_a);
+int matrix_power_3x3(const Mtrx3x3 *a, 
+                     const Scalar power, 
+                           Mtrx3x3 *a_to_power);
 
-int matrix_power_3x3(const mtrx_3x3 *a, const scalar power, 
-                           mtrx_3x3 *a_to_power);
+void matrix_log_3x3  (Mtrx3x3 * restrict a,  
+                      Mtrx3x3 * restrict log_of_a);
 
-#endif
+#endif  //LAPACK_MATRIX_POWER_H

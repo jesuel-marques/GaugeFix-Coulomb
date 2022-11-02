@@ -3,32 +3,54 @@
 
 #include <types.h>
 
-#define ELM2x2(a,b)    (a) * 2 + (b)  //  used to get the element of matrices
+#define ELM_2X2(a,b)    (a) * 2 + (b)  //  used to get the element of matrices
 
-// void print_mtrx_2x2(const mtrx_2x2 * restrict u, const char *name, const unsigned short decimal_places);
+#define LOOP_2_CK(a)    for (a = 0; a < 4; a++)
+#define LOOP_2_CK_i(a)  for (a = 1; a < 4; a++)
 
-// void copy_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck* restrict u_copy);
+#define LOOP_2X2(a, b)  for ( a = 0; a < Nc; a++)  \
+                        for ( b = 0; b < Nc; b++)
 
-void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, 
-                           mtrx_2x2 * restrict u);
+//void print_mtrx_2x2(const Mtrx2x2 * restrict u, const char *name, const unsigned short decimal_places);
 
-// void set_null_2x2(mtrx_2x2_ck * u), set_identity_2x2(mtrx_2x2_ck * u);
+void copy_2x2(const Mtrx2x2CK * restrict u, 
+                    Mtrx2x2CK* restrict u_copy);
 
-// void accumulate_2x2(const mtrx_2x2_ck * u, mtrx_2x2_ck* acc);
+void convert_from_ck(const Mtrx2x2CK * restrict u_ck, 
+                           Mtrx2x2 * restrict u);
 
-// void subtraction_2x2(const mtrx_2x2_ck* u, const mtrx_2x2_ck* v, mtrx_2x2_ck* u_minus_v);
+//void set_null_2x2(Mtrx2x2CK * u), set_identity_2x2(Mtrx2x2CK * u);
 
-// double SU2_trace(const mtrx_2x2_ck *u),
-//        determinant_2x2(const mtrx_2x2_ck *u);
+//void accumulate_2x2(const Mtrx2x2CK * u, 
+//                          Mtrx2x2CK* acc);
 
-// void herm_conj_2x2(const mtrx_2x2_ck* u, mtrx_2x2_ck* u_dagger);
+//void subtraction_2x2(const Mtrx2x2CK* u, 
+//                     const Mtrx2x2CK* v, 
+//                           Mtrx2x2CK* u_minus_v);
 
-// void mult_scalar_2x2(const mtrx_2x2_ck* restrict u, const double alpha, mtrx_2x2_ck* restrict alpha_times_u);
+//Scalar SU2_trace(const Mtrx2x2CK *u);
+Scalar determinant_2x2(const Mtrx2x2CK *u);
 
-// void product_2x2(const mtrx_2x2_ck* u, const mtrx_2x2_ck* v, mtrx_2x2_ck* uv),
-//      product_three_2x2(const mtrx_2x2_ck* u, const mtrx_2x2_ck* v, const mtrx_2x2_ck* w, mtrx_2x2_ck* uvw),
-//      product_four_2x2(const mtrx_2x2_ck* u, const mtrx_2x2_ck* v, const mtrx_2x2_ck* w, const mtrx_2x2_ck* x, mtrx_2x2_ck* uvwx);
+//void herm_conj_2x2(const Mtrx2x2CK* u, 
+//                         Mtrx2x2CK* u_dagger);
 
-short SU2_projection(mtrx_2x2_ck* restrict u);
+void mult_scalar_2x2(const Mtrx2x2CK * restrict u, 
+                     const Scalar alpha, 
+                           Mtrx2x2CK * restrict alpha_times_u);
 
-#endif
+//void product_2x2(const Mtrx2x2CK* u, 
+//                 const Mtrx2x2CK* v, 
+//                       Mtrx2x2CK* uv),
+//product_three_2x2(const Mtrx2x2CK* u, 
+//                  const Mtrx2x2CK* v, 
+//                  const Mtrx2x2CK* w, 
+//                        Mtrx2x2CK* uvw),
+//product_four_2x2(const Mtrx2x2CK* u, 
+//                 const Mtrx2x2CK* v,
+//                 const Mtrx2x2CK* w, 
+//                 const Mtrx2x2CK* x, 
+//                       Mtrx2x2CK* uvwx);
+
+short SU2_projection(Mtrx2x2CK* restrict u);
+
+#endif  //SU2OPS_H

@@ -8,5 +8,5 @@ hostfile
 *.cfg
 *.o
 *.d
-build/
+build
 Makefile

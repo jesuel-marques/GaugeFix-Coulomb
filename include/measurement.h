@@ -3,7 +3,7 @@
 
 #include <types.h>
 
-double spatial_plaquette_average (mtrx_3x3 * U),
-       temporal_plaquette_average(mtrx_3x3 * U);
+double spatial_plaquette_average (Mtrx3x3 * U),
+       temporal_plaquette_average(Mtrx3x3 * U);
 
-#endif
+#endif  //MEASUREMENT_H

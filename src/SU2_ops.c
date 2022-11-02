@@ -1,76 +1,81 @@
-#include <stdio.h>  //	Standard C header files
-#include <stdlib.h>
+#include <stdio.h>
 #include <tgmath.h>
 
-#include <types.h>
-#include <math_ops.h>  //	Math operations
+#include <math_ops.h>
 #include <SU2_ops.h>
+#include <types.h>
+
 
 // All matrices are in the Cayley-Klein representation
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
 //	where sigma[i] are the Pauli matrices.
 
-void print_mtrx_2x2(const mtrx_2x2 * restrict u, const char *name, const unsigned short decimal_places) {
-    // Prints the matrix on screen with a given number of decimal places and 
-    // adds a name on the top
+// void print_mtrx_2x2(const Mtrx2x2 * restrict u, 
+//                     const char *name, 
+//                     const unsigned short decimal_places) {
+//     // Prints the matrix on screen with a given number of decimal places and 
+//     // adds a name on the top
 
-    printf("\n\n %s \n", name);
+//     printf("\n\n %s \n", name);
 
-    printf("{");
-    for (SU2_color_idx  a = 0; a < 2; a++) {
-        printf("{");
+//     printf("{");
+//     for (SU2ColorIdx  a = 0; a < 2; a++) {
+//         printf("{");
 
-        for (SU2_color_idx  b = 0; b < 2; b++) {
-            printf("%.*lf + I(%.*lf)", decimal_places, creal(u -> m[ELM2x2(a, b)]), 
-                                       decimal_places, cimag(u -> m[ELM2x2(a, b)]));
+//         for (SU2ColorIdx  b = 0; b < 2; b++) {
+//             printf("%.*lf + I(%.*lf)", decimal_places, creal(u -> m[ELM_2X2(a, b)]), 
+//                                        decimal_places, cimag(u -> m[ELM_2X2(a, b)]));
             
-            b != 2 -1 ?  printf(",") : 0 ;
-        }
+//             b != 2 -1 ?  printf(",") : 0 ;
+//         }
 
-        a != 2 - 1 ?  printf("},\n") : 0 ;
-    }
+//         a != 2 - 1 ?  printf("},\n") : 0 ;
+//     }
 
-    printf("}}\n\n");
+//     printf("}}\n\n");
 
-    getchar();
-}
+//     getchar();
+// }
 
-void copy_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck * restrict u_copy) {
+void copy_2x2(const Mtrx2x2CK * restrict u, 
+                    Mtrx2x2CK * restrict u_copy) {
     // Copies u to u_copy
-
-    for (SU2_color_idx a = 0; a < 4; a++) {
+    SU2ColorIdx a;
+    LOOP_2_CK(a){
 
         u_copy -> m[a] = u -> m[a];
 
     }
 }
 
-inline void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, mtrx_2x2 * restrict u){
+inline void convert_from_ck(const Mtrx2x2CK * restrict u_ck, 
+                                  Mtrx2x2 * restrict u){
     
-    u -> m[ELM2x2(0, 0)] =      u_ck -> m[0] 
-                          + I * u_ck -> m[3];
+    u -> m[ELM_2X2(0, 0)] =      u_ck -> m[0] 
+                           + I * u_ck -> m[3];
 
-    u -> m[ELM2x2(0, 1)] =      u_ck -> m[2]
-                          + I * u_ck -> m[1];
+    u -> m[ELM_2X2(0, 1)] =      u_ck -> m[2]
+                           + I * u_ck -> m[1];
 
-    u -> m[ELM2x2(1, 0)] =   -  u_ck -> m[2] 
-                          + I * u_ck -> m[1];
+    u -> m[ELM_2X2(1, 0)] =   -  u_ck -> m[2] 
+                           + I * u_ck -> m[1];
 
-    u -> m[ELM2x2(1, 1)] =      u_ck -> m[0] 
-                          - I * u_ck -> m[3];
+    u -> m[ELM_2X2(1, 1)] =      u_ck -> m[0] 
+                           - I * u_ck -> m[3];
 
 }
-// void set_null_2x2(mtrx_2x2_ck * restrict u) {
+
+// void set_null_2x2(Mtrx2x2CK * restrict u) {
 //     // Sets u to be the null Cayley-Klein 2x2 matrix
 
-//     for (SU2_color_idx a = 0; a < 4; a++) {
+//     for (SU2ColorIdx a = 0; a < 4; a++) {
 
 //         u -> m[a] = 0.0;
 
 //     }
 // }
 
-// void set_identity_2x2(mtrx_2x2_ck * restrict u) {
+// void set_identity_2x2(Mtrx2x2CK * restrict u) {
 //     // Sets u to be the identity Cayley-Klein 2x2 matrix
 
 //     u -> m[0] = 1.0;
@@ -79,23 +84,24 @@ inline void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, mtrx_2x2 * restri
 //     u -> m[3] = 0.0;
 // }
 
-// void accumulate_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck * restrict acc) {
+// void accumulate_2x2(const Mtrx2x2CK * restrict u, 
+//                           Mtrx2x2CK * restrict acc) {
 //     // Accumulates the value of u into acc
 
-//     for (SU2_color_idx a = 0; a < 4; a++) {
+//     for (SU2ColorIdx a = 0; a < 4; a++) {
 
 //         acc -> m[a] += u -> m[a];
 
 //     }
 // }
 
-// void subtraction_2x2(const mtrx_2x2_ck * restrict u, 
-//                      const mtrx_2x2_ck * restrict v, 
-//                                 mtrx_2x2_ck * restrict u_minus_v) {
+// void subtraction_2x2(const Mtrx2x2CK * restrict u, 
+//                      const Mtrx2x2CK * restrict v, 
+//                            Mtrx2x2CK * restrict u_minus_v) {
 //     //  Calculates the difference between matrix u and matrix v
 //     //  and returns result in u_minus_v
 
-//     for (SU2_color_idx a = 0; a < 4; a++) {
+//     for (SU2ColorIdx a = 0; a < 4; a++) {
 
 //         u_minus_v -> m[a] = (u -> m[a]) 
 //                           - (v -> m[a]);
@@ -103,7 +109,7 @@ inline void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, mtrx_2x2 * restri
 //     }
 // }
 
-// work_data_type SU2_trace(const mtrx_2x2_ck * restrict u) {
+// Scalar SU2_trace(const Mtrx2x2CK * restrict u) {
 //     //	Calculates trace of u
 
 //     return 2.0 * (u -> m[0]);
@@ -111,12 +117,12 @@ inline void convert_from_ck(const mtrx_2x2_ck * restrict u_ck, mtrx_2x2 * restri
 //     //	twice the 0th component.
 // }
 
-inline scalar determinant_2x2(const mtrx_2x2_ck * restrict u) {
+inline Scalar determinant_2x2(const Mtrx2x2CK * restrict u) {
     //  Calculates the determinant of the matrix u
 
-    scalar det_u = 0.0;
-
-    for (SU2_color_idx a = 0; a <= 3; a++) {
+    Scalar det_u = 0.0;
+    SU2ColorIdx a;
+    LOOP_2_CK(a){
 
         det_u += POW2(u -> m[a]);
         //	In the Cayley-Klein representation, the determinant
@@ -127,29 +133,31 @@ inline scalar determinant_2x2(const mtrx_2x2_ck * restrict u) {
     return det_u;
 }
 
-void herm_conj_2x2(const mtrx_2x2_ck * restrict u, mtrx_2x2_ck * restrict u_dagger) {
-    // Calculates the hermitean conjugate to u
-    // and returns result in u_dagger.
+// void herm_conj_2x2(const Mtrx2x2CK * restrict u, 
+//                          Mtrx2x2CK * restrict u_dagger) {
+//     // Calculates the hermitean conjugate to u
+//     // and returns result in u_dagger.
 
-    u_dagger -> m[0] = u -> m[0];
-    //	In the Cayley-Klein representation, the 0th
-    //	component of the conjugate is the same...
+//     u_dagger -> m[0] = u -> m[0];
+//     //	In the Cayley-Klein representation, the 0th
+//     //	component of the conjugate is the same...
+//     SU2ColorIdx a;
+//     LOOP_2_CK_i(a){
 
-    for (SU2_color_idx a = 1; a <= 3; a++) {
+//         u_dagger -> m[a] = -(u -> m[a]);
+//         //	And the 1, 2 and 3 components are the
+//         //	same up to a minus sign.
 
-        u_dagger -> m[a] = -(u -> m[a]);
-        //	And the 1, 2 and 3 components are the
-        //	same up to a minus sign.
+//     }
+// }
 
-    }
-}
-
-void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const scalar alpha, 
-                                                    mtrx_2x2_ck * restrict alpha_times_u) {
-    //  Calculates multiplication of Cayley-Klein 2x2 matrix u by scalar alpha
+void mult_scalar_2x2(const Mtrx2x2CK * restrict u, 
+                     const Scalar alpha, 
+                           Mtrx2x2CK * restrict alpha_times_u) {
+    //  Calculates multiplication of Cayley-Klein 2x2 matrix u by Scalar alpha
     //  and returns result in alpha_times_u.
-
-    for (SU2_color_idx a = 0; a < 4; a++) {
+    SU2ColorIdx a;
+    LOOP_2_CK(a){
 
         alpha_times_u -> m[a] = alpha * (u -> m[a]);
         //	Mutiplying each entry.
@@ -157,15 +165,16 @@ void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const scalar alpha,
     }
 }
 
-// static scalar SU2_inner_prod(const mtrx_2x2_ck * restrict u, const mtrx_2x2_ck * restrict v) {
-//     //	Calculates the "scalar product" of two Cayley-Klein 2x2 matrices
+// static Scalar SU2_inner_prod(const Mtrx2x2CK * restrict u, 
+//                              const Mtrx2x2CK * restrict v) {
+//     //	Calculates the "Scalar product" of two Cayley-Klein 2x2 matrices
 //     //	in the Cayley-Klein representation.
 //     //	Used in the product of two Cayley-Klein 2x2 matrices.
 
-//     scalar inner_prod = (u -> m[0]) * (v -> m[0]);
+//     Scalar inner_prod = (u -> m[0]) * (v -> m[0]);
 //     //	The 0th component has a plus sign ...
 
-//     for (SU2_color_idx b = 1; b < 4; b++) {
+//     for (SU2ColorIdx b = 1; b < 4; b++) {
 
 //         inner_prod += -(u -> m[b]) 
 //                      * (v -> m[b]);
@@ -176,9 +185,9 @@ void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const scalar alpha,
 //     return inner_prod;
 // }
 
-// static void SU2_outer_product(const mtrx_2x2_ck * restrict u, 
-//                               const mtrx_2x2_ck * restrict v, 
-//                                         mtrx_2x2_ck * restrict outer_product) {
+// static void SU2_outer_product(const Mtrx2x2CK * restrict u, 
+//                               const Mtrx2x2CK * restrict v, 
+//                                     Mtrx2x2CK * restrict outer_product) {
 //     //	Calculates the "outer product" of two Cayley-Klein 2x2 matrices
 //     //	in the Cayley-Klein representation, and returns result in outer_product
 //     //	Used in the product of two Cayley-Klein 2x2 matrices.
@@ -195,13 +204,13 @@ void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const scalar alpha,
 //                           - (u -> m[2]) * (v -> m[1]);
 // }
 
-// void product_2x2(const mtrx_2x2_ck * restrict u, 
-//                  const mtrx_2x2_ck * restrict v, 
-//                             mtrx_2x2_ck * restrict uv) {
+// void product_2x2(const Mtrx2x2CK * restrict u, 
+//                  const Mtrx2x2CK * restrict v, 
+//                        Mtrx2x2CK * restrict uv) {
 //     // Calculates product of 2 Cayley-Klein 2x2 matrices u e v
 //     // and returns result in uv.
 
-//     mtrx_2x2_ck u_cross_v;
+//     Mtrx2x2CK u_cross_v;
 
 //     uv -> m[0] = SU2_inner_prod(u, v);
 //     //	In the Cayley-Klein representation, the 0th
@@ -209,7 +218,7 @@ void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const scalar alpha,
 
 //     SU2_outer_product(u, v, &u_cross_v);
 
-//     for (SU2_color_idx a = 1; a <= 3; a++) {
+//     for (SU2ColorIdx a = 1; a <= 3; a++) {
 
 //         uv -> m[a] = (u -> m[a]) * (v -> m[0]) 
 //                    + (u -> m[0]) * (v -> m[a])
@@ -221,40 +230,40 @@ void mult_scalar_2x2(const mtrx_2x2_ck * restrict u, const scalar alpha,
 //     //	a term which mixes 0 and 1, 2, 3 components.
 // }
 
-// void product_three_2x2(const mtrx_2x2_ck * restrict u,
-//                        const mtrx_2x2_ck * restrict v, 
-//                        const mtrx_2x2_ck * restrict w, 
-//                                 mtrx_2x2_ck * restrict uvw) {
+// void product_three_2x2(const Mtrx2x2CK * restrict u,
+//                        const Mtrx2x2CK * restrict v, 
+//                        const Mtrx2x2CK * restrict w, 
+//                              Mtrx2x2CK * restrict uvw) {
 //     //  Calculates product of 3 Cayley-Klein 2x2 matrices u, v and w
 //     //  and returns result in uvw.
 
-//     mtrx_2x2_ck uv;
+//     Mtrx2x2CK uv;
   
 //     product_2x2(u, v, &uv);
 //     product_2x2(&uv, w, uvw);
 
 // }
 
-// void product_four_2x2(const mtrx_2x2_ck * restrict u, 
-//                       const mtrx_2x2_ck * restrict v,
-//                       const mtrx_2x2_ck * restrict w, 
-//                       const mtrx_2x2_ck * restrict x, 
-//                                 mtrx_2x2_ck * restrict uvwx) {
+// void product_four_2x2(const Mtrx2x2CK * restrict u, 
+//                       const Mtrx2x2CK * restrict v,
+//                       const Mtrx2x2CK * restrict w, 
+//                       const Mtrx2x2CK * restrict x, 
+//                             Mtrx2x2CK * restrict uvwx) {
 //     //  Calculates product of 4 Cayley-Klein 2x2 matrices u, v, w and x
 //     //  and returns result in uvwx.
 
-//     mtrx_2x2_ck uvw;
+//     Mtrx2x2CK uvw;
 
 //     product_three_2x2(u, v, w, &uvw);
 //     product_2x2(&uvw, x, uvwx);
 
 // }
 
-inline short SU2_projection(mtrx_2x2_ck * restrict u) {
+inline short SU2_projection(Mtrx2x2CK * restrict u) {
     //	Projects matrix a to the group SU(2) returning SU(2) matrix a_SU2.
 
-    mtrx_2x2_ck u_SU2;
-    scalar det_u = determinant_2x2(u);
+    Mtrx2x2CK u_SU2;
+    Scalar det_u = determinant_2x2(u);
     if(det_u != 0){
 
         mult_scalar_2x2(u, 1.0 / sqrt(det_u), &u_SU2);

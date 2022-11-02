@@ -22,6 +22,9 @@
         "lapack.h": "c",
         "matrix_power.h": "c",
         "lapacke.h": "c",
-        "numbers": "c"
+        "numbers": "c",
+        "*.txt": "c",
+        "io_types.h": "c",
+        "flags.h": "c"
     }
 }

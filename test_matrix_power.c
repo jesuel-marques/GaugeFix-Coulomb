@@ -4,25 +4,23 @@
 #include <stdlib.h>
 #include <tgmath.h>
 
-
-#include <SU3_parameters.h>			//	Simulation parameters
-
-
 #include <SU3_ops.h>
+#include <SU3_parameters.h>			//	Simulation parameters
 
 #include <matrix_power.h>
 
-const char extension_config_in[]  = ".cfg";
-const char extension_config_out[] = "_clmb.cfg";
+short n_SPC;	//   Spatial lattice size
+short n_T;		//   Temporal lattice size
 
-const char extension_gt_in[] = "_clmb.gt";
-const char extension_gt_out[] = "_clmb.gt";
+int volume;		//	Number of sites in the lattice
+int spatial_volume;	
 
-int config_exception_list[] = {-1};
+int amount_of_links;
+int amount_of_points;
 
 int main(void) {
-	mtrx_3x3 a_to_power;
-	mtrx_3x3 a = {.m={0.254985810183403  + I * (-0.169733480381236), 0.437294090898545  + I * (-0.638466346569361),-0.508100811963174  + I * ( 0.221677580031758),
+	Mtrx3x3 a_to_power;
+	Mtrx3x3 a = {.m={0.254985810183403  + I * (-0.169733480381236), 0.437294090898545  + I * (-0.638466346569361),-0.508100811963174  + I * ( 0.221677580031758),
 					  0.293989643903225  + I * ( 0.393256005929310), 0.188221457593626  + I * ( 0.333447337901830), 0.097870630589627  + I * ( 0.776354750416125),
 					  0.708027903935633  + I * (-0.404708626754461),-0.393281432336049  + I * ( 0.315990305374718),-0.275049681392046  + I * (-0.068810822797471)}};
 
