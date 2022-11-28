@@ -40,7 +40,8 @@ double spatial_plaquette_average(Mtrx3x3 * restrict U){
     //  Calculates the spatial plaquette average
     double plaq_ave = 0.0;
 
-    #pragma omp parallel for reduction (+:plaq_ave) num_threads(NUM_THREADS) schedule(dynamic) 
+    #pragma omp parallel for reduction (+:plaq_ave) \
+            num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
         for (PosIndex t = 0; t < n_T; t++) {
 

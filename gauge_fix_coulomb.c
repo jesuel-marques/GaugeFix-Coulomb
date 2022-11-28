@@ -18,58 +18,84 @@
 #include <SU3_ops.h>
 
 
-short n_SPC;	//   Spatial lattice size
-short n_T;		//   Temporal lattice size
+// short n_SPC;	//   Spatial lattice size
+// short n_T;		//   Temporal lattice size
 
-int volume;		//	Number of sites in the lattice
-int spatial_volume;	
+// int volume;		//	Number of sites in the lattice
+// int spatial_volume;	
 
-int amount_of_links;
-int amount_of_points;
+// int amount_of_links;
+// int amount_of_points;
 
-char config_filename[MAX_LENGTH_NAME];
-char gauge_transf_filename[MAX_LENGTH_NAME];
+// char config_filename[MAX_LENGTH_NAME];
+// char gauge_transf_filename[MAX_LENGTH_NAME];
 
-double tolerance;
-float omega_OR;
+// double tolerance;
+// float omega_OR;
 
-void handle_input(int argc, char *argv[]){
+gauge_fixing_parameters handle_input(int argc, char *argv[]){
 
-	strcpy(config_filename		, argv[1]);
-	strcpy(gauge_transf_filename, argv[2]);
+	gauge_fixing_parameters pars;
 
-	n_SPC 		= atoi(argv[3]);
-	n_T   		= atoi(argv[4]);
 
-	tolerance 	= atof(argv[5]);
-	omega_OR 	= atof(argv[6]);
 
-	volume 	       = n_SPC * n_SPC * n_SPC * n_T;
-	spatial_volume = n_SPC * n_SPC * n_SPC;	//	Number of sites in the lattice
+	if(argc != 7){
+		pars.error = 1;
+	}
 
-	amount_of_links = DIM * volume;
-	amount_of_points = volume;	
+	strcpy(pars.config_filename		, argv[1]);
+	strcpy(pars.gauge_transf_filename	, argv[2]);
 
+	pars.n_SPC 		= atoi(argv[3]);
+	pars.n_T   		= atoi(argv[4]);
+
+	if(pars.n_SPC <= 0 || pars.n_T <= 0){
+		pars.error = 1;
+	}
+
+	pars.tolerance 	= atof(argv[5]);
+	pars.omega_OR 	= atof(argv[6]);
+
+	if(pars.omega_OR < 1 || pars.omega_OR >= 2 || pars.tolerance < 0){
+		pars.error = 1;
+	}
+
+	pars.spatial_volume = pars.n_SPC * pars.n_SPC * pars.n_SPC;	//	Number of sites in the lattice
+	pars.volume 	       =  pars.spatial_volume * pars.n_T;
+
+	pars.amount_of_links  = DIM * pars.volume;
+	pars.amount_of_points = pars.volume;
+	
+	return pars;
 }
 	
 int main(int argc, char *argv[]) {
 	int exit_status;
 
-	handle_input(argc, argv);
+	if(handle_input(argc, argv)){
+		fprintf(stderr, "Bad input.\n"
+						"Usage: Input config filename, gt filename, n_SPC, n_T, "
+						"tolerance and omega_OR in this order.\n"
+						"Check that:\n"
+						"1 < omega_OR < 2\n"
+						"n_SPC > 0 and n_T >0\n"
+						"tolerance > 0 \n");
+		return EXIT_FAILURE;
+	}
 	
-	// GREETER();		
+	// GREETER();
 
-	Mtrx3x3 * U = allocate_field(amount_of_links, sizeof(Mtrx3x3));
+	const Mtrx3x3 * U = allocate_field(amount_of_links, sizeof(Mtrx3x3));
 	if(U == NULL){
 		fprintf(stderr, "Could not allocate memory for config in file %s.\n",
 						config_filename);
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	if(SU3_load_config(U, config_filename)){
 		fprintf(stderr, "Loading of file %s failed.\n", config_filename);
 		free(U);
-		return -1;
+		return EXIT_FAILURE;
 	}
 	else{
 		printf("File %s loaded OK.\n", config_filename);
@@ -79,19 +105,19 @@ int main(int argc, char *argv[]) {
 	//	storing config in single precision.	
 
 	if(reunitarize_field(U,  amount_of_links)){
-		fprintf(stderr, "Configuration in file %s or its gauge-transformation"
-						"could not be reunitarized.\n", config_filename);
+		fprintf(stderr, "Configuration in file %s could not be reunitarized.\n",
+						 config_filename);
 		free(U);
-		return -1;
+		return EXIT_FAILURE;
 	}
 	Mtrx3x3 * G = allocate_field(amount_of_points, sizeof(Mtrx3x3));
 	if(G == NULL){
 		free(U);
-		return -1;
+		return EXIT_FAILURE;
 	}
 
 	set_field_to_identity(G, amount_of_points);
-		
+	
 	//  fix the gauge
 
 	int sweeps = SU3_gaugefix_overrelaxation(U, G, 
@@ -101,12 +127,12 @@ int main(int argc, char *argv[]) {
 
 	if(sweeps == -1){
 		fprintf(stderr, "Configuration in file %s could not be gauge-fixed.\n"	
-						 "SOR algorithm seems not to work or be too slow\n", 
+						"SOR algorithm seems not to work or be too slow\n", 
 						 config_filename);
 		
 		free(U);
 		free(G);
-		return -1;		
+		return EXIT_FAILURE;		
 	}
 
 	//	Record the effort to gauge-fix

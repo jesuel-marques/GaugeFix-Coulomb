@@ -21,17 +21,17 @@ int main(void) {
 					  0.293989643903225  + I * ( 0.393256005929310), 0.188221457593626  + I * ( 0.333447337901830), 0.097870630589627  + I * ( 0.776354750416125),
 					  0.708027903935633  + I * (-0.404708626754461),-0.393281432336049  + I * ( 0.315990305374718),-0.275049681392046  + I * (-0.068810822797471)}};
 
-	print_matrix_3x3(&a, "matrix", 16);
+	print_matrix_3x3(&a);
 	matrix_power_3x3(&a, 0.5, &a_to_power);
-	print_matrix_3x3(&a_to_power, "square root of matrix ", 16);
+	print_matrix_3x3(&a_to_power);
 	
-	print_matrix_3x3(&a, "matrix", 16);
+	print_matrix_3x3(&a);
 	matrix_power_3x3(&a, 0.5, &a_to_power);
-	print_matrix_3x3(&a_to_power, "square root of matrix ", 16);
+	print_matrix_3x3(&a_to_power);
 
-	print_matrix_3x3(&a, "matrix", 16);
+	print_matrix_3x3(&a);
 	matrix_power_3x3(&a, 1/3., &a_to_power);
-	print_matrix_3x3(&a_to_power, "cubic root of matrix ", 16);
+	print_matrix_3x3(&a_to_power);
 
 	return EXIT_SUCCESS;
 }

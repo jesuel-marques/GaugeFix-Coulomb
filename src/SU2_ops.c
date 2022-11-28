@@ -19,10 +19,10 @@
 //     printf("\n\n %s \n", name);
 
 //     printf("{");
-//     for (SU2ColorIdx  a = 0; a < 2; a++) {
+//     for (MtrxIdx2  a = 0; a < 2; a++) {
 //         printf("{");
 
-//         for (SU2ColorIdx  b = 0; b < 2; b++) {
+//         for (MtrxIdx2  b = 0; b < 2; b++) {
 //             printf("%.*lf + I(%.*lf)", decimal_places, creal(u -> m[ELM_2X2(a, b)]), 
 //                                        decimal_places, cimag(u -> m[ELM_2X2(a, b)]));
             
@@ -40,7 +40,7 @@
 void copy_2x2(const Mtrx2x2CK * restrict u, 
                     Mtrx2x2CK * restrict u_copy) {
     // Copies u to u_copy
-    SU2ColorIdx a;
+    MtrxIdx2 a;
     LOOP_2_CK(a){
 
         u_copy -> m[a] = u -> m[a];
@@ -68,7 +68,7 @@ inline void convert_from_ck(const Mtrx2x2CK * restrict u_ck,
 
 // void set_null_2x2(Mtrx2x2CK * restrict u) {
 //     // Sets u to be the null Cayley-Klein 2x2 matrix
-//     for (SU2ColorIdx a = 0; a < 4; a++) {
+//     for (MtrxIdx2 a = 0; a < 4; a++) {
 
 //         u -> m[a] = 0.0;
 
@@ -88,7 +88,7 @@ inline void convert_from_ck(const Mtrx2x2CK * restrict u_ck,
 // void accumulate_2x2(const Mtrx2x2CK * restrict u, 
 //                           Mtrx2x2CK * restrict acc) {
 //     // Accumulates the value of u into acc
-//     for (SU2ColorIdx a = 0; a < 4; a++) {
+//     for (MtrxIdx2 a = 0; a < 4; a++) {
 
 //         acc -> m[a] += u -> m[a];
 
@@ -102,7 +102,7 @@ inline void convert_from_ck(const Mtrx2x2CK * restrict u_ck,
 //     //  Calculates the difference between matrix u and matrix v
 //     //  and returns result in u_minus_v
 
-//     for (SU2ColorIdx a = 0; a < 4; a++) {
+//     for (MtrxIdx2 a = 0; a < 4; a++) {
 
 //         u_minus_v -> m[a] = (u -> m[a]) 
 //                           - (v -> m[a]);
@@ -122,7 +122,7 @@ inline void convert_from_ck(const Mtrx2x2CK * restrict u_ck,
 inline Scalar determinant_2x2(const Mtrx2x2CK * restrict u) {
     //  Calculates the determinant of the matrix u
     Scalar det_u = 0.0;
-    SU2ColorIdx a;
+    MtrxIdx2 a;
     LOOP_2_CK(a){
 
         det_u += POW2(u -> m[a]);
@@ -142,7 +142,7 @@ inline Scalar determinant_2x2(const Mtrx2x2CK * restrict u) {
 //     u_dagger -> m[0] = u -> m[0];
 //     //	In the Cayley-Klein representation, the 0th
 //     //	component of the conjugate is the same...
-//     SU2ColorIdx a;
+//     MtrxIdx2 a;
 //     LOOP_2_CK_i(a){
 
 //         u_dagger -> m[a] = -(u -> m[a]);
@@ -158,7 +158,7 @@ void mult_scalar_2x2(const Mtrx2x2CK * restrict u,
                            Mtrx2x2CK * restrict alpha_times_u) {
     //  Calculates multiplication of Cayley-Klein 2x2 matrix u by Scalar alpha
     //  and returns result in alpha_times_u.
-    SU2ColorIdx a;
+    MtrxIdx2 a;
     LOOP_2_CK(a){
 
         alpha_times_u -> m[a] = alpha * (u -> m[a]);
@@ -176,7 +176,7 @@ void mult_scalar_2x2(const Mtrx2x2CK * restrict u,
 //     Scalar inner_prod = (u -> m[0]) * (v -> m[0]);
 //     //	The 0th component has a plus sign ...
 
-//     for (SU2ColorIdx b = 1; b < 4; b++) {
+//     for (MtrxIdx2 b = 1; b < 4; b++) {
 
 //         inner_prod += -(u -> m[b]) 
 //                      * (v -> m[b]);
@@ -220,7 +220,7 @@ void mult_scalar_2x2(const Mtrx2x2CK * restrict u,
 
 //     SU2_outer_product(u, v, &u_cross_v);
 
-//     for (SU2ColorIdx a = 1; a <= 3; a++) {
+//     for (MtrxIdx2 a = 1; a <= 3; a++) {
 
 //         uv -> m[a] = (u -> m[a]) * (v -> m[0]) 
 //                    + (u -> m[0]) * (v -> m[a])

@@ -89,7 +89,7 @@ InCfgMtrx *get_link_in(InCfgMtrx *U,
                        const LorentzIdx mu) {
     //	Does the pointer arithmetic to get a pointer
     //  to link at given position and mu
-    return U + GET_LINK_U(position, mu);
+    return GET_LINK(U, position, mu);
 }
 
 
@@ -98,7 +98,7 @@ OutCfgMtrx *get_link_out(OutCfgMtrx *U,
                          const LorentzIdx mu) {
     //	Does the pointer arithmetic to get a pointer
     //  to link at given position and mu
-    return U + GET_LINK_U(position, mu);
+    return GET_LINK(U, position, mu);
 }
 
 
@@ -106,7 +106,7 @@ InGTMtrx  *get_gaugetransf_in (InGTMtrx  * restrict G_in,
                                const PosVec position) {
     //	Does the pointer arithmetic to get a pointer 
     //  to a gauge-transformation at given position
-    return G_in + GET_GT(position);
+    return  GET_GT(G_in, position);
 }
 
 
@@ -114,12 +114,12 @@ OutGTMtrx *get_gaugetransf_out(OutGTMtrx * restrict G_out,
                                const PosVec position) {
     //	Does the pointer arithmetic to get a pointer 
     //  to a gauge-transformation at given position
-    return G_out + GET_GT(position);
+    return GET_GT(G_out, position);
 }
 
 
-int SU3_load_config(Mtrx3x3 * restrict U, 
-                    char * config_filename) {
+int SU3_load_config(const Mtrx3x3 * restrict U, 
+                          char * config_filename) {
     //	Loads a link configuration from the file with filename to U.
     FILE *config_file;
 
@@ -130,7 +130,7 @@ int SU3_load_config(Mtrx3x3 * restrict U,
         return -1;
     }
 
-    InCfgMtrx *U_in;
+    const InCfgMtrx *U_in;
 
     #ifdef CONV_CFG_TO_WORKING_PRECISION
 
@@ -190,7 +190,7 @@ int SU3_load_config(Mtrx3x3 * restrict U,
 int SU3_load_gauge_transf(Mtrx3x3 * restrict G, 
                           char    * gauge_transf_filename) {
     //	Loads a gauge transformation to G.
-    InGTMtrx *G_in;
+    const InGTMtrx *G_in;
 
     #ifdef CONV_GT_TO_WORKING_PRECISION
         G_in = (InGTMtrx *)calloc( volume , sizeof(InGTMtrx));
@@ -201,7 +201,7 @@ int SU3_load_gauge_transf(Mtrx3x3 * restrict G,
         G_in = (InGTMtrx *)G;
     #endif  //CONV_GT_TO_WORKING_PRECISION
     
-    FILE *gaugetransf_file;
+    const FILE *gaugetransf_file;
 
     printf("Loading: %s.\n", gauge_transf_filename);
     if ((gaugetransf_file = fopen(gauge_transf_filename, "rb")) == NULL) {
@@ -260,7 +260,7 @@ int SU3_load_gauge_transf(Mtrx3x3 * restrict G,
 int SU3_write_config(Mtrx3x3 * restrict U, 
                      char * config_filename) {
     //  Loads a link configuration from the file with filename to U.
-    OutCfgMtrx *U_out;
+    const OutCfgMtrx *U_out;
 
     #ifdef CONV_CFG_FROM_WORKING_PRECISION
 
@@ -283,7 +283,7 @@ int SU3_write_config(Mtrx3x3 * restrict U,
         }
     #endif  //NEED_BYTE_SWAP_OUT
 
-    FILE *config_file;
+    const FILE *config_file;
 
     printf("Creating: %s.\n", config_filename);
     if ((config_file = fopen(config_filename, "wb")) == NULL) {
@@ -323,7 +323,7 @@ int SU3_write_config(Mtrx3x3 * restrict U,
 int SU3_write_gauge_transf(Mtrx3x3 * restrict G, 
                            char * gauge_transf_filename) {
     //  Loads a link configuration from the file with filename to U.
-    OutGTMtrx *G_out;
+    const OutGTMtrx *G_out;
 
     #ifdef CONV_GT_FROM_WORKING_PRECISION
         G_out = (OutGTMtrx *)calloc(volume, sizeof(OutGTMtrx));
@@ -337,7 +337,7 @@ int SU3_write_gauge_transf(Mtrx3x3 * restrict G,
         G_out = (OutGTMtrx *)G;
     #endif  //CONV_GT_FROM_WORKING_PRECISION
 
-    FILE *gaugetransf_file;
+    const FILE *gaugetransf_file;
 
     if ((gaugetransf_file = fopen(gauge_transf_filename, "wb")) == NULL) {
 

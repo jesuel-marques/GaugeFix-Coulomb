@@ -15,39 +15,55 @@ extern short n_T;
 
 Mtrx3x3 *allocate_field(int elements, 
                         int size_of_elements){
-    Mtrx3x3 *field = (Mtrx3x3 *) calloc(elements, size_of_elements);
-	if(field == NULL){		
-		return NULL;
-	}
-
+    if(elements <= 0  || size_of_elements <= 0){
+        return NULL;
+    }
+    
+    const Mtrx3x3 *field = (Mtrx3x3 *) calloc(elements, size_of_elements);
+	
     return field;
 }
 
 
-void set_field_to_identity(Mtrx3x3 * restrict field, 
+int set_field_to_identity(const Mtrx3x3 * restrict field, 
                            int elements){
+    if(elements <= 0  || field == NULL){
+        return -1;
+    }
+
     OMP_PARALLEL_FOR
     for(int i = 0; i < elements; i++)
         set_identity_3x3(field + i);
+    
+    return 0;
 }
 
 
-void copy_field(Mtrx3x3 * restrict field, 
+int copy_field(const Mtrx3x3 * restrict field, 
                 int elements, 
-                Mtrx3x3 * restrict field_copy){
+               const Mtrx3x3 * restrict field_copy){
+    if(elements <= 0  || field == NULL || field_copy == NULL){
+        return -1;
+    }
+
     OMP_PARALLEL_FOR
     for(int i = 0; i < elements; i++)
         copy_3x3(field + i, field_copy + i);
+
+    return 0;
 }
 
 
-int reunitarize_field(Mtrx3x3 * restrict field,
+int reunitarize_field(const Mtrx3x3 * restrict field,
                       int elements){
+    if(elements <= 0  || field == NULL){
+        return -1;
+    }
+
     int exit_status = 0;
     #pragma omp parallel for num_threads(NUM_THREADS) \
             reduction (|:exit_status) schedule(dynamic)
     for(int i = 0; i < elements; i++)
-
         exit_status |= projection_SU3(field + i);
 
     if(exit_status != 0){
@@ -57,16 +73,16 @@ int reunitarize_field(Mtrx3x3 * restrict field,
 }
 
 
-double average_field_det(Mtrx3x3 *restrict field,
+double average_field_det(const Mtrx3x3 *restrict field,
                          int elements) {
+    if(elements <= 0  || field == NULL){
+        return -1;
+    }
     double det = 0.0;
-    /* Reunitarizes the field*/
 
     #pragma omp parallel for num_threads(NUM_THREADS) \
             schedule(dynamic) reduction(+ : det)
-        // Paralelizing by slicing the time extent
         for(int i = 0; i < elements; i++)
-
             det += determinant_3x3(field + i);
 
     det /= (double)elements;
@@ -75,14 +91,14 @@ double average_field_det(Mtrx3x3 *restrict field,
 }
 
 
-Mtrx3x3 *get_link(Mtrx3x3 *restrict U, 
+Mtrx3x3 *get_link(const Mtrx3x3 *restrict U, 
                   const PosVec position, 
                   const LorentzIdx mu) {
     /* Does the pointer arithmetic to get a pointer to link at given position and mu */
     #ifdef CHECK_POSITION_BOUNDS
         if(position_mu_valid(position, mu))    
     #endif  //CHECK_POSITION_BOUNDS
-            return U + GET_LINK_U(position, mu);
+            return GET_LINK(U, position, mu);
     #ifdef CHECK_POSITION_BOUNDS
         else{
             printf("Program reading config outside of allowed range.\n");
@@ -92,11 +108,11 @@ Mtrx3x3 *get_link(Mtrx3x3 *restrict U,
 }
 
 
-void get_link_matrix(      Mtrx3x3 *restrict U, 
+void get_link_matrix(const Mtrx3x3 *restrict U, 
                      const PosVec position, 
                      const LorentzIdx mu, 
                            Direction dir, 
-                           Mtrx3x3 *restrict u) {
+                     const Mtrx3x3 *restrict u) {
     /* Gets forward or backward link at given position and mu
     and copies it to u. */
     #ifdef CHECK_POSITION_BOUNDS
@@ -125,14 +141,14 @@ void get_link_matrix(      Mtrx3x3 *restrict U,
 }
 
 
-Mtrx3x3 *get_gaugetransf(Mtrx3x3 *restrict G, 
+Mtrx3x3 *get_gaugetransf(const Mtrx3x3 *restrict G, 
                          const PosVec position) {
     /* Does the pointer arithmetic to get a pointer to 
        a gauge transformation at given position */
     #ifdef CHECK_POSITION_BOUNDS
         if(position_valid(position)){
     #endif  //CHECK_POSITION_BOUNDS
-            return G + GET_GT(position);
+            return GET_GT(G, position);
     #ifdef CHECK_POSITION_BOUNDS
         }
         else{

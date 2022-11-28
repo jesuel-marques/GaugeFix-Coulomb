@@ -8,14 +8,10 @@
 #include <SU3_ops.h>
 #include <types.h>
 
+#define DIGITS_MATRIX 18
 
-void print_matrix_3x3(const Mtrx3x3 * restrict u, 
-                      const char *name, 
-                      const unsigned short decimal_places) {
-    // Prints the matrix on screen with a given number of decimal places and 
-    // adds a name on the top
-
-    printf("\n\n %s \n", name);
+void print_matrix_3x3(const Mtrx3x3 * restrict u) {
+    // Prints the matrix on screen    
 
     printf("{");
     MtrxIdx3 a, b;
@@ -24,8 +20,8 @@ void print_matrix_3x3(const Mtrx3x3 * restrict u,
         printf("{");
 
         LOOP_3(b){
-            printf("%.*lf + I*(%.*lf)", decimal_places, creal(u -> m[ELEM_3X3(a, b)]), 
-                                        decimal_places, cimag(u -> m[ELEM_3X3(a, b)]));
+            printf("%.*lf + I*(%.*lf)", DIGITS_MATRIX, creal(u -> m[ELEM_3X3(a, b)]), 
+                                        DIGITS_MATRIX, cimag(u -> m[ELEM_3X3(a, b)]));
             
             b != Nc -1 ?  printf(", ") : 0 ;
         }
@@ -414,10 +410,10 @@ inline static int normalize_3_vec(Vec3 * restrict v){
             v -> m[a] *= r;
 
         }
-        return EXIT_SUCCESS;
+        return 0;
     }
     else{
-        return EXIT_FAILURE;
+        return -1;
     }
 }
 
@@ -472,8 +468,8 @@ inline short projection_SU3(Mtrx3x3 * restrict x) {
 
     }
         
-    if(exit_status==EXIT_SUCCESS){
-        return EXIT_SUCCESS;
+    if(exit_status==0){
+        return 0;
     }
     else{
         return -1;
