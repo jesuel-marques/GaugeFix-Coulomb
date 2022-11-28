@@ -63,9 +63,13 @@ int main(int argc, char *argv[]) {
 	else{
 		printf("File %s loaded OK.\n", config_filename);
 	}
+	
+	// printf("First Link\n");
 	// print_matrix_3x3(get_link(U, assign_position(0, 0, 0, 0), 0), "First link", 10);
-
-	// print_matrix_3x3(get_link(U, assign_position(n_SPC - 1, n_SPC - 1 , n_SPC - 1 , n_T - 1), DIM - 1), "Last link", 10);
+	// printf("Last link\n");
+	// print_matrix_3x3(get_link(U, 
+	// 							 assign_position(n_SPC - 1, n_SPC - 1 , n_SPC - 1 , n_T - 1),
+	// 							 DIM - 1));
 
 	// printf("\n e2 before reunitarization and gauge transformation: %5.4E \n", SU3_calculate_e2(U));
 	// printf("average determinant before reunitarization: %.15lf\n",	average_det(U));

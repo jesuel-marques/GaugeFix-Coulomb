@@ -74,7 +74,7 @@ void SU3_convert_cfg_in_work(InCfgMtrx * restrict U_in,
         position.t = t;
         LOOP_SPATIAL(position){
             LorentzIdx mu;
-            LOOP_LORENTZ(mu) {
+            LOOP_LORENTZ(mu){
 
                 convert_in_work_cfg_3x3(get_link_in(U_in  , position, mu), 
                                         get_link   (U_work, position, mu));

@@ -17,7 +17,7 @@ OutCfgMtrx *get_link_out(OutCfgMtrx * restrict U_out,
                          const PosVec position,
                          const LorentzIdx mu);
 
-int SU3_load_config (Mtrx3x3 * restrict U,
+int SU3_load_config (const Mtrx3x3 * restrict U,
                      char * config_filename),
     SU3_write_config(Mtrx3x3 * restrict U,
                      char * config_filename);

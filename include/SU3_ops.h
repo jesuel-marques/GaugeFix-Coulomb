@@ -11,9 +11,7 @@
                                 for ( b = 0; b < Nc; b++)
 
 
-void print_matrix_3x3(const Mtrx3x3 *u, 
-                      const char *name, 
-                      const unsigned short decimal_places);
+void print_matrix_3x3(const Mtrx3x3 *u);
 
 void copy_3x3(const Mtrx3x3 *u, 
                     Mtrx3x3 *u_copy);
@@ -61,7 +59,7 @@ void accum_left_prod_3x3 (const Mtrx3x3 *g,
                           const Mtrx3x3 *g);
 
 void accum_prod_SU2_3x3(const Mtrx2x2CK * restrict x_ck, 
-                              Mtrx3x3 * restrict g, 
+                              Mtrx3x3   * restrict g, 
                               MtrxIdx3 a, 
                               MtrxIdx3 b);
 

@@ -19,7 +19,7 @@ void SU3_calculate_A(      Mtrx3x3 * restrict U,
 
     subtraction_herm_conj_trless_3x3(get_link(U, position, mu), &U_minus_Udagger_trless);
     mult_by_scalar_3x3(-0.5 * I, &U_minus_Udagger_trless, A);
-
+    
 }
 
 

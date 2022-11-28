@@ -3,14 +3,16 @@
 
 #include <flags.h>
 
-#define DIM     4      //   Space-time lattice dimension
+//  Hard coded parameters
 
-#define Nc 3    //  Number of colors
+#define DIM 4                   //   Space-time lattice dimension
+
+#define Nc  3                   //  Number of colors
 
 // Other parameters
 
-#define MAX_LENGTH_NAME 2000
+#define MAX_LENGTH_NAME 2000    //  Maximum length for filenames
 
-#define NUM_THREADS 8
+#define NUM_THREADS 8           //  Number of threads the program will use
 
 #endif  //SU3_PARAMETERS_H
