@@ -12,6 +12,19 @@
         "random": "c",
         "stdio.h": "c",
         "measurement.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "math_ops.h": "c",
+        "*.tcc": "c",
+        "cstdio": "c",
+        "fields_io.h": "c",
+        "integpoly_gauge_fixing.h": "c",
+        "four_potential.h": "c",
+        "lapack.h": "c",
+        "matrix_power.h": "c",
+        "lapacke.h": "c",
+        "numbers": "c",
+        "*.txt": "c",
+        "io_types.h": "c",
+        "flags.h": "c"
     }
 }

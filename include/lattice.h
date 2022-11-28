@@ -1,0 +1,62 @@
+#ifndef LATTICE_H
+#define LATTICE_H
+#include <stdbool.h>
+
+#include <flags.h>
+#include <SU3_parameters.h>
+#include <types.h>
+
+
+#define POSITION_IS_ODD(position)    (((position.i) ^ \
+                                       (position.j) ^ \
+                                       (position.k) ^ \
+                                       (position.t)) & 1)
+
+#define POSITION_IS_EVEN(position)   !(POSITION_IS_ODD(position))
+
+#define LOOP_TEMPORAL(t)       for (t = 0; t < n_T; t++) 
+#define LOOP_SPATIAL(position) for (position.k = 0; position.k < n_SPC; position.k++) \
+                               for (position.j = 0; position.j < n_SPC; position.j++) \
+                               for (position.i = 0; position.i < n_SPC; position.i++)
+
+// Paralelizing by slicing the time extent
+#define LOOP_TEMPORAL_PARALLEL(t) OMP_PARALLEL_FOR \                                
+                               LOOP_TEMPORAL(t)                           
+
+#define LOOP_LORENTZ(mu) for (mu = 0; mu < DIM; mu++)  
+
+#define LOOP_LORENTZ_SPATIAL(mu) for (mu = 0; mu < DIM - 1 ; mu++)
+
+
+//  if position is odd, then the XOR of the first bit of each element
+//  of position must be 1. Take AND with 1 select this first bit. Take the NOT of 
+//  the odd code, because want 1 for even and 0 for odd.
+
+//  Odd position means that the sum of the coordinates is odd and equivalente for even
+
+
+//  Associations between the numeric indices and the lorentz directions
+
+#define X_INDX 0
+#define Y_INDX 1
+#define Z_INDX 2
+#define T_INDX 3
+
+inline bool position_valid(PosVec position);
+
+bool position_mu_valid(PosVec position, 
+                       LorentzIdx mu);
+
+PosVec assign_position(const PosIndex x, 
+                       const PosIndex y, 
+                       const PosIndex z, 
+                       const PosIndex t);
+
+void print_pos_vec(const PosVec u);
+
+PosVec hop_pos_plus (const PosVec u, 
+                     const LorentzIdx mu),
+       hop_pos_minus(const PosVec u, 
+                     const LorentzIdx mu);
+
+#endif  //LATTICE_H

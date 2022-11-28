@@ -3,4 +3,4 @@
 
 #define POW2(a) (a) * (a)   //  squares a number
 
-#endif
+#endif  //MATH_OPS_H

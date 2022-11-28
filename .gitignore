@@ -1,7 +1,13 @@
-configs/
 gauge_fix_coulomb
 plaquette_check
+test_matrix_power
 hostfile
 *.sh
 *.dbg
 *.txt
+*.cfg
+*.o
+*.d
+build
+Makefile
+gt
