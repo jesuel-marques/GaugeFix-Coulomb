@@ -8,10 +8,9 @@
 #include <four_potential.h>
 #include <gauge_fixing.h>
 #include <lattice.h>
-#include <math_ops.h>         
 #include <misc.h>
 #include <SU3_ops.h>
-#include <SU3_parameters.h>
+
 #include <types.h>
 
 //  Initial amount of sweeps to actually measure e2
@@ -26,13 +25,29 @@
 #define BLACKRED_SWEEP(position, sweep) ((POSITION_IS_EVEN(position)) ^ ((sweep) & 1))
 
 
-extern int volume ;
+static bool test_gaugefixing_parameters(gauge_fixing_parameters gfix_param){
+    if(gfix_param.omega_OR < 1  || gfix_param.omega_OR >= 2 ||
+       gfix_param.tolerance < 0 || gfix_param.error    == 1){
+		return false;
+	}
+    return true;
+}
 
-extern short n_T;
-extern short n_SPC;
 
-extern int amount_of_links;
-extern int amount_of_points;
+gauge_fixing_parameters init_gaugefixing_parameters(const double tolerance, 
+                                                    const double omega_OR){
+    gauge_fixing_parameters gfix_param = {.tolerance = 0.0, 
+                                          .omega_OR = 0.0, 
+                                          .error = 0};
+
+	gfix_param.tolerance 	= tolerance;
+	gfix_param.omega_OR 	= omega_OR;
+
+    if(test_gaugefixing_parameters(gfix_param))    
+		gfix_param.error = 1;
+	
+	return gfix_param;
+}
 
 static void SU3_local_update_U_G(Mtrx3x3 * restrict U, 
                                  Mtrx3x3 * restrict G, 
@@ -152,7 +167,7 @@ double SU3_calculate_F(Mtrx3x3 * restrict U){
         }
     }
 
-    return creal(trace_3x3(&U_acc)) / (volume * Nc * (DIM - 1));
+    return creal(trace_3x3(&U_acc)) / (lattice_param.volume * Nc * (DIM - 1));
 }
 
 
@@ -176,7 +191,7 @@ double SU3_calculate_theta(Mtrx3x3 * restrict U){
         }
     }
 
-    return creal(theta) / (double) (Nc * volume);
+    return creal(theta) / (double) (Nc * lattice_param.volume);
 }
 
     
@@ -184,9 +199,10 @@ double SU3_calculate_e2(Mtrx3x3 * restrict U) {
     /* 	Calculates e2 (defined in hep-lat/0301019v2),
     	used to find out distance to the gauge-fixed situation. */
     double e2 = 0.0;
+    PosIndex t;
     #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        for (PosIndex t = 0; t < n_T; t++) {
+        LOOP_TEMPORAL(t){
             Mtrx3x3 div_A;
             MtrxSU3Alg div_A_components;
 
@@ -211,7 +227,7 @@ double SU3_calculate_e2(Mtrx3x3 * restrict U) {
             e2 += e2_slice;
         }
 
-    e2 /= (volume);
+    e2 /= (lattice_param.volume);
 
     return e2;
 }
@@ -343,9 +359,11 @@ inline static void SU3_gaugefix_overrelaxation_local(      Mtrx3x3 * restrict U,
 
 int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U, 
                                 Mtrx3x3 * restrict G, 
-                                char * config_filename, 
-                                double tolerance, 
-                                double omega_OR) {
+                                const gauge_fixing_parameters gfix_param) {
+
+    if(!test_gaugefixing_parameters(gfix_param)){
+        return -2;
+    }
     //	Fix the gauge and follows the process by calculating e2;
     double last_e2 = 10.0;
     double new_e2 = SU3_calculate_e2(U);
@@ -359,7 +377,7 @@ int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U,
 
         OMP_PARALLEL_FOR
             // Paralelizing by slicing the time extent
-            for (PosIndex t = 0; t < n_T; t++) {
+            for (PosIndex t = 0; t < lattice_param.n_T; t++) {
                 PosVec position;
                 position.t = t;
                 LOOP_SPATIAL(position){
@@ -367,7 +385,8 @@ int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U,
                         //	Implementation of the checkerboard subdivision 
                         //  of the lattice.
                         
-                        SU3_gaugefix_overrelaxation_local(U, G, position, omega_OR): 0;
+                        SU3_gaugefix_overrelaxation_local(U, G, position, 
+                                                          gfix_param.omega_OR): 0;
                         //  The actual gauge-fixing algorithm
 
                 }
@@ -381,7 +400,7 @@ int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U,
             last_e2 = new_e2;
             new_e2  = SU3_calculate_e2(U);
 
-            if (new_e2 <= tolerance) {
+            if (new_e2 <= gfix_param.tolerance) {
 
                 break;
 
@@ -395,15 +414,15 @@ int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U,
             else {
                 
                 sweeps_to_measurement_e2 += 
-                    sweeps_to_next_measurement(new_e2, tolerance);
+                    sweeps_to_next_measurement(new_e2, gfix_param.tolerance);
                 //	No need to calculate e2 all the time
                 //	because it will take some hundreds/thousands of sweeps
                 //	to fix the gauge.
 
             }
-            printf("Sweeps in config from file %s: %8d. e2: %3.2E \n", config_filename, 
-                                                                       sweep,
-                                                                       new_e2);            
+            printf("Sweeps: %8d.\t e2: %3.2E \n",
+                   sweep,
+                   new_e2);            
             //	Gauge-fixing index, indicates how far we are to the Landau-gauge.
             //  It will be less than the tolerance,
             //	when the gauge-fixing is considered to be attained.
@@ -417,14 +436,14 @@ int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U,
         }
 
         if(!(sweep % SWEEPS_TO_REUNITARIZATION)){
-            reunitarize_field(U, amount_of_links);
-            reunitarize_field(G, amount_of_points);
+            reunitarize_field(U, lattice_param.amount_of_links);
+            reunitarize_field(G, lattice_param.amount_of_points);
 
         }
 
     }
-    reunitarize_field(U, amount_of_links);
-    reunitarize_field(G, amount_of_points);
+    reunitarize_field(U, lattice_param.amount_of_links);
+    reunitarize_field(G, lattice_param.amount_of_points);
 
     return sweep;
 }

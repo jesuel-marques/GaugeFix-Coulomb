@@ -6,12 +6,10 @@
 #include <lattice.h>
 #include <misc.h>
 #include <SU3_ops.h>
-#include <SU3_parameters.h>
 #include <types.h>
 
 
-extern short n_SPC;
-extern short n_T;
+extern geometric_parameters lattice_param;
 
 #ifdef CONV_CFG_TO_WORKING_PRECISION
 static void convert_in_work_cfg_3x3(const InCfgMtrx * restrict u_in, 

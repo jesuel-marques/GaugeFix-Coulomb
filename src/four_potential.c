@@ -5,7 +5,6 @@
 #include <four_potential.h>
 #include <lattice.h>
 #include <SU3_ops.h>
-#include <SU3_parameters.h>
 #include <types.h>
 
 

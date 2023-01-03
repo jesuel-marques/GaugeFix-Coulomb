@@ -13,7 +13,7 @@
 #include <measurement.h>
 #include <misc.h>
 #include <SU3_ops.h>
-#include <SU3_parameters.h>
+
 
 short n_SPC;	//   Spatial lattice size
 short n_T;		//   Temporal lattice size

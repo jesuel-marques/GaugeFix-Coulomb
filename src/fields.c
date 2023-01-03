@@ -6,11 +6,8 @@
 #include <lattice.h>
 #include <misc.h>
 #include <SU3_ops.h>
-#include <SU3_parameters.h>
-#include <types.h>
 
-extern short n_SPC;
-extern short n_T;
+#include <types.h>
 
 
 Mtrx3x3 *allocate_field(int elements, 

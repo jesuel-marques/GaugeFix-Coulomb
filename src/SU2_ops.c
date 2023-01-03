@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <tgmath.h>
 
-#include <math_ops.h>
+#include <misc.h>
 #include <SU2_ops.h>
 #include <types.h>
 

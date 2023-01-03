@@ -2,20 +2,21 @@
 #define FIELDS_H
 
 #include <flags.h>
-#include <SU3_parameters.h>
+#include <lattice.h>
+#include <SU3_ops.h>
 #include <types.h>
 
 
 //  Does the pointer arithmetic to get the correct index in the gauge transformation
-#define GET_GT(G, position)      G + (((position.t * n_SPC \
-                                            + position.k) * n_SPC \
-                                                + position.j) * n_SPC \
+#define GET_GT(G, position)      G + (((position.t * lattice_param.n_SPC \
+                                            + position.k) * lattice_param.n_SPC \
+                                                + position.j) * lattice_param.n_SPC \
                                                     + position.i) 
 
 //  Does the pointer arithmetic to get the correct index in the configuration
-#define GET_LINK(U, position, mu) U + ((((position.t * n_SPC \
-                                            + position.k) * n_SPC \
-                                                + position.j) * n_SPC \
+#define GET_LINK(U, position, mu) U + ((((position.t * lattice_param.n_SPC \
+                                            + position.k) * lattice_param.n_SPC \
+                                                + position.j) * lattice_param.n_SPC \
                                                     + position.i) * DIM \
                                                         + mu)
 
@@ -23,10 +24,10 @@ Mtrx3x3 *allocate_field(int elements,
                         int size_of_elements);
 
 int set_field_to_identity(const Mtrx3x3 * restrict field,
-                           int elements);
+                          int elements);
 
 int copy_field(const Mtrx3x3 * restrict field, 
-                int elements, 
+               int elements, 
                const Mtrx3x3 * restrict field_copy);
 
 int reunitarize_field(const Mtrx3x3 * restrict field,

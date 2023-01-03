@@ -2,6 +2,7 @@
 #define IO_TYPES_H
 
 #include <flags.h>
+#include <SU3_ops.h>
 #include <tgmath.h>
 #include <types.h>
 

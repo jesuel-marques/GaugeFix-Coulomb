@@ -1,7 +1,21 @@
 #ifndef GAUGEFIXING_H
 #define GAUGEFIXING_H
 
+#include <lattice.h>
 #include <types.h>
+#include <SU3_ops.h>
+
+typedef struct{
+
+    double tolerance;
+    float omega_OR;
+    
+    bool error;
+} gauge_fixing_parameters;
+
+
+gauge_fixing_parameters init_gaugefixing_parameters(const double tolerance, 
+                                                    const double omega_OR);
 
 void SU3_global_update_U(Mtrx3x3 * restrict U, 
                          Mtrx3x3 * restrict G);
@@ -16,8 +30,6 @@ void SU3_update_sub_LosAlamos(Mtrx3x3 * restrict w,
 
 int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U, 
                                 Mtrx3x3 * restrict G, 
-                                char * config_filename, 
-                                double tolerance, 
-                                double omega_OR);
+                                gauge_fixing_parameters parameters);
 
 #endif  //GAUGEFIXING_H

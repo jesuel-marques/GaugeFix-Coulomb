@@ -1,7 +1,8 @@
 #ifndef FOURVECTORFIELD_H
 #define FOURVECTORFIELD_H
 
-#include <types.h>
+#include <lattice.h>
+#include <SU3_ops.h>
 
 void SU3_calculate_A (Mtrx3x3 * restrict U, 
                       const PosVec position,

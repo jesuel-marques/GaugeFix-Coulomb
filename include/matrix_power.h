@@ -1,6 +1,7 @@
 #ifndef LAPACK_MATRIX_POWER_H
 #define LAPACK_MATRIX_POWER_H
 
+#include <SU3_ops.h>
 #include <types.h>
 
 int matrix_power_3x3(const Mtrx3x3 *a, 

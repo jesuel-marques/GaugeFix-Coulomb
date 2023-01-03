@@ -3,6 +3,23 @@
 
 #include <types.h>
 
+
+// 2x2 types
+
+typedef unsigned short MtrxIdx2;            //  2x2 matrix index
+
+typedef struct {
+    Scalar m[2 * 2];
+} Mtrx2x2;                                  /*  Struct for 2x2 matrices */
+
+typedef struct {
+    double m[4];
+} Mtrx2x2CK;                                /*  Struct for 2x2 matrices in the Cayley-
+                                                Klein form 
+                                                u = m[0] SU2_identity 
+                                                    + i sum_i=1^3 m[i]sigma[i] */
+
+
 #define ELM_2X2(a,b)    (a) * 2 + (b)  //  used to get the element of matrices
 
 #define LOOP_2_CK(a)    for (a = 0; a < 4; a++)

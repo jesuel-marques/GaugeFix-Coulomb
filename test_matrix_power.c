@@ -5,7 +5,6 @@
 #include <tgmath.h>
 
 #include <SU3_ops.h>
-#include <SU3_parameters.h>			//	Simulation parameters
 
 #include <matrix_power.h>
 

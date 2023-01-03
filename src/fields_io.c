@@ -13,13 +13,8 @@
 #include <misc.h>
 #include <SU2_ops.h>
 #include <SU3_ops.h>
-#include <SU3_parameters.h>
 
-
-extern short n_SPC;
-extern short n_T;
-
-extern int volume;
+extern geometric_parameters lattice_param;
 
 /*============================JONIVAR'S CODE===============================*/
 
@@ -134,8 +129,8 @@ int SU3_load_config(const Mtrx3x3 * restrict U,
 
     #ifdef CONV_CFG_TO_WORKING_PRECISION
 
-        U_in = (InCfgMtrx *)calloc(volume * DIM, sizeof(InCfgMtrx));
-        if(TEST_ALLOCATION(U_in)){
+        U_in = (InCfgMtrx *)calloc(lattice_param.volume * DIM, sizeof(InCfgMtrx));
+        if(U_in == NULL){
 
             return -1;
         }
@@ -144,7 +139,8 @@ int SU3_load_config(const Mtrx3x3 * restrict U,
         U_in = (InCfgMtrx *)U;
     #endif  //CONV_CFG_TO_WORKING_PRECISION
 
-    if (fread(U_in, sizeof(InCfgMtrx), volume * DIM, config_file) != volume * DIM) {
+    if (fread(U_in, sizeof(InCfgMtrx), lattice_param.volume * DIM, config_file) !=
+                                                           lattice_param.volume * DIM) {
 
         fprintf(stderr, "Error: Reading from file %s.\n", config_filename);
         #ifdef CONV_CFG_TO_WORKING_PRECISION 
@@ -169,7 +165,7 @@ int SU3_load_config(const Mtrx3x3 * restrict U,
     fclose(config_file);
 
     #ifdef NEED_BYTE_SWAP_IN
-        if(byte_swap(U_in, sizeof(InScalar) / 2, volume * DIM * sizeof(InCfgMtrx))){
+        if(byte_swap(U_in, sizeof(InScalar) / 2, lattice_param.volume * DIM * sizeof(InCfgMtrx))){
             fprintf(stderr, "Error: Problem with the byte_swap. Unknown size.\n");
             #ifdef CONV_CFG_TO_WORKING_PRECISION
                 free(U_in);
@@ -217,7 +213,8 @@ int SU3_load_gauge_transf(Mtrx3x3 * restrict G,
 
     }
 
-    if (fread(G_in, sizeof(InGTMtrx), volume, gaugetransf_file) != volume ) {
+    if (fread(G_in, sizeof(InGTMtrx), lattice_param.volume, gaugetransf_file) != 
+                                                                lattice_param.volume ) {
 
         fprintf(stderr, "Error: Problem reading file %s"
                         "to load gauge transformation.\n", gauge_transf_filename);
@@ -299,7 +296,8 @@ int SU3_write_config(Mtrx3x3 * restrict U,
 
     }
 
-    if (fwrite(U_out, sizeof(OutCfgMtrx), volume * DIM, config_file) != volume * DIM) {
+    if (fwrite(U_out, sizeof(OutCfgMtrx), lattice_param.volume * DIM, config_file) != 
+                                                           lattice_param.volume * DIM) {
 
         fclose(config_file);
 
@@ -351,7 +349,8 @@ int SU3_write_gauge_transf(Mtrx3x3 * restrict G,
         return -1;
     }
 
-    if (fwrite(G_out, sizeof(OutGTMtrx), volume, gaugetransf_file) != volume ) {
+    if (fwrite(G_out, sizeof(OutGTMtrx), lattice_param.volume, gaugetransf_file) != 
+                                                                lattice_param.volume ) {
 
         fprintf(stderr, "Error: Problem writing gauge transformation to file %s.\n",
                 gauge_transf_filename);

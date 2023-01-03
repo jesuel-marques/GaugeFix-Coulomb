@@ -5,14 +5,10 @@
 #include <fields.h>
 #include <lattice.h>
 #include <SU3_ops.h>
-#include <SU3_parameters.h>
+
 #include <types.h>
 
-
-extern short n_SPC;
-extern short n_T;
-
-extern int volume;
+extern geometric_parameters lattice_param;
 
 double SU3_re_tr_plaquette(      Mtrx3x3 * restrict U, 
                            const PosVec position, 
@@ -43,7 +39,7 @@ double spatial_plaquette_average(Mtrx3x3 * restrict U){
     #pragma omp parallel for reduction (+:plaq_ave) \
             num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        for (PosIndex t = 0; t < n_T; t++) {
+        for (PosIndex t = 0; t < lattice_param.n_T; t++) {
 
             PosVec position;
 
@@ -68,7 +64,7 @@ double spatial_plaquette_average(Mtrx3x3 * restrict U){
 
         }
 
-    plaq_ave /= ((DIM - 1.0) * volume);
+    plaq_ave /= ((DIM - 1.0) * lattice_param.volume);
 
     return plaq_ave;
 }
@@ -76,11 +72,11 @@ double spatial_plaquette_average(Mtrx3x3 * restrict U){
 
 double temporal_plaquette_average(Mtrx3x3 * restrict U){
     double plaq_ave = 0.0;
-
+    PosIndex t;
     #pragma omp parallel for reduction (+:plaq_ave) \
             num_threads(NUM_THREADS) schedule(dynamic) 
-        // Paralelizing by slicing the time extent
-        for (PosIndex t = 0; t < n_T; t++) {
+        // Paralelizing by slicing the time extent 
+        LOOP_TEMPORAL(t){
 
             PosVec position;
 
@@ -101,7 +97,7 @@ double temporal_plaquette_average(Mtrx3x3 * restrict U){
 
         }
 
-    plaq_ave /= ((DIM - 1.0) * volume);
+    plaq_ave /= ((DIM - 1.0) * lattice_param.volume);
 
     return plaq_ave;
 }

@@ -3,7 +3,7 @@
 
 #include <flags.h>
 #include <io_types.h>
-#include <types.h>
+#include <lattice.h>
 
 InGTMtrx  *get_gaugetransf_in (InGTMtrx  * restrict G_in,  
                                const PosVec position);

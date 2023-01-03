@@ -4,7 +4,9 @@
 
 #include <flags.h>
 #include <io_types.h>
+#include <lattice.h>
 #include <types.h>
+#include <SU3_ops.h>
 
 
 #ifdef CONV_CFG_TO_WORKING_PRECISION

@@ -4,18 +4,37 @@
 #include <flags.h>
 #include <lattice.h>
 #include <SU3_ops.h>
-#include <SU3_parameters.h>
 #include <types.h>
 
+geometric_parameters lattice_param;
 
-extern short n_T;
-extern short n_SPC;
+geometric_parameters init_geometric_parameters(const short n_s, const short n_t){
+    geometric_parameters lattice_param = {.n_SPC = 0, .n_T = 0};
+
+    lattice_param.n_SPC 		= n_s;
+	lattice_param.n_T   		= n_t;
+
+	if(lattice_param.n_SPC <= 0 || lattice_param.n_T <= 0){
+		lattice_param.error = 1;
+	}
+
+	lattice_param.spatial_volume = lattice_param.n_SPC * 
+                                   lattice_param.n_SPC * 
+                                   lattice_param.n_SPC;	//	Number of sites in the lattice
+	lattice_param.volume 	     = lattice_param.spatial_volume * 
+                                   lattice_param.n_T;
+
+	lattice_param.amount_of_links  = DIM * lattice_param.volume;
+	lattice_param.amount_of_points = lattice_param.volume;
+
+    return lattice_param;
+}
 
 inline bool position_valid(PosVec position){
-    if (position.t < n_T   &&
-        position.i < n_SPC &&
-        position.j < n_SPC &&
-        position.k < n_SPC    ){
+    if (position.t < lattice_param.n_T   &&
+        position.i < lattice_param.n_SPC &&
+        position.j < lattice_param.n_SPC &&
+        position.k < lattice_param.n_SPC    ){
         return true;
     }
     else{
@@ -26,10 +45,10 @@ inline bool position_valid(PosVec position){
 
 inline bool position_mu_valid(PosVec position, 
                               LorentzIdx mu){
-    if (position.t < n_T   &&
-        position.i < n_SPC &&
-        position.j < n_SPC &&
-        position.k < n_SPC &&
+    if (position.t < lattice_param.n_T   &&
+        position.i < lattice_param.n_SPC &&
+        position.j < lattice_param.n_SPC &&
+        position.k < lattice_param.n_SPC &&
        (mu == T_INDX || mu == X_INDX || 
         mu == Y_INDX || mu == Z_INDX )){
         return true;
@@ -82,7 +101,7 @@ inline PosVec hop_pos_plus(const PosVec u,
 
     switch (mu) {
         case X_INDX:
-            u_plus_muhat.i = ((v = u.i + 1) != n_SPC ? v : 0);
+            u_plus_muhat.i = ((v = u.i + 1) != lattice_param.n_SPC ? v : 0);
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
@@ -90,7 +109,7 @@ inline PosVec hop_pos_plus(const PosVec u,
 
         case Y_INDX:
             u_plus_muhat.i = u.i;
-            u_plus_muhat.j = ((v = u.j + 1) != n_SPC ? v : 0);
+            u_plus_muhat.j = ((v = u.j + 1) != lattice_param.n_SPC ? v : 0);
             u_plus_muhat.k = u.k;
             u_plus_muhat.t = u.t;
             break;
@@ -98,7 +117,7 @@ inline PosVec hop_pos_plus(const PosVec u,
         case Z_INDX:
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
-            u_plus_muhat.k = ((v = u.k + 1) != n_SPC ? v : 0);
+            u_plus_muhat.k = ((v = u.k + 1) != lattice_param.n_SPC ? v : 0);
             u_plus_muhat.t = u.t;
             break;
 
@@ -106,7 +125,7 @@ inline PosVec hop_pos_plus(const PosVec u,
             u_plus_muhat.i = u.i;
             u_plus_muhat.j = u.j;
             u_plus_muhat.k = u.k;
-            u_plus_muhat.t = ((v = u.t + 1) != n_T   ? v : 0);
+            u_plus_muhat.t = ((v = u.t + 1) != lattice_param.n_T   ? v : 0);
             break;
 
     }
@@ -136,7 +155,7 @@ inline PosVec hop_pos_minus(const PosVec u,
 
      switch (mu) {
         case X_INDX:
-            u_minus_muhat.i = ((v = u.i - 1) != -1 ? v : n_SPC - 1);
+            u_minus_muhat.i = ((v = u.i - 1) != -1 ? v : lattice_param.n_SPC - 1);
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
@@ -144,7 +163,7 @@ inline PosVec hop_pos_minus(const PosVec u,
 
         case Y_INDX:
             u_minus_muhat.i = u.i;
-            u_minus_muhat.j = ((v = u.j - 1) != -1 ? v : n_SPC - 1);
+            u_minus_muhat.j = ((v = u.j - 1) != -1 ? v : lattice_param.n_SPC - 1);
             u_minus_muhat.k = u.k;
             u_minus_muhat.t = u.t;
             break;
@@ -152,7 +171,7 @@ inline PosVec hop_pos_minus(const PosVec u,
         case Z_INDX:
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
-            u_minus_muhat.k = ((v = u.k - 1) != -1 ? v : n_SPC - 1);   
+            u_minus_muhat.k = ((v = u.k - 1) != -1 ? v : lattice_param.n_SPC - 1);   
             u_minus_muhat.t = u.t;
             break;
 
@@ -160,7 +179,7 @@ inline PosVec hop_pos_minus(const PosVec u,
             u_minus_muhat.i = u.i;
             u_minus_muhat.j = u.j;
             u_minus_muhat.k = u.k;
-            u_minus_muhat.t = ((v = u.t - 1) != -1 ?   v : n_T - 1);
+            u_minus_muhat.t = ((v = u.t - 1) != -1 ?   v : lattice_param.n_T - 1);
             break;
     }
 
