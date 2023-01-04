@@ -10,9 +10,9 @@
 #include <types.h>
 
 
-Mtrx3x3 *allocate_field(int elements, 
-                        int size_of_elements){
-    if(elements <= 0  || size_of_elements <= 0){
+Mtrx3x3 *allocateField(int elements, 
+                        int size_of_elements) {
+    if(elements <= 0  || size_of_elements <= 0) {
         return NULL;
     }
     
@@ -22,38 +22,38 @@ Mtrx3x3 *allocate_field(int elements,
 }
 
 
-int set_field_to_identity(const Mtrx3x3 * restrict field, 
-                           int elements){
-    if(elements <= 0  || field == NULL){
+int setFieldToIdentity(const Mtrx3x3 * restrict field, 
+                           int elements) {
+    if(elements <= 0  || field == NULL) {
         return -1;
     }
 
     OMP_PARALLEL_FOR
     for(int i = 0; i < elements; i++)
-        set_identity_3x3(field + i);
+        setIdentity3x3(field + i);
     
     return 0;
 }
 
 
-int copy_field(const Mtrx3x3 * restrict field, 
+int copyField(const Mtrx3x3 * restrict field, 
                 int elements, 
-               const Mtrx3x3 * restrict field_copy){
-    if(elements <= 0  || field == NULL || field_copy == NULL){
+               const Mtrx3x3 * restrict field_copy) {
+    if(elements <= 0  || field == NULL || field_copy == NULL) {
         return -1;
     }
 
     OMP_PARALLEL_FOR
     for(int i = 0; i < elements; i++)
-        copy_3x3(field + i, field_copy + i);
+        copy3x3(field + i, field_copy + i);
 
     return 0;
 }
 
 
-int reunitarize_field(const Mtrx3x3 * restrict field,
-                      int elements){
-    if(elements <= 0  || field == NULL){
+int reunitarizeField(const Mtrx3x3 * restrict field,
+                      int elements) {
+    if(elements <= 0  || field == NULL) {
         return -1;
     }
 
@@ -61,18 +61,18 @@ int reunitarize_field(const Mtrx3x3 * restrict field,
     #pragma omp parallel for num_threads(NUM_THREADS) \
             reduction (|:exit_status) schedule(dynamic)
     for(int i = 0; i < elements; i++)
-        exit_status |= projection_SU3(field + i);
+        exit_status |= projectSU3(field + i);
 
-    if(exit_status != 0){
+    if(exit_status != 0) {
         return -1;
     }
     return 0;
 }
 
 
-double average_field_det(const Mtrx3x3 *restrict field,
+double averageFieldDet(const Mtrx3x3 *restrict field,
                          int elements) {
-    if(elements <= 0  || field == NULL){
+    if(elements <= 0  || field == NULL) {
         return -1;
     }
     double det = 0.0;
@@ -80,7 +80,7 @@ double average_field_det(const Mtrx3x3 *restrict field,
     #pragma omp parallel for num_threads(NUM_THREADS) \
             schedule(dynamic) reduction(+ : det)
         for(int i = 0; i < elements; i++)
-            det += determinant_3x3(field + i);
+            det += determinant3x3(field + i);
 
     det /= (double)elements;
 
@@ -88,12 +88,12 @@ double average_field_det(const Mtrx3x3 *restrict field,
 }
 
 
-Mtrx3x3 *get_link(const Mtrx3x3 *restrict U, 
+Mtrx3x3 *getLink(const Mtrx3x3 *restrict U, 
                   const PosVec position, 
                   const LorentzIdx mu) {
     /* Does the pointer arithmetic to get a pointer to link at given position and mu */
     #ifdef CHECK_POSITION_BOUNDS
-        if(position_mu_valid(position, mu))    
+        if(positionmuValidQ(position, mu))    
     #endif  //CHECK_POSITION_BOUNDS
             return GET_LINK(U, position, mu);
     #ifdef CHECK_POSITION_BOUNDS
@@ -105,7 +105,7 @@ Mtrx3x3 *get_link(const Mtrx3x3 *restrict U,
 }
 
 
-void get_link_matrix(const Mtrx3x3 *restrict U, 
+void getLinkMatrix(const Mtrx3x3 *restrict U, 
                      const PosVec position, 
                      const LorentzIdx mu, 
                            Direction dir, 
@@ -113,14 +113,14 @@ void get_link_matrix(const Mtrx3x3 *restrict U,
     /* Gets forward or backward link at given position and mu
     and copies it to u. */
     #ifdef CHECK_POSITION_BOUNDS
-    if(position_mu_valid(position, mu)){
+    if(positionmuValidQ(position, mu)) {
     #endif  //CHECK_POSITION_BOUNDS
         if (dir == FRONT) {
-        copy_3x3(get_link(U, position, mu), u);
+        copy3x3(getLink(U, position, mu), u);
         //	Link in the positive way is what is stored in U
 
         } else if (dir == REAR) {
-        herm_conj_3x3(get_link(U, hop_pos_minus(position, mu), mu), u);
+        hermConj3x3(getLink(U, hopPosMinus(position, mu), mu), u);
         //	U_(-mu)(n)=(U_mu(n-mu))^\dagger
         }
         else{
@@ -138,12 +138,12 @@ void get_link_matrix(const Mtrx3x3 *restrict U,
 }
 
 
-Mtrx3x3 *get_gaugetransf(const Mtrx3x3 *restrict G, 
+Mtrx3x3 *getGaugetransf(const Mtrx3x3 *restrict G, 
                          const PosVec position) {
     /* Does the pointer arithmetic to get a pointer to 
        a gauge transformation at given position */
     #ifdef CHECK_POSITION_BOUNDS
-        if(position_valid(position)){
+        if(validPositionQ(position)) {
     #endif  //CHECK_POSITION_BOUNDS
             return GET_GT(G, position);
     #ifdef CHECK_POSITION_BOUNDS

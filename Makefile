@@ -27,7 +27,10 @@ BINARIES = gauge_fix_coulomb plaquette_check test_matrix_power
 
 all: $(BINARIES)
 
-gauge_fix_coulomb: $(OBJECTS)
+gauxe_fix_coulomb_main: gauge_fix_coulomb.c
+	$(CC) -o gauge_fix_coulomb.o $^ $(LAPACK_OBJS) $(CFLAGS) $(WARNINGS) $(LIBS)
+
+gauge_fix_coulomb: $(OBJECTS) gauge_fix_coulomb.o
 	$(CC) -o $@ $@.c $^ $(LAPACK_OBJS) $(CFLAGS) $(WARNINGS) $(LIBS) 
 
 plaquette_check: $(OBJECTS)
@@ -42,4 +45,4 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c Makefile
 	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
 
 clean:
-	rm -f $(BINARIES) $(BUILD_DIR)/*.[od] *~ */*~ 
+	rm -f $(BINARIES) $(BUILD_DIR)/*.[od] *~ */*~ *.o

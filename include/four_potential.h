@@ -4,12 +4,12 @@
 #include <lattice.h>
 #include <SU3_ops.h>
 
-void SU3_calculate_A (Mtrx3x3 * restrict U, 
+void calculateA (Mtrx3x3 * restrict U, 
                       const PosVec position,
                       const LorentzIdx mu, 
                       Mtrx3x3 * restrict A);
 
-void SU3_divergence_A(Mtrx3x3 * restrict U,
+void divergenceA(Mtrx3x3 * restrict U,
                       const PosVec position, 
                       Mtrx3x3 * restrict div_A);
 

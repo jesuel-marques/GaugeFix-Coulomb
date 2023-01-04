@@ -20,33 +20,33 @@
                                                     + position.i) * DIM \
                                                         + mu)
 
-Mtrx3x3 *allocate_field(int elements, 
+Mtrx3x3 *allocateField(int elements, 
                         int size_of_elements);
 
-int set_field_to_identity(const Mtrx3x3 * restrict field,
+int setFieldToIdentity(const Mtrx3x3 * restrict field,
                           int elements);
 
-int copy_field(const Mtrx3x3 * restrict field, 
+int copyField(const Mtrx3x3 * restrict field, 
                int elements, 
                const Mtrx3x3 * restrict field_copy);
 
-int reunitarize_field(const Mtrx3x3 * restrict field,
+int reunitarizeField(const Mtrx3x3 * restrict field,
                       int elements);
 
-double average_field_det(const Mtrx3x3 *restrict field,
+double averageFieldDet(const Mtrx3x3 *restrict field,
                          int elements) ;
 
-Mtrx3x3 * get_link(const Mtrx3x3 *U, 
+Mtrx3x3 * getLink(const Mtrx3x3 *U, 
                    const PosVec position,
                    const LorentzIdx mu);
 
-void get_link_matrix(const Mtrx3x3 * restrict U,
+void getLinkMatrix(const Mtrx3x3 * restrict U,
                      const PosVec position,
                      const LorentzIdx mu,
                      Direction dir,
                      const Mtrx3x3 * restrict u);
 
-Mtrx3x3 *get_gaugetransf(const Mtrx3x3 * restrict G,
+Mtrx3x3 *getGaugetransf(const Mtrx3x3 * restrict G,
                          const PosVec position);
 
 #endif  //FIELDS_H

@@ -11,25 +11,26 @@ typedef struct{
     float omega_OR;
     
     bool error;
-} gauge_fixing_parameters;
+} GaugeFixingParameters;
 
+bool validGaugeFixingParametersQ(GaugeFixingParameters gfix_param);
 
-gauge_fixing_parameters init_gaugefixing_parameters(const double tolerance, 
-                                                    const double omega_OR);
+GaugeFixingParameters initGaugeFixingParameters(const double tolerance, 
+                                                const double omega_OR);
 
-void SU3_global_update_U(Mtrx3x3 * restrict U, 
+void updateGlobalU(Mtrx3x3 * restrict U, 
                          Mtrx3x3 * restrict G);
 
-double SU3_calculate_F    (Mtrx3x3 * restrict U);
-double SU3_calculate_theta(Mtrx3x3 * restrict U);
-double SU3_calculate_e2   (Mtrx3x3 * restrict U);
+double calculateF    (Mtrx3x3 * restrict U);
+double calculateTheta(Mtrx3x3 * restrict U);
+double calculate_e2  (Mtrx3x3 * restrict U);
 
-void SU3_update_sub_LosAlamos(Mtrx3x3 * restrict w, 
+void updateSubLosAlamos(Mtrx3x3 * restrict w, 
                               Submtrx sub); 
 //GET THIS OUT OF HERE. THIS SHOULD NOT BE IN A .H FILE. ONLY HERE BECAUSE USING IN SU3_OPS
 
-int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U, 
+int gaugefixOverrelaxation(Mtrx3x3 * restrict U, 
                                 Mtrx3x3 * restrict G, 
-                                gauge_fixing_parameters parameters);
+                                GaugeFixingParameters parameters);
 
 #endif  //GAUGEFIXING_H

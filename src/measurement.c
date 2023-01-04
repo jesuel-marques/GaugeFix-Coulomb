@@ -8,31 +8,36 @@
 
 #include <types.h>
 
-extern geometric_parameters lattice_param;
+extern GeometricParameters lattice_param;
 
-double SU3_re_tr_plaquette(      Mtrx3x3 * restrict U, 
-                           const PosVec position, 
-                           const LorentzIdx mu, 
-                           const LorentzIdx nu){
+double ReTrPlaquette(Mtrx3x3 * restrict U, 
+                     const PosVec position, 
+                     const LorentzIdx mu, 
+                     const LorentzIdx nu) {
     Mtrx3x3 plaquette;
 
     Mtrx3x3 ua, ub, uc, ud;
 
-    PosVec position_plus_mu = hop_pos_plus(position, mu);
+    PosVec position_plus_mu = hopPosPlus(position, mu);
 
-    get_link_matrix(U,              position,              mu, FRONT, &ua);
-    get_link_matrix(U,              position_plus_mu,      nu, FRONT, &ub);
-    get_link_matrix(U, hop_pos_plus(position_plus_mu, nu), mu, REAR , &uc);
-    get_link_matrix(U, hop_pos_plus(position, nu),         nu, REAR , &ud);
+    getLinkMatrix(U,              position,              mu, FRONT, &ua);
+    getLinkMatrix(U,              position_plus_mu,      nu, FRONT, &ub);
+    getLinkMatrix(U, hopPosPlus(position_plus_mu, nu), mu, REAR , &uc);
+    getLinkMatrix(U, hopPosPlus(position, nu),         nu, REAR , &ud);
 
-	prod_four_3x3(&ua, &ub, &uc, &ud, &plaquette);
+	prodFour3x3(&ua, &ub, &uc, &ud, &plaquette);
 
-    return creal(trace_3x3(&plaquette)) / Nc;
+    return creal(trace3x3(&plaquette)) / Nc;
 
 }
 
 
-double spatial_plaquette_average(Mtrx3x3 * restrict U){
+double averageSpatialPlaquette(Mtrx3x3 * restrict U) {
+
+    if(!validGeometricParametersQ()){
+        fprintf(stderr, "Error in lattice parameters\n");
+    }
+
     //  Calculates the spatial plaquette average
     double plaq_ave = 0.0;
 
@@ -46,14 +51,14 @@ double spatial_plaquette_average(Mtrx3x3 * restrict U){
             position.t = t;
             double plaq_ave_slice = 0.0;
 
-            LOOP_SPATIAL(position){
+            LOOP_SPATIAL(position) {
                 LorentzIdx mu;
-                LOOP_LORENTZ_SPATIAL(mu){
-                    for (LorentzIdx nu = 0; nu < DIM - 1 ; nu++){
-                        if( mu < nu){
+                LOOP_LORENTZ_SPATIAL(mu) {
+                    for (LorentzIdx nu = 0; nu < DIM - 1 ; nu++) {
+                        if( mu < nu) {
 
                             plaq_ave_slice += 
-                                SU3_re_tr_plaquette(U, position, mu, nu);                                    
+                                ReTrPlaquette(U, position, mu, nu);                                    
                         
                         }
                     }
@@ -70,25 +75,30 @@ double spatial_plaquette_average(Mtrx3x3 * restrict U){
 }
 
 
-double temporal_plaquette_average(Mtrx3x3 * restrict U){
+double averageTemporalPlaquette(Mtrx3x3 * restrict U) {
+    
+    if(!validGeometricParametersQ()){
+        fprintf(stderr, "Error in lattice parameters\n");
+    }
+
     double plaq_ave = 0.0;
     PosIndex t;
     #pragma omp parallel for reduction (+:plaq_ave) \
             num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent 
-        LOOP_TEMPORAL(t){
+        LOOP_TEMPORAL(t) {
 
             PosVec position;
 
             position.t = t;
             double plaq_ave_slice = 0.0;
 
-            LOOP_SPATIAL(position){
+            LOOP_SPATIAL(position) {
                 LorentzIdx mu;
-                LOOP_LORENTZ_SPATIAL(mu){
+                LOOP_LORENTZ_SPATIAL(mu) {
                 
                     plaq_ave_slice += 
-                        SU3_re_tr_plaquette(U, position, T_INDX, mu);
+                        ReTrPlaquette(U, position, T_INDX, mu);
                 
                 }
             }

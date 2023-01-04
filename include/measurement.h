@@ -3,7 +3,7 @@
 
 #include <SU3_ops.h>
 
-double spatial_plaquette_average (Mtrx3x3 * U),
-       temporal_plaquette_average(Mtrx3x3 * U);
+double averageSpatialPlaquette (Mtrx3x3 * U),
+       averageTemporalPlaquette(Mtrx3x3 * U);
 
 #endif  //MEASUREMENT_H

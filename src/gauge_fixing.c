@@ -14,7 +14,9 @@
 #include <types.h>
 
 //  Initial amount of sweeps to actually measure e2
-#define INITIAL_SWEEPS_TO_CHECK_e2 1000
+#define ESTIMATE_SWEEPS_TO_CHECK_e2 1000
+//  Maximum number of sweeps that program will perform to fix
+#define MAX_SWEEPS_TO_FIX 100 * ESTIMATE_SWEEPS_TO_CHECK_e2
 //  Amount of sweeps to reunitarize fields
 #define SWEEPS_TO_REUNITARIZATION 250
 
@@ -25,59 +27,66 @@
 #define BLACKRED_SWEEP(position, sweep) ((POSITION_IS_EVEN(position)) ^ ((sweep) & 1))
 
 
-static bool test_gaugefixing_parameters(gauge_fixing_parameters gfix_param){
-    if(gfix_param.omega_OR < 1  || gfix_param.omega_OR >= 2 ||
-       gfix_param.tolerance < 0 || gfix_param.error    == 1){
+bool validGaugeFixingParametersQ(GaugeFixingParameters gfix_param) {
+    if(gfix_param.omega_OR  < 1 || gfix_param.omega_OR >= 2 ||
+       gfix_param.tolerance < 0 || gfix_param.error    == 1   ) {
+
 		return false;
+
 	}
     return true;
 }
 
 
-gauge_fixing_parameters init_gaugefixing_parameters(const double tolerance, 
-                                                    const double omega_OR){
-    gauge_fixing_parameters gfix_param = {.tolerance = 0.0, 
-                                          .omega_OR = 0.0, 
-                                          .error = 0};
+GaugeFixingParameters initGaugeFixingParameters(const double tolerance, 
+                                                  const double omega_OR) {
+    GaugeFixingParameters gfix_param = {.tolerance = 0.0, 
+                                        .omega_OR  = 0.0, 
+                                        .error     = 0};
 
 	gfix_param.tolerance 	= tolerance;
 	gfix_param.omega_OR 	= omega_OR;
 
-    if(test_gaugefixing_parameters(gfix_param))    
-		gfix_param.error = 1;
-	
+    if(!validGaugeFixingParametersQ(gfix_param)) {
+
+        gfix_param.error = 1;
+
+    }
 	return gfix_param;
 }
 
-static void SU3_local_update_U_G(Mtrx3x3 * restrict U, 
-                                 Mtrx3x3 * restrict G, 
-                                 const PosVec position, 
-                                 const Mtrx3x3 * restrict update) {
+
+static void updateLocalUG(Mtrx3x3 * restrict U, 
+                             Mtrx3x3 * restrict G, 
+                             const PosVec position, 
+                             const Mtrx3x3 * restrict update) {
     /* Updates U and G only at a given position */
-    accum_left_prod_3x3(update, get_gaugetransf(G, position));
+    accumLeftProd3x3(update, getGaugetransf(G, position));
 
     Mtrx3x3 update_dagger;
-    herm_conj_3x3(update, &update_dagger);
+    hermConj3x3(update, &update_dagger);
 
     LorentzIdx mu;
     LOOP_LORENTZ(mu) {
+
         //	U'_mu(x)=g(x).U_mu(x).1 for red-black updates
 
-        accum_left_prod_3x3(update, get_link(U, position, mu));
+        accumLeftProd3x3(update, getLink(U, position, mu));
 
         //	U'_mu(x-mu)=1.U_mu(x-mu).g_dagger(x) for red-black updates
 
-        accum_right_prod_3x3(get_link(U, hop_pos_minus(position, mu), mu), 
+        accumRightProd3x3(getLink(U, hopPosMinus(position, mu), mu), 
                              &update_dagger);
+
     }
 }
 
 
-void SU3_global_update_U(Mtrx3x3 * restrict U, 
-                         Mtrx3x3 * restrict G) {
+void updateGlobalU(Mtrx3x3 * restrict U, 
+                      Mtrx3x3 * restrict G) {
     /* Updates U on the whole lattice*/
     PosIndex t;
-    LOOP_TEMPORAL_PARALLEL(t){
+    LOOP_TEMPORAL_PARALLEL(t) {
         Mtrx3x3 * g;
         Mtrx3x3 * u;
         Mtrx3x3 u_updated;
@@ -86,17 +95,19 @@ void SU3_global_update_U(Mtrx3x3 * restrict U,
 
         position.t = t;
 
-        LOOP_SPATIAL(position){
-            g = get_gaugetransf(G, position);
+        LOOP_SPATIAL(position) {
+
+            g = getGaugetransf(G, position);
             LorentzIdx mu;
             LOOP_LORENTZ(mu) {
+
                 //	U'_mu(x)=g(x).U_mu(x).gdagger(x+mu)
-                u = get_link(U, position, mu);
+                u = getLink(U, position, mu);
                 
-                prod_vuwdagger_3x3(g, u, get_gaugetransf(G, hop_pos_plus(position, mu)),
-                                   &u_updated);
+                prod_vuwdagger3x3(g, u, getGaugetransf(G, hopPosPlus(position, mu)),
+                                  &u_updated);
                 
-                copy_3x3(&u_updated, u);
+                copy3x3(&u_updated, u);
 
             }
         }
@@ -104,89 +115,90 @@ void SU3_global_update_U(Mtrx3x3 * restrict U,
 }
 
 
-static inline void accumulate_front_hear_link_3x3(      Mtrx3x3 * restrict U, 
-                                                  const PosVec position, 
-                                                        LorentzIdx mu, 
-                                                        Mtrx3x3 * restrict w) {
+static inline void accumulateFrontHearLink3x3(Mtrx3x3 * restrict U, 
+                                              const PosVec position, 
+                                              LorentzIdx mu, 
+                                              Mtrx3x3 * restrict w) {
     /* Accumulates the value of U_mu(n) and U_-mu(n) into w */
-    Mtrx3x3 * u_front = get_link(U,               position,      mu);
-    Mtrx3x3 * u_rear  = get_link(U, hop_pos_minus(position, mu), mu);
+    Mtrx3x3 * u_front = getLink(U,             position,      mu);
+    Mtrx3x3 * u_rear  = getLink(U, hopPosMinus(position, mu), mu);
 
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
-
+    LOOP_3X3(a, b) {
+        
         w -> m[ELEM_3X3(a, b)] +=       u_front -> m[ELEM_3X3(a, b)]
-                                 + conj(u_rear  -> m[ELEM_3X3(b, a)]);
-        
-        
+                                 + conj(u_rear  -> m[ELEM_3X3(b, a)]);        
+    
     }
 }
 
 
-inline static void SU3_calculate_w(      Mtrx3x3 * restrict U, 
-                                   const PosVec position,
-                                         Mtrx3x3 * restrict w) {
+inline static void calculate_w(Mtrx3x3 * restrict U, 
+                               const PosVec position,
+                               Mtrx3x3 * restrict w) {
     /* 	Calculates 	w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 
         for red black subdivision, following the notation in hep-lat/9306018
     	returns result in w.*/
-    set_null_3x3(w);  //	Initializing w(n)=0
+    setNull3x3(w);  //	Initializing w(n)=0
 
     // w(n)	calculation
 
     LorentzIdx mu;
-    LOOP_LORENTZ_SPATIAL(mu){
-        /* w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision */
+    LOOP_LORENTZ_SPATIAL(mu) {
 
-        accumulate_front_hear_link_3x3(U, position, mu, w);
+        /* w(n) = sum_mu U_mu(n).1+U_dagger_mu(n-mu_hat).1 for red black subdivision */
+        accumulateFrontHearLink3x3(U, position, mu, w);
 
     }
 }
 
 
-static int sweeps_to_next_measurement(double e2, double tolerance){ 
-    return 10 + (unsigned)(INITIAL_SWEEPS_TO_CHECK_e2 * 
-                           (1.0 - log10(e2) / log10(tolerance))); 
+static int sweepsToNextMeasurement(double e2, double tolerance) { 
+    return 10 + (unsigned)(ESTIMATE_SWEEPS_TO_CHECK_e2 * 
+                        (1.0 - log10(e2) / log10(tolerance))); 
 }
 
 
-double SU3_calculate_F(Mtrx3x3 * restrict U){
+double calculateF(Mtrx3x3 * restrict U) {
     Mtrx3x3 U_acc;
-    set_null_3x3(&U_acc);
+    setNull3x3(&U_acc);
 
     PosIndex t;
-    LOOP_TEMPORAL_PARALLEL(t){
+    LOOP_TEMPORAL_PARALLEL(t) {
 
         PosVec position;
         position.t = t;
 
-        LOOP_SPATIAL(position){
+        LOOP_SPATIAL(position) {
             LorentzIdx mu;
-            LOOP_LORENTZ_SPATIAL(mu){            
-                accumulate_3x3(get_link(U, position, mu), &U_acc);                    
+            LOOP_LORENTZ_SPATIAL(mu) {
+
+                accumulate3x3(getLink(U, position, mu), &U_acc);
+
             }
         }
     }
 
-    return creal(trace_3x3(&U_acc)) / (lattice_param.volume * Nc * (DIM - 1));
+    return creal(trace3x3(&U_acc)) / (lattice_param.volume * Nc * (DIM - 1));
 }
 
 
-double SU3_calculate_theta(Mtrx3x3 * restrict U){ 
+double calculateTheta(Mtrx3x3 * restrict U) { 
     Mtrx3x3 div_A, div_A_dagger, prod;
 
     double theta = 0.0;
 
     PosIndex t;
-    LOOP_TEMPORAL_PARALLEL(t){
+    LOOP_TEMPORAL_PARALLEL(t) {
 
         PosVec position;
         position.t = t;
-        LOOP_SPATIAL(position){     
+        LOOP_SPATIAL(position) {     
 
-            SU3_divergence_A(U, position, &div_A);
-            herm_conj_3x3(&div_A, &div_A_dagger);
-            prod_3x3(&div_A, &div_A_dagger, &prod);
-            theta += trace_3x3(&prod);
+            divergenceA(U, position, &div_A);
+            hermConj3x3(&div_A, &div_A_dagger);
+            prod3x3(&div_A, &div_A_dagger, &prod);
+            theta += trace3x3(&prod);
 
         }
     }
@@ -195,14 +207,14 @@ double SU3_calculate_theta(Mtrx3x3 * restrict U){
 }
 
     
-double SU3_calculate_e2(Mtrx3x3 * restrict U) {
+double calculate_e2(Mtrx3x3 * restrict U) {
     /* 	Calculates e2 (defined in hep-lat/0301019v2),
     	used to find out distance to the gauge-fixed situation. */
     double e2 = 0.0;
     PosIndex t;
     #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
         // Paralelizing by slicing the time extent
-        LOOP_TEMPORAL(t){
+        LOOP_TEMPORAL(t) {
             Mtrx3x3 div_A;
             MtrxSU3Alg div_A_components;
 
@@ -212,16 +224,18 @@ double SU3_calculate_e2(Mtrx3x3 * restrict U) {
 
             position.t = t;
 
-            LOOP_SPATIAL(position){
+            LOOP_SPATIAL(position) {
 
-                SU3_divergence_A(U, position, &div_A);
-                decompose_algebra_SU3(&div_A, &div_A_components);
+                divergenceA(U, position, &div_A);
+                decomposeAlgebraSU3(&div_A, &div_A_components);
                 for (SU3AlgIdx a = 1; a <= POW2(Nc)-1; a++) {
+
                     /* 	Normalized sum of the squares of the color components
                         of the divergence of A. */
                     e2_slice += POW2(div_A_components.m[a]);
+
                 }
-                
+
             }
               
             e2 += e2_slice;
@@ -233,7 +247,7 @@ double SU3_calculate_e2(Mtrx3x3 * restrict U) {
 }
 
 
-inline void SU3_update_sub_LosAlamos(Mtrx3x3 * restrict w, 
+inline void updateSubLosAlamos(Mtrx3x3 * restrict w, 
                                      Submtrx sub) {
     MtrxIdx3 a, b;
 
@@ -262,13 +276,15 @@ inline void SU3_update_sub_LosAlamos(Mtrx3x3 * restrict w,
         constrains, where the constraint is that mtrx_SU2 has 
         to be an SU(2) matrix. */
 
-    if(!SU2_projection(&mtrx_SU2)){
-        /* If SU2_projection is succesful, it will return 0
+    if(!projectSU2(&mtrx_SU2)) {
+
+        /* If projectSU2 is succesful, it will return 0
            Then w can be updated */
-        accum_prod_SU2_3x3(&mtrx_SU2, w, a, b);
+        accumProdSU2_3x3(&mtrx_SU2, w, a, b);
+
     }
     else{
-        /*  If SU2_projection is unsuccesful, this means
+        /*  If projectSU2 is unsuccesful, this means
             that mtrx_SU2 was 0 and w remains what it was.
             The program will then carry on to the next 
             Submtrx update. */
@@ -278,7 +294,7 @@ inline void SU3_update_sub_LosAlamos(Mtrx3x3 * restrict w,
 }
 
 
-inline void SU3_LosAlamos(Mtrx3x3 * restrict w, 
+inline void updateLosAlamos(Mtrx3x3 * restrict w, 
                           Mtrx3x3 * restrict total_update) {
     /*  Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
         algorithm for SU(3), with a division of the update matrix in submatrices
@@ -293,7 +309,7 @@ inline void SU3_LosAlamos(Mtrx3x3 * restrict w,
     
 
        
-    if(inverse_3x3(w, &w_inv_old)){
+    if(inverse3x3(w, &w_inv_old)) {
 
         /*  Local maximization is attained iteratively in SU(3),
             thus we need to make many hits ... */
@@ -304,24 +320,26 @@ inline void SU3_LosAlamos(Mtrx3x3 * restrict w,
                 /* Submatrices are indicated by numbers from 0 to 2
                    with codenames R, S and T */
 
-                SU3_update_sub_LosAlamos(w, sub);
+                updateSubLosAlamos(w, sub);
                 
             }
         }
     }
     else{
+
         /* if w has no inverse, update will be given by the identity */
-        set_identity_3x3(total_update);
+        setIdentity3x3(total_update);
+
     }
     
-    prod_3x3(w, &w_inv_old, total_update);
+    prod3x3(w, &w_inv_old, total_update);
     /*	Updates matrix to total_update. It is the
     	accumulated updates from the hits. */
 }
 
 
-inline static void SU3_gaugefix_overrelaxation_local(      Mtrx3x3 * restrict U,  
-                                                           Mtrx3x3 * restrict G, 
+inline static void gaugefixOverrelaxationLocal(      Mtrx3x3 * restrict U,  
+                                                     Mtrx3x3 * restrict G, 
                                                      const PosVec position, 
                                                      const double omega_OR) {
     /*	Generalization of the algorithm described in hep-lat/0301019v2, using the
@@ -330,11 +348,11 @@ inline static void SU3_gaugefix_overrelaxation_local(      Mtrx3x3 * restrict U,
     Mtrx3x3 w;
 
     //	Calculating w(n)=h(n) for red black subdivision
-    SU3_calculate_w(U, position, &w);  
+    calculate_w(U, position, &w);  
 
     Mtrx3x3 update_LA;
 
-    SU3_LosAlamos(&w, &update_LA);
+    updateLosAlamos(&w, &update_LA);
 
     /*	The above function determines update_LA which would be the naïve
    	update to bring the local function to its mininum. However,
@@ -348,57 +366,64 @@ inline static void SU3_gaugefix_overrelaxation_local(      Mtrx3x3 * restrict U,
 
     /* update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA) */
     
-    if(power_3x3_binomial(&update_LA, omega_OR, &update_OR))
-        set_identity_3x3(&update_OR);   
+    if(power3x3Binomial(&update_LA, omega_OR, &update_OR))
+        setIdentity3x3(&update_OR);   
         /*  if matrix could not be projected to SU3 inside
         power_3x3 binomial, then use identity as update */
 
-    SU3_local_update_U_G(U, G, position, &update_OR);
+    updateLocalUG(U, G, position, &update_OR);
 }
 
 
-int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U, 
+int gaugefixOverrelaxation(Mtrx3x3 * restrict U, 
                                 Mtrx3x3 * restrict G, 
-                                const gauge_fixing_parameters gfix_param) {
+                                const GaugeFixingParameters gfix_param) {
 
-    if(!test_gaugefixing_parameters(gfix_param)){
+    if(!validGaugeFixingParametersQ(gfix_param)) {
+
         return -2;
+
     }
-    //	Fix the gauge and follows the process by calculating e2;
+
     double last_e2 = 10.0;
-    double new_e2 = SU3_calculate_e2(U);
+    double new_e2 = calculate_e2(U);
     
+    //	Counter to the number of sweeps to fix config to Coulomb gauge
     int sweep = 0;
-    int sweeps_to_measurement_e2 = INITIAL_SWEEPS_TO_CHECK_e2;
-    //	Counter to the number of sweeps to fix config to Landau gauge
+    int sweeps_to_measurement_e2 = sweepsToNextMeasurement(new_e2, 
+                                                           gfix_param.tolerance);
 
-
-    while (1) {
-
+    while (new_e2 > gfix_param.tolerance) {
         OMP_PARALLEL_FOR
             // Paralelizing by slicing the time extent
             for (PosIndex t = 0; t < lattice_param.n_T; t++) {
                 PosVec position;
                 position.t = t;
-                LOOP_SPATIAL(position){
+                LOOP_SPATIAL(position) {
+
                     BLACKRED_SWEEP(position, sweep) ?
                         //	Implementation of the checkerboard subdivision 
                         //  of the lattice.
                         
-                        SU3_gaugefix_overrelaxation_local(U, G, position, 
+                        gaugefixOverrelaxationLocal(U, G, position, 
                                                           gfix_param.omega_OR): 0;
                         //  The actual gauge-fixing algorithm
 
                 }
             }
 
-
         sweep++;
 
+        if(sweep >= MAX_SWEEPS_TO_FIX ) {
+
+                return -1;
+
+        }
 
         if(sweep == sweeps_to_measurement_e2) {
+
             last_e2 = new_e2;
-            new_e2  = SU3_calculate_e2(U);
+            new_e2  = calculate_e2(U);
 
             if (new_e2 <= gfix_param.tolerance) {
 
@@ -406,19 +431,19 @@ int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U,
 
             }
             
-            else if(sweep >= 100 * INITIAL_SWEEPS_TO_CHECK_e2 || last_e2 == new_e2 ){
+            else if(last_e2 == new_e2 ) {
 
                 return -1;
 
             }
             else {
-                
+
                 sweeps_to_measurement_e2 += 
-                    sweeps_to_next_measurement(new_e2, gfix_param.tolerance);
+                    sweepsToNextMeasurement(new_e2, gfix_param.tolerance);
                 //	No need to calculate e2 all the time
                 //	because it will take some hundreds/thousands of sweeps
                 //	to fix the gauge.
-
+                
             }
             printf("Sweeps: %8d.\t e2: %3.2E \n",
                    sweep,
@@ -427,23 +452,19 @@ int SU3_gaugefix_overrelaxation(Mtrx3x3 * restrict U,
             //  It will be less than the tolerance,
             //	when the gauge-fixing is considered to be attained.
             //	Following the notation of hep-lat/0301019v2
-            
-        }
-        else if(!(sweep % (INITIAL_SWEEPS_TO_CHECK_e2 / 2) )) {
-
-            // printf("Sweeps in config %5d: %8d.\n", config_nr, sweep);
 
         }
 
-        if(!(sweep % SWEEPS_TO_REUNITARIZATION)){
-            reunitarize_field(U, lattice_param.amount_of_links);
-            reunitarize_field(G, lattice_param.amount_of_points);
+        if(!(sweep % SWEEPS_TO_REUNITARIZATION)) {
+
+            reunitarizeField(U, lattice_param.amount_of_links);
+            reunitarizeField(G, lattice_param.amount_of_points);
 
         }
-
     }
-    reunitarize_field(U, lattice_param.amount_of_links);
-    reunitarize_field(G, lattice_param.amount_of_points);
+
+    reunitarizeField(U, lattice_param.amount_of_links);
+    reunitarizeField(G, lattice_param.amount_of_points);
 
     return sweep;
 }

@@ -14,11 +14,11 @@
 #include <SU2_ops.h>
 #include <SU3_ops.h>
 
-extern geometric_parameters lattice_param;
+extern GeometricParameters lattice_param;
 
 /*============================JONIVAR'S CODE===============================*/
 
-void block_swap(int *buffer, size_t length) {
+void swap_block(int *buffer, size_t length) {
     size_t i;
     union swapper {
         int integer;
@@ -37,7 +37,7 @@ void block_swap(int *buffer, size_t length) {
 }
 
 
-void block_swap_double(double *buffer, size_t length) {
+void swap_block_double(double *buffer, size_t length) {
     size_t i;
     union swapper {
         double double_number;
@@ -60,13 +60,13 @@ void block_swap_double(double *buffer, size_t length) {
 }
 
 
-int byte_swap(void *strip, size_t size, size_t length) {
+int byteSwap(void *strip, size_t size, size_t length) {
     switch (size) {
         case sizeof(float): /* = 4 */
-            block_swap(strip, length / size);
+            swap_block(strip, length / size);
             break;
         case sizeof(double): /* = 8 */
-            block_swap_double(strip, length / size);
+            swap_block_double(strip, length / size);
             break;
         case 1:
             break;
@@ -79,7 +79,16 @@ int byte_swap(void *strip, size_t size, size_t length) {
 /*==========================================================================*/
 
 
-InCfgMtrx *get_link_in(InCfgMtrx *U, 
+InCfgMtrx *getLinkIn(InCfgMtrx * U, 
+                     const PosVec position,
+                     const LorentzIdx mu) {
+    //	Does the pointer arithmetic to get a pointer
+    //  to link at given position and mu
+    return GET_LINK(U, position, mu);
+}
+
+
+OutCfgMtrx *getLinkOut(OutCfgMtrx * U, 
                        const PosVec position,
                        const LorentzIdx mu) {
     //	Does the pointer arithmetic to get a pointer
@@ -88,33 +97,24 @@ InCfgMtrx *get_link_in(InCfgMtrx *U,
 }
 
 
-OutCfgMtrx *get_link_out(OutCfgMtrx *U, 
-                         const PosVec position,
-                         const LorentzIdx mu) {
-    //	Does the pointer arithmetic to get a pointer
-    //  to link at given position and mu
-    return GET_LINK(U, position, mu);
-}
-
-
-InGTMtrx  *get_gaugetransf_in (InGTMtrx  * restrict G_in,
-                               const PosVec position) {
+InGTMtrx  *getGaugetransfIn(InGTMtrx  * restrict G_in,
+                            const PosVec position) {
     //	Does the pointer arithmetic to get a pointer 
     //  to a gauge-transformation at given position
     return  GET_GT(G_in, position);
 }
 
 
-OutGTMtrx *get_gaugetransf_out(OutGTMtrx * restrict G_out,
-                               const PosVec position) {
+OutGTMtrx *getGaugetransfOut(OutGTMtrx * restrict G_out,
+                             const PosVec position) {
     //	Does the pointer arithmetic to get a pointer 
     //  to a gauge-transformation at given position
     return GET_GT(G_out, position);
 }
 
 
-int SU3_load_config(const Mtrx3x3 * restrict U, 
-                          char * config_filename) {
+int loadConfig(const Mtrx3x3 * restrict U, 
+               char * config_filename) {
     //	Loads a link configuration from the file with filename to U.
     FILE *config_file;
 
@@ -130,7 +130,7 @@ int SU3_load_config(const Mtrx3x3 * restrict U,
     #ifdef CONV_CFG_TO_WORKING_PRECISION
 
         U_in = (InCfgMtrx *)calloc(lattice_param.volume * DIM, sizeof(InCfgMtrx));
-        if(U_in == NULL){
+        if(U_in == NULL) {
 
             return -1;
         }
@@ -165,8 +165,9 @@ int SU3_load_config(const Mtrx3x3 * restrict U,
     fclose(config_file);
 
     #ifdef NEED_BYTE_SWAP_IN
-        if(byte_swap(U_in, sizeof(InScalar) / 2, lattice_param.volume * DIM * sizeof(InCfgMtrx))){
-            fprintf(stderr, "Error: Problem with the byte_swap. Unknown size.\n");
+        if(byteSwap(U_in, sizeof(InScalar) / 2,
+                    lattice_param.volume * DIM * sizeof(InCfgMtrx))) {
+            fprintf(stderr, "Error: Problem with the byteSwap. Unknown size.\n");
             #ifdef CONV_CFG_TO_WORKING_PRECISION
                 free(U_in);
             #endif  //CONV_CFG_TO_WORKING_PRECISION
@@ -175,7 +176,7 @@ int SU3_load_config(const Mtrx3x3 * restrict U,
     #endif  //NEED_BYTE_SWAP_IN
 
     #ifdef CONV_CFG_TO_WORKING_PRECISION
-        SU3_convert_cfg_in_work(U_in, U);
+        convertCfg_in_work(U_in, U);
         free(U_in);
     #endif  //CONV_CFG_TO_WORKING_PRECISION
 
@@ -183,14 +184,14 @@ int SU3_load_config(const Mtrx3x3 * restrict U,
 }
 
 
-int SU3_load_gauge_transf(Mtrx3x3 * restrict G, 
-                          char    * gauge_transf_filename) {
+int loadGaugeTransf(Mtrx3x3 * restrict G, 
+                    char * gauge_transf_filename) {
     //	Loads a gauge transformation to G.
     const InGTMtrx *G_in;
 
     #ifdef CONV_GT_TO_WORKING_PRECISION
         G_in = (InGTMtrx *)calloc( volume , sizeof(InGTMtrx));
-        if(TEST_ALLOCATION(G_in)){
+        if(TEST_ALLOCATION(G_in)) {
             return -1;
         }
     #else   //CONV_GT_TO_WORKING_PRECISION
@@ -246,7 +247,7 @@ int SU3_load_gauge_transf(Mtrx3x3 * restrict G,
     fclose(gaugetransf_file);
 
     #ifdef CONV_GT_TO_WORKING_PRECISION
-        SU3_convert_gt_in_work(G_in, G);
+        convertGT_in_work(G_in, G);
         free(G_in);
     #endif  //CONV_GT_TO_WORKING_PRECISION
 
@@ -254,8 +255,8 @@ int SU3_load_gauge_transf(Mtrx3x3 * restrict G,
 }
 
 
-int SU3_write_config(Mtrx3x3 * restrict U, 
-                     char * config_filename) {
+int writeConfig(Mtrx3x3 * restrict U, 
+                char * config_filename) {
     //  Loads a link configuration from the file with filename to U.
     const OutCfgMtrx *U_out;
 
@@ -264,15 +265,15 @@ int SU3_write_config(Mtrx3x3 * restrict U,
         U_out = (OutCfgMtrx *)calloc(volume * DIM, sizeof(OutCfgMtrx));
         TEST_ALLOCATION(U_out);
 
-        SU3_convert_cfg_work_out(U, U_out);
+        convertCfg_work_out(U, U_out);
 
     #else   //CONV_CFG_FROM_WORKING_PRECISION
         U_out = (OutCfgMtrx *)U;
     #endif  //CONV_CFG_FROM_WORKING_PRECISION
 
     #ifdef NEED_BYTE_SWAP_OUT
-        if (byte_swap(U_out, sizeof(OutScalar) / 2, volume * DIM * sizeof(OutCfgMtrx))){
-            fprintf(stderr, "Error: Problem with the byte_swap. Unknown size.\n");
+        if (byteSwap(U_out, sizeof(OutScalar) / 2, volume * DIM * sizeof(OutCfgMtrx))) {
+            fprintf(stderr, "Error: Problem with the byte swap. Unknown size.\n");
             #ifdef CONV_CFG_FROM_WORKING_PRECISION
                 free(U_out);
             #endif  //CONV_CFG_FROM_WORKING_PRECISION
@@ -318,19 +319,19 @@ int SU3_write_config(Mtrx3x3 * restrict U,
 }
 
 
-int SU3_write_gauge_transf(Mtrx3x3 * restrict G, 
-                           char * gauge_transf_filename) {
+int writeGaugeTransf(Mtrx3x3 * restrict G, 
+                     char * gauge_transf_filename) {
     //  Loads a link configuration from the file with filename to U.
     const OutGTMtrx *G_out;
 
     #ifdef CONV_GT_FROM_WORKING_PRECISION
         G_out = (OutGTMtrx *)calloc(volume, sizeof(OutGTMtrx));
-        if(TEST_ALLOCATION(G_out)){
+        if(TEST_ALLOCATION(G_out)) {
             
             return -1;
         
         }
-        SU3_convert_gt_work_out(G, G_out);
+        convertGT_work_out(G, G_out);
     #else   //CONV_GT_FROM_WORKING_PRECISION
         G_out = (OutGTMtrx *)G;
     #endif  //CONV_GT_FROM_WORKING_PRECISION

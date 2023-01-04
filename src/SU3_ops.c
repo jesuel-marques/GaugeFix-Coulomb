@@ -10,16 +10,16 @@
 
 #define DIGITS_MATRIX 18
 
-void print_matrix_3x3(const Mtrx3x3 * restrict u) {
+void printMatrix3x3(const Mtrx3x3 * restrict u) {
     // Prints the matrix on screen    
 
     printf("{");
     MtrxIdx3 a, b;
     
-    LOOP_3(a){
+    LOOP_3(a) {
         printf("{");
 
-        LOOP_3(b){
+        LOOP_3(b) {
             printf("%.*lf + I*(%.*lf)", DIGITS_MATRIX, creal(u -> m[ELEM_3X3(a, b)]), 
                                         DIGITS_MATRIX, cimag(u -> m[ELEM_3X3(a, b)]));
             
@@ -35,10 +35,10 @@ void print_matrix_3x3(const Mtrx3x3 * restrict u) {
 }
 
 
-void copy_3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict u_copy) {
+void copy3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict u_copy) {
     // Copies u to u_copy
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         u_copy -> m[ELEM_3X3(a, b)] = u -> m[ELEM_3X3(a, b)];
 
@@ -46,10 +46,10 @@ void copy_3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict u_copy) {
 }
 
 
-inline void set_null_3x3(Mtrx3x3 * restrict u) {
+inline void setNull3x3(Mtrx3x3 * restrict u) {
     // Sets u to be the 3x3 null matrix
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         u -> m[ELEM_3X3(a, b)] = 0.0;
 
@@ -57,10 +57,10 @@ inline void set_null_3x3(Mtrx3x3 * restrict u) {
 }
 
 
-inline void set_identity_3x3(Mtrx3x3 * restrict u) {
+inline void setIdentity3x3(Mtrx3x3 * restrict u) {
     // Sets u to be the identity matrix in SU(3)
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         u -> m[ELEM_3X3(a, b)] = a != b ? 0.0 : 1.0 ;
 
@@ -68,10 +68,10 @@ inline void set_identity_3x3(Mtrx3x3 * restrict u) {
 }
 
 
-inline void accumulate_3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict acc) {
+inline void accumulate3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict acc) {
     // Accumulates the value of u into acc
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         acc -> m[ELEM_3X3(a, b)] += u -> m[ELEM_3X3(a, b)];
         
@@ -79,13 +79,13 @@ inline void accumulate_3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict acc) {
 }
 
 
-void subtraction_3x3(const Mtrx3x3 * restrict u, 
+void subtraction3x3(const Mtrx3x3 * restrict u, 
                      const Mtrx3x3 * restrict v,
                            Mtrx3x3 * restrict u_minus_v) {
     //  Calculates the difference between matrix u and matrix v
     //  and returns result in u_minus_v
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         u_minus_v -> m[ELEM_3X3(a, b)] =   u -> m[ELEM_3X3(a, b)] 
                                              - v -> m[ELEM_3X3(a, b)];
@@ -94,7 +94,7 @@ void subtraction_3x3(const Mtrx3x3 * restrict u,
 }
 
 
-Scalar trace_3x3(const Mtrx3x3 * restrict u) {
+Scalar trace3x3(const Mtrx3x3 * restrict u) {
     //	Calculates the trace of the matrix u
     //  and returns result (complex) in tr
     return   u -> m[ELEM_3X3(0, 0)] 
@@ -103,7 +103,7 @@ Scalar trace_3x3(const Mtrx3x3 * restrict u) {
 }
 
 
-inline Scalar determinant_3x3(const Mtrx3x3 * restrict u) {
+inline Scalar determinant3x3(const Mtrx3x3 * restrict u) {
     //  Calculates the determinant of the matrix u
     //  and returns result, a complex number, in det.
 
@@ -118,7 +118,7 @@ inline Scalar determinant_3x3(const Mtrx3x3 * restrict u) {
 }
 
 
-inline void herm_conj_3x3(const Mtrx3x3 * restrict u, 
+inline void hermConj3x3(const Mtrx3x3 * restrict u, 
                                 Mtrx3x3 * restrict u_dagger) {
     // Calculates the hermitean conjugate to u
     // and returns result in u_dagger.
@@ -127,7 +127,7 @@ inline void herm_conj_3x3(const Mtrx3x3 * restrict u,
     u_dagger -> m[ELEM_3X3(2, 2)] = conj(u -> m[ELEM_3X3(2, 2)]);
 
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         u_dagger -> m[ELEM_3X3(b, a)] = conj(u -> m[ELEM_3X3(a, b)]);
         u_dagger -> m[ELEM_3X3(a, b)] = conj(u -> m[ELEM_3X3(b, a)]);
@@ -137,7 +137,7 @@ inline void herm_conj_3x3(const Mtrx3x3 * restrict u,
 }
 
 
-inline void subtraction_herm_conj_trless_3x3(const Mtrx3x3 * restrict u,
+inline void subtractionHermConjTrless3x3(const Mtrx3x3 * restrict u,
                                                Mtrx3x3 * restrict u_minus_udag_trless) {
     Scalar tr;
     tr  = u_minus_udag_trless -> m[ELEM_3X3(0, 0)] 
@@ -154,7 +154,7 @@ inline void subtraction_herm_conj_trless_3x3(const Mtrx3x3 * restrict u,
     u_minus_udag_trless -> m[ELEM_3X3(2, 2)] -= tr;
 
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
             
         u_minus_udag_trless -> m[ELEM_3X3(a, b)] =       u -> m[ELEM_3X3(a, b)] 
                                                   - conj(u -> m[ELEM_3X3(b, a)]);
@@ -164,13 +164,13 @@ inline void subtraction_herm_conj_trless_3x3(const Mtrx3x3 * restrict u,
 }
 
 
-inline void mult_by_scalar_3x3(const Scalar alpha, 
+inline void multByScalar3x3(const Scalar alpha, 
                                const Mtrx3x3 * restrict u,
                                      Mtrx3x3 * restrict alpha_times_u) {
     //  Calculates multiplication of 3x3 matrix u by Scalar alpha
     //  and returns result in alphatimesu.
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         alpha_times_u -> m[ELEM_3X3(a, b)] = alpha * u -> m[ELEM_3X3(a, b)];
             //	Mutiplying each entry.
@@ -179,12 +179,12 @@ inline void mult_by_scalar_3x3(const Scalar alpha,
 }
 
 
-inline void subst_mult_scalar_3x3(const Scalar alpha, 
+inline void substMultScalar3x3(const Scalar alpha, 
                                         Mtrx3x3 * restrict u) {
     //  Calculates multiplication of 3x3 matrix u by Scalar alpha
     //  and returns result in u.
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         u -> m[ELEM_3X3(a, b)] *= alpha;
         //	Mutiplying each entry.
@@ -193,15 +193,15 @@ inline void subst_mult_scalar_3x3(const Scalar alpha,
 }
 
 
-inline void prod_3x3(const Mtrx3x3 * restrict u, 
+inline void prod3x3(const Mtrx3x3 * restrict u, 
                      const Mtrx3x3 * restrict v, 
                            Mtrx3x3 * restrict uv) {
     // Calculates product of 2 3x3 matrices u e v
     // and returns result in uv.
     MtrxIdx3 a, b, c;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
         uv -> m[ELEM_3X3(a, b)] = 0.0;
-        LOOP_3(c){
+        LOOP_3(c) {
 
             uv -> m[ELEM_3X3(a, b)] +=   (u -> m[ELEM_3X3(a, c)]) 
                                        * (v -> m[ELEM_3X3(c, b)]);
@@ -211,17 +211,17 @@ inline void prod_3x3(const Mtrx3x3 * restrict u,
 }
 
 
-void prod_three_3x3(const Mtrx3x3 * restrict u, 
+void prodThree3x3(const Mtrx3x3 * restrict u, 
                     const Mtrx3x3 * restrict v,
                     const Mtrx3x3 * restrict w,
                           Mtrx3x3 * restrict uvw) {
     //  Calculates product of 3 3x3 matrices u, v and w
     //  and returns result in uvw.
     MtrxIdx3 a, b, c, d;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
         uvw -> m[ELEM_3X3(a, b)] = 0.0;
-        LOOP_3(c){
-            LOOP_3(d){
+        LOOP_3(c) {
+            LOOP_3(d) {
 
                 uvw -> m[ELEM_3X3(a, b)] +=   (u -> m[ELEM_3X3(a, c)]) 
                                             * (v -> m[ELEM_3X3(c, d)]) 
@@ -234,19 +234,19 @@ void prod_three_3x3(const Mtrx3x3 * restrict u,
 }
 
 
-void prod_four_3x3(const Mtrx3x3 * restrict u, 
+void prodFour3x3(const Mtrx3x3 * restrict u, 
                    const Mtrx3x3 * restrict v,
                    const Mtrx3x3 * restrict w,
                    const Mtrx3x3 * restrict x, 
-                         Mtrx3x3 * restrict uvwx){
+                         Mtrx3x3 * restrict uvwx) {
     //  Calculates product of 3 3x3 matrices u, v and w
     //  and returns result in uvw.
     MtrxIdx3 a, b, c, d, e;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
         uvwx -> m[ELEM_3X3(a, b)] = 0.0;
-        LOOP_3(c){
-            LOOP_3(d){
-                LOOP_3(e){
+        LOOP_3(c) {
+            LOOP_3(d) {
+                LOOP_3(e) {
 
                     uvwx -> m[ELEM_3X3(a, b)] +=   (u -> m[ELEM_3X3(a, c)]) 
                                                  * (v -> m[ELEM_3X3(c, d)]) 
@@ -260,34 +260,34 @@ void prod_four_3x3(const Mtrx3x3 * restrict u,
 }
 
 
-inline void accum_left_prod_3x3(const Mtrx3x3 * restrict g,
+inline void accumLeftProd3x3(const Mtrx3x3 * restrict g,
                                       Mtrx3x3 * restrict acc_prod) {
     //	Calculates matrix product between g and acc_prod
     //  and accumulates result in acc_prod
     Mtrx3x3 aux_prod;
  
-    copy_3x3(acc_prod, &aux_prod);
-    prod_3x3(g, &aux_prod, acc_prod);
+    copy3x3(acc_prod, &aux_prod);
+    prod3x3(g, &aux_prod, acc_prod);
 
 }
 
 
-inline void accum_right_prod_3x3(      Mtrx3x3 * restrict acc_prod, 
+inline void accumRightProd3x3(      Mtrx3x3 * restrict acc_prod, 
                                  const Mtrx3x3 * restrict g) {
     //	Calculates matrix product between acc_prod and g 
     //  and accumulates result in acc_prod
     Mtrx3x3 aux_prod;
 
-    copy_3x3(acc_prod, &aux_prod);
-    prod_3x3(&aux_prod, g, acc_prod);
+    copy3x3(acc_prod, &aux_prod);
+    prod3x3(&aux_prod, g, acc_prod);
 
 }
 
 
-inline void accum_prod_SU2_3x3(const Mtrx2x2CK * restrict x_ck, 
+inline void accumProdSU2_3x3(const Mtrx2x2CK * restrict x_ck, 
                                      Mtrx3x3 * restrict g, 
                                      MtrxIdx3 a, 
-                                     MtrxIdx3 b ){
+                                     MtrxIdx3 b ) {
     //  Accumulates in g the product of a SU(2) Cabbibo-Marinari 
     //  Submtrx in Cayley-Klein form x_ck with g
     //  The Cabbibo-Marinari have corresponding line a and column b in 3x3 notation.
@@ -297,9 +297,9 @@ inline void accum_prod_SU2_3x3(const Mtrx2x2CK * restrict x_ck,
     Mtrx2x2 x;
     //  the Cayley-Klein matrix will be first converted to a regular 2x2 matrix
     
-    convert_from_ck(x_ck, &x);
+    convertFromCK(x_ck, &x);
     MtrxIdx3 c;
-    LOOP_3(c){
+    LOOP_3(c) {
         //  Modifying only the terms in g that will actually receive contributions
 
         xg1 =   x.m[ELM_2X2(0, 0)] * g -> m[ELEM_3X3(a, c)] 
@@ -314,16 +314,16 @@ inline void accum_prod_SU2_3x3(const Mtrx2x2CK * restrict x_ck,
 }
 
 
-inline void prod_vuwdagger_3x3(const Mtrx3x3 * restrict v, 
+inline void prod_vuwdagger3x3(const Mtrx3x3 * restrict v, 
                                const Mtrx3x3 * restrict u, 
                                const Mtrx3x3 * restrict w, 
-                                     Mtrx3x3 * restrict vuwdagger ){
+                                     Mtrx3x3 * restrict vuwdagger ) {
      //	Calculates matrix product between v, u and w dagger.
     MtrxIdx3 a, b, c, d;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
         vuwdagger -> m[ELEM_3X3(a, b)] = 0.0;
-        LOOP_3(c){
-            LOOP_3(d){
+        LOOP_3(c) {
+            LOOP_3(d) {
 
                 vuwdagger -> m[ELEM_3X3(a, b)] +=       (v -> m[ELEM_3X3(a, c)]) 
                                                   *     (u -> m[ELEM_3X3(c, d)]) 
@@ -335,13 +335,13 @@ inline void prod_vuwdagger_3x3(const Mtrx3x3 * restrict v,
 }
 
 
-inline short power_3x3_binomial(      Mtrx3x3 * restrict A, 
+inline short power3x3Binomial(      Mtrx3x3 * restrict A, 
                                 const double omega, 
-                                      Mtrx3x3 * restrict A_to_omega){
+                                      Mtrx3x3 * restrict A_to_omega) {
     //  Calculates A^omega according to the formula (which works well for A close to identity)
     // A^omega = Proj_SU3(I + omega * (A-I) + ...)
     MtrxIdx3 a, b;
-    LOOP_3X3(a, b){
+    LOOP_3X3(a, b) {
 
         A_to_omega -> m[ELEM_3X3(a, b)] = a == b ? 
                                           1.0 + omega * (A -> m[ELEM_3X3(a, b)] - 1.0):
@@ -349,15 +349,15 @@ inline short power_3x3_binomial(      Mtrx3x3 * restrict A,
             
     }
 
-    return projection_SU3(A_to_omega);
+    return projectSU3(A_to_omega);
 }
 
 
-inline double inverse_3x3(const Mtrx3x3 * restrict a,
-                                Mtrx3x3 * restrict a_inv){
+inline double inverse3x3(const Mtrx3x3 * restrict a,
+                                Mtrx3x3 * restrict a_inv) {
 	//	Calculates the inverse of a 3 by 3 matrix x explicitly
     //  and returns result in a_inv.
-	Scalar a_det = determinant_3x3(a);
+	Scalar a_det = determinant3x3(a);
     
     if(a_det != 0.0) {
 
@@ -388,24 +388,24 @@ inline double inverse_3x3(const Mtrx3x3 * restrict a,
 }
 
 
-inline static int normalize_3_vec(Vec3 * restrict v){
+inline static int normalize3Vec(Vec3 * restrict v) {
     //  Takes a color vector and normalizes it
     //  returning result in the same vector
     double r = 0.0;
 
     MtrxIdx3 a;
 
-    LOOP_3(a){
+    LOOP_3(a) {
         //  Calculates the sum of the absolute
         //  value squared of each component
         r += POW2(fabs(v -> m[a]));
 
     }
-    if ( r != 0 ){
+    if ( r != 0 ) {
         //  If vector is not null, then normalizes it
         r = 1.0 / sqrt(r);
 
-        LOOP_3(a){
+        LOOP_3(a) {
 
             v -> m[a] *= r;
 
@@ -418,9 +418,9 @@ inline static int normalize_3_vec(Vec3 * restrict v){
 }
 
 
-inline static void cross_product_conj(Vec3 u, 
+inline static void crossproductConj(Vec3 u, 
                                       Vec3 v,
-                                      Vec3* u_cross_v_star){
+                                      Vec3* u_cross_v_star) {
     //  Calculates the cross product of u and v and then the 
     //  conjugate of the result and returns result in u_cross_v_star
     //  First component:
@@ -438,7 +438,7 @@ inline static void cross_product_conj(Vec3 u,
 }
 
 
-inline short projection_SU3(Mtrx3x3 * restrict x) {
+inline short projectSU3(Mtrx3x3 * restrict x) {
     //	Projects matrix x to the group SU(3) 
     //  returning SU(3) matrix x at the end.
     //	Follows method found in openqcd fastsum code.
@@ -447,20 +447,20 @@ inline short projection_SU3(Mtrx3x3 * restrict x) {
     Vec3 v0, v1, v2;
 
     MtrxIdx3 b;
-    LOOP_3(b){
+    LOOP_3(b) {
 
         v0.m[b] = x -> m[ELEM_3X3(0, b)];
         v1.m[b] = x -> m[ELEM_3X3(1, b)];
 
     }
 
-    exit_status = normalize_3_vec(&v0);
-    cross_product_conj(v0, v1, &v2);
+    exit_status = normalize3Vec(&v0);
+    crossproductConj(v0, v1, &v2);
 
-    exit_status |= normalize_3_vec(&v2);
-    cross_product_conj(v2, v0, &v1);
+    exit_status |= normalize3Vec(&v2);
+    crossproductConj(v2, v0, &v1);
 
-    LOOP_3(b){
+    LOOP_3(b) {
 
         x -> m[ELEM_3X3(0, b)] = v0.m[b];
         x -> m[ELEM_3X3(1, b)] = v1.m[b];
@@ -468,7 +468,7 @@ inline short projection_SU3(Mtrx3x3 * restrict x) {
 
     }
         
-    if(exit_status==0){
+    if(exit_status==0) {
         return 0;
     }
     else{
@@ -477,7 +477,7 @@ inline short projection_SU3(Mtrx3x3 * restrict x) {
 }
 
 
-void decompose_algebra_SU3(const Mtrx3x3    * restrict a, 
+void decomposeAlgebraSU3(const Mtrx3x3    * restrict a, 
                                  MtrxSU3Alg * restrict a_components) {
     //  Decomposes A in the components of the alfebra of SU(3)
     //  using the Gell-Mann matrices a basis and following the conventions
@@ -513,7 +513,7 @@ void decompose_algebra_SU3(const Mtrx3x3    * restrict a,
 }
 
 
-void SU3_CabbiboMarinari_projection(Mtrx3x3 * restrict w, 
+void projectSU3CabbiboMarinari(Mtrx3x3 * restrict w, 
                                     Mtrx3x3 * restrict total_update) {
     //	Calculates the update matrix A from w(n)=g(n).h(n) as in the Los Alamos
     //	algorithm for SU(3), with a division of the update matrix in submatrices
@@ -527,7 +527,7 @@ void SU3_CabbiboMarinari_projection(Mtrx3x3 * restrict w,
     //  multiply from the right by the old inverse.
 
        
-    if(inverse_3x3(w, &w_inv_old)){
+    if(inverse3x3(w, &w_inv_old)) {
 
         //  Local maximization is attained iteratively in SU(3),
         //  thus we need to make many hits ...
@@ -538,18 +538,18 @@ void SU3_CabbiboMarinari_projection(Mtrx3x3 * restrict w,
                 //	Submatrices are indicated by numbers from 0 to 2
                 //  with codenames R, S and T
 
-                SU3_update_sub_LosAlamos(w, sub);
+                updateSubLosAlamos(w, sub);
             }
         }
     }
     else{
         //  if w has no inverse, update will be given by the identity
-        set_identity_3x3(total_update);
+        setIdentity3x3(total_update);
         return;
     }
     
-    prod_3x3(w, &w_inv_old, &total_update_conj);
-    herm_conj_3x3(&total_update_conj, total_update);
+    prod3x3(w, &w_inv_old, &total_update_conj);
+    hermConj3x3(&total_update_conj, total_update);
 
     //	Updates matrix to total_update. It is the
     //	accumulated updates from the hits.

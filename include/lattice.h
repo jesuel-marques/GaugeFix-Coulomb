@@ -78,28 +78,31 @@ typedef struct {
     int amount_of_points;
 
     bool error;
-} geometric_parameters;
+} GeometricParameters;
 
-extern geometric_parameters lattice_param;
+extern GeometricParameters lattice_param;
 
-geometric_parameters init_geometric_parameters(const short n_SPC, 
-                                               const short n_T);
+int initGeometricParameters(const short n_SPC, const short n_T);
 
-inline bool position_valid(PosVec position);
+bool validGeometricParametersQ(void);
 
-bool position_mu_valid(PosVec position, 
+inline bool validPositionQ(PosVec position);
+
+bool positionmuValidQ(PosVec position, 
                        LorentzIdx mu);
 
-PosVec assign_position(const PosIndex x, 
+PosVec makePositionValid(PosVec position);
+
+PosVec assignPosition(const PosIndex x, 
                        const PosIndex y, 
                        const PosIndex z, 
                        const PosIndex t);
 
-void print_pos_vec(const PosVec u);
+void printPosVec(const PosVec u);
 
-PosVec hop_pos_plus (const PosVec u, 
+PosVec hopPosPlus (const PosVec u, 
                      const LorentzIdx mu),
-       hop_pos_minus(const PosVec u, 
+       hopPosMinus(const PosVec u, 
                      const LorentzIdx mu);
 
 #endif  //LATTICE_H
