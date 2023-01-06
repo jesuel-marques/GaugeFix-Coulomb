@@ -3,32 +3,32 @@
 #include <stdbool.h>
 
 #include <flags.h>
-
+#include <misc.h>
 #include <types.h>
 
 
-#define POSITION_IS_ODD(position)    (((position.i) ^ \
-                                       (position.j) ^ \
-                                       (position.k) ^ \
-                                       (position.t)) & 1)
+#define POSITION_IS_ODD(position)    (((position.pos[X_INDX]) ^ \
+                                       (position.pos[Y_INDX]) ^ \
+                                       (position.pos[Z_INDX]) ^ \
+                                       (position.pos[T_INDX])) & 1)
 
 #define POSITION_IS_EVEN(position)   !(POSITION_IS_ODD(position))
 
-#define LOOP_TEMPORAL(t)       for (t = 0; t < lattice_param.n_T; t++) 
-#define LOOP_SPATIAL_DIR(mu)   for (position.mu = 0; \
-                                    position.mu < lattice_param.n_SPC; \
-                                    position.mu++) 
-#define LOOP_SPATIAL(position) LOOP_SPATIAL_DIR(k)  \
-                               LOOP_SPATIAL_DIR(j)  \
-                               LOOP_SPATIAL_DIR(i)
+#define LOOP_TEMPORAL(t)       for(t = 0; t < lattice_param.n_T; t++) 
+#define LOOP_SPATIAL_DIR(position, mu)   for(position.pos[mu] = 0; \
+                                              position.pos[mu] < lattice_param.n_SPC; \
+                                              position.pos[mu]++) 
+#define LOOP_SPATIAL(position) LOOP_SPATIAL_DIR(position, Z_INDX)  \
+                               LOOP_SPATIAL_DIR(position, Y_INDX)  \
+                               LOOP_SPATIAL_DIR(position, X_INDX)
 
-// Paralelizing by slicing the time extent
+// Parallelizing by slicing the time extent
 #define LOOP_TEMPORAL_PARALLEL(t) OMP_PARALLEL_FOR \                                
                                LOOP_TEMPORAL(t)                           
 
-#define LOOP_LORENTZ(mu) for (mu = 0; mu < DIM; mu++)  
+#define LOOP_LORENTZ(mu) for(mu = 0; mu < DIM; mu++)  
 
-#define LOOP_LORENTZ_SPATIAL(mu) for (mu = 0; mu < DIM - 1 ; mu++)
+#define LOOP_LORENTZ_SPATIAL(mu) for(mu = 0; mu < DIM - 1 ; mu++)
 
 
 //  if position is odd, then the XOR of the first bit of each element
@@ -50,11 +50,10 @@
 
 //  Geometric types definitions
 
-typedef unsigned short PosIndex;             /*	Position index  */
+typedef short PosIndex;             /*	Position index  */
 
 typedef struct {
-    PosIndex i, j, k;
-    PosIndex t;
+    PosIndex pos[4];
 } PosVec;                                   /*	Struct for position vectors */
 
 
@@ -82,16 +81,16 @@ typedef struct {
 
 extern GeometricParameters lattice_param;
 
-int initGeometricParameters(const short n_SPC, const short n_T);
+int initGeometry(const short n_SPC, const short n_T);
 
 bool validGeometricParametersQ(void);
 
-inline bool validPositionQ(PosVec position);
+bool validPositionQ(PosVec position);
 
 bool positionmuValidQ(PosVec position, 
                        LorentzIdx mu);
 
-PosVec makePositionValid(PosVec position);
+PosVec makePeriodicBound(PosVec position);
 
 PosVec assignPosition(const PosIndex x, 
                        const PosIndex y, 
@@ -100,9 +99,6 @@ PosVec assignPosition(const PosIndex x,
 
 void printPosVec(const PosVec u);
 
-PosVec hopPosPlus (const PosVec u, 
-                     const LorentzIdx mu),
-       hopPosMinus(const PosVec u, 
-                     const LorentzIdx mu);
+PosVec getNeighbour(PosVec position, LorentzIdx mu, Direction dir);
 
 #endif  //LATTICE_H

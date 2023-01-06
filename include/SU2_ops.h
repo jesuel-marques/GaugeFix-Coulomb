@@ -22,11 +22,11 @@ typedef struct {
 
 #define ELM_2X2(a,b)    (a) * 2 + (b)  //  used to get the element of matrices
 
-#define LOOP_2_CK(a)    for (a = 0; a < 4; a++)
-#define LOOP_2_CK_i(a)  for (a = 1; a < 4; a++)
+#define LOOP_2_CK(a)    for(a = 0; a < 4; a++)
+#define LOOP_2_CK_i(a)  for(a = 1; a < 4; a++)
 
-#define LOOP_2X2(a, b)  for (a = 0; a < 3; a++)  \
-                        for (b = 0; b < 3; b++)
+#define LOOP_2X2(a, b)  for(a = 0; a < 3; a++)  \
+                        for(b = 0; b < 3; b++)
 
 //void printMtrx2x2(const Mtrx2x2 * restrict u, const char *name, const unsigned short decimal_places);
 

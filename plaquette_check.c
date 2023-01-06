@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 	// GREETER();
 
 	Mtrx3x3 * U = (Mtrx3x3 *) calloc(volume * DIM, sizeof(Mtrx3x3));
-	if (TEST_ALLOCATION(U)) {
+	if(TEST_ALLOCATION(U)) {
 		fprintf(stderr,"Could not allocate memory for config filename %s",
 						config_filename);
 		return -1;
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 	// printf("F before gt: e2: %5.4E\n",calculateF(U));
 	// printf("theta before gt: %5.4E\n", calculateTheta(U));
 
-	updateGlobalU(U, G);
+	applyGaugeTransformationU(U, G);
 
 	// printf("F after gt: %5.4E\n",calculateF(U));
 	// printf("theta after gt: %5.4E\n", calculateTheta(U));

@@ -8,18 +8,48 @@
 
 GeometricParameters lattice_param;
 
-#define HOP_POS_SPA(v, u, i)    (v).i = ((u).i != lattice_param.n_SPC - 1 ? \
-                                                   (u).i + 1 : 0);
-#define HOP_POS_TIME(v, u)      (v).t  = ((u).t  != lattice_param.n_T   - 1 ? \
-                                                   (u).t  + 1 : 0);
+PosVec *neighbour_table;
 
-#define HOP_MIN_SPA(v, u, i)    (v).i = ((u).i != 0 ? \
-                                         (u).i - 1 : lattice_param.n_SPC - 1);
-#define HOP_MIN_TIME(v, u)      (v).t  = ((u).t  != 0 ? \
-                                         (u).t  - 1 : lattice_param.n_T - 1);
+static void makeNeighbourTable(){
 
+    neighbour_table = (PosVec *) malloc(lattice_param.amount_of_points
+                                        * DIM * 2 * sizeof(PosVec));
+    short t;
+    LOOP_TEMPORAL_PARALLEL(t){
+        PosVec position = {.pos={0, 0, 0, t}};
+        PosVec neighbour = {.pos={0, 0, 0, 0}};
 
-int initGeometricParameters(const short n_s, const short n_t) {
+        LorentzIdx mu;
+        LOOP_SPATIAL(position){
+            LOOP_LORENTZ(mu){
+                neighbour = position;
+                neighbour.pos[mu]--;
+
+                *(neighbour_table + ((((position.pos[T_INDX]  * lattice_param.n_SPC 
+                                      + position.pos[Z_INDX]) * lattice_param.n_SPC
+                                      + position.pos[Y_INDX]) * lattice_param.n_SPC
+                                      + position.pos[X_INDX]) * DIM 
+                                      + mu) * 2 + REAR) = makePeriodicBound(neighbour);
+            
+                neighbour = position;
+                neighbour.pos[mu]++;
+
+                *(neighbour_table + ((((position.pos[T_INDX]  * lattice_param.n_SPC 
+                                      + position.pos[Z_INDX]) * lattice_param.n_SPC
+                                      + position.pos[Y_INDX]) * lattice_param.n_SPC
+                                      + position.pos[X_INDX]) * DIM 
+                                      + mu) * 2 + FRONT) = makePeriodicBound(neighbour);
+            }
+        }
+    }
+
+}
+
+void finalizeGeometry(){
+    free(neighbour_table);
+}
+
+int initGeometry(const short n_s, const short n_t) {
 
     lattice_param.n_SPC 		= n_s;
 	lattice_param.n_T   		= n_t;
@@ -37,13 +67,15 @@ int initGeometricParameters(const short n_s, const short n_t) {
 	lattice_param.amount_of_links  = DIM * lattice_param.volume;
 	lattice_param.amount_of_points = lattice_param.volume;
 
-    if(validGeometricParametersQ()){
-        return 0;
-    }
-    else{
+    if(!validGeometricParametersQ()){
         return 1;
     }
+
+    makeNeighbourTable();
+
+    return 0;
 }
+
 
 bool validGeometricParametersQ(void){
     short ns = lattice_param.n_SPC;
@@ -70,27 +102,22 @@ bool validGeometricParametersQ(void){
 }
 
 inline bool validPositionQ(PosVec position) {
-    if (position.t < lattice_param.n_T   &&
-        position.t >= 0                  &&
-        position.i < lattice_param.n_SPC &&
-        position.i >= 0                  &&
-        position.j < lattice_param.n_SPC &&
-        position.j >= 0                  &&
-        position.k < lattice_param.n_SPC &&
-        position.k >= 0                    ) {
-        return true;
-    }
-    else{
 
-        return false;
-
+    for(LorentzIdx mu = X_INDX; mu < DIM; mu++){
+        if(position.pos[mu] >= (mu != T_INDX ? 
+                               lattice_param.n_SPC : 
+                               lattice_param.n_T) &&
+           position.pos[mu] < 0 )
+            return false;
     }
+
+    return true;
 }
 
 
 inline bool positionmuValidQ(PosVec position, 
-                              LorentzIdx mu) {
-    if (validPositionQ(position) &&
+                             LorentzIdx mu) {
+    if(validPositionQ(position) &&
         (mu == T_INDX || mu == X_INDX || 
          mu == Y_INDX || mu == Z_INDX   )) {
 
@@ -102,28 +129,27 @@ inline bool positionmuValidQ(PosVec position,
 }
 
 
-int mod(short a, unsigned short b)
+inline int mod(short a, unsigned short b)
 {
-    int r = a % b;
+    short r = a % b;
     return r < 0 ? r + b : r;
 }
 
 
-PosVec makePositionValid(PosVec position) {
+PosVec makePeriodicBound(PosVec position) {
     PosVec valid_position;
     
-    if(!validGeometricParametersQ()){
-        fprintf(stderr, "Not possible to make position valid." 
-                        "Error in lattice parameters\n"
-                        "Returning same possibly invalid position.");
-        return position;
+    // if(!validGeometricParametersQ()){
+    //     fprintf(stderr, "Error in geometric parameters\n";
+    //     return position;
+    // }
+
+    for(LorentzIdx mu = X_INDX; mu < DIM; mu++){
+        valid_position.pos[mu] = mod(position.pos[mu], mu != T_INDX ? 
+                                                       lattice_param.n_SPC :
+                                                       lattice_param.n_T);
     }
-
-    valid_position.i = mod(position.i, lattice_param.n_SPC);
-    valid_position.j = mod(position.j, lattice_param.n_SPC);
-    valid_position.k = mod(position.k, lattice_param.n_SPC);
-    valid_position.t = mod(position.t, lattice_param.n_T  );
-
+    
     return valid_position;   
 }
 
@@ -133,105 +159,27 @@ PosVec assignPosition(const PosIndex x,
                       const PosIndex y, 
                       const PosIndex t) {
     /* assigns x, y, z and t to a position vector */
-    PosVec position = {.i = x, .j = y, .k = z, .t = t};
+    PosVec position = {.pos = {x, y, z, t}};
     
     if(!validPositionQ(position)) {
-        position = makePositionValid(position);
+        position = makePeriodicBound(position);
     }   /* if position not valid, make it valid and assign the valid one */
     return position;
 }
 
-void printPosVec(const PosVec pos) {
+void printPosVec(const PosVec position) {
     /* prints a position to the screen */
-    printf("x: %hu y: %hu z: %hu t: %hu\n", pos.i, pos.j, pos.k, pos.t);
+    printf("x: %hu y: %hu z: %hu t: %hu\n", position.pos[X_INDX],
+                                            position.pos[Y_INDX],
+                                            position.pos[Z_INDX],
+                                            position.pos[T_INDX] );
+
 }
 
 
-inline PosVec hopPosPlus(const PosVec u, 
-                         const LorentzIdx mu) {
-    /* 	Calculates the position immediately forward
-    	in the direction mu, taken into account the
-    	periodic boundary conditions. */
-    #ifdef CHECK_POSITION_BOUNDS
-        if(!positionmuValidQ(u, mu)) {
-            printf("Position: ");
-            printPosVec(u);
-            printf("\n");
-            printf("or mu: %d invalid.\n", mu);
-            exit(EXIT_FAILURE);
-        }
-
-        if(!validGeometricParametersQ()){
-            fprintf(stderr, "Error in lattice parameters\n");
-            exit(EXIT_FAILURE);
-        }
-    #endif  //CHECK_POSITION_BOUNDS
-
-    PosVec u_plus_muhat = u;
-
-    switch (mu) {
-        case X_INDX:
-            HOP_POS_SPA(u_plus_muhat, u, i);
-            break;
-
-        case Y_INDX:
-            HOP_POS_SPA(u_plus_muhat, u, j);
-            break;
-
-        case Z_INDX:
-            HOP_POS_SPA(u_plus_muhat, u, k);
-            break;
-
-        case T_INDX:
-            HOP_POS_TIME(u_plus_muhat, u);
-            break;
-
-    }
-
-    return u_plus_muhat;
-}
-
-
-inline PosVec hopPosMinus(const PosVec u, 
-                          const LorentzIdx mu) {
-    /* Calculates the position immediately behind
-    in the direction mu, taken into account the
-    periodic boundary conditions. */
-    #ifdef CHECK_POSITION_BOUNDS
-        if(!positionmuValidQ(u, mu)) {
-            printf("Position: ");
-            printPosVec(u);
-            printf("\n");
-            printf("or mu: %d invalid.\n", mu);
-            exit(EXIT_FAILURE);
-
-            if(!validGeometricParametersQ()){
-                fprintf(stderr, "Error in lattice parameters\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-    #endif  //CHECK_POSITION_BOUNDS
-
-    PosVec u_minus_muhat = u;
-
-    switch (mu) {
-        case X_INDX:
-            HOP_MIN_SPA(u_minus_muhat, u, i);
-            break;
-
-        case Y_INDX:
-            HOP_MIN_SPA(u_minus_muhat, u, j);
-            break;
-
-        case Z_INDX:
-            HOP_MIN_SPA(u_minus_muhat, u, k);
-            break;
-
-        case T_INDX:
-            HOP_MIN_TIME(u_minus_muhat, u);
-            break;
-
-    }
-
-    return u_minus_muhat;
+inline PosVec getNeighbour(PosVec position, LorentzIdx mu, Direction dir){
+    return *(neighbour_table + ((((position.pos[T_INDX]  * lattice_param.n_SPC 
+                                  +position.pos[Z_INDX]) * lattice_param.n_SPC
+                                  +position.pos[Y_INDX]) * lattice_param.n_SPC
+                                  +position.pos[X_INDX]) * DIM + mu) * 2 + dir);
 }

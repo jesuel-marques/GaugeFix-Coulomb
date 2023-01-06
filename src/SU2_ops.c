@@ -19,10 +19,10 @@
 //     printf("\n\n %s \n", name);
 
 //     printf("{");
-//     for (MtrxIdx2  a = 0; a < 2; a++) {
+//     for(MtrxIdx2  a = 0; a < 2; a++) {
 //         printf("{");
 
-//         for (MtrxIdx2  b = 0; b < 2; b++) {
+//         for(MtrxIdx2  b = 0; b < 2; b++) {
 //             printf("%.*lf + I(%.*lf)", decimal_places, creal(u -> m[ELM_2X2(a, b)]), 
 //                                        decimal_places, cimag(u -> m[ELM_2X2(a, b)]));
             
@@ -68,7 +68,7 @@ inline void convertFromCK(const Mtrx2x2CK * restrict u_ck,
 
 // void setNull2x2(Mtrx2x2CK * restrict u) {
 //     // Sets u to be the null Cayley-Klein 2x2 matrix
-//     for (MtrxIdx2 a = 0; a < 4; a++) {
+//     for(MtrxIdx2 a = 0; a < 4; a++) {
 
 //         u -> m[a] = 0.0;
 
@@ -88,7 +88,7 @@ inline void convertFromCK(const Mtrx2x2CK * restrict u_ck,
 // void accumulate2x2(const Mtrx2x2CK * restrict u, 
 //                           Mtrx2x2CK * restrict acc) {
 //     // Accumulates the value of u into acc
-//     for (MtrxIdx2 a = 0; a < 4; a++) {
+//     for(MtrxIdx2 a = 0; a < 4; a++) {
 
 //         acc -> m[a] += u -> m[a];
 
@@ -102,7 +102,7 @@ inline void convertFromCK(const Mtrx2x2CK * restrict u_ck,
 //     //  Calculates the difference between matrix u and matrix v
 //     //  and returns result in u_minus_v
 
-//     for (MtrxIdx2 a = 0; a < 4; a++) {
+//     for(MtrxIdx2 a = 0; a < 4; a++) {
 
 //         u_minus_v -> m[a] = (u -> m[a]) 
 //                           - (v -> m[a]);
@@ -176,7 +176,7 @@ void multScalar2x2(const Mtrx2x2CK * restrict u,
 //     Scalar inner_prod = (u -> m[0]) * (v -> m[0]);
 //     //	The 0th component has a plus sign ...
 
-//     for (MtrxIdx2 b = 1; b < 4; b++) {
+//     for(MtrxIdx2 b = 1; b < 4; b++) {
 
 //         inner_prod += -(u -> m[b]) 
 //                      * (v -> m[b]);
@@ -220,7 +220,7 @@ void multScalar2x2(const Mtrx2x2CK * restrict u,
 
 //     SU2OuterProduct(u, v, &u_cross_v);
 
-//     for (MtrxIdx2 a = 1; a <= 3; a++) {
+//     for(MtrxIdx2 a = 1; a <= 3; a++) {
 
 //         uv -> m[a] = (u -> m[a]) * (v -> m[0]) 
 //                    + (u -> m[0]) * (v -> m[a])

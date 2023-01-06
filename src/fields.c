@@ -115,12 +115,12 @@ void getLinkMatrix(const Mtrx3x3 *restrict U,
     #ifdef CHECK_POSITION_BOUNDS
     if(positionmuValidQ(position, mu)) {
     #endif  //CHECK_POSITION_BOUNDS
-        if (dir == FRONT) {
+        if(dir == FRONT) {
         copy3x3(getLink(U, position, mu), u);
         //	Link in the positive way is what is stored in U
 
-        } else if (dir == REAR) {
-        hermConj3x3(getLink(U, hopPosMinus(position, mu), mu), u);
+        } else if(dir == REAR) {
+        hermConj3x3(getLink(U, getNeighbour(position, mu, REAR), mu), u);
         //	U_(-mu)(n)=(U_mu(n-mu))^\dagger
         }
         else{
@@ -156,4 +156,60 @@ Mtrx3x3 *getGaugetransf(const Mtrx3x3 *restrict G,
             
         }
     #endif  //CHECK_POSITION_BOUNDS
+}
+
+
+void applyGaugeTransformationU(Mtrx3x3 * restrict U, 
+                               Mtrx3x3 * restrict G) {
+    
+    /*
+	 * Description:
+     * ===========
+	 * Applies gauge transformation G to gluon-field U.
+     * 
+	 * Calls:
+	 * =====
+     * prod_vuwdagger3x3, copy3x3,
+     * getNeighbour,
+	 * getLink, getGaugetransf.
+	 *
+	 * Parameters:
+	 * ==========
+	 * Mtrx3x3 * U:	    gluon field,
+     * Mtrx3x3 * G:	    gauge-transformation field.
+     *  
+	 * Returns:
+	 * =======
+	 * 
+	 */
+
+    PosIndex t;
+    LOOP_TEMPORAL_PARALLEL(t) {
+        Mtrx3x3 * g;
+        Mtrx3x3 * u;
+        Mtrx3x3 u_updated;
+
+        PosVec position;
+
+        position.pos[T_INDX] = t;
+
+        LOOP_SPATIAL(position) {
+
+            g = getGaugetransf(G, position);
+            LorentzIdx mu;
+            LOOP_LORENTZ(mu) {
+
+                u = getLink(U, position, mu);
+                
+                //	U'_mu(x) = g(x) . U_mu(x) . gdagger(x + mu)
+                prod_vuwdagger3x3(g,
+                                  u, 
+                                  getGaugetransf(G, getNeighbour(position, mu, FRONT)),
+                                  &u_updated);
+                
+                copy3x3(&u_updated, u);
+
+            }
+        }
+    }
 }

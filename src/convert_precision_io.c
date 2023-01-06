@@ -66,7 +66,7 @@ void convertCfg_in_work(InCfgMtrx * restrict U_in,
     PosIndex t;
     LOOP_TEMPORAL_PARALLEL(t) {
         PosVec position;
-        position.t = t;
+        position.pos[T_INDX] = t;
         LOOP_SPATIAL(position) {
             LorentzIdx mu;
             LOOP_LORENTZ(mu) {

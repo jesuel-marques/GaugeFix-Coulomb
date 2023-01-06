@@ -59,10 +59,10 @@ updates are performed for each submatrix in turn.
 
 #define ELEM_3X3(a, b)    (a) * Nc + (b)  //  used to get the element of matrices
 
-#define LOOP_3(a)         for ( a = 0; a < Nc; a++)
+#define LOOP_3(a)         for( a = 0; a < Nc; a++)
 
-#define LOOP_3X3(a, b)    for ( a = 0; a < Nc; a++)  \
-                                for ( b = 0; b < Nc; b++)
+#define LOOP_3X3(a, b)    for( a = 0; a < Nc; a++)  \
+                                for( b = 0; b < Nc; b++)
 
 
 void printMatrix3x3(const Mtrx3x3 *u);

@@ -18,12 +18,12 @@ double ReTrPlaquette(Mtrx3x3 * restrict U,
 
     Mtrx3x3 ua, ub, uc, ud;
 
-    PosVec position_plus_mu = hopPosPlus(position, mu);
+    const PosVec position_plus_mu = getNeighbour(position, mu, FRONT);
 
-    getLinkMatrix(U,              position,              mu, FRONT, &ua);
-    getLinkMatrix(U,              position_plus_mu,      nu, FRONT, &ub);
-    getLinkMatrix(U, hopPosPlus(position_plus_mu, nu), mu, REAR , &uc);
-    getLinkMatrix(U, hopPosPlus(position, nu),         nu, REAR , &ud);
+    getLinkMatrix(U,              position,                     mu, FRONT, &ua);
+    getLinkMatrix(U,              position_plus_mu,             nu, FRONT, &ub);
+    getLinkMatrix(U, getNeighbour(position_plus_mu, nu, FRONT), mu, REAR , &uc);
+    getLinkMatrix(U, getNeighbour(position,         nu, FRONT), nu, REAR , &ud);
 
 	prodFour3x3(&ua, &ub, &uc, &ud, &plaquette);
 
@@ -35,26 +35,26 @@ double ReTrPlaquette(Mtrx3x3 * restrict U,
 double averageSpatialPlaquette(Mtrx3x3 * restrict U) {
 
     if(!validGeometricParametersQ()){
-        fprintf(stderr, "Error in lattice parameters\n");
+        fprintf(stderr, "Error in geometric parameters\n");
     }
 
     //  Calculates the spatial plaquette average
     double plaq_ave = 0.0;
-
+    
+    // Parallelizing by slicing the time extent
     #pragma omp parallel for reduction (+:plaq_ave) \
             num_threads(NUM_THREADS) schedule(dynamic) 
-        // Paralelizing by slicing the time extent
-        for (PosIndex t = 0; t < lattice_param.n_T; t++) {
+        for(PosIndex t = 0; t < lattice_param.n_T; t++) {
 
             PosVec position;
 
-            position.t = t;
+            position.pos[T_INDX] = t;
             double plaq_ave_slice = 0.0;
 
             LOOP_SPATIAL(position) {
                 LorentzIdx mu;
                 LOOP_LORENTZ_SPATIAL(mu) {
-                    for (LorentzIdx nu = 0; nu < DIM - 1 ; nu++) {
+                    for(LorentzIdx nu = 0; nu < DIM - 1 ; nu++) {
                         if( mu < nu) {
 
                             plaq_ave_slice += 
@@ -78,19 +78,19 @@ double averageSpatialPlaquette(Mtrx3x3 * restrict U) {
 double averageTemporalPlaquette(Mtrx3x3 * restrict U) {
     
     if(!validGeometricParametersQ()){
-        fprintf(stderr, "Error in lattice parameters\n");
+        fprintf(stderr, "Error in geometric parameters\n");
     }
 
     double plaq_ave = 0.0;
     PosIndex t;
+    // Parallelizing by slicing the time extent 
     #pragma omp parallel for reduction (+:plaq_ave) \
             num_threads(NUM_THREADS) schedule(dynamic) 
-        // Paralelizing by slicing the time extent 
         LOOP_TEMPORAL(t) {
 
             PosVec position;
 
-            position.t = t;
+            position.pos[T_INDX] = t;
             double plaq_ave_slice = 0.0;
 
             LOOP_SPATIAL(position) {

@@ -36,7 +36,7 @@ test_matrix_power: $(OBJECTS)
 
 -include $(DEPENDS)
 
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c Makefile
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c Makefile_notebook
 	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
 
 clean:

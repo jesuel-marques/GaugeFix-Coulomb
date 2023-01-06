@@ -35,8 +35,8 @@ void divergenceA(Mtrx3x3 * restrict U,
     LorentzIdx mu;
     LOOP_LORENTZ_SPATIAL(mu) {
         
-        calculateA(U,               position,      mu, &A1);
-        calculateA(U, hopPosMinus(position, mu), mu, &A2);
+        calculateA(U,              position,            mu, &A1);
+        calculateA(U, getNeighbour(position, mu, REAR), mu, &A2);
 
         subtraction3x3(&A1, &A2, &term_divA);
 

@@ -21,7 +21,7 @@ int writeSweepsToGaugefix(char * identifier,
                           int sweeps) {
 	
 	if(!validGeometricParametersQ()){
-		fprintf(stderr, "Error in lattice parameters\n");
+		fprintf(stderr, "Error in geometric parameters\n");
 		exit(EXIT_FAILURE);
     }
 
@@ -48,12 +48,12 @@ int main(int argc, char *argv[]) {
 	const char * config_filename 	   = argv[1];
 	const char * gauge_transf_filename = argv[2];
 
-	initGeometricParameters(atoi(argv[3]), atoi(argv[4]));
+	initGeometry(atoi(argv[3]), atoi(argv[4]));
 	
-	const GaugeFixingParameters gfix_param = initGaugeFixingParameters(atof(argv[5]), 
+	const ORGaugeFixingParameters gfix_param = initORGaugeFixingParameters(atof(argv[5]), 
 															  		   atof(argv[6]));
 	
-	if(argc != 7 || !validGaugeFixingParametersQ(gfix_param) 
+	if(argc != 7 || !validORGaugeFixingParametersQ(gfix_param) 
 				 || !validGeometricParametersQ()			) {
 		fprintf(stderr, "Bad input.\n"
 						"Usage: Input config filename, gt filename, n_SPC, n_T, "
@@ -105,8 +105,6 @@ int main(int argc, char *argv[]) {
 		free(U);
 		return EXIT_FAILURE;
 	}
-
-	setFieldToIdentity(G, lattice_param.amount_of_points);
 	
 	//  fix the gauge
 
@@ -134,7 +132,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//	Record the effort to gauge-fix
-	if ( sweeps >= 0) {
+	if( sweeps >= 0) {
 		printf("Sweeps needed to gauge-fix config from file %s: %d. e2: %3.2E \n", 
 				config_filename,
 				sweeps,
@@ -166,6 +164,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	free(G);		//	Free memory allocated for gauge transformation.
-	
+	finalizeGeometry();
 	return EXIT_SUCCESS;
 }

@@ -25,7 +25,7 @@ void swap_block(int *buffer, size_t length) {
         char pos[4];
     } a, b;
 
-    for (i = 0; i < length; i++) {
+    for(i = 0; i < length; i++) {
         a.integer = *buffer;
         b.pos[0] = a.pos[3];
         b.pos[1] = a.pos[2];
@@ -44,7 +44,7 @@ void swap_block_double(double *buffer, size_t length) {
         char pos[8];
     } a, b;
 
-    for (i = 0; i < length; i++) {
+    for(i = 0; i < length; i++) {
         a.double_number = *buffer;
         b.pos[0] = a.pos[7];
         b.pos[1] = a.pos[6];
@@ -118,7 +118,7 @@ int loadConfig(const Mtrx3x3 * restrict U,
     //	Loads a link configuration from the file with filename to U.
     FILE *config_file;
 
-    if ((config_file = fopen(config_filename, "rb")) == NULL) {
+    if((config_file = fopen(config_filename, "rb")) == NULL) {
 
         fprintf(stderr, "Error: Problem opening config file %s.\n", config_filename);
 
@@ -139,7 +139,7 @@ int loadConfig(const Mtrx3x3 * restrict U,
         U_in = (InCfgMtrx *)U;
     #endif  //CONV_CFG_TO_WORKING_PRECISION
 
-    if (fread(U_in, sizeof(InCfgMtrx), lattice_param.volume * DIM, config_file) !=
+    if(fread(U_in, sizeof(InCfgMtrx), lattice_param.volume * DIM, config_file) !=
                                                            lattice_param.volume * DIM) {
 
         fprintf(stderr, "Error: Reading from file %s.\n", config_filename);
@@ -152,7 +152,7 @@ int loadConfig(const Mtrx3x3 * restrict U,
     }
     fgetc(config_file);
 
-    if (!feof(config_file)) {
+    if(!feof(config_file)) {
         fprintf(stderr, "Error: File has not been read till the end.\n"
                         "Check lattice sizes.\n");
         #ifdef CONV_CFG_TO_WORKING_PRECISION 
@@ -201,7 +201,7 @@ int loadGaugeTransf(Mtrx3x3 * restrict G,
     const FILE *gaugetransf_file;
 
     printf("Loading: %s.\n", gauge_transf_filename);
-    if ((gaugetransf_file = fopen(gauge_transf_filename, "rb")) == NULL) {
+    if((gaugetransf_file = fopen(gauge_transf_filename, "rb")) == NULL) {
 
         fprintf(stderr, "Error: Problem opening file %s"
                         "to load gauge transformation.\n", gauge_transf_filename);
@@ -214,7 +214,7 @@ int loadGaugeTransf(Mtrx3x3 * restrict G,
 
     }
 
-    if (fread(G_in, sizeof(InGTMtrx), lattice_param.volume, gaugetransf_file) != 
+    if(fread(G_in, sizeof(InGTMtrx), lattice_param.volume, gaugetransf_file) != 
                                                                 lattice_param.volume ) {
 
         fprintf(stderr, "Error: Problem reading file %s"
@@ -231,7 +231,7 @@ int loadGaugeTransf(Mtrx3x3 * restrict G,
 
     fgetc(gaugetransf_file);
 
-    if (!feof(gaugetransf_file)) {
+    if(!feof(gaugetransf_file)) {
 
         fprintf(stderr, "Error: File has not been read till the end."
                         "Check lattice sizes.\n");
@@ -272,7 +272,7 @@ int writeConfig(Mtrx3x3 * restrict U,
     #endif  //CONV_CFG_FROM_WORKING_PRECISION
 
     #ifdef NEED_BYTE_SWAP_OUT
-        if (byteSwap(U_out, sizeof(OutScalar) / 2, volume * DIM * sizeof(OutCfgMtrx))) {
+        if(byteSwap(U_out, sizeof(OutScalar) / 2, volume * DIM * sizeof(OutCfgMtrx))) {
             fprintf(stderr, "Error: Problem with the byte swap. Unknown size.\n");
             #ifdef CONV_CFG_FROM_WORKING_PRECISION
                 free(U_out);
@@ -284,7 +284,7 @@ int writeConfig(Mtrx3x3 * restrict U,
     const FILE *config_file;
 
     printf("Creating: %s.\n", config_filename);
-    if ((config_file = fopen(config_filename, "wb")) == NULL) {
+    if((config_file = fopen(config_filename, "wb")) == NULL) {
 
         fprintf(stderr, "Error: Problem creating file %s"
                         "for config.\n", config_filename);
@@ -297,7 +297,7 @@ int writeConfig(Mtrx3x3 * restrict U,
 
     }
 
-    if (fwrite(U_out, sizeof(OutCfgMtrx), lattice_param.volume * DIM, config_file) != 
+    if(fwrite(U_out, sizeof(OutCfgMtrx), lattice_param.volume * DIM, config_file) != 
                                                            lattice_param.volume * DIM) {
 
         fclose(config_file);
@@ -338,7 +338,7 @@ int writeGaugeTransf(Mtrx3x3 * restrict G,
 
     const FILE *gaugetransf_file;
 
-    if ((gaugetransf_file = fopen(gauge_transf_filename, "wb")) == NULL) {
+    if((gaugetransf_file = fopen(gauge_transf_filename, "wb")) == NULL) {
 
         fprintf(stderr, "Error: Problem opening file %s \
                          to store gauge transformation.\n", gauge_transf_filename);
@@ -350,7 +350,7 @@ int writeGaugeTransf(Mtrx3x3 * restrict G,
         return -1;
     }
 
-    if (fwrite(G_out, sizeof(OutGTMtrx), lattice_param.volume, gaugetransf_file) != 
+    if(fwrite(G_out, sizeof(OutGTMtrx), lattice_param.volume, gaugetransf_file) != 
                                                                 lattice_param.volume ) {
 
         fprintf(stderr, "Error: Problem writing gauge transformation to file %s.\n",

@@ -8,17 +8,17 @@
 
 
 //  Does the pointer arithmetic to get the correct index in the gauge transformation
-#define GET_GT(G, position)      G + (((position.t * lattice_param.n_SPC \
-                                            + position.k) * lattice_param.n_SPC \
-                                                + position.j) * lattice_param.n_SPC \
-                                                    + position.i) 
+#define GET_GT(G, position) G + (((position.pos[T_INDX]  * lattice_param.n_SPC \
+                                 + position.pos[Z_INDX]) * lattice_param.n_SPC \
+                                 + position.pos[Y_INDX]) * lattice_param.n_SPC \
+                                 + position.pos[X_INDX]) 
 
 //  Does the pointer arithmetic to get the correct index in the configuration
-#define GET_LINK(U, position, mu) U + ((((position.t * lattice_param.n_SPC \
-                                            + position.k) * lattice_param.n_SPC \
-                                                + position.j) * lattice_param.n_SPC \
-                                                    + position.i) * DIM \
-                                                        + mu)
+#define GET_LINK(U, position, mu) U + ((((position.pos[T_INDX]  * lattice_param.n_SPC \
+                                        + position.pos[Z_INDX]) * lattice_param.n_SPC \
+                                        + position.pos[Y_INDX]) * lattice_param.n_SPC \
+                                        + position.pos[X_INDX])  * DIM                \
+                                        + mu)
 
 Mtrx3x3 *allocateField(int elements, 
                         int size_of_elements);
@@ -48,5 +48,8 @@ void getLinkMatrix(const Mtrx3x3 * restrict U,
 
 Mtrx3x3 *getGaugetransf(const Mtrx3x3 * restrict G,
                          const PosVec position);
+
+void applyGaugeTransformationU(Mtrx3x3 * restrict U, 
+                               Mtrx3x3 * restrict G);
 
 #endif  //FIELDS_H

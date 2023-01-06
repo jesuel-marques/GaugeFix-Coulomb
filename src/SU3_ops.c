@@ -401,7 +401,7 @@ inline static int normalize3Vec(Vec3 * restrict v) {
         r += POW2(fabs(v -> m[a]));
 
     }
-    if ( r != 0 ) {
+    if( r != 0 ) {
         //  If vector is not null, then normalizes it
         r = 1.0 / sqrt(r);
 
@@ -478,7 +478,7 @@ inline short projectSU3(Mtrx3x3 * restrict x) {
 
 
 void decomposeAlgebraSU3(const Mtrx3x3    * restrict a, 
-                                 MtrxSU3Alg * restrict a_components) {
+                               MtrxSU3Alg * restrict a_components) {
     //  Decomposes A in the components of the alfebra of SU(3)
     //  using the Gell-Mann matrices a basis and following the conventions
     //  of Gattringer. The components are then returned in a_components
@@ -531,10 +531,10 @@ void projectSU3CabbiboMarinari(Mtrx3x3 * restrict w,
 
         //  Local maximization is attained iteratively in SU(3),
         //  thus we need to make many hits ...
-        for (unsigned short hits = 1; hits <= 300; hits++) {
+        for(unsigned short hits = 1; hits <= 300; hits++) {
 
             //	... and each hit contains the Cabbibo-Marinari subdivision
-            for (Submtrx sub = R; sub <= T; sub++) {
+            for(Submtrx sub = R; sub <= T; sub++) {
                 //	Submatrices are indicated by numbers from 0 to 2
                 //  with codenames R, S and T
 

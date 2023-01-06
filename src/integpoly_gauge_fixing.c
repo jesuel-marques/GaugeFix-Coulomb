@@ -21,7 +21,7 @@ Mtrx3x3 average_u_Temporal(Mtrx3x3 * restrict U,
 
     setNull3x3(&u_timeslice_sum);
 
-    PosVec position = {.t = t};
+    PosVec position = {.pos={t,0,0,0}};
     LOOP_SPATIAL(position) {
 
         accumulate3x3(getLink(U, position, T_INDX), &u_timeslice_sum);
@@ -100,7 +100,7 @@ int integPolyakovGaugefix(Mtrx3x3 * restrict U,
     for(PosIndex t = 0; t < lattice_param.n_T; t++) {
         Mtrx3x3 updated_u;
         PosVec position;
-        position.t = t;
+        position.pos[T_INDX] = t;
         
         LOOP_SPATIAL(position) {
                                         
