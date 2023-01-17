@@ -50,9 +50,9 @@ Scalar determinant2x2(const Mtrx2x2CK *u);
 //void hermConj2x2(const Mtrx2x2CK* u, 
 //                         Mtrx2x2CK* u_dagger);
 
-void multScalar2x2(const Mtrx2x2CK * restrict u, 
-                     const Scalar alpha, 
-                           Mtrx2x2CK * restrict alpha_times_u);
+void multByScalar2x2(const Scalar alpha,
+                    const Mtrx2x2CK * restrict u, 
+                    Mtrx2x2CK * restrict alpha_times_u);
 
 //void product2x2(const Mtrx2x2CK* u, 
 //                 const Mtrx2x2CK* v, 

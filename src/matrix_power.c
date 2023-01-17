@@ -17,9 +17,9 @@ static int eigensystem3x3(Mtrx3x3 * restrict a,
     lapack_int info;
     
     info = LAPACKE_zgeev(LAPACK_ROW_MAJOR, 'N', 'V', Nc, a -> m, Nc, 
-                        eigenvalues, 
-                        &(left_eigenvectors).m, Nc, 
-                             eigenvectors -> m, Nc);
+                         eigenvalues, 
+                         &(left_eigenvectors).m, Nc, 
+                         eigenvectors -> m, Nc);
     
     setNull3x3(eigenvalues_mat);
     MtrxIdx3 c;
@@ -32,7 +32,7 @@ static int eigensystem3x3(Mtrx3x3 * restrict a,
 
 
 static void logDiagonalMtrx3x3(Mtrx3x3 * restrict diag_mtrx,  
-                                  Mtrx3x3 * restrict log_of_diag_mtrx) {
+                               Mtrx3x3 * restrict log_of_diag_mtrx) {
     setNull3x3(log_of_diag_mtrx);    
     MtrxIdx3 a;
     LOOP_3(a) {
@@ -42,7 +42,7 @@ static void logDiagonalMtrx3x3(Mtrx3x3 * restrict diag_mtrx,
 
 
 static void powerDiagonalMtrx3x3(Mtrx3x3 * restrict diag_mtrx, Scalar power, 
-                                    Mtrx3x3 * restrict diag_mtrx_to_power) {
+                                 Mtrx3x3 * restrict diag_mtrx_to_power) {
     setNull3x3(diag_mtrx_to_power);    
     MtrxIdx3 a;
     LOOP_3(a) {

@@ -10,22 +10,73 @@
 #include <types.h>
 
 
-Mtrx3x3 *allocateField(int elements, 
-                        int size_of_elements) {
-    if(elements <= 0  || size_of_elements <= 0) {
-        return NULL;
-    }
+Mtrx3x3 *allocate3x3Field(unsigned elements) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Allocated the memory for 3x3 with a given number of elements.
+     * 
+	 * Calls:
+	 * =====
+     * calloc.
+	 *
+	 * Macros:
+	 * ======
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * unsigned elements:   number of 3x3 matrices of the field to be allocated.
+     * 
+	 * Returns:
+	 * =======
+     * A pointer to the allocated field. This pointer can be NULL, if the internal
+     * calloc finds some error which prevents it from allocating the necessary memory.
+	 * 
+     */
     
-    const Mtrx3x3 *field = (Mtrx3x3 *) calloc(elements, size_of_elements);
+    const Mtrx3x3 *field = (Mtrx3x3 *) calloc(elements, sizeof(Mtrx3x3));
 	
     return field;
 }
 
 
-int setFieldToIdentity(const Mtrx3x3 * restrict field, 
-                           int elements) {
-    if(elements <= 0  || field == NULL) {
-        return -1;
+int setFieldToIdentity(const Mtrx3x3 * restrict field, unsigned elements) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Sets all 3x3 matrices entries in field to unit matrices.
+     * 
+	 * Calls:
+	 * =====
+     * setIdentity3x3.
+	 *
+	 * Macros:
+	 * ======
+     * OMP_PARALLEL_FOR.
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 * field:     field composed as a collection of 3x3 matrices,
+     * unsigned elements:   number of 3x3 matrices of the field.
+     * 
+	 * Returns:
+	 * =======
+     * 0 if successful. 
+     * Integer error-code otherwise:
+     *      -2: the field passed was a NULL pointer.
+	 * 
+     */
+
+    if(field == NULL) {
+        return -2;
     }
 
     OMP_PARALLEL_FOR
@@ -37,10 +88,41 @@ int setFieldToIdentity(const Mtrx3x3 * restrict field,
 
 
 int copyField(const Mtrx3x3 * restrict field, 
-                int elements, 
-               const Mtrx3x3 * restrict field_copy) {
-    if(elements <= 0  || field == NULL || field_copy == NULL) {
-        return -1;
+              unsigned elements, 
+              const Mtrx3x3 * restrict field_copy) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Copies a field to field_copy.
+     * 
+	 * Calls:
+	 * =====
+     * copy3x3.
+	 *
+	 * Macros:
+	 * ======
+     * OMP_PARALLEL_FOR.
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 * field:         field composed as a collection of 3x3 matrices,
+     * unsigned elements:       number of 3x3 matrices of the field,
+     * Mtrx3x3 * field_copy:    copy of field.
+     * 
+	 * Returns:
+	 * =======
+     * 0 if successful. 
+     * Integer error-code otherwise:
+     *      -2: the field or field_copy passed was a NULL pointer.
+	 * 
+     */
+
+    if(field == NULL || field_copy == NULL) {
+        return -2;
     }
 
     OMP_PARALLEL_FOR
@@ -51,10 +133,41 @@ int copyField(const Mtrx3x3 * restrict field,
 }
 
 
-int reunitarizeField(const Mtrx3x3 * restrict field,
-                      int elements) {
-    if(elements <= 0  || field == NULL) {
-        return -1;
+int reunitarizeField(const Mtrx3x3 * restrict field, unsigned elements) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Reunitarizes all the matrices in the field by projecting them all to SU(3).
+     * 
+	 * Calls:
+	 * =====
+     * projectSU3.
+	 *
+	 * Macros:
+	 * ======
+     * NUM_THREADS.
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 * field:     field composed as a collection of 3x3 matrices,
+     * unsigned elements:   number of 3x3 matrices of the field.
+     * 
+	 * Returns:
+	 * =======
+     * 0 if successful. 
+     * Integer error-code otherwise: 
+     *      -1: the projection didn't work, probably because there is a
+     *          null matrix somewhere. 
+     *      -2: the field passed was a NULL pointer.
+	 * 
+     */
+
+    if(field == NULL) {
+        return -2;
     }
 
     int exit_status = 0;
@@ -66,23 +179,52 @@ int reunitarizeField(const Mtrx3x3 * restrict field,
     if(exit_status != 0) {
         return -1;
     }
-    return 0;
+    return exit_status;
 }
 
 
-double averageFieldDet(const Mtrx3x3 *restrict field,
-                         int elements) {
-    if(elements <= 0  || field == NULL) {
-        return -1;
+Scalar averageFieldDet(const Mtrx3x3 *restrict field, unsigned elements) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Gives the average determinant for a field of 3x3 matrices.
+     * 
+	 * Calls:
+	 * =====
+     * determinant3x3.
+	 *
+	 * Macros:
+	 * ======
+     * NUM_THREADS.
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 * field:     field composed as a collection of 3x3 matrices,
+     * unsigned elements:   number of 3x3 matrices of the field.
+     * 
+	 * Returns:
+	 * =======
+     * The lattice averaged determinant for the field if successful.
+     * Integer error-code otherwise:
+     *      -2: the field passed was a NULL pointer.
+	 * 
+     */
+
+    if(field == NULL) {
+        return -2;
     }
-    double det = 0.0;
+    Scalar det = 0.0;
 
     #pragma omp parallel for num_threads(NUM_THREADS) \
             schedule(dynamic) reduction(+ : det)
         for(int i = 0; i < elements; i++)
             det += determinant3x3(field + i);
 
-    det /= (double)elements;
+    det /= (Scalar)elements;
 
     return det;
 }
@@ -91,57 +233,144 @@ double averageFieldDet(const Mtrx3x3 *restrict field,
 Mtrx3x3 *getLink(const Mtrx3x3 *restrict U, 
                   const PosVec position, 
                   const LorentzIdx mu) {
-    /* Does the pointer arithmetic to get a pointer to link at given position and mu */
+
+    /*
+	 * Description:
+     * ===========
+	 * Gets a pointer to a link at the given position and mu.
+     * 
+	 * Calls:
+	 * =====
+     * if CHECK_POSITION_BOUNDS set
+     * validPositionQ.
+	 *
+	 * Macros:
+	 * ======
+     * CHECK_POSITION_BOUNDS, GET_LINK.
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 * U:         SU(3) gluon field,
+     * PosVec position:     position at which the link variable is requested,
+     * LorentzIdx mu:       Lorentz direction for which the link variable is requested.
+     * 
+	 * Returns:
+	 * =======
+     * The gauge link at that particular point and mu as a pointer to a 3x3 matrix.
+	 * 
+     */
+
     #ifdef CHECK_POSITION_BOUNDS
         if(positionmuValidQ(position, mu))    
     #endif  //CHECK_POSITION_BOUNDS
             return GET_LINK(U, position, mu);
     #ifdef CHECK_POSITION_BOUNDS
         else{
-            printf("Program reading config outside of allowed range.\n");
-            exit(EXIT_FAILURE);
+            return NULL;
         }
     #endif  //CHECK_POSITION_BOUNDS
 }
 
 
 void getLinkMatrix(const Mtrx3x3 *restrict U, 
-                     const PosVec position, 
-                     const LorentzIdx mu, 
-                           Direction dir, 
-                     const Mtrx3x3 *restrict u) {
-    /* Gets forward or backward link at given position and mu
-    and copies it to u. */
-    #ifdef CHECK_POSITION_BOUNDS
-    if(positionmuValidQ(position, mu)) {
-    #endif  //CHECK_POSITION_BOUNDS
-        if(dir == FRONT) {
-        copy3x3(getLink(U, position, mu), u);
-        //	Link in the positive way is what is stored in U
+                   const PosVec position, 
+                   const LorentzIdx mu, 
+                   Direction dir, 
+                   const Mtrx3x3 *restrict u) {
+    
+    /*
+	 * Description:
+     * ===========
+	 * Gets forward or backward link at given position and mu.
+     * 
+	 * Calls:
+	 * =====
+     * getNeighbour,
+     * copy3x3, hermConj3x3,
+     * getLink.
+     * 
+     * Macros:
+     * ======
+     * CHECK_POSITION_BOUNDS.
+     * 
+     * if CHECK_POSITION_BOUNDS set
+     * positionmuValidQ.
+     * 
+     * Global Variables:
+     * ================
+	 *
+	 * Parameters:
+	 * ==========
+	 * Mtrx3x3 * U:	        SU(3) gluon field,
+     * PosVec position:     position at which the link is required,
+     * LorentzIdx mu:       Lorentz direction at which the link is required,
+     * Direction dir:       FRONT if the forward link REAR if the backward link,
+     * Mtrx3x3 * u:         the link with coordinates position and mu.
+     * 
+	 * Returns:
+	 * =======
+	 * 
+	 */
 
-        } else if(dir == REAR) {
-        hermConj3x3(getLink(U, getNeighbour(position, mu, REAR), mu), u);
-        //	U_(-mu)(n)=(U_mu(n-mu))^\dagger
+    
+    #ifdef CHECK_POSITION_BOUNDS
+        if(positionmuValidQ(position, mu)) {
+    #endif  //CHECK_POSITION_BOUNDS
+            if(dir == FRONT) {
+            copy3x3(getLink(U, position, mu), u);
+            //	Link in the positive way is what is stored in U
+
+            } else if(dir == REAR) {
+            hermConj3x3(getLink(U, getNeighbour(position, mu, REAR), mu), u);
+            //	U_(-mu)(n) = (U_mu(n - mu))^\dagger
+            }
+            else{
+                u = NULL; 
+            }
+    #ifdef CHECK_POSITION_BOUNDS
         }
         else{
-            printf("Direction is not valid.");
-            exit(EXIT_FAILURE); 
+            u = NULL;
         }
-    #ifdef CHECK_POSITION_BOUNDS
-    }
-    else{
-        printf("Program reading config outside of allowed range.\n");
-        exit(EXIT_FAILURE);
-    }
     #endif  //CHECK_POSITION_BOUNDS
     
 }
 
 
 Mtrx3x3 *getGaugetransf(const Mtrx3x3 *restrict G, 
-                         const PosVec position) {
-    /* Does the pointer arithmetic to get a pointer to 
-       a gauge transformation at given position */
+                        const PosVec position) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Gets a pointer to the gauge transformation at the given position.
+     * 
+	 * Calls:
+	 * =====
+     * if CHECK_POSITION_BOUNDS set
+     * validPositionQ.
+	 *
+	 * Macros:
+	 * ======
+     * CHECK_POSITION_BOUNDS, GET_GT.
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 * G:         SU(3) gauge transformation field,
+     * PosVec position:     position at which the gauge transformation is requested.
+     * 
+	 * Returns:
+	 * =======
+     * The gauge transformation at that particular point as a pointer to a 3x3 matrix.
+	 * 
+     */
+
     #ifdef CHECK_POSITION_BOUNDS
         if(validPositionQ(position)) {
     #endif  //CHECK_POSITION_BOUNDS
@@ -149,11 +378,7 @@ Mtrx3x3 *getGaugetransf(const Mtrx3x3 *restrict G,
     #ifdef CHECK_POSITION_BOUNDS
         }
         else{
-        
-            fprintf(stderr, "Program reading gauge-transformation"
-                            "outside of allowed position range.\n");
-            exit(EXIT_FAILURE);
-            
+            return NULL;
         }
     #endif  //CHECK_POSITION_BOUNDS
 }
@@ -172,11 +397,18 @@ void applyGaugeTransformationU(Mtrx3x3 * restrict U,
      * prod_vuwdagger3x3, copy3x3,
      * getNeighbour,
 	 * getLink, getGaugetransf.
+     * 
+     * Macros:
+     * ======
+     * LOOP_TEMPORAL_PARALLEL, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ.
+     * 
+     * Global Variables:
+     * ================
 	 *
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U:	    gluon field,
-     * Mtrx3x3 * G:	    gauge-transformation field.
+	 * Mtrx3x3 * U:	    SU(3) gluon field,
+     * Mtrx3x3 * G:	    SU(3) gauge-transformation field.
      *  
 	 * Returns:
 	 * =======
@@ -197,13 +429,11 @@ void applyGaugeTransformationU(Mtrx3x3 * restrict U,
 
             g = getGaugetransf(G, position);
             LorentzIdx mu;
-            LOOP_LORENTZ(mu) {
-
-                u = getLink(U, position, mu);
+            LOOP_LORENTZ(mu) {                
                 
                 //	U'_mu(x) = g(x) . U_mu(x) . gdagger(x + mu)
                 prod_vuwdagger3x3(g,
-                                  u, 
+                                  u = getLink(U, position, mu), 
                                   getGaugetransf(G, getNeighbour(position, mu, FRONT)),
                                   &u_updated);
                 

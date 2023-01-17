@@ -1,3 +1,11 @@
+#include <SU2_ops.h>
+#include <SU3_ops.h>
+#include <convert_precision_io.h>
+#include <fields.h>
+#include <fields_io.h>
+#include <flags.h>
+#include <lattice.h>
+#include <misc.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -5,18 +13,10 @@
 #include <string.h>
 #include <tgmath.h>
 
-#include <convert_precision_io.h>
-#include <fields.h>
-#include <fields_io.h>
-#include <flags.h>
-#include <lattice.h>
-#include <misc.h>
-#include <SU2_ops.h>
-#include <SU3_ops.h>
-
 extern GeometricParameters lattice_param;
 
 /*============================JONIVAR'S CODE===============================*/
+/* conversion between little and big endian */
 
 void swap_block(int *buffer, size_t length) {
     size_t i;
@@ -25,7 +25,7 @@ void swap_block(int *buffer, size_t length) {
         char pos[4];
     } a, b;
 
-    for(i = 0; i < length; i++) {
+    for (i = 0; i < length; i++) {
         a.integer = *buffer;
         b.pos[0] = a.pos[3];
         b.pos[1] = a.pos[2];
@@ -36,15 +36,13 @@ void swap_block(int *buffer, size_t length) {
     }
 }
 
-
 void swap_block_double(double *buffer, size_t length) {
-    size_t i;
     union swapper {
         double double_number;
         char pos[8];
     } a, b;
 
-    for(i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         a.double_number = *buffer;
         b.pos[0] = a.pos[7];
         b.pos[1] = a.pos[6];
@@ -58,7 +56,6 @@ void swap_block_double(double *buffer, size_t length) {
         buffer++;
     }
 }
-
 
 int byteSwap(void *strip, size_t size, size_t length) {
     switch (size) {
@@ -76,52 +73,174 @@ int byteSwap(void *strip, size_t size, size_t length) {
 
     return 0;
 }
-/*==========================================================================*/
+/*=============================================================================*/
 
+InCfgMtrx *getLinkIn(InCfgMtrx *U_in, const PosVec position, const LorentzIdx mu) {
+    /*
+     * Description:
+     * ===========
+     * Gets a pointer to a link in input precision at the given position and mu.
+     *
+     * Calls:
+     * =====
+     *
+     * Macros:
+     * ======
+     * GET_LINK.
+     *
+     * Global Variables:
+     * ================
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U_in:      SU(3) gluon field in input precision,
+     * PosVec position:     position at which the link variable is requested,
+     * LorentzIdx mu:       Lorentz direction for which the link variable is requested.
+     *
+     * Returns:
+     * =======
+     * The gauge link at that particular point and mu as a pointer to a 3x3 matrix in
+     * input precision.
+     *
+     */
 
-InCfgMtrx *getLinkIn(InCfgMtrx * U, 
-                     const PosVec position,
-                     const LorentzIdx mu) {
-    //	Does the pointer arithmetic to get a pointer
-    //  to link at given position and mu
-    return GET_LINK(U, position, mu);
+    return GET_LINK(U_in, position, mu);
 }
 
+OutCfgMtrx *getLinkOut(OutCfgMtrx *U_out, const PosVec position, const LorentzIdx mu) {
+    /*
+     * Description:
+     * ===========
+     * Gets a pointer to a link in output precision at the given position and mu.
+     *
+     * Calls:
+     * =====
+     *
+     * Macros:
+     * ======
+     * GET_LINK.
+     *
+     * Global Variables:
+     * ================
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U_out:     SU(3) gluon field in output precision,
+     * PosVec position:     position at which the link variable is requested,
+     * LorentzIdx mu:       Lorentz direction for which the link variable is requested.
+     *
+     * Returns:
+     * =======
+     * The gauge link at that particular point and mu as a pointer to a 3x3 matrix in
+     * output precision.
+     *
+     */
 
-OutCfgMtrx *getLinkOut(OutCfgMtrx * U, 
-                       const PosVec position,
-                       const LorentzIdx mu) {
-    //	Does the pointer arithmetic to get a pointer
-    //  to link at given position and mu
-    return GET_LINK(U, position, mu);
+    return GET_LINK(U_out, position, mu);
 }
 
+InGTMtrx *getGaugetransfIn(InGTMtrx *restrict G_in, const PosVec position) {
+    /*
+     * Description:
+     * ===========
+     * Gets a pointer to the gauge transformation in input precision at the given
+     * position.
+     *
+     * Calls:
+     * =====
+     *
+     * Macros:
+     * ======
+     * GET_GT.
+     *
+     * Global Variables:
+     * ================
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * G_in:      SU(3) gauge transformation field in input precision,
+     * PosVec position:     position at which the gauge transformation is requested.
+     *
+     * Returns:
+     * =======
+     * The gauge transformation at that particular point as a pointer to a 3x3 matrix in
+     * input precision.
+     *
+     */
 
-InGTMtrx  *getGaugetransfIn(InGTMtrx  * restrict G_in,
-                            const PosVec position) {
-    //	Does the pointer arithmetic to get a pointer 
-    //  to a gauge-transformation at given position
-    return  GET_GT(G_in, position);
+    return GET_GT(G_in, position);
 }
 
+OutGTMtrx *getGaugetransfOut(OutGTMtrx *restrict G_out, const PosVec position) {
+    /*
+     * Description:
+     * ===========
+     * Gets a pointer to the gauge transformation in output precision at the given
+     * position.
+     *
+     * Calls:
+     * =====
+     *
+     * Macros:
+     * ======
+     * GET_GT.
+     *
+     * Global Variables:
+     * ================
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * G_out:     SU(3) gauge transformation field in output precision,
+     * PosVec position:     position at which the gauge transformation is requested.
+     *
+     * Returns:
+     * =======
+     * The gauge transformation at that particular point as a pointer to a 3x3 matrix in
+     * output precision.
+     *
+     */
 
-OutGTMtrx *getGaugetransfOut(OutGTMtrx * restrict G_out,
-                             const PosVec position) {
-    //	Does the pointer arithmetic to get a pointer 
-    //  to a gauge-transformation at given position
     return GET_GT(G_out, position);
 }
 
+int loadConfig(const Mtrx3x3 *restrict U, char * config_filename) {
 
-int loadConfig(const Mtrx3x3 * restrict U, 
-               char * config_filename) {
-    //	Loads a link configuration from the file with filename to U.
+    /*
+     * Description:
+     * ===========
+     * Reads a file with filename config_filename and loads a gluon-field from it.
+     *
+     * Calls:
+     * =====
+     * fopen, fprintf, fread, fclose, feof, fgetc,
+     * if CONV_CFG_TO_WORKING_PRECISION set
+     * calloc, free,
+     * byteSwap, 
+     * convertCfg_in_work.
+     *
+     * Macros:
+     * ======
+     * CONV_CFG_TO_WORKING_PRECISION, TEST_ALLOCATION, NEED_BYTE_SWAP_IN, DIM.
+     *
+     * Global Variables:
+     * ================
+     * lattice_param
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * restrict U:    the gluon field to be written,
+     * char * config_filename:  the filename of the file which will store the
+     *                          gluon field.
+     *
+     * Returns:
+     * =======
+     * 0 on success, negative integer on failure.
+     */
+    
     FILE *config_file;
 
     if((config_file = fopen(config_filename, "rb")) == NULL) {
-
         fprintf(stderr, "Error: Problem opening config file %s.\n", config_filename);
-
         return -1;
     }
 
@@ -131,117 +250,143 @@ int loadConfig(const Mtrx3x3 * restrict U,
 
         U_in = (InCfgMtrx *)calloc(lattice_param.volume * DIM, sizeof(InCfgMtrx));
         if(U_in == NULL) {
-
-            return -1;
+            return -3;
         }
 
-    #else   //CONV_CFG_TO_WORKING_PRECISION
+    #else   // CONV_CFG_TO_WORKING_PRECISION
         U_in = (InCfgMtrx *)U;
-    #endif  //CONV_CFG_TO_WORKING_PRECISION
+    #endif  // CONV_CFG_TO_WORKING_PRECISION
 
-    if(fread(U_in, sizeof(InCfgMtrx), lattice_param.volume * DIM, config_file) !=
-                                                           lattice_param.volume * DIM) {
-
-        fprintf(stderr, "Error: Reading from file %s.\n", config_filename);
-        #ifdef CONV_CFG_TO_WORKING_PRECISION 
-             free(U_in);
-        #endif  //CONV_CFG_TO_WORKING_PRECISION
+        if(fread(U_in, sizeof(InCfgMtrx), lattice_param.volume * DIM, config_file) !=
+                                          lattice_param.volume * DIM) {
+            fprintf(stderr, "Error: Reading from file %s.\n", config_filename);
+    #ifdef CONV_CFG_TO_WORKING_PRECISION
+            free(U_in);
+    #endif  // CONV_CFG_TO_WORKING_PRECISION
         fclose(config_file);
-        return -1;
-
+        return -2;
     }
     fgetc(config_file);
 
     if(!feof(config_file)) {
-        fprintf(stderr, "Error: File has not been read till the end.\n"
-                        "Check lattice sizes.\n");
-        #ifdef CONV_CFG_TO_WORKING_PRECISION 
-             free(U_in);
-        #endif  //CONV_CFG_TO_WORKING_PRECISION
+        fprintf(stderr,
+                "Error: File has not been read till the end.\n Check lattice sizes.\n");
+    #ifdef CONV_CFG_TO_WORKING_PRECISION
+        free(U_in);
+    #endif  // CONV_CFG_TO_WORKING_PRECISION
         fclose(config_file);
-        return -1;
+        return -3;
     }
 
     fclose(config_file);
 
     #ifdef NEED_BYTE_SWAP_IN
-        if(byteSwap(U_in, sizeof(InScalar) / 2,
+        if(byteSwap(U_in, sizeof(InScalar) / 2, 
                     lattice_param.volume * DIM * sizeof(InCfgMtrx))) {
-            fprintf(stderr, "Error: Problem with the byteSwap. Unknown size.\n");
-            #ifdef CONV_CFG_TO_WORKING_PRECISION
-                free(U_in);
-            #endif  //CONV_CFG_TO_WORKING_PRECISION
-            return -1;
+            fprintf(stderr, "Error: Problem with the byteSwap. \n");
+    #ifdef CONV_CFG_TO_WORKING_PRECISION
+            free(U_in);
+    #endif  // CONV_CFG_TO_WORKING_PRECISION
+            return -4;
         }
-    #endif  //NEED_BYTE_SWAP_IN
+    #endif  // NEED_BYTE_SWAP_IN
 
     #ifdef CONV_CFG_TO_WORKING_PRECISION
         convertCfg_in_work(U_in, U);
         free(U_in);
-    #endif  //CONV_CFG_TO_WORKING_PRECISION
+    #endif  // CONV_CFG_TO_WORKING_PRECISION
 
     return 0;
 }
 
+int loadGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
 
-int loadGaugeTransf(Mtrx3x3 * restrict G, 
-                    char * gauge_transf_filename) {
-    //	Loads a gauge transformation to G.
+    /*
+     * Description:
+     * ===========
+     * Reads a file with filename gauge_transf_filename and loads a gauge transformation
+     * from it.
+     *
+     * Calls:
+     * =====
+     * fopen, fprintf, fread, fclose, feof, fgetc,
+     * if CONV_GT_TO_WORKING_PRECISION set
+     * calloc, free,
+     * convertGT_in_work.
+     *
+     * Macros:
+     * ======
+     * CONV_GT_TO_WORKING_PRECISION,
+     *
+     * if CONV_GT_TO_WORKING_PRECISION set
+     * TEST_ALLOCATION.
+     *
+     * Global Variables:
+     * ================
+     * lattice_param
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * restrict G:            the gauge transformation field to be read into,
+     * char * gauge_transf_filename:    the filename of the file which stores the
+     *                                  gauge transformation.
+     *
+     * Returns:
+     * =======
+     * 0 on success, negative integer on failure.
+     */
+    
     const InGTMtrx *G_in;
 
     #ifdef CONV_GT_TO_WORKING_PRECISION
-        G_in = (InGTMtrx *)calloc( volume , sizeof(InGTMtrx));
+        G_in = (InGTMtrx *)calloc(lattice_param.volume, sizeof(InGTMtrx));
         if(TEST_ALLOCATION(G_in)) {
-            return -1;
+            return -3;
         }
-    #else   //CONV_GT_TO_WORKING_PRECISION
+    #else   // CONV_GT_TO_WORKING_PRECISION
         G_in = (InGTMtrx *)G;
-    #endif  //CONV_GT_TO_WORKING_PRECISION
-    
+    #endif  // CONV_GT_TO_WORKING_PRECISION
+
     const FILE *gaugetransf_file;
 
-    printf("Loading: %s.\n", gauge_transf_filename);
     if((gaugetransf_file = fopen(gauge_transf_filename, "rb")) == NULL) {
+        fprintf(stderr, 
+                "Error: Problem opening file %s to load gauge transformation.\n",
+                gauge_transf_filename);
 
-        fprintf(stderr, "Error: Problem opening file %s"
-                        "to load gauge transformation.\n", gauge_transf_filename);
-
-        #ifdef CONV_GT_TO_WORKING_PRECISION
-            free(G_in);
-        #endif  //CONV_GT_TO_WORKING_PRECISION
+    #ifdef CONV_GT_TO_WORKING_PRECISION
+        free(G_in);
+    #endif  // CONV_GT_TO_WORKING_PRECISION
 
         return -1;
-
     }
 
-    if(fread(G_in, sizeof(InGTMtrx), lattice_param.volume, gaugetransf_file) != 
-                                                                lattice_param.volume ) {
+    if(fread(G_in, sizeof(InGTMtrx), lattice_param.volume, gaugetransf_file) !=
+                                     lattice_param.volume) {
+        fprintf(stderr, 
+                "Error: Problem reading file %s to load gauge transformation.\n",
+                gauge_transf_filename);
 
-        fprintf(stderr, "Error: Problem reading file %s"
-                        "to load gauge transformation.\n", gauge_transf_filename);
-
-        #ifdef CONV_GT_TO_WORKING_PRECISION
-            free(G_in);
-        #endif  //CONV_GT_TO_WORKING_PRECISION
+    #ifdef CONV_GT_TO_WORKING_PRECISION
+        free(G_in);
+    #endif  // CONV_GT_TO_WORKING_PRECISION
 
         fclose(gaugetransf_file);
-        return -1;
-
+        return -2;
     }
 
     fgetc(gaugetransf_file);
 
     if(!feof(gaugetransf_file)) {
+        fprintf(stderr,
+                "Error: File has not been read till the end.\nCheck lattice sizes.\n");
 
-        fprintf(stderr, "Error: File has not been read till the end."
-                        "Check lattice sizes.\n");
-        
-        #ifdef CONV_GT_TO_WORKING_PRECISION
-            free(G_in);
-        #endif  //CONV_GT_TO_WORKING_PRECISION
+    #ifdef CONV_GT_TO_WORKING_PRECISION
+        free(G_in);
+    #endif  // CONV_GT_TO_WORKING_PRECISION
 
         fclose(gaugetransf_file);
-        return -1;
+        return -2;
     }
 
     fclose(gaugetransf_file);
@@ -249,131 +394,176 @@ int loadGaugeTransf(Mtrx3x3 * restrict G,
     #ifdef CONV_GT_TO_WORKING_PRECISION
         convertGT_in_work(G_in, G);
         free(G_in);
-    #endif  //CONV_GT_TO_WORKING_PRECISION
+    #endif  // CONV_GT_TO_WORKING_PRECISION
 
     return 0;
 }
 
+int writeConfig(Mtrx3x3 *restrict U, char *config_filename) {
+    /*
+     * Description:
+     * ===========
+     * Creates a file with filename config_filename and stores a gluon-field in it.
+     *
+     * Calls:
+     * =====
+     * fopen, fprintf, fwrite, fclose,
+     * if CONV_CFG_FROM_WORKING_PRECISION set
+     * calloc, free,
+     * byteSwap, 
+     * convertCfg_work_out.
+     *
+     * Macros:
+     * ======
+     * CONV_CFG_FROM_WORKING_PRECISION, TEST_ALLOCATION, NEED_BYTE_SWAP_OUT, DIM.
+     *
+     * Global Variables:
+     * ================
+     * lattice_param
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * restrict U:    the gluon field to be written,
+     * char * config_filename:  the filename of the file which will store the
+     *                          gluon field.
+     *
+     * Returns:
+     * =======
+     * 0 on success, negative integer on failure.
+     */
 
-int writeConfig(Mtrx3x3 * restrict U, 
-                char * config_filename) {
-    //  Loads a link configuration from the file with filename to U.
     const OutCfgMtrx *U_out;
 
-    #ifdef CONV_CFG_FROM_WORKING_PRECISION
+#ifdef CONV_CFG_FROM_WORKING_PRECISION
 
-        U_out = (OutCfgMtrx *)calloc(volume * DIM, sizeof(OutCfgMtrx));
-        TEST_ALLOCATION(U_out);
+    U_out = (OutCfgMtrx *)calloc(lattice_param.volume * DIM, sizeof(OutCfgMtrx));
+    TEST_ALLOCATION(U_out);
 
-        convertCfg_work_out(U, U_out);
+    convertCfg_work_out(U, U_out);
 
-    #else   //CONV_CFG_FROM_WORKING_PRECISION
-        U_out = (OutCfgMtrx *)U;
-    #endif  //CONV_CFG_FROM_WORKING_PRECISION
+#else   // CONV_CFG_FROM_WORKING_PRECISION
+    U_out = (OutCfgMtrx *)U;
+#endif  // CONV_CFG_FROM_WORKING_PRECISION
 
-    #ifdef NEED_BYTE_SWAP_OUT
-        if(byteSwap(U_out, sizeof(OutScalar) / 2, volume * DIM * sizeof(OutCfgMtrx))) {
-            fprintf(stderr, "Error: Problem with the byte swap. Unknown size.\n");
-            #ifdef CONV_CFG_FROM_WORKING_PRECISION
-                free(U_out);
-            #endif  //CONV_CFG_FROM_WORKING_PRECISION
-            return -1;
-        }
-    #endif  //NEED_BYTE_SWAP_OUT
+#ifdef NEED_BYTE_SWAP_OUT
+    if(byteSwap(U_out, sizeof(OutScalar) / 2,
+                 lattice_param.volume * DIM * sizeof(OutCfgMtrx))) {
+        fprintf(stderr, "Error: Problem with the byte swap. Unknown size.\n");
+#ifdef CONV_CFG_FROM_WORKING_PRECISION
+        free(U_out);
+#endif  // CONV_CFG_FROM_WORKING_PRECISION
+        return -3;
+    }
+#endif  // NEED_BYTE_SWAP_OUT
 
     const FILE *config_file;
 
-    printf("Creating: %s.\n", config_filename);
     if((config_file = fopen(config_filename, "wb")) == NULL) {
+        fprintf(stderr, "Error: Problem creating file %s for config.\n", 
+                        config_filename);
 
-        fprintf(stderr, "Error: Problem creating file %s"
-                        "for config.\n", config_filename);
-
-        #ifdef CONV_CFG_FROM_WORKING_PRECISION
-            free(U_out);
-        #endif  //CONV_CFG_FROM_WORKING_PRECISION
+#ifdef CONV_CFG_FROM_WORKING_PRECISION
+        free(U_out);
+#endif  // CONV_CFG_FROM_WORKING_PRECISION
 
         return -1;
-
     }
 
-    if(fwrite(U_out, sizeof(OutCfgMtrx), lattice_param.volume * DIM, config_file) != 
-                                                           lattice_param.volume * DIM) {
-
+    if(fwrite(U_out, sizeof(OutCfgMtrx), lattice_param.volume * DIM, config_file) !=
+        lattice_param.volume * DIM) {
         fclose(config_file);
 
-        #ifdef CONV_CFG_FROM_WORKING_PRECISION
-            free(U_out);
-        #endif  //CONV_CFG_FROM_WORKING_PRECISION
+#ifdef CONV_CFG_FROM_WORKING_PRECISION
+        free(U_out);
+#endif  // CONV_CFG_FROM_WORKING_PRECISION
 
-        return -1;
+        return -2;
     }
 
     fclose(config_file);
 
-    #ifdef CONV_CFG_FROM_WORKING_PRECISION
-        free(U_out);
-    #endif  //CONV_CFG_FROM_WORKING_PRECISION
+#ifdef CONV_CFG_FROM_WORKING_PRECISION
+    free(U_out);
+#endif  // CONV_CFG_FROM_WORKING_PRECISION
 
     return 0;
 }
 
+int writeGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
 
-int writeGaugeTransf(Mtrx3x3 * restrict G, 
-                     char * gauge_transf_filename) {
-    //  Loads a link configuration from the file with filename to U.
+    /*
+     * Description:
+     * ===========
+     * Creates a file with filename gauge_transf_filename and stores a gauge
+     * transformation in it.
+     *
+     * Calls:
+     * =====
+     * fopen, fprintf, fwrite, fclose,
+     * if CONV_GT_FROM_WORKING_PRECISION set
+     * calloc, free,
+     * convertGT_work_out.
+     *
+     * Macros:
+     * ======
+     * CONV_GT_FROM_WORKING_PRECISION,
+     *
+     * if CONV_GT_FROM_WORKING_PRECISION set
+     *  TEST_ALLOCATION.
+     *
+     * Global Variables:
+     * ================
+     * lattice_param
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * restrict G:            the gauge transformation to be written,
+     * char * gauge_transf_filename:    the filename of the file which will store the
+     *                                  gauge transformation.
+     *
+     * Returns:
+     * =======
+     * 0 on success, negative integer on failure.
+     */
+
     const OutGTMtrx *G_out;
 
     #ifdef CONV_GT_FROM_WORKING_PRECISION
-        G_out = (OutGTMtrx *)calloc(volume, sizeof(OutGTMtrx));
+        G_out = (OutGTMtrx *)calloc(lattice_param.volume, sizeof(OutGTMtrx));
         if(TEST_ALLOCATION(G_out)) {
-            
-            return -1;
-        
+            return -3;
         }
         convertGT_work_out(G, G_out);
-    #else   //CONV_GT_FROM_WORKING_PRECISION
+    #else   // CONV_GT_FROM_WORKING_PRECISION
         G_out = (OutGTMtrx *)G;
-    #endif  //CONV_GT_FROM_WORKING_PRECISION
+    #endif  // CONV_GT_FROM_WORKING_PRECISION
 
     const FILE *gaugetransf_file;
 
     if((gaugetransf_file = fopen(gauge_transf_filename, "wb")) == NULL) {
-
-        fprintf(stderr, "Error: Problem opening file %s \
-                         to store gauge transformation.\n", gauge_transf_filename);
-        
         #ifdef CONV_GT_FROM_WORKING_PRECISION
             free(G_out);
-        #endif  //CONV_GT_FROM_WORKING_PRECISION
+        #endif  // CONV_GT_FROM_WORKING_PRECISION
 
         return -1;
     }
 
-    if(fwrite(G_out, sizeof(OutGTMtrx), lattice_param.volume, gaugetransf_file) != 
-                                                                lattice_param.volume ) {
-
-        fprintf(stderr, "Error: Problem writing gauge transformation to file %s.\n",
-                gauge_transf_filename);
-
+    if(fwrite(G_out, sizeof(OutGTMtrx), lattice_param.volume, gaugetransf_file) !=
+        lattice_param.volume) {
         fclose(gaugetransf_file);
 
         #ifdef CONV_GT_FROM_WORKING_PRECISION
-
             free(G_out);
-            
-        #endif  //CONV_GT_FROM_WORKING_PRECISION
+        #endif  // CONV_GT_FROM_WORKING_PRECISION
 
-        return -1;
+        return -2;
     }
 
     fclose(gaugetransf_file);
 
     #ifdef CONV_GT_FROM_WORKING_PRECISION
-
         free(G_out);
-        
-    #endif  //CONV_GT_FROM_WORKING_PRECISION
+    #endif  // CONV_GT_FROM_WORKING_PRECISION
 
     return 0;
 }

@@ -20,7 +20,7 @@
 int writeSweepsToGaugefix(char * identifier,
                           int sweeps) {
 	
-	if(!validGeometricParametersQ()){
+	if(!validGeometricParametersQ()) {
 		fprintf(stderr, "Error in geometric parameters\n");
 		exit(EXIT_FAILURE);
     }
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 	
-	const Mtrx3x3 * U = allocateField(lattice_param.amount_of_links, sizeof(Mtrx3x3));
+	const Mtrx3x3 * U = allocate3x3Field(lattice_param.amount_of_links);
 	if(U == NULL) {
 		fprintf(stderr, "Could not allocate memory for config in file %s.\n",
 						config_filename);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	Mtrx3x3 * G = allocateField(lattice_param.amount_of_points, sizeof(Mtrx3x3));
+	Mtrx3x3 * G = allocate3x3Field(lattice_param.amount_of_points);
 	if(G == NULL) {
 		fprintf(stderr, "Could not allocate memory for gauge transformation " 
 						"for file %s.\n",
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//	Record the effort to gauge-fix
-	if( sweeps >= 0) {
+	if(sweeps >= 0) {
 		printf("Sweeps needed to gauge-fix config from file %s: %d. e2: %3.2E \n", 
 				config_filename,
 				sweeps,

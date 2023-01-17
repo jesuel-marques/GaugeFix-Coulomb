@@ -38,8 +38,33 @@
 // }
 
 void copy2x2(const Mtrx2x2CK * restrict u, 
-                    Mtrx2x2CK * restrict u_copy) {
-    // Copies u to u_copy
+             Mtrx2x2CK * restrict u_copy) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Copies a 2x2 matrix in the Cayley-Klein representation.
+     * 
+	 * Calls:
+	 * =====
+     * 
+     * Macros:
+	 * ======
+     * LOOP_2_CK.
+     * 
+     * Global Variables:
+     * ================
+     *  
+	 * Parameters:
+	 * ==========
+	 * Mtrx2x2CK * u:         2x2 Cayley-Klein matrix to be copied,
+     * Mtrx2x2CK * u_copy:    copied matrix.
+     * 
+	 * Returns:
+	 * =======
+	 * 
+	 */
+    
     MtrxIdx2 a;
     LOOP_2_CK(a) {
 
@@ -50,7 +75,33 @@ void copy2x2(const Mtrx2x2CK * restrict u,
 
 
 inline void convertFromCK(const Mtrx2x2CK * restrict u_ck, 
-                                  Mtrx2x2 * restrict u) {
+                          Mtrx2x2 * restrict u) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Converts a 2x2 matrix from the Cayley-Klein representation to a 2x2 usual matrix.
+     * 
+	 * Calls:
+	 * =====
+     * 
+     * Macros:
+	 * ======
+     * ELM_2X2.
+     * 
+     * Global Variables:
+     * ================
+     *  
+	 * Parameters:
+	 * ==========
+	 * Mtrx2x2CK * u_ck:    2x2 Cayley-Klein matrix to be converted,
+     * Mtrx2x2 * u:         2x2 usual matrix.
+     * 
+	 * Returns:
+	 * =======
+	 * 
+	 */
+
     u -> m[ELM_2X2(0, 0)] =      u_ck -> m[0] 
                            + I * u_ck -> m[3];
 
@@ -120,7 +171,32 @@ inline void convertFromCK(const Mtrx2x2CK * restrict u_ck,
 
 
 inline Scalar determinant2x2(const Mtrx2x2CK * restrict u) {
-    //  Calculates the determinant of the matrix u
+/*
+	 * Description:
+     * ===========
+	 * Obtains the determinant of a 2x2 Cayley-Klein matrix.
+     * 
+	 * Calls:
+	 * =====
+     * 
+     * Macros:
+	 * ======
+     * POW2,
+     * LOOP_2_CK.
+     * 
+     * Global Variables:
+     * ================
+     *  
+	 * Parameters:
+	 * ==========
+	 * Mtrx2x2CK * u:     2x2 Cayley-Klein matrix whose determinant is being calculated.
+     * 
+	 * Returns:
+	 * =======
+	 * Scalar containing the determinant of the matrix, which is a real number cast 
+     * to a complex number in double precision.
+	 */
+    
     Scalar det_u = 0.0;
     MtrxIdx2 a;
     LOOP_2_CK(a) {
@@ -153,17 +229,40 @@ inline Scalar determinant2x2(const Mtrx2x2CK * restrict u) {
 // }
 
 
-void multScalar2x2(const Mtrx2x2CK * restrict u, 
-                     const Scalar alpha, 
-                           Mtrx2x2CK * restrict alpha_times_u) {
-    //  Calculates multiplication of Cayley-Klein 2x2 matrix u by Scalar alpha
-    //  and returns result in alpha_times_u.
+void multByScalar2x2(const Scalar alpha,
+                     const Mtrx2x2CK * restrict u, 
+                     Mtrx2x2CK * restrict alpha_times_u) {
+    
+    /*
+	 * Description:
+     * ===========
+	 * Calculates multiplication of 2x2 Cayley-Klein matrix u by Scalar alpha, 
+     * which is a complex number in double precision.
+     * 
+	 * Calls:
+	 * =====
+     * 
+     * Macros:
+	 * ======
+     * LOOP_2_CK.
+     * 
+     * Global Variables:
+     * ================
+     *  
+	 * Parameters:
+	 * ==========
+	 * Scalar alpha:                scalar to multiply the matrix,
+     * Mtrx2x2CK * u:               2x2 Cayley-Klein matrix to be multiplied by alpha,
+     * Mtrx2x2CK * alpha_times_u:   matrix resulting of multiplication of alpha by u.
+     * 
+	 * Returns:
+	 * =======
+	 * 
+	 */
+
     MtrxIdx2 a;
     LOOP_2_CK(a) {
-
         alpha_times_u -> m[a] = alpha * (u -> m[a]);
-        //	Mutiplying each entry.
-
     }
 }
 
@@ -263,19 +362,41 @@ void multScalar2x2(const Mtrx2x2CK * restrict u,
 
 
 inline short projectSU2(Mtrx2x2CK * restrict u) {
-    //	Projects matrix a to the group SU(2) returning SU(2) matrix a_SU2.
+
+    /*
+	 * Description:
+     * ===========
+	 * Projects 2x2 Cayley-Klein matrix u to the group SU(2) 
+     * returning SU(2) matrix in u at the end.
+     * 
+	 * Calls:
+	 * =====
+     * copy2x2, determinant2x2, multByScalar2x2.
+     * 
+     * Macros:
+	 * ======
+     * ELEM_3X3, LOOP_3.
+     * 
+     * Global Variables:
+     * ================
+     *  
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 * u:     the 2x2 Cayley-Klein matrix to be projected to SU(2).
+     * 
+	 * Returns:
+	 * =======
+	 * 
+     */
+
     Mtrx2x2CK u_SU2;
     Scalar det_u = determinant2x2(u);
     if(det_u != 0) {
-
-        multScalar2x2(u, 1.0 / sqrt(det_u), &u_SU2);
+        multByScalar2x2(1.0 / sqrt(det_u), u, &u_SU2);
         copy2x2(&u_SU2, u);
         return  0;
-
     }
     else{
-
         return -1;
-    
     }
 }

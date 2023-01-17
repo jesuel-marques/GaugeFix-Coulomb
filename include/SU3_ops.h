@@ -62,80 +62,81 @@ updates are performed for each submatrix in turn.
 #define LOOP_3(a)         for( a = 0; a < Nc; a++)
 
 #define LOOP_3X3(a, b)    for( a = 0; a < Nc; a++)  \
-                                for( b = 0; b < Nc; b++)
+                              for( b = 0; b < Nc; b++)
 
 
 void printMatrix3x3(const Mtrx3x3 *u);
 
 void copy3x3(const Mtrx3x3 *u, 
-                    Mtrx3x3 *u_copy);
+             Mtrx3x3 *u_copy);
 
 void setNull3x3    (Mtrx3x3 *u),
      setIdentity3x3(Mtrx3x3 *u);
 
 void accumulate3x3(const Mtrx3x3 *u, 
-                          Mtrx3x3 *acc);
+                   Mtrx3x3 *acc);
 
 void subtraction3x3(const Mtrx3x3 *u, 
-                     const Mtrx3x3 *v, 
-                           Mtrx3x3 *u_minus_v);
+                    const Mtrx3x3 *v, 
+                    Mtrx3x3 *u_minus_v);
 
 Scalar trace3x3      (const Mtrx3x3 *u),
        determinant3x3(const Mtrx3x3 *u);
 
 void hermConj3x3(const Mtrx3x3 *u, 
-                         Mtrx3x3 *u_dagger);
+                 Mtrx3x3 *u_dagger);
 
 void subtractionHermConjTrless3x3(const Mtrx3x3 * restrict u, 
-                                               Mtrx3x3 * restrict u_minus_udagger);
+                                  Mtrx3x3 * restrict u_minus_udagger);
 
 void multByScalar3x3(const Scalar alpha, 
-                        const Mtrx3x3 *u, 
-                              Mtrx3x3 *alpha_times_u);
+                     const Mtrx3x3 *u, 
+                     Mtrx3x3 *alpha_times_u);
 void substMultScalar3x3(const Scalar alpha, 
-                                 Mtrx3x3 *u);
+                        Mtrx3x3 *u);
 
 void prod3x3(const Mtrx3x3 *u, const Mtrx3x3 *v, Mtrx3x3 *uv);
 
 void prodThree3x3(const Mtrx3x3 *u, 
-                    const Mtrx3x3 *v, 
-                    const Mtrx3x3 *w, 
-                          Mtrx3x3 *uvw),
+                  const Mtrx3x3 *v, 
+                  const Mtrx3x3 *w, 
+                  Mtrx3x3 *uvw),
      prodFour3x3 (const Mtrx3x3 *u, 
-                    const Mtrx3x3 *v, 
-                    const Mtrx3x3 *w, 
-                    const Mtrx3x3 *x, 
-                          Mtrx3x3 *uvwx);
+                  const Mtrx3x3 *v, 
+                  const Mtrx3x3 *w, 
+                  const Mtrx3x3 *x, 
+                  Mtrx3x3 *uvwx);
 
 void accumLeftProd3x3 (const Mtrx3x3 *g, 
-                                Mtrx3x3 *acc_prod),
-     accumRightProd3x3(      Mtrx3x3 *acc_prod, 
-                          const Mtrx3x3 *g);
+                       Mtrx3x3 *acc_prod),
+     accumRightProd3x3(Mtrx3x3 *acc_prod, 
+                       const Mtrx3x3 *g);
 
 void accumProdSU2_3x3(const Mtrx2x2CK * restrict x_ck, 
-                              Mtrx3x3   * restrict g, 
-                              MtrxIdx3 a, 
-                              MtrxIdx3 b);
+                      Mtrx3x3   * restrict g, 
+                      MtrxIdx3 a, 
+                      MtrxIdx3 b);
 
 void prod_vuwdagger3x3(const Mtrx3x3 * restrict v, 
-                        const Mtrx3x3 * restrict u, 
-                        const Mtrx3x3 * restrict w, 
-                              Mtrx3x3 * restrict vuwdagger );
+                       const Mtrx3x3 * restrict u, 
+                       const Mtrx3x3 * restrict w, 
+                       Mtrx3x3 * restrict vuwdagger );
 
-short power3x3Binomial(Mtrx3x3 * restrict A, 
-                         const double omega, 
-                         Mtrx3x3 * restrict A_to_omega);
+short power3x3Binomial(const Mtrx3x3 * restrict A, 
+                       const double omega, 
+                       Mtrx3x3 * restrict A_to_omega);
 
+void updateSubLosAlamos(Mtrx3x3 * restrict w, Submtrx sub);
 
 double inverse3x3(const Mtrx3x3 * restrict a, 
-                         Mtrx3x3 * restrict a_inv);
+                  Mtrx3x3 * restrict a_inv);
 
 short projectSU3(Mtrx3x3 *x);
 
 void decomposeAlgebraSU3(const Mtrx3x3 *a, 
-                                 MtrxSU3Alg *a_components);
+                         MtrxSU3Alg *a_components);
 
 void projectSU3CabbiboMarinari(Mtrx3x3 * restrict w, 
-                                    Mtrx3x3 * restrict total_update);
+                               Mtrx3x3 * restrict total_update);
 
 #endif      //SU3OPS_H

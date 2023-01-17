@@ -27,7 +27,7 @@
 #define SWEEPS_TO_REUNITARIZATION 250
 
 //   Iterations hits for the maximization of Tr[w(n)] in updateSubLosAlamos
-#define MAX_HITS 2  
+#define MAX_HITS 2
 
 //	Implementation of the checkerboard subdivision of the lattice.
 #define BLACKRED_SWEEP(position, sweep) ((POSITION_IS_EVEN(position)) ^ ((sweep) & 1))
@@ -115,13 +115,13 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const double tolerance,
 
 
 static int whenNextConvergenceCheckQ(unsigned int current_sweep,
-                                const double e2, 
-                                const double tolerance) {
+                                     const double e2, 
+                                     const double tolerance) {
                                  
     /*
 	 * Description:
      * ===========
-	 * Calculates number of sweeps to check again if gauge-fixing is attained.
+	 * Calculates number of sweeps to check if gauge-fixing is attained.
      *  
 	 * Calls:
 	 * =====
@@ -136,6 +136,7 @@ static int whenNextConvergenceCheckQ(unsigned int current_sweep,
      * 
 	 * Parameters:
 	 * ==========
+     * int current_sweep:   already elapsed sweeps,
 	 * double e2        :   index which shows how close config is to be gauge-fixed,
      * double tolerance :   tolerance for the gauge-fixing.
      *  
@@ -145,8 +146,9 @@ static int whenNextConvergenceCheckQ(unsigned int current_sweep,
      *
 	 */
 
-    if(e2 < tolerance ) 
+    if(e2 < tolerance) {
         return current_sweep;
+    }
     else{    
         return current_sweep + 10 + (unsigned)(ESTIMATE_SWEEPS_TO_GF_PROGRESS * 
                                                 (1.0 - log10(e2) / log10(tolerance))); 
@@ -180,7 +182,7 @@ double calculateF(Mtrx3x3 * restrict U) {
 	 *
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U:    gluon field.
+	 * Mtrx3x3 * U:    SU(3) gluon field.
      *  
 	 * Returns:
 	 * =======
@@ -236,7 +238,7 @@ double calculateTheta(Mtrx3x3 * restrict U) {
      * 
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U:    gluon field.
+	 * Mtrx3x3 * U:    SU(3) gluon field.
      *  
 	 * Returns:
 	 * =======
@@ -294,7 +296,7 @@ double calculate_e2(Mtrx3x3 * restrict U) {
 	 *
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U:    gluon field.
+	 * Mtrx3x3 * U:    SU(3) gluon field.
      *  
 	 * Returns:
 	 * =======
@@ -361,7 +363,7 @@ static inline void accumulateFrontHearLink(Mtrx3x3 * restrict U,
      * 
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U: 	    gluon field,
+	 * Mtrx3x3 * U: 	    SU(3) gluon field,
      * PosVec position:     specific position which is being dealt with,
      * LorentzIdx mu:       specific lorentz index which is being dealt with,
      * Mtrx3x3 * w:         matrix which holds the accumulation.
@@ -409,7 +411,7 @@ inline static void calculate_w(Mtrx3x3 * restrict U,
      * 
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U: 	    gluon field,
+	 * Mtrx3x3 * U: 	    SU(3) gluon field,
      * PosVec position:     specific position which is being dealt with,
      * Mtrx3x3 * w:         matrix which holds the sum of links.
      *  
@@ -430,82 +432,6 @@ inline static void calculate_w(Mtrx3x3 * restrict U,
         */ 
         accumulateFrontHearLink(U, position, mu, w);
 
-    }
-}
-
-
-inline void updateSubLosAlamos(Mtrx3x3 * restrict w, const Submtrx sub) {
-
-    /*
-	 * Description:
-     * ===========
-	 * Performs a Los Alamos update to w with submatrix indicated by sub.
-     * The Los Alamos update is a SU(2) Cabbibo-Marinari submatrix of SU(3) 
-     * which maximizes the value of the ReTr(w).
-     *  
-	 * Calls:
-	 * =====
-     * creal, cimag,
-     * projectSU2,
-     * accumProdSU2_3x3.
-     * 
-	 * Macros:
-	 * ======
-     * ELEM_3X3.
-     * 
-     * Global Variables:
-     * ================
-     * 
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * w:     matrix to be updated; comes from accumulating links,
-     * Submtrx sub:     index of SU(2) Cabbibo-Marinari submatrix of SU(3).
-     *  
-	 * Returns:
-	 * =======
-	 *
-	 */
-
-    MtrxIdx3 a, b;
-
-    a = sub == T ? 1 : 0;
-    b = sub == R ? 1 : 2;
-
-    /* a and b will be the line and colums index
-    for each Cabbibo-Marinari matrix,  */
-
-    Mtrx2x2CK LA_sub_update;
-
-    LA_sub_update.m[0] =  creal( w -> m[ELEM_3X3(a, a)]
-                               + w -> m[ELEM_3X3(b, b)]);
-    LA_sub_update.m[1] = -cimag( w -> m[ELEM_3X3(a, b)] 
-                               + w -> m[ELEM_3X3(b, a)]);
-    LA_sub_update.m[2] = -creal( w -> m[ELEM_3X3(a, b)]
-                               - w -> m[ELEM_3X3(b, a)]);
-    LA_sub_update.m[3] = -cimag( w -> m[ELEM_3X3(a, a)] 
-                               - w -> m[ELEM_3X3(b, b)]);
-  
-
-    /*  The SU(2) matrix corresponding to the Cabbibo-Marinari 
-        Submtrx is built from w according to the formulae above.
-        This is what maximizes the functional locally for each
-        Submtrx. This can be proven using maximization with 
-        constrains, where the constraint is that mtrx_SU2 has 
-        to be an SU(2) matrix. */
-
-    if(!projectSU2(&LA_sub_update)) {
-
-        /* If projectSU2 is succesful, it will return 0
-           Then w can be updated */
-        accumProdSU2_3x3(&LA_sub_update, w, a, b);
-        return;
-    }
-    else{
-        /*  If projectSU2 is unsuccesful, this means
-            that mtrx_SU2 was 0 and w remains what it was.
-            The program will then carry on to the next 
-            Submtrx update. */
-        return;
     }
 }
 
@@ -603,8 +529,8 @@ static void updateLocalUG(Mtrx3x3 * restrict U,
      * 
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U: 	    gluon field,
-     * Mtrx3x3 * G:	        gauge-transformation field,
+	 * Mtrx3x3 * U: 	    SU(3) gluon field,
+     * Mtrx3x3 * G:	        SU(3) gauge-transformation field,
      * PosVec position:     specific position for the update,
      * Mtrx3x3 * update:    update gauge-transformation to be applied to the fields.
      * 
@@ -660,10 +586,10 @@ inline static void gaugefixOverrelaxationLocal(Mtrx3x3 * restrict U,
      * 
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U: 	    gluon field,
-     * Mtrx3x3 * G:	        gauge-transformation field,
+	 * Mtrx3x3 * U: 	    SU(3) gluon field,
+     * Mtrx3x3 * G:	        SU(3) gauge-transformation field,
      * PosVec position:     specific position for the update,
-     * Mtrx3x3 * update:    update gauge-transformation to be applied to the fields.
+     * double omega_OR:     omega parameter of overrelaxation algorithm.
      * 
 	 * Returns:
 	 * =======
@@ -726,8 +652,8 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
      * 
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U:                  	    gluon field,
-     * Mtrx3x3 * G:	                        gauge-transformation field,
+	 * Mtrx3x3 * U:                  	    SU(3) gluon field,
+     * Mtrx3x3 * G:	                        SU(3) gauge-transformation field,
      * ORGaugeFixingParameters gfix_param:	overrelaxation gauge fixing parameters.
      * 
 	 * Returns:
@@ -791,7 +717,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
             else if(new_e2 <= gfix_param.tolerance) {
                 break;  /* converged */
             }
-            else {
+            else{
                 printf("Sweeps: %8d.\t e2: %3.2E \n", sweep, new_e2);
                 converge_check_due = 
                     whenNextConvergenceCheckQ(sweep, new_e2, gfix_param.tolerance);

@@ -2,7 +2,7 @@
 #define CONFIGIO_H
 
 #include <flags.h>
-#include <io_types.h>
+#include <types_io.h>
 #include <lattice.h>
 
 InGTMtrx  *getGaugetransfIn (InGTMtrx  * restrict G_in,  

@@ -90,8 +90,6 @@ bool validPositionQ(PosVec position);
 bool positionmuValidQ(PosVec position, 
                        LorentzIdx mu);
 
-PosVec makePeriodicBound(PosVec position);
-
 PosVec assignPosition(const PosIndex x, 
                        const PosIndex y, 
                        const PosIndex z, 

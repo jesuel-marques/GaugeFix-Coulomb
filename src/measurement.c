@@ -10,10 +10,41 @@
 
 extern GeometricParameters lattice_param;
 
-double ReTrPlaquette(Mtrx3x3 * restrict U, 
-                     const PosVec position, 
-                     const LorentzIdx mu, 
-                     const LorentzIdx nu) {
+Scalar TrPlaquette(Mtrx3x3 * restrict U, 
+                   const PosVec position, 
+                   const LorentzIdx mu, 
+                   const LorentzIdx nu) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Calculates the trace of a specified plaquette.
+     * 
+	 * Calls:
+	 * =====
+     * creal,
+     * getNeighbour, getLinkMatrix,
+     * prodFour3x3, trace3x3.
+	 *
+	 * Macros:
+	 * ======
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 *  U:        SU(3) gluon field,
+     * PosVec position:     position to which the plaquette is attached, 
+     * LorentzIdx mu:       first direction of the plaquette specification, 
+     * LorentzIdx nu:       second direction of the plaquette specification.
+     * 
+	 * Returns:
+	 * =======
+     * The trace of the plaquette as a double precision complex number.
+	 * 
+     */
+
     Mtrx3x3 plaquette;
 
     Mtrx3x3 ua, ub, uc, ud;
@@ -27,19 +58,49 @@ double ReTrPlaquette(Mtrx3x3 * restrict U,
 
 	prodFour3x3(&ua, &ub, &uc, &ud, &plaquette);
 
-    return creal(trace3x3(&plaquette)) / Nc;
+    return trace3x3(&plaquette) / Nc;
 
 }
 
 
-double averageSpatialPlaquette(Mtrx3x3 * restrict U) {
+Scalar averageSpatialPlaquette(Mtrx3x3 * restrict U) {
 
-    if(!validGeometricParametersQ()){
+    /*
+	 * Description:
+     * ===========
+	 * Calculates the average of the spatial plaquettes for a SU(3) field.
+     * 
+	 * Calls:
+	 * =====
+     * fprintf,
+     * validGeometricParametersQ,
+     * TrPlaquette.
+	 *
+	 * Macros:
+	 * ======
+     * NUM_THREADS, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, DIM.
+     * 
+     * Global Variables:
+     * ================
+     * lattice_param.
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 *  U:        SU(3) gluon field.
+     * 
+	 * Returns:
+	 * =======
+     * The average trace of the spatial plaquettes of the gluon field 
+     * as a double precision complex number.
+	 * 
+     */
+
+    if(!validGeometricParametersQ()) {
         fprintf(stderr, "Error in geometric parameters\n");
     }
 
     //  Calculates the spatial plaquette average
-    double plaq_ave = 0.0;
+    Scalar plaq_ave = 0.0;
     
     // Parallelizing by slicing the time extent
     #pragma omp parallel for reduction (+:plaq_ave) \
@@ -49,39 +110,64 @@ double averageSpatialPlaquette(Mtrx3x3 * restrict U) {
             PosVec position;
 
             position.pos[T_INDX] = t;
-            double plaq_ave_slice = 0.0;
+            Scalar plaq_ave_slice = 0.0;
 
             LOOP_SPATIAL(position) {
                 LorentzIdx mu;
                 LOOP_LORENTZ_SPATIAL(mu) {
                     for(LorentzIdx nu = 0; nu < DIM - 1 ; nu++) {
-                        if( mu < nu) {
-
+                        if(mu < nu) {
                             plaq_ave_slice += 
-                                ReTrPlaquette(U, position, mu, nu);                                    
-                        
+                                TrPlaquette(U, position, mu, nu);                                    
                         }
                     }
                 }
             }
-
             plaq_ave += plaq_ave_slice;
-
         }
-
     plaq_ave /= ((DIM - 1.0) * lattice_param.volume);
 
     return plaq_ave;
 }
 
 
-double averageTemporalPlaquette(Mtrx3x3 * restrict U) {
+Scalar averageTemporalPlaquette(Mtrx3x3 * restrict U) {
+
+    /*
+	 * Description:
+     * ===========
+	 * Calculates the average of the temporal plaquettes for a SU(3) field.
+     * 
+	 * Calls:
+	 * =====
+     * fprintf,
+     * validGeometricParametersQ,
+     * TrPlaquette.
+	 *
+	 * Macros:
+	 * ======
+     * NUM_THREADS, LOOP_TEMPORAL, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, DIM.
+     * 
+     * Global Variables:
+     * ================
+     * lattice_param.
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 *  U:        SU(3) gluon field.
+     * 
+	 * Returns:
+	 * =======
+     * The average trace of the temporal plaquettes of the gluon field 
+     * as a double precision complex number.
+	 * 
+     */
     
-    if(!validGeometricParametersQ()){
+    if(!validGeometricParametersQ()) {
         fprintf(stderr, "Error in geometric parameters\n");
     }
 
-    double plaq_ave = 0.0;
+    Scalar plaq_ave = 0.0;
     PosIndex t;
     // Parallelizing by slicing the time extent 
     #pragma omp parallel for reduction (+:plaq_ave) \
@@ -91,14 +177,14 @@ double averageTemporalPlaquette(Mtrx3x3 * restrict U) {
             PosVec position;
 
             position.pos[T_INDX] = t;
-            double plaq_ave_slice = 0.0;
+            Scalar plaq_ave_slice = 0.0;
 
             LOOP_SPATIAL(position) {
                 LorentzIdx mu;
                 LOOP_LORENTZ_SPATIAL(mu) {
                 
                     plaq_ave_slice += 
-                        ReTrPlaquette(U, position, T_INDX, mu);
+                        TrPlaquette(U, position, T_INDX, mu);
                 
                 }
             }
@@ -106,7 +192,6 @@ double averageTemporalPlaquette(Mtrx3x3 * restrict U) {
             plaq_ave += plaq_ave_slice;
 
         }
-
     plaq_ave /= ((DIM - 1.0) * lattice_param.volume);
 
     return plaq_ave;

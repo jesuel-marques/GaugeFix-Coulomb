@@ -24,7 +24,7 @@
         "lapacke.h": "c",
         "numbers": "c",
         "*.txt": "c",
-        "io_types.h": "c",
+        "types_io.h": "c",
         "flags.h": "c",
         "tgmath.h": "c"
     }

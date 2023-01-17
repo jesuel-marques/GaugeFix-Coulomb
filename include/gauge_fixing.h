@@ -16,16 +16,12 @@ typedef struct{
 bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param);
 
 ORGaugeFixingParameters initORGaugeFixingParameters(const double tolerance, 
-                                                const double omega_OR);
+                                                    const double omega_OR);
 
 
 double calculateF    (Mtrx3x3 * restrict U);
 double calculateTheta(Mtrx3x3 * restrict U);
 double calculate_e2  (Mtrx3x3 * restrict U);
-
-void updateSubLosAlamos(Mtrx3x3 * restrict w, 
-                              Submtrx sub); 
-//GET THIS OUT OF HERE. THIS SHOULD NOT BE IN A .H FILE. ONLY HERE BECAUSE USING IN SU3_OPS
 
 int gaugefixOverrelaxation(Mtrx3x3 * restrict U, 
                            Mtrx3x3 * restrict G, 
