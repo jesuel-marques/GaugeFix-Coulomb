@@ -24,7 +24,7 @@ typedef struct{
 
 bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param);
 
-ORGaugeFixingParameters initORGaugeFixingParameters(char * parameter_filename);
+ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filename);
 
 double calculateF    (Mtrx3x3 * restrict U);
 double calculateTheta(Mtrx3x3 * restrict U);

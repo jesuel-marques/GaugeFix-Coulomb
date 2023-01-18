@@ -45,8 +45,9 @@ bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param) {
 	 * true if parameters are valid, false if invalid.
 	 */
 
-    if((gfix_param.omega_OR  >= 1          && gfix_param.omega_OR < 2 &&
-        gfix_param.stop_crit.tolerance > 0 && gfix_param.error != 1     )){
+    if((gfix_param.omega_OR  >= 1                   && gfix_param.omega_OR < 2  &&
+        gfix_param.stop_crit.tolerance > 0          && gfix_param.error != true &&
+        gfix_param.sweeps_to_reunitarization > 0    && gfix_param.hits > 0        )){
         return true;
     }
     else{
@@ -55,11 +56,11 @@ bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param) {
     }
 }
 
-ORGaugeFixingParameters initORdefault(){
+ORGaugeFixingParameters initParametersORDefault(){
     ORGaugeFixingParameters gfix_param = 
-                    {.omega_OR  = 1.95, 
-                     .error     = false,
-                     .hits      = 2,
+                    {.omega_OR = 1.95, 
+                     .error = false,
+                     .hits = 2,
                      .stop_crit.gfix_proxy = calculate_e2,
                      .stop_crit.tolerance = 1E-16,
                      .stop_crit.max_sweeps_to_fix = 100000,
@@ -71,25 +72,43 @@ ORGaugeFixingParameters initORdefault(){
 
 void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param){
 
-    printf("max_sweeps_to_fix: %d\n", gfix_param.stop_crit.max_sweeps_to_fix);
-    printf("estimate_sweeps_to_gfixprogress: %d\n", gfix_param.stop_crit.estimate_sweeps_to_gf_progress);
-    printf("max_hits: %d\n", gfix_param.hits);
-    printf("sweeps_to_reunitarization: %d\n", gfix_param.sweeps_to_reunitarization);
+    printf("max_sweeps_to_fix: %d\n", 
+            gfix_param.stop_crit.max_sweeps_to_fix);
+    printf("estimate_sweeps_to_gfixprogress: %d\n", 
+            gfix_param.stop_crit.estimate_sweeps_to_gf_progress);
+    printf("max_hits: %d\n",
+            gfix_param.hits);
+    printf("sweeps_to_reunitarization: %d\n",
+            gfix_param.sweeps_to_reunitarization);
 
-    printf("omega_OR: %lf\n", gfix_param.omega_OR);
-    printf("tolerance: %3.2E\n", gfix_param.stop_crit.tolerance);
+    printf("omega_OR: %lf\n",
+            gfix_param.omega_OR);
+    printf("tolerance: %3.2E\n",
+            gfix_param.stop_crit.tolerance);
 
 }
 
-void rmspaces(char **str)
+void rmspaces(char *string)
 {
-    while (isspace(**str))
-        (*str)++;
+    // non_space_count to keep the frequency of non space characters
+    int non_space_count = 0;
+
+    //Traverse a string and if it is non space character then, place it at index non_space_count
+    for (int i = 0; string[i] != '\0'; i++) {
+        if (!isspace(string[i])) {
+            string[non_space_count] = string[i];
+            non_space_count++;//non_space_count incremented
+        }    
+    }
+    
+    //Finally placing final character at the string end
+    string[non_space_count] = '\0';
 }
+   
 
 /* Initializes gauge-fixing parameters given a tolerance and a omega parameter
    for the overrelaxation algorithm, checking if the parameters passed are valid. */
-ORGaugeFixingParameters initORGaugeFixingParameters(char * parameter_filename) {
+ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filename) {
 
     /*
 	 * Calls:
@@ -122,43 +141,52 @@ ORGaugeFixingParameters initORGaugeFixingParameters(char * parameter_filename) {
      * the error flag in the struct will be set.
 	 */
 
-    ORGaugeFixingParameters gfix_param = initORdefault();
+    ORGaugeFixingParameters gfix_param = initParametersORDefault();
 
     FILE * parameter_file = fopen(parameter_filename, "r");
-    char delimiter[] = ":";
-    char * field;
-    char * value;
 
+    char delimiter[] = ":";
     char buff[100];
+
     if(parameter_file != NULL){
-        while(fgets(buff, 100, parameter_file)) {
+        while(fgets(buff, 100, parameter_file)){
+
+            rmspaces(buff);
+
+            char * field;
             field = strtok(buff, delimiter);
-            if(!strcmp(field, "tolerance")) {
-                gfix_param.stop_crit.tolerance = atof(strtok(NULL, "\n"));            
-            }else if(!strcmp(field, "hits")) {
-                gfix_param.hits = atof(strtok(NULL, "\n"));
-            }else if(!strcmp(field, "omega_OR")) {
-                gfix_param.omega_OR = atof(strtok(NULL, "\n"));
-            }else if(!strcmp(field, "max_sweeps_to_fix")) {
-                gfix_param.stop_crit.max_sweeps_to_fix = atof(strtok(NULL, "\n"));
-            }else if(!strcmp(field, "estimate_sweeps_to_gf_progress")) {
-                gfix_param.stop_crit.estimate_sweeps_to_gf_progress = atof(strtok(NULL, "\n"));
-            }else if(!strcmp(field, "sweeps_to_reunitarization")) {
-                gfix_param.sweeps_to_reunitarization = atof(strtok(NULL, "\n"));
-            }else if(!strcmp(field, "gfix_proxy")) {
-                char * value = strtok(NULL, "\n");
-                rmspaces(&value);
-                if(!strcmp(value, "e2")){
-                    gfix_param.stop_crit.gfix_proxy = calculate_e2;
+            
+            char * value;
+            value = strtok(NULL, "\n");
+            if(field && value){
+                
+                if(!strcmp(field, "tolerance")) {
+                    gfix_param.stop_crit.tolerance = atof(value);            
+                }else if(!strcmp(field, "hits")) {
+                    gfix_param.hits = atof(value);
+                }else if(!strcmp(field, "omega_OR")) {
+                    gfix_param.omega_OR = atof(value);
+                }else if(!strcmp(field, "max_sweeps_to_fix")) {
+                    gfix_param.stop_crit.max_sweeps_to_fix = atof(value);
+                }else if(!strcmp(field, "estimate_sweeps_to_gf_progress")) {
+                    gfix_param.stop_crit.estimate_sweeps_to_gf_progress = atof(value);
+                }else if(!strcmp(field, "sweeps_to_reunitarization")) {
+                    gfix_param.sweeps_to_reunitarization = atof(value);
+                }else if(!strcmp(field, "gfix_proxy")) {
+                
+                    if(!strcmp(value, "e2")){
+                        gfix_param.stop_crit.gfix_proxy = calculate_e2;
+                    }
+                    else if(!strcmp(value, "theta")){
+                        gfix_param.stop_crit.gfix_proxy = calculateTheta;
+                    }
+                    else{
+                        fprintf(stderr, "Unrecognized gfix_proxy: %s.\n", value);
+                    }
+
+                }else if(strcmp(field, "\n")){
+                    fprintf(stderr, "Unrecognized parameter: %s.\n", field);
                 }
-                else if(!strcmp(value, "theta")){
-                    gfix_param.stop_crit.gfix_proxy = calculateTheta;
-                }
-                else{
-                    fprintf(stderr, "Unrecognized gfix_proxy: %s.\n", value);
-                }
-            }else {
-                fprintf(stderr, "Unrecognized parameter: %s.\n", field);
             }
         }
     }
@@ -166,6 +194,10 @@ ORGaugeFixingParameters initORGaugeFixingParameters(char * parameter_filename) {
     if(!validORGaugeFixingParametersQ(gfix_param)) {
         gfix_param.error = true;
     }
+
+    printORGaugeFixingParameters(gfix_param);
+    
+    fclose(parameter_file);
 
 	return gfix_param;
 }

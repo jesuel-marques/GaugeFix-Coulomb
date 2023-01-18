@@ -48,11 +48,7 @@ int main(int argc, char *argv[]) {
 	const char * config_filename 	   = argv[1];
 	const char * gauge_transf_filename = argv[2];
 
-
-
 	initGeometry(atoi(argv[3]), atoi(argv[4]));
-
-	
 	
 	const ORGaugeFixingParameters gfix_param = initORGaugeFixingParameters(argv[5]);
 	
