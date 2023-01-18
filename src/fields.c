@@ -9,14 +9,10 @@
 
 #include <types.h>
 
-
+/* Allocated the memory for 3x3 with a given number of elements. */
 Mtrx3x3 *allocate3x3Field(unsigned elements) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Allocated the memory for 3x3 with a given number of elements.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * calloc.
@@ -43,14 +39,10 @@ Mtrx3x3 *allocate3x3Field(unsigned elements) {
     return field;
 }
 
-
+/* Sets all 3x3 matrices entries in field to unit matrices. */
 int setFieldToIdentity(const Mtrx3x3 * restrict field, unsigned elements) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Sets all 3x3 matrices entries in field to unit matrices.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * setIdentity3x3.
@@ -86,16 +78,12 @@ int setFieldToIdentity(const Mtrx3x3 * restrict field, unsigned elements) {
     return 0;
 }
 
-
+/* Copies a field to field_copy. */
 int copyField(const Mtrx3x3 * restrict field, 
               unsigned elements, 
               const Mtrx3x3 * restrict field_copy) {
 
     /*
-	 * Description:
-     * ===========
-	 * Copies a field to field_copy.
-     * 
 	 * Calls:
 	 * =====
      * copy3x3.
@@ -132,15 +120,11 @@ int copyField(const Mtrx3x3 * restrict field,
     return 0;
 }
 
-
+/* Reunitarizes all the matrices in the field by projecting them all to SU(3). */
 int reunitarizeField(const Mtrx3x3 * restrict field, unsigned elements) {
 
     /*
-	 * Description:
-     * ===========
-	 * Reunitarizes all the matrices in the field by projecting them all to SU(3).
-     * 
-	 * Calls:
+     * Calls:
 	 * =====
      * projectSU3.
 	 *
@@ -182,14 +166,10 @@ int reunitarizeField(const Mtrx3x3 * restrict field, unsigned elements) {
     return exit_status;
 }
 
-
+/* Gives the average determinant for a field of 3x3 matrices. */
 Scalar averageFieldDet(const Mtrx3x3 *restrict field, unsigned elements) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Gives the average determinant for a field of 3x3 matrices.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * determinant3x3.
@@ -229,16 +209,12 @@ Scalar averageFieldDet(const Mtrx3x3 *restrict field, unsigned elements) {
     return det;
 }
 
-
+/* Gets a pointer to a link at the given position and mu. */
 Mtrx3x3 *getLink(const Mtrx3x3 *restrict U, 
                   const PosVec position, 
                   const LorentzIdx mu) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Gets a pointer to a link at the given position and mu.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * if CHECK_POSITION_BOUNDS set
@@ -274,7 +250,7 @@ Mtrx3x3 *getLink(const Mtrx3x3 *restrict U,
     #endif  //CHECK_POSITION_BOUNDS
 }
 
-
+/* Gets forward or backward link at given position and mu. */
 void getLinkMatrix(const Mtrx3x3 *restrict U, 
                    const PosVec position, 
                    const LorentzIdx mu, 
@@ -282,10 +258,6 @@ void getLinkMatrix(const Mtrx3x3 *restrict U,
                    const Mtrx3x3 *restrict u) {
     
     /*
-	 * Description:
-     * ===========
-	 * Gets forward or backward link at given position and mu.
-     * 
 	 * Calls:
 	 * =====
      * getNeighbour,
@@ -339,15 +311,11 @@ void getLinkMatrix(const Mtrx3x3 *restrict U,
     
 }
 
-
+/* Gets a pointer to the gauge transformation at the given position. */
 Mtrx3x3 *getGaugetransf(const Mtrx3x3 *restrict G, 
                         const PosVec position) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Gets a pointer to the gauge transformation at the given position.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * if CHECK_POSITION_BOUNDS set

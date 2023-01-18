@@ -10,14 +10,10 @@ GeometricParameters lattice_param;
 
 PosVec *neighbour_table;
 
-
+/* Modulo function which deals with negative numbers. */
 static inline int mod(short a, unsigned short b) {
     
-    /*
-	 * Description:
-     * ===========
-	 * Modulo function which deals with negative numbers.
-     *  
+    /*  
 	 * Calls:
 	 * =====
      *
@@ -42,14 +38,10 @@ static inline int mod(short a, unsigned short b) {
     return r >= 0 ? r : r + b;
 }
 
-
+/* Implements the periodic boundary conditions at the geometric level. */
 PosVec makePeriodicBound(PosVec position) {
 
-     /*
-	 * Description:
-     * ===========
-	 * Implements the periodic boundary conditions at the geometric level.
-     *  
+    /*
 	 * Calls:
 	 * =====
      * mod.
@@ -90,13 +82,10 @@ PosVec makePeriodicBound(PosVec position) {
     return valid_position;   
 }
 
+/* Sets up a table which records which lattice points are neighbours to which other. */
 static void makeNeighbourTable() {
 
     /*
-	 * Description:
-     * ===========
-	 * Sets up a table which records which lattice points are neighbours to which other.
-     *  
 	 * Calls:
 	 * =====
      * malloc,
@@ -119,8 +108,7 @@ static void makeNeighbourTable() {
 	 * 
      */
 
-    neighbour_table = (PosVec *) malloc(lattice_param.amount_of_points
-                                        * DIM * 2 * sizeof(PosVec));
+    neighbour_table = (PosVec *)malloc(lattice_param.volume * DIM * 2 * sizeof(PosVec));
     short t;
     LOOP_TEMPORAL_PARALLEL(t) {
         PosVec position = {.pos={0, 0, 0, t}};
@@ -152,15 +140,11 @@ static void makeNeighbourTable() {
 
 }
 
-
+/* Returns the front or rear (depending on dir) neighbour of position in Lorentz 
+   direction mu.  */
 inline PosVec getNeighbour(PosVec position, LorentzIdx mu, Direction dir) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Returns the front or rear (depending on dir) neighbour of position in Lorentz 
-     * direction mu. 
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * printf.
@@ -202,43 +186,10 @@ inline PosVec getNeighbour(PosVec position, LorentzIdx mu, Direction dir) {
 }
 
 
-void finalizeGeometry(void) {
-
-    /*
-	 * Description:
-     * ===========
-	 * Frees up the memory allocated for the neighbour table.
-     *  
-	 * Calls:
-	 * =====
-     * free.
-     * 
-     * Macros:
-	 * ======
-     * 
-     * Global Variables:
-     * ================
-     * neighbour_table
-     *  
-	 * Parameters:
-	 * ==========
-     * 
-	 * Returns:
-	 * =======
-	 * 
-     */
-
-    free(neighbour_table);
-}
-
-
+/* Check if current geometric parameters are valid. */
 bool validGeometricParametersQ(void) {
 
     /*
-	 * Description:
-     * ===========
-	 * Check if current geometric parameters are valid.
-     *  
 	 * Calls:
 	 * =====
      * 
@@ -261,32 +212,25 @@ bool validGeometricParametersQ(void) {
     short ns = lattice_param.n_SPC;
     short nt = lattice_param.n_T;
 
-    if(lattice_param.n_SPC <= 0                                 || 
-       lattice_param.n_T   <= 0                                 ||
-       lattice_param.error == 1                                 ||
-       lattice_param.spatial_volume != ns * ns * ns             ||
-       lattice_param.volume != ns * ns * ns * nt                ||
-       lattice_param.amount_of_links != DIM * ns * ns * ns * nt ||
-       lattice_param.amount_of_points != ns * ns * ns * nt        ) {
-        
-        lattice_param.error = 1;
-        return false;
-    }
-    else{
+    if(lattice_param.n_SPC          >  0                         && 
+       lattice_param.n_T            >  0                         &&
+       lattice_param.error          != 1                         &&
+       lattice_param.spatial_volume == ns * ns * ns              &&
+       lattice_param.volume         == ns * ns * ns * nt           ) {
         return true;
-    }	
+    }
+    lattice_param.error = 1;
+    return false;
+    	
 }
 
 
+/* Initializes the global variable lattice_param which contains the lattice 
+   geometric parameters, performing check to see if the parameters set are
+   reasonable. After that it generates a table of neighbours for neighbour lookups. */
 int initGeometry(const short n_s, const short n_t) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Initializes the global variable lattice_param which contains the lattice 
-     * geometric parameters, performing check to see if the parameters set are
-     * reasonable. After that it generates a table of neighbours for neighbour lookups.
-     *  
+    /*  
 	 * Calls:
 	 * =====
      * validGeometricParametersQ, makeNeighbourTable.
@@ -323,9 +267,6 @@ int initGeometry(const short n_s, const short n_t) {
 	lattice_param.volume 	     = lattice_param.spatial_volume * 
                                    lattice_param.n_T;
 
-	lattice_param.amount_of_links  = DIM * lattice_param.volume;
-	lattice_param.amount_of_points = lattice_param.volume;
-
     if(!validGeometricParametersQ()) {
         return 1;
     }
@@ -336,13 +277,37 @@ int initGeometry(const short n_s, const short n_t) {
 }
 
 
-inline bool validPositionQ(PosVec position) {
+/* Frees up the memory allocated for the neighbour table. */
+void finalizeGeometry(void) {
 
     /*
-	 * Description:
-     * ===========
-	 * Checks if all position components are in the allowed range between 0 and N_mu.
+	 * Calls:
+	 * =====
+     * free.
+     * 
+     * Macros:
+	 * ======
+     * 
+     * Global Variables:
+     * ================
+     * neighbour_table
      *  
+	 * Parameters:
+	 * ==========
+     * 
+	 * Returns:
+	 * =======
+	 * 
+     */
+
+    free(neighbour_table);
+}
+
+
+/* Checks if all position components are in the allowed range between 0 and N_mu. */
+inline bool validPositionQ(PosVec position) {
+
+    /*  
 	 * Calls:
 	 * =====
      * 
@@ -376,16 +341,12 @@ inline bool validPositionQ(PosVec position) {
     return true;
 }
 
-
+/* Checks if all position components and a Lorentz index are in the allowed range
+   between 0 and N_mu for position and 0 and DIM for mu. */
 inline bool positionmuValidQ(PosVec position, 
                              LorentzIdx mu) {
 
     /*
-	 * Description:
-     * ===========
-	 * Checks if all position components and a Lorentz index are in the allowed range
-     * between 0 and N_mu for position and 0 and DIM for mu.
-     * 
 	 * Calls:
 	 * =====
      * validPositionQ.
@@ -410,27 +371,19 @@ inline bool positionmuValidQ(PosVec position,
      * 
      */
 
-    if(validPositionQ(position) &&
+    return (validPositionQ(position) &&
         (mu == T_INDX || mu == X_INDX || 
-         mu == Y_INDX || mu == Z_INDX   )) {
-        return true;
-    }
-
-    return false;
+         mu == Y_INDX || mu == Z_INDX   ));
 }
 
-
+/* Assigns numbers to a PosVec position struct, implementing the periodic boundary
+   conditions. */
 PosVec assignPosition(const PosIndex x, 
                       const PosIndex z, 
                       const PosIndex y, 
                       const PosIndex t) {
 
     /*
-	 * Description:
-     * ===========
-	 * Assigns numbers to a PosVec position struct, implementing the periodic boundary
-     * conditions.
-     * 
 	 * Calls:
 	 * =====
      * validPositionQ, makePeriodicBound.
@@ -467,13 +420,10 @@ PosVec assignPosition(const PosIndex x,
     return position;
 }
 
+/* Prints a position to the screen. */
 void printPosVec(const PosVec position) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Prints a position to the screen.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * printf.

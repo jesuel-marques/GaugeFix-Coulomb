@@ -75,12 +75,9 @@ int byteSwap(void *strip, size_t size, size_t length) {
 }
 /*=============================================================================*/
 
+/* Gets a pointer to a link in input precision at the given position and mu. */
 InCfgMtrx *getLinkIn(InCfgMtrx *U_in, const PosVec position, const LorentzIdx mu) {
     /*
-     * Description:
-     * ===========
-     * Gets a pointer to a link in input precision at the given position and mu.
-     *
      * Calls:
      * =====
      *
@@ -107,12 +104,9 @@ InCfgMtrx *getLinkIn(InCfgMtrx *U_in, const PosVec position, const LorentzIdx mu
     return GET_LINK(U_in, position, mu);
 }
 
+/* Gets a pointer to a link in output precision at the given position and mu. */
 OutCfgMtrx *getLinkOut(OutCfgMtrx *U_out, const PosVec position, const LorentzIdx mu) {
     /*
-     * Description:
-     * ===========
-     * Gets a pointer to a link in output precision at the given position and mu.
-     *
      * Calls:
      * =====
      *
@@ -139,13 +133,10 @@ OutCfgMtrx *getLinkOut(OutCfgMtrx *U_out, const PosVec position, const LorentzId
     return GET_LINK(U_out, position, mu);
 }
 
+/* Gets a pointer to the gauge transformation in input precision at the given position. 
+*/
 InGTMtrx *getGaugetransfIn(InGTMtrx *restrict G_in, const PosVec position) {
     /*
-     * Description:
-     * ===========
-     * Gets a pointer to the gauge transformation in input precision at the given
-     * position.
-     *
      * Calls:
      * =====
      *
@@ -171,13 +162,10 @@ InGTMtrx *getGaugetransfIn(InGTMtrx *restrict G_in, const PosVec position) {
     return GET_GT(G_in, position);
 }
 
+/* Gets a pointer to the gauge transformation in output precision at the given
+ position. */
 OutGTMtrx *getGaugetransfOut(OutGTMtrx *restrict G_out, const PosVec position) {
     /*
-     * Description:
-     * ===========
-     * Gets a pointer to the gauge transformation in output precision at the given
-     * position.
-     *
      * Calls:
      * =====
      *
@@ -203,13 +191,10 @@ OutGTMtrx *getGaugetransfOut(OutGTMtrx *restrict G_out, const PosVec position) {
     return GET_GT(G_out, position);
 }
 
+/* Reads a file with filename config_filename and loads a gluon-field from it. */
 int loadConfig(const Mtrx3x3 *restrict U, char * config_filename) {
 
     /*
-     * Description:
-     * ===========
-     * Reads a file with filename config_filename and loads a gluon-field from it.
-     *
      * Calls:
      * =====
      * fopen, fprintf, fread, fclose, feof, fgetc,
@@ -299,14 +284,11 @@ int loadConfig(const Mtrx3x3 *restrict U, char * config_filename) {
     return 0;
 }
 
+/* Reads a file with filename gauge_transf_filename and loads a gauge transformation
+   from it. */
 int loadGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
 
     /*
-     * Description:
-     * ===========
-     * Reads a file with filename gauge_transf_filename and loads a gauge transformation
-     * from it.
-     *
      * Calls:
      * =====
      * fopen, fprintf, fread, fclose, feof, fgetc,
@@ -399,12 +381,9 @@ int loadGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
     return 0;
 }
 
+/* Creates a file with filename config_filename and stores a gluon-field in it. */
 int writeConfig(Mtrx3x3 *restrict U, char *config_filename) {
     /*
-     * Description:
-     * ===========
-     * Creates a file with filename config_filename and stores a gluon-field in it.
-     *
      * Calls:
      * =====
      * fopen, fprintf, fwrite, fclose,
@@ -489,14 +468,11 @@ int writeConfig(Mtrx3x3 *restrict U, char *config_filename) {
     return 0;
 }
 
+/* Creates a file with filename gauge_transf_filename and stores a gauge transformation
+   in it. */
 int writeGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
 
     /*
-     * Description:
-     * ===========
-     * Creates a file with filename gauge_transf_filename and stores a gauge
-     * transformation in it.
-     *
      * Calls:
      * =====
      * fopen, fprintf, fwrite, fclose,

@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 	// 							 assignPosition(n_SPC - 1, n_SPC - 1 , n_SPC - 1 , n_T - 1),
 	// 							 DIM - 1));
 
-	// printf("\n e2 before reunitarization and gauge transformation: %5.4E \n", calculate_e2(U));
+	// printf("\n residue before reunitarization and gauge transformation: %5.4E \n", calculate_e2(U));
 	// printf("average determinant before reunitarization: %.15lf\n",	average_det(U));
 	// //  calculate plaquette average
 	// printf("Spatial plaquette before reunitarization: %.10lf\n", averageSpatialPlaquette(U));

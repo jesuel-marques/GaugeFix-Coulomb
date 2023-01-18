@@ -9,15 +9,12 @@
 #include <types.h>
 
 #ifdef CONV_CFG_TO_WORKING_PRECISION
+/* Converts a SU(3) gauge link from the input precision to the internal working 
+   precision. */
 static void convertCfg_in_work_3x3(const InCfgMtrx * restrict u_in, 
                                          WorkMtrx  * restrict u_work) {
 
     /*
-	 * Description:
-     * ===========
-     * Converts a SU(3) gauge link from the input precision to the internal working 
-     * precision.
-     * 
 	 * Calls:
 	 * =====
 	 *
@@ -49,15 +46,12 @@ static void convertCfg_in_work_3x3(const InCfgMtrx * restrict u_in,
 
 
 #ifdef CONV_CFG_FROM_WORKING_PRECISION
+/* Converts a SU(3) gauge link from the internal working precision to the output 
+   precision. */
 static void convertCfg_work_out_3x3(const WorkMtrx * restrict u_work, 
                                     OutCfgMtrx * restrict u_out) {
 
     /*
-	 * Description:
-     * ===========
-     * Converts a SU(3) gauge link from the internal working precision to the output 
-     * precision.
-     * 
 	 * Calls:
 	 * =====
 	 *
@@ -87,15 +81,12 @@ static void convertCfg_work_out_3x3(const WorkMtrx * restrict u_work,
 
 
 #ifdef CONV_GT_TO_WORKING_PRECISION
+/* Converts a SU(3) gauge-transformation matrix from the input precision to the
+   internal working precision. */
 static void convertGT_in_work_3x3(const InGTMtrx * restrict g_in, 
                                         WorkMtrx * restrict g_work) {
 
-    /*
-	 * Description:
-     * ===========
-     * Converts a SU(3) gauge-transformation matrix from the input precision to the
-     * internal working precision.
-     * 
+    /* 
 	 * Calls:
 	 * =====
 	 *
@@ -125,15 +116,12 @@ static void convertGT_in_work_3x3(const InGTMtrx * restrict g_in,
 
 
 #ifdef CONV_GT_FROM_WORKING_PRECISION
+/* Converts a SU(3) gauge-transformation matrix from the internal working precision 
+   to the output precision. */
 static void convertGT_work_out_3x3(const WorkMtrx  * restrict g_work, 
                                          OutGTMtrx * restrict g_out) {
 
-    /*
-	 * Description:
-     * ===========
-     * Converts a SU(3) gauge-transformation matrix from the internal working precision 
-     * to the output precision.
-     * 
+    /* 
 	 * Calls:
 	 * =====
 	 *
@@ -163,15 +151,12 @@ static void convertGT_work_out_3x3(const WorkMtrx  * restrict g_work,
 
 
 #ifdef CONV_CFG_TO_WORKING_PRECISION
+/* Converts a SU(3) gauge field from the input precision to the internal working 
+   precision. */
 void convertCfg_in_work(InCfgMtrx * restrict U_in, 
                          WorkMtrx * restrict U_work) {
 
-    /*
-	 * Description:
-     * ===========
-     * Converts a SU(3) gauge field from the input precision to the internal working 
-     * precision.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * getLink, getLinkIn,
@@ -211,14 +196,11 @@ void convertCfg_in_work(InCfgMtrx * restrict U_in,
 
 
 #ifdef CONV_CFG_FROM_WORKING_PRECISION
+/* Converts a SU(3) gluon field from the internal working precision to  output 
+   precision. */
 void convertCfg_work_out(WorkMtrx * restrict U_work, OutCfgMtrx * restrict U_out) {
     
-    /*
-	 * Description:
-     * ===========
-     * Converts a SU(3) gluon field from the internal working precision to  output 
-     * precision.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * getLink, getLinkOut,
@@ -260,14 +242,11 @@ void convertCfg_work_out(WorkMtrx * restrict U_work, OutCfgMtrx * restrict U_out
 
 
 #ifdef CONV_GT_TO_WORKING_PRECISION
+/* Converts a SU(3) gauge-transformation field from the input precision to the
+   internal working precision.  */
  void convertGT_in_work(InGTMtrx * restrict G_in, WorkMtrx * restrict G_work) {
     
-    /*
-	 * Description:
-     * ===========
-     * Converts a SU(3) gauge-transformation field from the input precision to the
-     * internal working precision. 
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * getGaugetransf, getGaugetransfIn,
@@ -307,15 +286,12 @@ void convertCfg_work_out(WorkMtrx * restrict U_work, OutCfgMtrx * restrict U_out
 
 
 #ifdef CONV_GT_FROM_WORKING_PRECISION
+/* Converts a SU(3) gauge-transformation field from the internal working precision 
+   to the output precision. */
 void convertGT_work_out(WorkMtrx  *G_work, 
                         OutGTMtrx *G_out) {
 
-    /*
-	 * Description:
-     * ===========
-     * Converts a SU(3) gauge-transformation field from the internal working precision 
-     * to the output precision. 
-     * 
+    /*  
 	 * Calls:
 	 * =====
      * getGaugetransf, getGaugetransfOut,

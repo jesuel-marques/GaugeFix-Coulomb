@@ -48,13 +48,16 @@ int main(int argc, char *argv[]) {
 	const char * config_filename 	   = argv[1];
 	const char * gauge_transf_filename = argv[2];
 
+
+
 	initGeometry(atoi(argv[3]), atoi(argv[4]));
+
 	
-	const ORGaugeFixingParameters gfix_param = initORGaugeFixingParameters(atof(argv[5]), 
-															  		   atof(argv[6]));
 	
-	if(argc != 7 || !validORGaugeFixingParametersQ(gfix_param) 
-				 || !validGeometricParametersQ()			) {
+	const ORGaugeFixingParameters gfix_param = initORGaugeFixingParameters(argv[5]);
+	
+	if((argc != 6 && argc != 5) || !validORGaugeFixingParametersQ(gfix_param) 
+				 || !validGeometricParametersQ()		      ) {
 		fprintf(stderr, "Bad input.\n"
 						"Usage: Input config filename, gt filename, n_SPC, n_T, "
 						"tolerance and omega_OR in this order.\n"
@@ -66,12 +69,12 @@ int main(int argc, char *argv[]) {
 		                "omega_OR : %lf \n"
 						"tolerance : %3.2E \n", 
 						lattice_param.n_SPC, lattice_param.n_T,
-						gfix_param.omega_OR, gfix_param.tolerance );
+						gfix_param.omega_OR, gfix_param.stop_crit.tolerance );
 
 		return EXIT_FAILURE;
 	}
 	
-	const Mtrx3x3 * U = allocate3x3Field(lattice_param.amount_of_links);
+	const Mtrx3x3 * U = allocate3x3Field(DIM * lattice_param.volume);
 	if(U == NULL) {
 		fprintf(stderr, "Could not allocate memory for config in file %s.\n",
 						config_filename);
@@ -90,14 +93,14 @@ int main(int argc, char *argv[]) {
 	//	Reunitarizing right away because of loss of precision due to
 	//	storing config in single precision.	
 
-	if(reunitarizeField(U, lattice_param.amount_of_links)) {
+	if(reunitarizeField(U, DIM * lattice_param.volume)) {
 		fprintf(stderr, "Configuration in file %s could not be reunitarized.\n",
 						 config_filename);
 		free(U);
 		return EXIT_FAILURE;
 	}
 
-	Mtrx3x3 * G = allocate3x3Field(lattice_param.amount_of_points);
+	Mtrx3x3 * G = allocate3x3Field(lattice_param.volume);
 	if(G == NULL) {
 		fprintf(stderr, "Could not allocate memory for gauge transformation " 
 						"for file %s.\n",
@@ -107,7 +110,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//  fix the gauge
-
 	int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
 
 	if(sweeps < 0) {
@@ -133,10 +135,10 @@ int main(int argc, char *argv[]) {
 
 	//	Record the effort to gauge-fix
 	if(sweeps >= 0) {
-		printf("Sweeps needed to gauge-fix config from file %s: %d. e2: %3.2E \n", 
+		printf("Sweeps needed to gauge-fix config from file %s: %d. residue: %3.2E \n", 
 				config_filename,
 				sweeps,
-				calculate_e2(U));
+				gfix_param.stop_crit.gfix_proxy(U));
 		writeSweepsToGaugefix(config_filename, sweeps);
 	}
 

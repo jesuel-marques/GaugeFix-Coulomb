@@ -7,17 +7,13 @@
 #include <SU3_ops.h>
 #include <types.h>
 
-
+/* Calculates the vector A_mu(n) field. 
+   The formula is A_mu=((U - U_dagger)/2i)|traceless */
 void calculateA(Mtrx3x3 * restrict U, 
                 const PosVec position, 
                 const LorentzIdx mu,
                 Mtrx3x3 * restrict A) {
-    /*
-	 * Description:
-     * ===========
-	 * Calculates the vector A_mu(n) field.
-     * The formula is A_mu=((U - U_dagger)/2i)|traceless
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * subtractionHermConjTrless3x3, multByScalar3x3,
@@ -47,16 +43,12 @@ void calculateA(Mtrx3x3 * restrict U,
     multByScalar3x3(-0.5 * I, &U_minus_Udagger_trless, A);
 }
 
-
+/* Calculates the divergence of the field A in a specific position.  */
 void divergenceA(Mtrx3x3 * restrict U, 
                  const PosVec position, 
                  Mtrx3x3 * restrict div_A) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Calculates the divergence of the field A in a specific position. 
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * setNull3x3, subtraction3x3, accumulate3x3

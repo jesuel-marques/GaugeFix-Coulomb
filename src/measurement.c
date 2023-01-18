@@ -10,17 +10,14 @@
 
 extern GeometricParameters lattice_param;
 
+/* Calculates the trace of a specified plaquette. */
 Scalar TrPlaquette(Mtrx3x3 * restrict U, 
                    const PosVec position, 
                    const LorentzIdx mu, 
                    const LorentzIdx nu) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates the trace of a specified plaquette.
-     * 
-	 * Calls:
+     * Calls:
 	 * =====
      * creal,
      * getNeighbour, getLinkMatrix,
@@ -62,14 +59,10 @@ Scalar TrPlaquette(Mtrx3x3 * restrict U,
 
 }
 
-
+/* Calculates the average of the spatial plaquettes for a SU(3) field. */
 Scalar averageSpatialPlaquette(Mtrx3x3 * restrict U) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates the average of the spatial plaquettes for a SU(3) field.
-     * 
 	 * Calls:
 	 * =====
      * fprintf,
@@ -130,14 +123,10 @@ Scalar averageSpatialPlaquette(Mtrx3x3 * restrict U) {
     return plaq_ave;
 }
 
-
+/* Calculates the average of the temporal plaquettes for a SU(3) field. */
 Scalar averageTemporalPlaquette(Mtrx3x3 * restrict U) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates the average of the temporal plaquettes for a SU(3) field.
-     * 
 	 * Calls:
 	 * =====
      * fprintf,

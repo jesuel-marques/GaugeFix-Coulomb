@@ -7,12 +7,29 @@
 #include <types.h>
 
 
+//  Associations between the numeric indices and the lorentz directions
+
+#define DIM 4                   //   Space-time lattice dimension
+
+#define X_INDX 0
+#define Y_INDX 1
+#define Z_INDX 2
+#define T_INDX 3
+
+
+//  if position is odd, then the XOR of the first bit of each element
+//  of position must be 1. Take AND with 1 select this first bit. Take the NOT of 
+//  the odd code, because want 1 for even and 0 for odd.
+
+//  Odd position means that the sum of the coordinates is odd and equivalente for even
+
 #define POSITION_IS_ODD(position)    (((position.pos[X_INDX]) ^ \
                                        (position.pos[Y_INDX]) ^ \
                                        (position.pos[Z_INDX]) ^ \
                                        (position.pos[T_INDX])) & 1)
 
 #define POSITION_IS_EVEN(position)   !(POSITION_IS_ODD(position))
+
 
 #define LOOP_TEMPORAL(t)       for(t = 0; t < lattice_param.n_T; t++) 
 #define LOOP_SPATIAL_DIR(position, mu)   for(position.pos[mu] = 0; \
@@ -30,22 +47,6 @@
 
 #define LOOP_LORENTZ_SPATIAL(mu) for(mu = 0; mu < DIM - 1 ; mu++)
 
-
-//  if position is odd, then the XOR of the first bit of each element
-//  of position must be 1. Take AND with 1 select this first bit. Take the NOT of 
-//  the odd code, because want 1 for even and 0 for odd.
-
-//  Odd position means that the sum of the coordinates is odd and equivalente for even
-
-
-//  Associations between the numeric indices and the lorentz directions
-
-#define DIM 4                   //   Space-time lattice dimension
-
-#define X_INDX 0
-#define Y_INDX 1
-#define Z_INDX 2
-#define T_INDX 3
 
 
 //  Geometric types definitions
@@ -72,9 +73,6 @@ typedef struct {
 
     int volume;		//	Number of sites in the lattice
     int spatial_volume;	
-
-    int amount_of_links;
-    int amount_of_points;
 
     bool error;
 } GeometricParameters;

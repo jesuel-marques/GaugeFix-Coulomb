@@ -10,12 +10,9 @@
 
 #define DIGITS_MATRIX 18
 
+/* Prints the 3x3 matrix to screen in Mathematica style. */
 void printMatrix3x3(const Mtrx3x3 * restrict u) {
     /*
-	 * Description:
-     * ===========
-	 *  Prints the 3x3 matrix to screen in Mathematica style.
-     * 
 	 * Calls:
 	 * =====
      * printf,
@@ -54,13 +51,9 @@ void printMatrix3x3(const Mtrx3x3 * restrict u) {
     printf("}}\n\n");
 }
 
-
+/* Copies a 3x3 matrix. */
 void copy3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict u_copy) {
-    /*
-	 * Description:
-     * ===========
-	 * Copies a 3x3 matrix.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * 
@@ -87,13 +80,9 @@ void copy3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict u_copy) {
     }
 }
 
-
+/* Sets a 3x3 matrix to be the 3x3 null matrix. */
 inline void setNull3x3(Mtrx3x3 * restrict u) {
     /*
-	 * Description:
-     * ===========
-	 * Sets a 3x3 matrix to be the 3x3 null matrix.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -119,13 +108,9 @@ inline void setNull3x3(Mtrx3x3 * restrict u) {
     }
 }
 
-
+/* Sets a 3x3 matrix to be the 3x3 identity matrix. */
 inline void setIdentity3x3(Mtrx3x3 * restrict u) {
     /*
-	 * Description:
-     * ===========
-	 * Sets a 3x3 matrix to be the 3x3 identity matrix.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -151,13 +136,9 @@ inline void setIdentity3x3(Mtrx3x3 * restrict u) {
     }
 }
 
-
+/* Accumulates value of 3x3 matrix u in 3x3 matrix acc. */
 inline void accumulate3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict acc) {
     /*
-	 * Description:
-     * ===========
-	 * Accumulates value of 3x3 matrix u in 3x3 matrix acc .
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -184,16 +165,12 @@ inline void accumulate3x3(const Mtrx3x3 * restrict u, Mtrx3x3 * restrict acc) {
     }
 }
 
-
+/* Subtracts two 3x3 matrices and put value in another one. */
 void subtraction3x3(const Mtrx3x3 * restrict u, 
                      const Mtrx3x3 * restrict v,
                            Mtrx3x3 * restrict u_minus_v) {
 
-     /*
-	 * Description:
-     * ===========
-	 * Subtracts two 3x3 matrices and put value in another one.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * 
@@ -222,14 +199,10 @@ void subtraction3x3(const Mtrx3x3 * restrict u,
     }
 }
 
-
+/* Obtains the trace of a 3x3 matrix. */
 Scalar trace3x3(const Mtrx3x3 * restrict u) {
 
     /*
-	 * Description:
-     * ===========
-	 * Obtains the trace of a 3x3 matrix.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -255,14 +228,10 @@ Scalar trace3x3(const Mtrx3x3 * restrict u) {
            + u -> m[ELEM_3X3(2, 2)];
 }
 
-
+/* Obtains the determinant of a 3x3 matrix. */
 inline Scalar determinant3x3(const Mtrx3x3 * restrict u) {
 
     /*
-	 * Description:
-     * ===========
-	 * Obtains the determinant of a 3x3 matrix.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -292,15 +261,11 @@ inline Scalar determinant3x3(const Mtrx3x3 * restrict u) {
                                       - u->m[ELEM_3X3(1, 1)] * u->m[ELEM_3X3(2, 0)]);
 }
 
-
+/* Calculates the hermitean conjugate of a 3x3 matrix. */
 inline void hermConj3x3(const Mtrx3x3 * restrict u, 
                                 Mtrx3x3 * restrict u_dagger) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates the hermitean conjugate of a 3x3 matrix.
-     * 
 	 * Calls:
 	 * =====
      * conj.
@@ -334,15 +299,11 @@ inline void hermConj3x3(const Mtrx3x3 * restrict u,
 
 }
 
-
+/* Takes a 3x3 matrix u and calculates u - u^dagger - trace. */
 inline void subtractionHermConjTrless3x3(const Mtrx3x3 * restrict u,
                                                Mtrx3x3 * restrict u_minus_udag_trless) {
 
     /*
-	 * Description:
-     * ===========
-	 * Takes a 3x3 matrix u and calculates u - u^dagger - trace.
-     * 
 	 * Calls:
 	 * =====
      * creal, cimag, conj.
@@ -365,40 +326,39 @@ inline void subtractionHermConjTrless3x3(const Mtrx3x3 * restrict u,
 	 * 
 	 */                              
 
-    Scalar tr;
-    tr  = u_minus_udag_trless -> m[ELEM_3X3(0, 0)] 
-        =     2 * I * cimag(u -> m[ELEM_3X3(0, 0)]);
-    tr += u_minus_udag_trless -> m[ELEM_3X3(1, 1)] 
-        =     2 * I * cimag(u -> m[ELEM_3X3(1, 1)]);
-    tr += u_minus_udag_trless -> m[ELEM_3X3(2, 2)]
-        =     2 * I * cimag(u -> m[ELEM_3X3(2, 2)]) ;
+    Scalar tr = 0.0;
+    MtrxIdx3 a;
 
-    tr /= Nc;
-
-    u_minus_udag_trless -> m[ELEM_3X3(0, 0)] -= tr;
-    u_minus_udag_trless -> m[ELEM_3X3(1, 1)] -= tr;
-    u_minus_udag_trless -> m[ELEM_3X3(2, 2)] -= tr;
-
-    MtrxIdx3 a, b;
-    LOOP_3X3(a, b) {
-        u_minus_udag_trless -> m[ELEM_3X3(a, b)] =       u -> m[ELEM_3X3(a, b)] 
-                                                  - conj(u -> m[ELEM_3X3(b, a)]);
-        u_minus_udag_trless -> m[ELEM_3X3(b, a)] =       u -> m[ELEM_3X3(b, a)] 
-                                                  - conj(u -> m[ELEM_3X3(a, b)]);
+    LOOP_3(a){
+        tr += u_minus_udag_trless -> m[ELEM_3X3(a, a)] 
+            =     2 * I * cimag(u -> m[ELEM_3X3(a, a)]);
     }
+
+    tr /= (double) Nc;
+
+    LOOP_3(a){
+        u_minus_udag_trless -> m[ELEM_3X3(a, a)] -= tr;
+    }
+
+    MtrxIdx3 b;
+    LOOP_3X3(a, b) {
+        if( a != b){
+            u_minus_udag_trless -> m[ELEM_3X3(a, b)] =       u -> m[ELEM_3X3(a, b)] 
+                                                      - conj(u -> m[ELEM_3X3(b, a)]);
+            u_minus_udag_trless -> m[ELEM_3X3(b, a)] =       u -> m[ELEM_3X3(b, a)] 
+                                                      - conj(u -> m[ELEM_3X3(a, b)]);
+        }
+    }
+
 }
 
-
+/* Calculates multiplication of 3x3 matrix u by Scalar alpha, which is a complex 
+   number in double precision. */
 inline void multByScalar3x3(const Scalar alpha, 
                             const Mtrx3x3 * restrict u,
                             Mtrx3x3 * restrict alpha_times_u) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates multiplication of 3x3 matrix u by Scalar alpha, which is a complex 
-     * number in double precision.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -426,16 +386,12 @@ inline void multByScalar3x3(const Scalar alpha,
     }
 }
 
-
+/* Calculates multiplication of 3x3 matrix u by Scalar alpha, which is a complex 
+   number in double precision. Result is returned in same matrix. */
 inline void substMultScalar3x3(const Scalar alpha, 
                                Mtrx3x3 * restrict u) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates multiplication of 3x3 matrix u by Scalar alpha, which is a complex 
-     * number in double precision. Result is returned in same matrix.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -463,16 +419,12 @@ inline void substMultScalar3x3(const Scalar alpha,
     }
 }
 
-
+/* Calculates product of two 3x3 matrices. */
 inline void prod3x3(const Mtrx3x3 * restrict u, 
                     const Mtrx3x3 * restrict v, 
                           Mtrx3x3 * restrict uv) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates product of two 3x3 matrices.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -504,17 +456,13 @@ inline void prod3x3(const Mtrx3x3 * restrict u,
     }
 }
 
-
+/* Calculates product of three 3x3 matrices. */
 void prodThree3x3(const Mtrx3x3 * restrict u, 
                   const Mtrx3x3 * restrict v,
                   const Mtrx3x3 * restrict w,
                         Mtrx3x3 * restrict uvw) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates product of three 3x3 matrices.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -551,6 +499,7 @@ void prodThree3x3(const Mtrx3x3 * restrict u,
 }
 
 
+/* Calculates product of four 3x3 matrices. */
 void prodFour3x3(const Mtrx3x3 * restrict u, 
                  const Mtrx3x3 * restrict v,
                  const Mtrx3x3 * restrict w,
@@ -558,10 +507,6 @@ void prodFour3x3(const Mtrx3x3 * restrict u,
                        Mtrx3x3 * restrict uvwx) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates product of four 3x3 matrices.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -601,16 +546,12 @@ void prodFour3x3(const Mtrx3x3 * restrict u,
     }
 }
 
-
+/* Calculates matrix product between g and acc_prod and 
+   accumulates result in acc_prod. */
 inline void accumLeftProd3x3(const Mtrx3x3 * restrict g,
                                    Mtrx3x3 * restrict acc_prod) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Calculates matrix product between g and acc_prod and
-     * accumulates result in acc_prod.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * copy3x3, prod3x3.
@@ -638,16 +579,12 @@ inline void accumLeftProd3x3(const Mtrx3x3 * restrict g,
 
 }
 
-
+/* Calculates matrix product between acc_prod and g and accumulates result in acc_prod. 
+   */
 inline void accumRightProd3x3(      Mtrx3x3 * restrict acc_prod, 
                               const Mtrx3x3 * restrict g) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates matrix product between acc_prod and g and
-     * accumulates result in acc_prod.
-     * 
 	 * Calls:
 	 * =====
      * copy3x3, prod3x3.
@@ -675,17 +612,13 @@ inline void accumRightProd3x3(      Mtrx3x3 * restrict acc_prod,
 
 }
 
-
+/* Accumulates in g the product of a SU(2) Cabbibo-Marinari submatrix in
+   Cayley-Klein form x_ck with g.  */
 inline void accumProdSU2_3x3(const Mtrx2x2CK * restrict x_ck, 
                                    Mtrx3x3 * restrict g, 
                                    MtrxIdx3 a, 
                                    MtrxIdx3 b ) {
-    /*
-	 * Description:
-     * ===========
-	 * Accumulates in g the product of a SU(2) Cabbibo-Marinari submatrix in
-     * Cayley-Klein form x_ck with g. 
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * convertFromCK.
@@ -732,17 +665,13 @@ inline void accumProdSU2_3x3(const Mtrx2x2CK * restrict x_ck,
 
 }
 
-
+/* Calculates matrix product between v, u and w dagger. */
 inline void prod_vuwdagger3x3(const Mtrx3x3 * restrict v, 
                               const Mtrx3x3 * restrict u, 
                               const Mtrx3x3 * restrict w, 
                                     Mtrx3x3 * restrict vuwdagger ) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates matrix product between v, u and w dagger.
-     * 
 	 * Calls:
 	 * =====
      * conj
@@ -781,16 +710,12 @@ inline void prod_vuwdagger3x3(const Mtrx3x3 * restrict v,
     }
 }
 
-
+/* Calculates A^omega according to the formula (which works for A close to identity)
+   A^omega = Proj_SU3(I + omega * (A-I) + ...). */
 inline short power3x3Binomial(const Mtrx3x3 * restrict A, 
                               const double omega, 
                               Mtrx3x3 * restrict A_to_omega) {
     /*
-	 * Description:
-     * ===========
-	 * Calculates A^omega according to the formula (which works for A close to identity)
-     * A^omega = Proj_SU3(I + omega * (A-I) + ...).
-     * 
 	 * Calls:
 	 * =====
      * projectSU3
@@ -826,16 +751,12 @@ inline short power3x3Binomial(const Mtrx3x3 * restrict A,
     return projectSU3(A_to_omega);
 }
 
-
+/* Performs a Los Alamos update to w with submatrix indicated by sub. The Los Alamos 
+   update is a SU(2) Cabbibo-Marinari submatrix of SU(3) which maximizes the value of
+   ReTr(w). */
 inline void updateSubLosAlamos(Mtrx3x3 * restrict w, const Submtrx sub) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Performs a Los Alamos update to w with submatrix indicated by sub.
-     * The Los Alamos update is a SU(2) Cabbibo-Marinari submatrix of SU(3) 
-     * which maximizes the value of ReTr(w).
-     *  
+    /*  
 	 * Calls:
 	 * =====
      * creal, cimag,
@@ -899,15 +820,11 @@ inline void updateSubLosAlamos(Mtrx3x3 * restrict w, const Submtrx sub) {
     }
 }
 
-
+/* Calculates the inverse of a 3 by 3 matrix x explicitly. */
 inline double inverse3x3(const Mtrx3x3 * restrict a,
                                Mtrx3x3 * restrict a_inv) {
                                     
     /*
-	 * Description:
-     * ===========
-	 * Calculates the inverse of a 3 by 3 matrix x explicitly.
-     * 
 	 * Calls:
 	 * =====
      * determinant3x3.
@@ -963,13 +880,9 @@ inline double inverse3x3(const Mtrx3x3 * restrict a,
     return a_det;
 }
 
-
+/* Takes a color vector and normalizes it. */
 inline static int normalize3Vec(Vec3 * restrict v) {
     /*
-	 * Description:
-     * ===========
-	 * Takes a color vector and normalizes it.
-     * 
 	 * Calls:
 	 * =====
      * fabs, sqrt.
@@ -1018,16 +931,12 @@ inline static int normalize3Vec(Vec3 * restrict v) {
     }
 }
 
-
+/* Calculates the conjugate of the cross product of color vectors u and v. */
 inline static void crossproductConj(Vec3 u, 
                                     Vec3 v,
                                     Vec3* u_cross_v_star) {
 
     /*
-	 * Description:
-     * ===========
-	 * Calculates the conjugate of the cross product of color vectors u and v.
-     * 
 	 * Calls:
 	 * =====
      * conj.
@@ -1061,16 +970,12 @@ inline static void crossproductConj(Vec3 u,
 
 }
 
-
+/* Projects matrix x to the group SU(3) returning SU(3) matrix in x at the end.
+   Follows method found in openqcd fastsum code.
+   https://gitlab.com/fastsum/openqcd-fastsum/-/tree/master/ */
 inline short projectSU3(Mtrx3x3 * restrict x) {
 
     /*
-	 * Description:
-     * ===========
-	 * Projects matrix x to the group SU(3) returning SU(3) matrix in x at the end.
-     * Follows method found in openqcd fastsum code.
-     * https://gitlab.com/fastsum/openqcd-fastsum/-/tree/master/
-     * 
 	 * Calls:
 	 * =====
      * normalize3Vec, crossproductConj.
@@ -1125,18 +1030,14 @@ inline short projectSU3(Mtrx3x3 * restrict x) {
     }
 }
 
-
+/* Decomposes A in the components of the alfebra of SU(3) using the 
+   Gell-Mann matrices as a basis and following the conventions of Gattringer 
+   (https://link.springer.com/book/10.1007/978-3-642-01850-3). 
+   Formulas for the coefficients obtained in Mathematica. */
 void decomposeAlgebraSU3(const Mtrx3x3    * restrict a, 
                                MtrxSU3Alg * restrict a_components) {
     
     /*
-	 * Description:
-     * ===========
-	 * Decomposes A in the components of the alfebra of SU(3) using the 
-     * Gell-Mann matrices as a basis and following the conventions of Gattringer 
-     * (https://link.springer.com/book/10.1007/978-3-642-01850-3). 
-     * Formulas for the coefficients obtained in Mathematica.
-     *  
 	 * Calls:
 	 * =====
      * sqrt,
@@ -1189,14 +1090,11 @@ void decomposeAlgebraSU3(const Mtrx3x3    * restrict a,
 
 #define CABBIBO_MARINARI_HITS 300
 
+/* Alternative projection method, following */
 void projectSU3CabbiboMarinari(Mtrx3x3 * restrict w, 
-                               Mtrx3x3 * restrict total_update) {
+                               Mtrx3x3 * restrict w_projected) {
     
-     /*
-	 * Description:
-     * ===========
-	 * 
-     *  
+    /*  
 	 * Calls:
 	 * =====
      * inverse3x3, updateSubLosAlamos, setIdentity3x3, prod3x3, hermConj3x3.
@@ -1218,14 +1116,12 @@ void projectSU3CabbiboMarinari(Mtrx3x3 * restrict w,
 	 * 
      */
 
-    	
     Mtrx3x3 w_inv_old;
     Mtrx3x3 total_update_conj;
     /* Calculates the inverse of w in the beginning. The program will update w 
        successively and to extract what was the combined update, we can multiply from
        the right by the old inverse. */
 
-       
     if(inverse3x3(w, &w_inv_old)) {
 
         /* Local maximization is attained iteratively in SU(3),
@@ -1243,12 +1139,12 @@ void projectSU3CabbiboMarinari(Mtrx3x3 * restrict w,
     }
     else{
         //  if w has no inverse, update will be given by the identity
-        setIdentity3x3(total_update);
+        setIdentity3x3(w_projected);
         return;
     }
     
     prod3x3(w, &w_inv_old, &total_update_conj);
-    hermConj3x3(&total_update_conj, total_update);
+    hermConj3x3(&total_update_conj, w_projected);
 
     //	Updates matrix to total_update. It is the accumulated updates from the hits.
 }

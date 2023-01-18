@@ -26,6 +26,7 @@
         "*.txt": "c",
         "types_io.h": "c",
         "flags.h": "c",
-        "tgmath.h": "c"
+        "tgmath.h": "c",
+        "types.h": "c"
     }
 }

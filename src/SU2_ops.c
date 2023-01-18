@@ -37,14 +37,11 @@
 //     getchar();
 // }
 
+/* Copies a 2x2 matrix in the Cayley-Klein representation. */
 void copy2x2(const Mtrx2x2CK * restrict u, 
              Mtrx2x2CK * restrict u_copy) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Copies a 2x2 matrix in the Cayley-Klein representation.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * 
@@ -73,15 +70,11 @@ void copy2x2(const Mtrx2x2CK * restrict u,
     }
 }
 
-
+/* Converts a 2x2 matrix from the Cayley-Klein representation to a 2x2 usual matrix. */
 inline void convertFromCK(const Mtrx2x2CK * restrict u_ck, 
                           Mtrx2x2 * restrict u) {
 
-    /*
-	 * Description:
-     * ===========
-	 * Converts a 2x2 matrix from the Cayley-Klein representation to a 2x2 usual matrix.
-     * 
+    /* 
 	 * Calls:
 	 * =====
      * 
@@ -169,13 +162,9 @@ inline void convertFromCK(const Mtrx2x2CK * restrict u_ck,
 //     //	twice the 0th component.
 // }
 
-
+/* Obtains the determinant of a 2x2 Cayley-Klein matrix. */
 inline Scalar determinant2x2(const Mtrx2x2CK * restrict u) {
-/*
-	 * Description:
-     * ===========
-	 * Obtains the determinant of a 2x2 Cayley-Klein matrix.
-     * 
+    /*
 	 * Calls:
 	 * =====
      * 
@@ -228,17 +217,13 @@ inline Scalar determinant2x2(const Mtrx2x2CK * restrict u) {
 //     }
 // }
 
-
+/* Calculates multiplication of 2x2 Cayley-Klein matrix u by Scalar alpha, 
+   which is a complex number in double precision. */
 void multByScalar2x2(const Scalar alpha,
                      const Mtrx2x2CK * restrict u, 
                      Mtrx2x2CK * restrict alpha_times_u) {
     
     /*
-	 * Description:
-     * ===========
-	 * Calculates multiplication of 2x2 Cayley-Klein matrix u by Scalar alpha, 
-     * which is a complex number in double precision.
-     * 
 	 * Calls:
 	 * =====
      * 
@@ -360,15 +345,11 @@ void multByScalar2x2(const Scalar alpha,
 
 // }
 
-
+/* Projects 2x2 Cayley-Klein matrix u to the group SU(2) returning SU(2) matrix in
+   u at the end. */
 inline short projectSU2(Mtrx2x2CK * restrict u) {
 
     /*
-	 * Description:
-     * ===========
-	 * Projects 2x2 Cayley-Klein matrix u to the group SU(2) 
-     * returning SU(2) matrix in u at the end.
-     * 
 	 * Calls:
 	 * =====
      * copy2x2, determinant2x2, multByScalar2x2.
