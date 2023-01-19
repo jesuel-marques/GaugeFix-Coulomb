@@ -1,5 +1,5 @@
 sweeps_to_reunitarization:  		250
-omega_OR:                       1.97	
+omega_OR:                       -1.97	
 hits:                           2		  
 gfix_proxy:					            e2    
 tolerance:					            1.0E-16

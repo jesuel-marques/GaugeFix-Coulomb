@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
 	initGeometry(atoi(argv[3]), atoi(argv[4]));
 	
-	const ORGaugeFixingParameters gfix_param = initORGaugeFixingParameters(argv[5]);
+	ORGaugeFixingParameters gfix_param = initORGaugeFixingParameters(argv[5]);
 	
 	if((argc != 6 && argc != 5) || !validORGaugeFixingParametersQ(gfix_param) 
 				 || !validGeometricParametersQ()		      ) {
@@ -66,8 +66,8 @@ int main(int argc, char *argv[]) {
 						"tolerance : %3.2E \n", 
 						lattice_param.n_SPC, lattice_param.n_T,
 						gfix_param.omega_OR, gfix_param.stop_crit.tolerance );
-
-		return EXIT_FAILURE;
+		fprintf(stderr, "Initializing parameters to default instead.\n");
+		gfix_param = initParametersORDefault();
 	}
 	
 	const Mtrx3x3 * U = allocate3x3Field(DIM * lattice_param.volume);
