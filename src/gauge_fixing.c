@@ -19,6 +19,7 @@
 #include <SU3_ops.h>
 #include <types.h>
 
+#define PARAMETER_KEY_VALUE_DELIMITER ":"
 
 //	Implementation of the checkerboard subdivision of the lattice.
 #define BLACKRED_SWEEP(position, sweep) ((POSITION_IS_EVEN(position)) ^ ((sweep) & 1))
@@ -93,12 +94,13 @@ void rmspaces(char *string)
     // non_space_count to keep the frequency of non space characters
     int non_space_count = 0;
 
-    //Traverse a string and if it is non space character then, place it at index non_space_count
+    /* Traverse a string and if it is non space character then, 
+       place it at index non_space_count. */
     for (int i = 0; string[i] != '\0'; i++) {
         if (!isspace(string[i])) {
             string[non_space_count] = string[i];
-            non_space_count++;//non_space_count incremented
-        }    
+            non_space_count++;
+        }
     }
     
     //Finally placing final character at the string end
@@ -145,59 +147,64 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
 
     FILE * parameter_file = fopen(parameter_filename, "r");
 
-    char delimiter[] = ":";
+    char delimiter[] = PARAMETER_KEY_VALUE_DELIMITER;
     char buff[100];
 
-    if(parameter_file != NULL){
-        while(fgets(buff, 100, parameter_file)){
+    if(parameter_file != NULL) {
+        while(fgets(buff, 100, parameter_file)) {
 
             rmspaces(buff);
 
-            char * field;
-            field = strtok(buff, delimiter);
+            char * key;
+            key = strtok(buff, delimiter);
             
             char * value;
             value = strtok(NULL, "\n");
-            if(field && value){
+            if(value){
                 
-                if(!strcmp(field, "tolerance")) {
+                if(!strcmp(key, "tolerance")) {
                     gfix_param.stop_crit.tolerance = atof(value);            
-                }else if(!strcmp(field, "hits")) {
+                }else if(!strcmp(key, "hits")) {
                     gfix_param.hits = atof(value);
-                }else if(!strcmp(field, "omega_OR")) {
+                }else if(!strcmp(key, "omega_OR")) {
                     gfix_param.omega_OR = atof(value);
-                }else if(!strcmp(field, "max_sweeps_to_fix")) {
+                }else if(!strcmp(key, "max_sweeps_to_fix")) {
                     gfix_param.stop_crit.max_sweeps_to_fix = atof(value);
-                }else if(!strcmp(field, "estimate_sweeps_to_gf_progress")) {
+                }else if(!strcmp(key, "estimate_sweeps_to_gf_progress")) {
                     gfix_param.stop_crit.estimate_sweeps_to_gf_progress = atof(value);
-                }else if(!strcmp(field, "sweeps_to_reunitarization")) {
+                }else if(!strcmp(key, "sweeps_to_reunitarization")) {
                     gfix_param.sweeps_to_reunitarization = atof(value);
-                }else if(!strcmp(field, "gfix_proxy")) {
+                }else if(!strcmp(key, "gfix_proxy")) {
                 
                     if(!strcmp(value, "e2")){
                         gfix_param.stop_crit.gfix_proxy = calculate_e2;
                     }
-                    else if(!strcmp(value, "theta")){
+                    else if(!strcmp(value, "theta")) {
                         gfix_param.stop_crit.gfix_proxy = calculateTheta;
                     }
                     else{
                         fprintf(stderr, "Unrecognized gfix_proxy: %s.\n", value);
                     }
 
-                }else if(strcmp(field, "\n")){
-                    fprintf(stderr, "Unrecognized parameter: %s.\n", field);
+                }else if(strcmp(key, "\n")) {
+                    fprintf(stderr, "Unrecognized parameter: %s.\n", key);
                 }
+
             }
         }
+        fclose(parameter_file);
+    }
+    else{
+        fprintf(stderr, "Gauge-fixing parameter file could not be opened. "
+                        "Using default parameters instead.\n");
+        printORGaugeFixingParameters(gfix_param);
     }
 
     if(!validORGaugeFixingParametersQ(gfix_param)) {
         gfix_param.error = true;
     }
 
-    printORGaugeFixingParameters(gfix_param);
-    
-    fclose(parameter_file);
+    // printORGaugeFixingParameters(gfix_param);
 
 	return gfix_param;
 }
