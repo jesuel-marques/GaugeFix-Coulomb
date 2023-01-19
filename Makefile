@@ -18,7 +18,7 @@ OBJECTS = $(patsubst %, $(BUILD_DIR)/%, $(_OBJECTS))
 _DEPENDS = $(patsubst $(SOURCE_DIR)/%.c, %.d, $(SOURCES))
 DEPENDS = $(patsubst %, $(BUILD_DIR)/%, $(_DEPENDS))
 
-BINARIES = gauge_fix_coulomb plaquette_check test_matrix_power
+BINARIES = gauge_fix_coulomb
 
 .PHONY: all clean
 
@@ -27,12 +27,6 @@ all: $(BINARIES)
 
 gauge_fix_coulomb: $(OBJECTS) gauge_fix_coulomb.c
 	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
-
-plaquette_check: $(OBJECTS)
-	$(CC) -o $@ $@.c $^ $(CFLAGS) $(WARNINGS) $(LIBS)
-
-test_matrix_power: $(OBJECTS)
-	$(CC) -o $@ $@.c $^ $(CFLAGS) $(WARNINGS) $(LIBS)
 
 -include $(DEPENDS)
 
