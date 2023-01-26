@@ -1,8 +1,10 @@
+#GaugeFix-Coulomb
+
 This program gauge-fixes lattice QCD gauge configurations to Coulomb gauge.
 
-Install
-=======
-On Linux:
+##Install
+
+###On Linux:
 
 Go to the main directory, where gauge_fix_coulomb.c is located. 
 The command to compile is 
@@ -14,12 +16,12 @@ provided is set to use GCC as the C compiler. If you use something else, you wou
 have to change that and change the flags appropriately. Also feel free to change the 
 flags in the Makefile to suit your needs.
 
-Other platforms:
+###Other platforms:
 
 Not guaranteed to work, but a C compiler should be able to compile the code anyway.
 
-Configuration
-=============
+##Configuration
+
 Before you run the program, you need know if:
 
 - Your configuration is in the SCIDAC format and if the xml header has been stripped 
@@ -82,8 +84,8 @@ lines commented or uncommented as appropriate:
 
 following the same pattern as for the configurations.
 
-Usage
-=====
+##Usage
+
 The main executable is gauge_fix_coulomb. It is a program which reads in a gauge
 configuration in the SCIDAC binary format, together with some other parameters and 
 outputs a gauge transformation which brings the configuration to Coulomb-gauge.
@@ -106,8 +108,8 @@ gtransformation_path and also a file "sweeps_to_gaugefix_nsxnt.txt", which recor
 how many sweeps were needed to gauge-fix the particular configuration. It writes the
 gtransformation_path in the first column and the number of sweeps in the next column.
 
-Parameter file format:
-=====================
+##Parameter file format:
+
 
 You can specify a few parameters for the gauge-fixing. If a parameter is not specified,
 the program will use some default value. The parameters are specified in a simple text
@@ -173,8 +175,7 @@ this fact to make comments in the parameter file. However, if your comment conta
 it will think that you wanted somehow to specify a parameter with a weird name and warn 
 you, but that does no harm.
 
-Internal Workings:
-=================
+##Internal Workings:
 
 In order to fix the gauge the overrelaxation algorithm. To know more about this take a 
 look at DOI: 10.22323/1.396.0057.
@@ -205,12 +206,11 @@ you use an omega_OR which is close to the (in principle) unknown optimal value.
 From my experience, for large enough lattices, the optimal value is actually 
 surprisingly close to 2.
 
-Exit codes:
-==========
+##Exit codes
+
 0 if successful and a negative integer if some problem occured.
 
-More on the format
-==================
+##More on the format
 
 The mapping between the directions and the Lorentz indices is defined in lattice.h.
 
@@ -226,8 +226,8 @@ The configuration is read in this order. The full matrices are expected to be st
 and not just two lines.
 
 
-Not (at least currently) supported
-==================================
+##Not (at least currently) supported
+
 In the order of priority of possible future implementation 
 
 -support for other gauges
