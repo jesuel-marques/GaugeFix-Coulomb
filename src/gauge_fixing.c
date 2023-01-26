@@ -46,67 +46,81 @@ bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param) {
 	 * true if parameters are valid, false if invalid.
 	 */
 
-    if((gfix_param.omega_OR  >= 1                   && gfix_param.omega_OR < 2  &&
-        gfix_param.stop_crit.tolerance > 0          && gfix_param.error != true &&
-        gfix_param.sweeps_to_reunitarization > 0    && gfix_param.hits > 0        )){
-        return true;
-    }
-    else{
-        gfix_param.error = 1;
-        return false;
-    }
+    return (gfix_param.omega_OR  >= 1 && gfix_param.omega_OR < 2  && 
+            gfix_param.generic_gf.tolerance > 0 && 
+            gfix_param.generic_gf.error != true &&
+            gfix_param.generic_gf.sweeps_to_reunitarization > 0                                );
 }
 
 ORGaugeFixingParameters initParametersORDefault(){
     ORGaugeFixingParameters gfix_param = 
-                    {.omega_OR = 1.95, 
-                     .error = false,
-                     .hits = 2,
-                     .stop_crit.gfix_proxy = calculate_e2,
-                     .stop_crit.tolerance = 1E-16,
-                     .stop_crit.max_sweeps_to_fix = 100000,
-                     .stop_crit.estimate_sweeps_to_gf_progress = 1000,
-                     .sweeps_to_reunitarization = 250};
+                    {.omega_OR = 1.95,  
+                     .hits = 2,                     
+                     .generic_gf.error = false,
+                     .generic_gf.gfix_proxy = calculate_e2,
+                     .generic_gf.tolerance = 1E-16,
+                     .generic_gf.max_sweeps_to_fix = 100000,
+                     .generic_gf.estimate_sweeps_to_gf_progress = 1000,
+                     .generic_gf.sweeps_to_reunitarization = 250};
 
     return gfix_param;
 }
 
 void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param){
 
-    printf("max_sweeps_to_fix: %d\n", 
-            gfix_param.stop_crit.max_sweeps_to_fix);
-    printf("estimate_sweeps_to_gfixprogress: %d\n", 
-            gfix_param.stop_crit.estimate_sweeps_to_gf_progress);
-    printf("max_hits: %d\n",
+    printf("\n");
+    printf("max_hits: %u\n",
             gfix_param.hits);
-    printf("sweeps_to_reunitarization: %d\n",
-            gfix_param.sweeps_to_reunitarization);
-
     printf("omega_OR: %lf\n",
             gfix_param.omega_OR);
+    printf("\n");
     printf("tolerance: %3.2E\n",
-            gfix_param.stop_crit.tolerance);
-
+            gfix_param.generic_gf.tolerance);
+    printf("max_sweeps_to_fix: %u\n", 
+            gfix_param.generic_gf.max_sweeps_to_fix);
+    printf("estimate_sweeps_to_gfixprogress: %u\n", 
+            gfix_param.generic_gf.estimate_sweeps_to_gf_progress);
+    printf("\n");
+    printf("sweeps_to_reunitarization: %u\n",
+            gfix_param.generic_gf.sweeps_to_reunitarization);
+    printf("\n");
 }
 
-void rmspaces(char *string)
+/* Removes whitespace characters from a string. */
+void removeSpaces(char * restrict string)
 {
-    // non_space_count to keep the frequency of non space characters
+    /*
+	 * Calls:
+	 * =====
+	 * isspace.
+	 *
+     * Macros:
+	 * ======
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+	 * char * string:      string whose spaces will be removed           
+     * 
+	 * Returns:
+	 * =======
+	 * 
+	 */
+
     int non_space_count = 0;
 
-    /* Traverse a string and if it is non space character then, 
-       place it at index non_space_count. */
-    for (int i = 0; string[i] != '\0'; i++) {
-        if (!isspace(string[i])) {
-            string[non_space_count] = string[i];
+    for(unsigned count = 0; string[count]; count++) {
+        if(!isspace(string[count])) {
+            string[non_space_count] = string[count];
             non_space_count++;
         }
     }
     
-    //Finally placing final character at the string end
     string[non_space_count] = '\0';
 }
-   
+
 
 /* Initializes gauge-fixing parameters given a tolerance and a omega parameter
    for the overrelaxation algorithm, checking if the parameters passed are valid. */
@@ -153,7 +167,7 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
     if(parameter_file != NULL) {
         while(fgets(buff, 100, parameter_file)) {
 
-            rmspaces(buff);
+            removeSpaces(buff);
 
             char * key;
             key = strtok(buff, delimiter);
@@ -163,24 +177,24 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
             if(value){
                 
                 if(!strcmp(key, "tolerance")) {
-                    gfix_param.stop_crit.tolerance = atof(value);            
+                    gfix_param.generic_gf.tolerance = atof(value);            
                 }else if(!strcmp(key, "hits")) {
                     gfix_param.hits = atof(value);
                 }else if(!strcmp(key, "omega_OR")) {
                     gfix_param.omega_OR = atof(value);
                 }else if(!strcmp(key, "max_sweeps_to_fix")) {
-                    gfix_param.stop_crit.max_sweeps_to_fix = atof(value);
+                    gfix_param.generic_gf.max_sweeps_to_fix = atof(value);
                 }else if(!strcmp(key, "estimate_sweeps_to_gf_progress")) {
-                    gfix_param.stop_crit.estimate_sweeps_to_gf_progress = atof(value);
+                    gfix_param.generic_gf.estimate_sweeps_to_gf_progress = atof(value);
                 }else if(!strcmp(key, "sweeps_to_reunitarization")) {
-                    gfix_param.sweeps_to_reunitarization = atof(value);
+                    gfix_param.generic_gf.sweeps_to_reunitarization = atof(value);
                 }else if(!strcmp(key, "gfix_proxy")) {
                 
                     if(!strcmp(value, "e2")){
-                        gfix_param.stop_crit.gfix_proxy = calculate_e2;
+                        gfix_param.generic_gf.gfix_proxy = calculate_e2;
                     }
                     else if(!strcmp(value, "theta")) {
-                        gfix_param.stop_crit.gfix_proxy = calculateTheta;
+                        gfix_param.generic_gf.gfix_proxy = calculateTheta;
                     }
                     else{
                         fprintf(stderr, "Unrecognized gfix_proxy: %s.\n", value);
@@ -201,10 +215,8 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
     }
 
     if(!validORGaugeFixingParametersQ(gfix_param)) {
-        gfix_param.error = true;
+        gfix_param.generic_gf.error = true;
     }
-
-    // printORGaugeFixingParameters(gfix_param);
 
 	return gfix_param;
 }
@@ -239,13 +251,13 @@ static int whenNextConvergenceCheckQ(unsigned int current_sweep,
      *
 	 */
 
-    if(residue < gfix_param.stop_crit.tolerance) {
+    if(residue < gfix_param.generic_gf.tolerance) {
         return current_sweep;
     }
     else{
         return current_sweep + 10 
-                + (unsigned)(gfix_param.stop_crit.estimate_sweeps_to_gf_progress * 
-                        (1.0 - log10(residue) / log10(gfix_param.stop_crit.tolerance))); 
+                + (unsigned)(gfix_param.generic_gf.estimate_sweeps_to_gf_progress * 
+                       (1.0 - log10(residue) / log10(gfix_param.generic_gf.tolerance))); 
     }
 
 }
@@ -350,11 +362,11 @@ double calculateTheta(Mtrx3x3 * restrict U) {
 }
 
 /* Calculates e2, an index to measure proximity to gauge-fixing condition
-   (defined in hep-lat/0301019v2). It is the normalized sum of the squares 
+   (defined in eq 6.1 of hep-lat/0301019v2). It is the normalized sum of the squares 
    of the color components of the divergence of A. */    
 double calculate_e2(Mtrx3x3 * restrict U) {
 
-    /*  
+    /*
 	 * Calls:
 	 * =====
      * decomposeAlgebraSU3,
@@ -369,7 +381,7 @@ double calculate_e2(Mtrx3x3 * restrict U) {
      * 
      * Global Variables:
      * ================
-     * lattice_param
+     * lattice_param.
 	 *
 	 * Parameters:
 	 * ==========
@@ -401,7 +413,7 @@ double calculate_e2(Mtrx3x3 * restrict U) {
                 decomposeAlgebraSU3(&div_A, &div_A_components);
                 for(SU3AlgIdx a = 1; a <= POW2(Nc)-1; a++) {
 
-                    /* 	Sum of the squares of the color components
+                    /* 	Sum of the squares of the color components 
                         of the divergence of A. */
                     e2_slice += POW2(div_A_components.m[a]);
 
@@ -736,7 +748,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
     
     /* No need to calculate residue all the time because it will typically take some 
        hundreds/thousands of sweeps to fix the gauge. */
-    double new_res = gfix_param.stop_crit.gfix_proxy(U);
+    double new_res = gfix_param.generic_gf.gfix_proxy(U);
     int converge_check_due = whenNextConvergenceCheckQ(sweep, new_res, gfix_param);
 
     while(true) {
@@ -763,11 +775,11 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
             double last_res = new_res;
 
             if(fabs((new_res = 
-                    gfix_param.stop_crit.gfix_proxy(U)) - last_res)/last_res < 10E-16) {
+                    gfix_param.generic_gf.gfix_proxy(U)) - last_res)/last_res < 10E-16) {
                 printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
                 return -1;  /* convergence too slow or not converging */
             }
-            else if(new_res <= gfix_param.stop_crit.tolerance) {
+            else if(new_res <= gfix_param.generic_gf.tolerance) {
                 break;  /* converged */
             }
             else{
@@ -778,11 +790,11 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
             
         }
 
-        if(sweep >= gfix_param.stop_crit.max_sweeps_to_fix) {
+        if(sweep >= gfix_param.generic_gf.max_sweeps_to_fix) {
             return -1;  /* convergence too slow or not converging */
         }
 
-        if(!(sweep % gfix_param.sweeps_to_reunitarization)) {
+        if(!(sweep % gfix_param.generic_gf.sweeps_to_reunitarization)) {
 
             reunitarizeField(U, DIM * lattice_param.volume);
             reunitarizeField(G, lattice_param.volume);

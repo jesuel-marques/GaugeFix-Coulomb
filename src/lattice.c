@@ -8,8 +8,6 @@
 
 GeometricParameters lattice_param;
 
-PosVec *neighbour_table;
-
 /* Modulo function which deals with negative numbers. */
 static inline int mod(short a, unsigned short b) {
     
@@ -82,63 +80,6 @@ PosVec makePeriodicBound(PosVec position) {
     return valid_position;   
 }
 
-/* Sets up a table which records which lattice points are neighbours to which other. */
-static void makeNeighbourTable() {
-
-    /*
-	 * Calls:
-	 * =====
-     * malloc,
-     * makePeriodicBound.
-     * 
-     * Macros:
-	 * ======
-     * X_INDX, Y_INDX, Z_INDX, T_INDX, 
-     * LOOP_TEMPORAL_PARALLEL, LOOP_SPATIAL, LOOP_LORENTZ, DIM.
-     * 
-     * Global Variables:
-     * ================
-     * lattice_param, neighbour_table.
-     *  
-	 * Parameters:
-	 * ==========
-     * 
-	 * Returns:
-	 * =======
-	 * 
-     */
-
-    neighbour_table = (PosVec *)malloc(lattice_param.volume * DIM * 2 * sizeof(PosVec));
-    short t;
-    LOOP_TEMPORAL_PARALLEL(t) {
-        PosVec position = {.pos={0, 0, 0, t}};
-        PosVec neighbour = {.pos={0, 0, 0, 0}};
-
-        LorentzIdx mu;
-        LOOP_SPATIAL(position) {
-            LOOP_LORENTZ(mu) {
-                neighbour = position;
-                neighbour.pos[mu]--;
-
-                *(neighbour_table + ((((position.pos[T_INDX]  * lattice_param.n_SPC 
-                                      + position.pos[Z_INDX]) * lattice_param.n_SPC
-                                      + position.pos[Y_INDX]) * lattice_param.n_SPC
-                                      + position.pos[X_INDX]) * DIM 
-                                      + mu) * 2 + REAR) = makePeriodicBound(neighbour);
-            
-                neighbour = position;
-                neighbour.pos[mu]++;
-
-                *(neighbour_table + ((((position.pos[T_INDX]  * lattice_param.n_SPC 
-                                      + position.pos[Z_INDX]) * lattice_param.n_SPC
-                                      + position.pos[Y_INDX]) * lattice_param.n_SPC
-                                      + position.pos[X_INDX]) * DIM 
-                                      + mu) * 2 + FRONT) = makePeriodicBound(neighbour);
-            }
-        }
-    }
-
-}
 
 /* Returns the front or rear (depending on dir) neighbour of position in Lorentz 
    direction mu.  */
@@ -147,15 +88,14 @@ inline PosVec getNeighbour(PosVec position, LorentzIdx mu, Direction dir) {
     /* 
 	 * Calls:
 	 * =====
-     * printf.
+     * printf,
+     * makePeriodicBound.
      * 
      * Macros:
 	 * ======
-     * DIM.
      * 
      * Global Variables:
      * ================
-     * neighbour_table
      * 
 	 * Parameters:
 	 * ==========
@@ -168,21 +108,17 @@ inline PosVec getNeighbour(PosVec position, LorentzIdx mu, Direction dir) {
      * A struct PosVec with the neighbour position.
      */
 
-    /* PosVec neighbour = position; 
+    PosVec neighbour = position; 
 
     if(dir == REAR) {
-        neighbour.pos[mu] --;
+        neighbour.pos[mu]--;
     }
     else{
         neighbour.pos[mu]++;
     } 
 
-    return makePeriodicBound(neighbour); */
+    return makePeriodicBound(neighbour); 
     
-    return *(neighbour_table + ((((  position.pos[T_INDX]  * lattice_param.n_SPC 
-                                   + position.pos[Z_INDX]) * lattice_param.n_SPC
-                                   + position.pos[Y_INDX]) * lattice_param.n_SPC
-                                   + position.pos[X_INDX]) * DIM + mu) * 2 + dir);
 }
 
 
@@ -212,16 +148,11 @@ bool validGeometricParametersQ(void) {
     short ns = lattice_param.n_SPC;
     short nt = lattice_param.n_T;
 
-    if(lattice_param.n_SPC          >  0                         && 
-       lattice_param.n_T            >  0                         &&
-       lattice_param.error          != 1                         &&
-       lattice_param.spatial_volume == ns * ns * ns              &&
-       lattice_param.volume         == ns * ns * ns * nt           ) {
-        return true;
-    }
-    lattice_param.error = 1;
-    return false;
-    	
+    return (lattice_param.n_SPC          >  0                && 
+            lattice_param.n_T            >  0                &&
+            lattice_param.error          != 1                &&
+            lattice_param.spatial_volume == ns * ns * ns     &&
+            lattice_param.volume         == ns * ns * ns * nt  );
 }
 
 
@@ -233,7 +164,7 @@ int initGeometry(const short n_s, const short n_t) {
     /*  
 	 * Calls:
 	 * =====
-     * validGeometricParametersQ, makeNeighbourTable.
+     * validGeometricParametersQ.
      * 
      * Macros:
 	 * ======
@@ -271,36 +202,7 @@ int initGeometry(const short n_s, const short n_t) {
         return 1;
     }
 
-    makeNeighbourTable();
-
     return 0;
-}
-
-
-/* Frees up the memory allocated for the neighbour table. */
-void finalizeGeometry(void) {
-
-    /*
-	 * Calls:
-	 * =====
-     * free.
-     * 
-     * Macros:
-	 * ======
-     * 
-     * Global Variables:
-     * ================
-     * neighbour_table
-     *  
-	 * Parameters:
-	 * ==========
-     * 
-	 * Returns:
-	 * =======
-	 * 
-     */
-
-    free(neighbour_table);
 }
 
 
@@ -329,16 +231,11 @@ inline bool validPositionQ(PosVec position) {
      * 
      */
 
-    LorentzIdx mu;
-    LOOP_LORENTZ(mu) {
-        if(position.pos[mu] >= (mu != T_INDX ? 
-                               lattice_param.n_SPC : 
-                               lattice_param.n_T) &&
-           position.pos[mu] < 0 )
-            return false;
-    }
-
-    return true;
+    return (position.pos[T_INDX] < lattice_param.n_T   && position.pos[T_INDX] >= 0 &&
+            position.pos[X_INDX] < lattice_param.n_SPC && position.pos[X_INDX] >= 0 &&
+            position.pos[Y_INDX] < lattice_param.n_SPC && position.pos[Y_INDX] >= 0 &&
+            position.pos[Z_INDX] < lattice_param.n_SPC && position.pos[Z_INDX] >= 0   );
+           
 }
 
 /* Checks if all position components and a Lorentz index are in the allowed range
@@ -372,8 +269,8 @@ inline bool positionmuValidQ(PosVec position,
      */
 
     return (validPositionQ(position) &&
-        (mu == T_INDX || mu == X_INDX || 
-         mu == Y_INDX || mu == Z_INDX   ));
+            (mu == T_INDX || mu == X_INDX || 
+             mu == Y_INDX || mu == Z_INDX   ));
 }
 
 /* Assigns numbers to a PosVec position struct, implementing the periodic boundary

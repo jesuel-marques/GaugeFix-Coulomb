@@ -1,5 +1,5 @@
-#ifndef CONFIGIO_H
-#define CONFIGIO_H
+#ifndef FIELDS_IO_H
+#define FIELDS_IO_H
 
 #include <flags.h>
 #include <types_io.h>
@@ -27,4 +27,4 @@ int loadGaugeTransf (Mtrx3x3 * restrict G,
     writeGaugeTransf(Mtrx3x3 * restrict G,
                            char * gauge_transf_filename);
 
-#endif  //CONFIGIO_H
+#endif  //FIELDS_IO_H

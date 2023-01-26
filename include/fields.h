@@ -7,13 +7,13 @@
 #include <types.h>
 
 
-//  Does the pointer arithmetic to get the correct index in the gauge transformation
+/* Does the pointer arithmetic to get the correct index for the gauge transformation */
 #define GET_GT(G, position) G + (((position.pos[T_INDX]  * lattice_param.n_SPC \
                                  + position.pos[Z_INDX]) * lattice_param.n_SPC \
                                  + position.pos[Y_INDX]) * lattice_param.n_SPC \
                                  + position.pos[X_INDX]) 
 
-//  Does the pointer arithmetic to get the correct index in the configuration
+/* Does the pointer arithmetic to get the correct index for the configuration */
 #define GET_LINK(U, position, mu) U + ((((position.pos[T_INDX]  * lattice_param.n_SPC \
                                         + position.pos[Z_INDX]) * lattice_param.n_SPC \
                                         + position.pos[Y_INDX]) * lattice_param.n_SPC \

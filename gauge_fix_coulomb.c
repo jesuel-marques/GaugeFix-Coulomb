@@ -52,8 +52,9 @@ int main(int argc, char *argv[]) {
 	
 	ORGaugeFixingParameters gfix_param = initORGaugeFixingParameters(argv[5]);
 	
-	if((argc != 6 && argc != 5) || !validORGaugeFixingParametersQ(gfix_param) 
-				 || !validGeometricParametersQ()		      ) {
+	if((argc != 6 && argc != 5) 				   || 
+		!validORGaugeFixingParametersQ(gfix_param) ||
+		!validGeometricParametersQ()				 ) {
 		fprintf(stderr, "Bad input.\n"
 						"Usage: Input config filename, gt filename, n_SPC, n_T, "
 						"tolerance and omega_OR in this order.\n"
@@ -61,14 +62,18 @@ int main(int argc, char *argv[]) {
 						"1 < omega_OR < 2\n"
 						"n_SPC > 0 and n_T >0\n"
 						"tolerance > 0 \n");
-		fprintf(stderr, "n_SPC: %d \nn_T: %d \n"
+		fprintf(stderr, "\n Provided parameters: \n"
+						"n_SPC: %d \nn_T: %d \n"
 		                "omega_OR : %lf \n"
 						"tolerance : %3.2E \n", 
 						lattice_param.n_SPC, lattice_param.n_T,
-						gfix_param.omega_OR, gfix_param.stop_crit.tolerance );
-		fprintf(stderr, "Initializing parameters to default instead.\n");
+						gfix_param.omega_OR, gfix_param.generic_gf.tolerance );
+		fprintf(stderr, "Initializing gauge-fixing parameters to default instead.\n");
 		gfix_param = initParametersORDefault();
 	}
+
+	printf("\nGauge-fixing parameters that will be used:\n");
+	printORGaugeFixingParameters(gfix_param);
 	
 	const Mtrx3x3 * U = allocate3x3Field(DIM * lattice_param.volume);
 	if(U == NULL) {
@@ -113,8 +118,10 @@ int main(int argc, char *argv[]) {
 		free(G);
 		switch(sweeps) {
 			case -1:
-				fprintf(stderr, "Configuration in file %s could not be gauge-fixed.\n"	
-								"SOR algorithm seems not to work or be too slow\n", 
+				fprintf(stderr, "Configuration in file %s could not be gauge-fixed "
+								"within the maximum number of sweeps passed.\n"	
+								"SOR algorithm seems not to work or be slower than "
+								"what the user expected for this particular config. \n", 
 								config_filename);
 				break;
 
@@ -134,7 +141,7 @@ int main(int argc, char *argv[]) {
 		printf("Sweeps needed to gauge-fix config from file %s: %d. residue: %3.2E \n", 
 				config_filename,
 				sweeps,
-				gfix_param.stop_crit.gfix_proxy(U));
+				gfix_param.generic_gf.gfix_proxy(U));
 		writeSweepsToGaugefix(config_filename, sweeps);
 	}
 
@@ -162,6 +169,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	free(G);		//	Free memory allocated for gauge transformation.
-	finalizeGeometry();
+	// finalizeGeometry();
 	return EXIT_SUCCESS;
 }
