@@ -1,15 +1,12 @@
-
-
-#   parameters specific to overrelaxation 
-omega_OR:                       1.97	
-hits:                           2		  
-
-#general parameters
+#generic parameters
 gfix_proxy:					            e2    
 tolerance:					            1.0E-16
 max_sweeps_to_fix:        			50000
-estimate_sweeps_to_gf_progress: 1000
+estimate_sweeps_to_gf_progress:     3000
+
+#   parameters specific to overrelaxation 
+omega_OR:                       1.99
+hits:                           2	
 
 #reunitarization parameter
-#sweeps_to_reunitarization:  		250
 sweeps_to_reunitarization:  		200

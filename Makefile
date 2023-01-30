@@ -2,6 +2,7 @@ INCLUDE_DIR := include
 SOURCE_DIR := src
 BUILD_DIR := build
 
+RM = rm -f
 CC := gcc
 CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -DNUM_THREADS=`nproc`
 
@@ -34,4 +35,4 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c Makefile
 	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
 
 clean:
-	rm -f $(BINARIES) $(BUILD_DIR)/*.[od] *~ */*~
+	$(RM) $(BINARIES) $(OBJECTS) $(DEPENDS)

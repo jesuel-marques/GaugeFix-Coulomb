@@ -1,6 +1,24 @@
 /*
-*   Gauge-fixing functions and macros
-*/
+    gauge_fixing contain routines to gauge fix a configuration.
+
+    Copyright (C) 2023  Jesuel Marques
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    Contact: jesuel.leal@usp.br
+    
+ */
 
 #include <ctype.h>
 #include <stdio.h>
@@ -46,10 +64,10 @@ bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param) {
 	 * true if parameters are valid, false if invalid.
 	 */
 
-    return (gfix_param.omega_OR  >= 1 && gfix_param.omega_OR < 2  && 
-            gfix_param.generic_gf.tolerance > 0 && 
-            gfix_param.generic_gf.error != true &&
-            gfix_param.generic_gf.sweeps_to_reunitarization > 0                                );
+    return (gfix_param.omega_OR  >= 1 && gfix_param.omega_OR < 2    && 
+            gfix_param.generic_gf.tolerance > 0                     && 
+            gfix_param.generic_gf.error != true                     &&
+            gfix_param.generic_gf.sweeps_to_reunitarization > 0         );
 }
 
 ORGaugeFixingParameters initParametersORDefault(){
@@ -159,6 +177,11 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
 
     ORGaugeFixingParameters gfix_param = initParametersORDefault();
 
+    if(!strcmp(parameter_filename, " ")){
+        printf("No parameter-file detected, using default values.\n");
+        return gfix_param;
+    }
+
     FILE * parameter_file = fopen(parameter_filename, "r");
 
     char delimiter[] = PARAMETER_KEY_VALUE_DELIMITER;
@@ -209,8 +232,8 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
         fclose(parameter_file);
     }
     else{
-        fprintf(stderr, "Gauge-fixing parameter file could not be opened. "
-                        "Using default parameters instead.\n");
+        fprintf(stderr, "Gauge-fixing parameter file %s could not be opened. "
+                        "Using default parameters instead.\n", parameter_filename);
         printORGaugeFixingParameters(gfix_param);
     }
 
@@ -392,7 +415,6 @@ double calculate_e2(Mtrx3x3 * restrict U) {
 	 * Value of gauge-fixing index e2 in double precision.
      *
 	 */
-
     double e2 = 0.0;
     PosIndex t;
     // Parallelizing by slicing the time extent
@@ -421,7 +443,6 @@ double calculate_e2(Mtrx3x3 * restrict U) {
             }
             e2 += e2_slice;
         }
-
     return e2 / (lattice_param.volume);
 }
 
@@ -733,9 +754,8 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
     if(!validORGaugeFixingParametersQ(gfix_param)) {
         return -2;
     }
-
     setFieldToIdentity(G, lattice_param.volume);
-    
+
     /*	
      *  Gauge-fixing index, indicates how far we are to the Landau-gauge.
      *  It will be less than the tolerance,
@@ -749,9 +769,11 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
     /* No need to calculate residue all the time because it will typically take some 
        hundreds/thousands of sweeps to fix the gauge. */
     double new_res = gfix_param.generic_gf.gfix_proxy(U);
+    printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
+    
     int converge_check_due = whenNextConvergenceCheckQ(sweep, new_res, gfix_param);
-
-    while(true) {
+    
+    while(new_res > gfix_param.generic_gf.tolerance) {
         // Parallelizing by slicing the time extent
         OMP_PARALLEL_FOR
             for(PosIndex t = 0; t < lattice_param.n_T; t++) {
@@ -775,7 +797,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
             double last_res = new_res;
 
             if(fabs((new_res = 
-                    gfix_param.generic_gf.gfix_proxy(U)) - last_res)/last_res < 10E-16) {
+                    gfix_param.generic_gf.gfix_proxy(U)) - last_res)/last_res < 10E-16){
                 printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
                 return -1;  /* convergence too slow or not converging */
             }

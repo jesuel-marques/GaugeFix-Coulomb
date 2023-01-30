@@ -9,4 +9,3 @@ hostfile
 *.o
 *.d
 build
-gt

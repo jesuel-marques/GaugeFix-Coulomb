@@ -1,3 +1,25 @@
+/*
+    Main program to gauge-fix configurations to Coulomb-gauge.
+
+    Copyright (C) 2023  Jesuel Marques
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    Contact: jesuel.leal@usp.br
+
+ */
+
 //	srun -p DevQ -N 1 -A nuim01 -t 1:00:00 --pty bash
 //	gcc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/four_potential.c source/fields_io.c  -lm -O4 -march=skylake -fopenmp -w
 //	mpiicc -o gauge_fix_coulomb gauge_fix_coulomb.c source/lattice.c source/SU2_ops.c source/SU3_ops.c source/gauge_fixing.c source/four_potential.c  -lm -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp -DMPI_CODE
@@ -49,9 +71,15 @@ int main(int argc, char *argv[]) {
 	const char * gauge_transf_filename = argv[2];
 
 	initGeometry(atoi(argv[3]), atoi(argv[4]));
-	
-	ORGaugeFixingParameters gfix_param = initORGaugeFixingParameters(argv[5]);
-	
+
+	ORGaugeFixingParameters gfix_param;
+	if(argc == 6){
+		gfix_param = initORGaugeFixingParameters(argv[5]);
+	}
+	else{
+		gfix_param = initORGaugeFixingParameters(" ");
+	}
+
 	if((argc != 6 && argc != 5) 				   || 
 		!validORGaugeFixingParametersQ(gfix_param) ||
 		!validGeometricParametersQ()				 ) {
@@ -109,7 +137,6 @@ int main(int argc, char *argv[]) {
 		free(U);
 		return EXIT_FAILURE;
 	}
-	
 	//  fix the gauge
 	int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
 

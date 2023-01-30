@@ -1,3 +1,25 @@
+/*
+    fields_io takes care of input and output of lattice fields.
+
+    Copyright (C) 2023  Jesuel Marques
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    Contact: jesuel.leal@usp.br
+    
+ */
+
 #include <SU2_ops.h>
 #include <SU3_ops.h>
 #include <convert_precision_io.h>
@@ -232,12 +254,10 @@ int loadConfig(const Mtrx3x3 *restrict U, char * config_filename) {
     const InCfgMtrx *U_in;
 
     #ifdef CONV_CFG_TO_WORKING_PRECISION
-
         U_in = (InCfgMtrx *)calloc(lattice_param.volume * DIM, sizeof(InCfgMtrx));
         if(U_in == NULL) {
             return -3;
         }
-
     #else   // CONV_CFG_TO_WORKING_PRECISION
         U_in = (InCfgMtrx *)U;
     #endif  // CONV_CFG_TO_WORKING_PRECISION
@@ -245,6 +265,7 @@ int loadConfig(const Mtrx3x3 *restrict U, char * config_filename) {
         if(fread(U_in, sizeof(InCfgMtrx), lattice_param.volume * DIM, config_file) !=
                                           lattice_param.volume * DIM) {
             fprintf(stderr, "Error: Reading from file %s.\n", config_filename);
+
     #ifdef CONV_CFG_TO_WORKING_PRECISION
             free(U_in);
     #endif  // CONV_CFG_TO_WORKING_PRECISION

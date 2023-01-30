@@ -1,3 +1,26 @@
+/*
+    convert_precision_io takes care of converting the input or output fields to the
+    format other programs in this suite use internally.
+
+    Copyright (C) 2023  Jesuel Marques
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    Contact: jesuel.leal@usp.br
+    
+ */
+
 #include <convert_precision_io.h>
 #include <fields.h>
 #include <fields_io.h>
@@ -12,7 +35,7 @@
 /* Converts a SU(3) gauge link from the input precision to the internal working 
    precision. */
 static void convertCfg_in_work_3x3(const InCfgMtrx * restrict u_in, 
-                                         Mtrx3x3Work  * restrict u_work) {
+                                   Mtrx3x3Work  * restrict u_work) {
 
     /*
 	 * Calls:
@@ -37,9 +60,7 @@ static void convertCfg_in_work_3x3(const InCfgMtrx * restrict u_in,
 
     MtrxIdx3 a, b;
     LOOP_3X3(a, b) {
-
         u_work -> m[ELEM_3X3(a, b)] = (WorkScalarType) u_in -> m[ELEM_3X3(a, b)];
-
     }
 }
 #endif  //CONV_CFG_TO_WORKING_PRECISION
