@@ -5,7 +5,7 @@ max_sweeps_to_fix:        			50000
 estimate_sweeps_to_gf_progress:     3000
 
 #   parameters specific to overrelaxation 
-omega_OR:                       1.99
+omega_OR:                       1.95
 hits:                           2	
 
 #reunitarization parameter

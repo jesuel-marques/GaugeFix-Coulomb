@@ -128,12 +128,11 @@ Scalar averageSpatialPlaquette(Mtrx3x3 * restrict U) {
             Scalar plaq_ave_slice = 0.0;
 
             LOOP_SPATIAL(position) {
-                LorentzIdx mu;
-                LOOP_LORENTZ_SPATIAL(mu) {
-                    for(LorentzIdx nu = 0; nu < DIM - 1 ; nu++) {
-                        if(mu < nu) {
-                            plaq_ave_slice += 
-                                TrPlaquette(U, position, mu, nu);                                    
+                LorentzIdx i, j;
+                LOOP_LORENTZ_SPATIAL(i) {
+                    LOOP_LORENTZ_SPATIAL(j){
+                        if(i < j) {
+                            plaq_ave_slice += TrPlaquette(U, position, i, j);                                    
                         }
                     }
                 }
@@ -193,10 +192,7 @@ Scalar averageTemporalPlaquette(Mtrx3x3 * restrict U) {
             LOOP_SPATIAL(position) {
                 LorentzIdx mu;
                 LOOP_LORENTZ_SPATIAL(mu) {
-                
-                    plaq_ave_slice += 
-                        TrPlaquette(U, position, T_INDX, mu);
-                
+                    plaq_ave_slice += TrPlaquette(U, position, T_INDX, mu);
                 }
             }
 

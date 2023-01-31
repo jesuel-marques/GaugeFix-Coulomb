@@ -31,7 +31,7 @@
 
 
 /* Uncomment if reading config in float and need to convert to double precision */
-//#define     CONV_CFG_TO_WORKING_PRECISION
+// #define     CONV_CFG_TO_WORKING_PRECISION
 
 /*  Uncomment if writing config in float and need to convert from double precision */
 // #define     CONV_CFG_FROM_WORKING_PRECISION

@@ -33,10 +33,25 @@
 #define DIM 4
 
 /*  Associations between the numeric indices and the lorentz directions */
-#define X_INDX 0
-#define Y_INDX 1
-#define Z_INDX 2
-#define T_INDX 3
+// #define X_INDX 0
+// #define Y_INDX 1
+// #define Z_INDX 2
+// #define T_INDX 3
+
+#define T_INDX 0
+#define Z_INDX 1
+#define Y_INDX 2
+#define X_INDX 3
+
+#if Z_INDX < X_INDX 
+    #define LOWEST_SPATIAL_INDEX Z_INDX
+    #define HIGHEST_SPATIAL_INDEX X_INDX
+#else
+    #define LOWEST_SPATIAL_INDEX X_INDX
+    #define HIGHEST_SPATIAL_INDEX Z_INDX
+#endif
+
+
 
 
 /* Test to decide if position is odd */
@@ -58,8 +73,8 @@
 
 /* Shortening for the loops in the spatial coordinate mu */
 #define LOOP_SPATIAL_DIR(position, mu)   for(position.pos[mu] = 0; \
-                                              position.pos[mu] < lattice_param.n_SPC; \
-                                              position.pos[mu]++) 
+                                             position.pos[mu] < lattice_param.n_SPC; \
+                                             position.pos[mu]++) 
 
 /* Shortening for the loops in all spatial coordinate */                                              
 #define LOOP_SPATIAL(position) LOOP_SPATIAL_DIR(position, Z_INDX)  \
@@ -75,8 +90,10 @@
 #define LOOP_LORENTZ(mu) for(mu = 0; mu < DIM; mu++)  
 
 /* Shortening for the loop in Lorentz indices associated to spatial directions only */
-#define LOOP_LORENTZ_SPATIAL(mu) for(mu = 0; mu < DIM - 1 ; mu++)
-
+// #define LOOP_LORENTZ_SPATIAL(mu) for(mu = 0; mu < DIM - 1 ; mu++)
+#define LOOP_LORENTZ_SPATIAL(mu) for(mu = LOWEST_SPATIAL_INDEX; \
+                                     mu <= HIGHEST_SPATIAL_INDEX ; \
+                                     mu++)
 
 
 //  Geometric types definitions
