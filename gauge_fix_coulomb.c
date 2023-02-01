@@ -137,6 +137,7 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	printf("F before: %lf\n", calculateF(U));
 	printf("Average trace of spatial plaquettes before gauge transformation: %.10lf\n", 
 													    averagePlaquette(U, "spatial"));
 	printf("Average trace of temporal plaquettes before gauge transformation: %.10lf\n", 
@@ -147,7 +148,7 @@ int main(int argc, char *argv[]) {
 														averagePlaquette(U, "spatial"));
 	printf("Average trace of temporal plaquettes after gauge transformation: %.10lf\n", 
 													   averagePlaquette(U, "temporal"));
-
+	printf("F after: %lf\n", calculateF(U));
 	if(sweeps < 0) {
 		free(U);
 		free(G);

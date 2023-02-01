@@ -23,11 +23,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <fields.h>
-#include <../settings.h>
-#include <geometry.h>
-#include <SU3_ops.h>
+#include <omp.h>
 
+#include <fields.h>
+#include <geometry.h>
+#include <../settings.h>
+#include <SU3_ops.h>
 #include <types.h>
 
 /* Allocated the memory for 3x3 with a given number of elements. */

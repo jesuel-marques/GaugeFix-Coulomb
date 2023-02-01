@@ -8,7 +8,7 @@ CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx
 
 WARNINGS:= -Wall -Wextra
 
-LIBS := -lm -llapacke
+LIBS := -lm
 
 
 SOURCES := $(wildcard $(SOURCE_DIR)/*.c)

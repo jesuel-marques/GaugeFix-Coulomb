@@ -21,14 +21,16 @@
     
  */
 
+#include <omp.h>
+
 #include <convert_precision_io.h>
 #include <fields.h>
 #include <fields_io.h>
-#include <../settings.h>
-#include <types_io.h>
 #include <geometry.h>
+#include <../settings.h>
 #include <SU3_ops.h>
 #include <types.h>
+#include <types_io.h>
 
 #ifdef CONV_CFG_TO_WORKING_PRECISION
 /* Converts a SU(3) gauge link from the input precision to the internal working 

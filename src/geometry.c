@@ -23,8 +23,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <../settings.h>
 #include <geometry.h>
+#include <../settings.h>
 #include <SU3_ops.h>
 #include <types.h>
 
@@ -300,7 +300,7 @@ inline bool positionmuValidQ(PosVec position,
 PosVec assignPosition(const PosIndex x, 
                       const PosIndex z, 
                       const PosIndex y, 
-                      const PosIndex t) {
+                      const PosIndex t ) {
 
     /*
 	 * Calls:

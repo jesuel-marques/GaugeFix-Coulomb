@@ -238,14 +238,15 @@ In the order of priority of possible future implementation
 1. [ ] Support for other gauges
 2. [ ] Other algorithms for gauge-fixing other than overrelaxation
 3. [ ] Other gfix_proxy apart from e2 and theta
-4. [ ] Gently pause or stop the running program
-5. [ ] Signal handling. Program will terminate abruptly if termination signals are passed
-6. [ ] Support for GPU acceleration
-7. [ ] Other formats for configurations different from the headerless SCIDAC
-8. [ ] Nc different from 3
-9. [ ] Lattices with different number of points in different spatial directions
-10. [ ] Gauge field in a representation different from the fundamental
-11. [ ] Number of dimensions different from 4
-12. [ ] Support for custom precision datatypes
+4. [ ] gfix_proxy is measured more globally. Implement local conditions.
+5. [ ] Gently pause or stop the running program
+6. [ ] Signal handling. Program will terminate abruptly if termination signals are passed
+7. [ ] Support for GPU acceleration
+8. [ ] Other formats for configurations different from the headerless SCIDAC
+9. [ ] Nc different from 3
+10. [ ] Lattices with different number of points in different spatial directions
+11. [ ] Gauge field in a representation different from the fundamental
+12. [ ] Number of dimensions different from 4
+13. [ ] Support for custom precision datatypes
 
 Error handling is not great right now, but I intend to improve this as time allows.

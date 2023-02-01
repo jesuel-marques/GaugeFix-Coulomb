@@ -20,19 +20,21 @@
     
  */
 
-#include <SU2_ops.h>
-#include <SU3_ops.h>
-#include <convert_precision_io.h>
-#include <fields.h>
-#include <fields_io.h>
-#include <../settings.h>
-#include <geometry.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tgmath.h>
+
+
+#include <convert_precision_io.h>
+#include <fields.h>
+#include <fields_io.h>
+#include <geometry.h>
+#include <../settings.h>
+#include <SU2_ops.h>
+#include <SU3_ops.h>
 
 extern GeometricParameters lattice_param;
 

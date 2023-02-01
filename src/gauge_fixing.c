@@ -29,10 +29,10 @@
 #include <omp.h>
 
 #include <fields.h>
-#include <../settings.h>
 #include <four_potential.h>
 #include <gauge_fixing.h>
 #include <geometry.h>
+#include <../settings.h>
 #include <SU3_ops.h>
 #include <types.h>
 
@@ -292,13 +292,13 @@ double calculateF(Mtrx3x3 * restrict U) {
 	 * Calls:
 	 * =====
      * creal,
-     * setNull3x3, accumulate3x3, trace3x3,
+     * trace3x3,
      * getLink.
      * 
      * Macros:
 	 * ======
      * Nc
-     * DIM, LOOP_TEMPORA, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, T_INDX.
+     * LOOP_TEMPORAL, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, T_INDX.
      * 
      * Global Variables:
      * ================
@@ -314,26 +314,27 @@ double calculateF(Mtrx3x3 * restrict U) {
      *
 	 */
 
-    Mtrx3x3 U_acc;
-    setNull3x3(&U_acc);
 
+    double retrU_acc = 0.0;
+    
     PosIndex t;
+    #pragma omp parallel for reduction (+:retrU_acc) num_threads(NUM_THREADS)   \
+                             schedule(dynamic)                                  
     LOOP_TEMPORAL(t) {
 
-        PosVec position;
-        position.pos[T_INDX] = t;
-
+        PosVec position;    
+        position.pos[T_INDX]  = t;
         LOOP_SPATIAL(position) {
             LorentzIdx mu;
             LOOP_LORENTZ_SPATIAL(mu) {
-
-                accumulate3x3(getLink(U, position, mu), &U_acc);
+                
+                retrU_acc += creal(trace3x3(getLink(U, position, mu)));
 
             }
         }
     }
 
-    return creal(trace3x3(&U_acc)) / (double) (lattice_param.volume * Nc * (DIM - 1));
+    return retrU_acc / (double) (lattice_param.volume * Nc * (DIM - 1));
 }
 
 /* Calculates an alternative index to measure proximity to gauge-fixing condition.
@@ -366,12 +367,21 @@ double calculateTheta(Mtrx3x3 * restrict U) {
      *
 	 */
 
-    Mtrx3x3 div_A, div_A_dagger, prod;
+    
 
     double theta = 0.0;
 
-    PosVec position;
-    LOOP_TEMPORAL(position.pos[T_INDX]) {
+    PosIndex t;
+    #pragma omp parallel for reduction (+:theta) num_threads(NUM_THREADS) \
+                             schedule(dynamic)                            
+    LOOP_TEMPORAL(t) {
+
+        PosVec position;
+
+        position.pos[T_INDX] = t;
+
+        Mtrx3x3 div_A, div_A_dagger, prod;
+
         LOOP_SPATIAL(position) {
             divergenceA(U, position, &div_A);
             hermConj3x3(&div_A, &div_A_dagger);
@@ -414,6 +424,7 @@ double calculate_e2(Mtrx3x3 * restrict U) {
      *
 	 */
     double e2 = 0.0;
+
     PosIndex t;
     // Parallelizing by slicing the time extent
     #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
@@ -429,7 +440,7 @@ double calculate_e2(Mtrx3x3 * restrict U) {
 
                 divergenceA(U, position, &div_A);
                 decomposeAlgebraSU3(&div_A, &div_A_components);
-                for(SU3AlgIdx a = 1; a <= Nc * Nc -1; a++) {
+                for(SU3AlgIdx a = 1; a <= Nc * Nc - 1; a++) {
 
                     /* 	Sum of the squares of the color components 
                         of the divergence of A. */
@@ -438,6 +449,7 @@ double calculate_e2(Mtrx3x3 * restrict U) {
                 }
             }
         }
+
     return e2 / (lattice_param.volume);
 }
 

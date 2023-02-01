@@ -28,7 +28,6 @@
 #include <fields.h>
 #include <geometry.h>
 #include <SU3_ops.h>
-
 #include <types.h>
 
 extern GeometricParameters lattice_param;

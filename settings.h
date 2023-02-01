@@ -1,5 +1,5 @@
 /*
-    Sets flags related to format conversions of input/output fields.
+    Sets macros related to format conversions of input/output fields.
 
     Copyright (C) 2023  Jesuel Marques
 

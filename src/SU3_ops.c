@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <tgmath.h>
 
-#include <gauge_fixing.h> // CHANGE THIS. HERE ONLY TO USE SU3_update_sub_Los_Alamos
 #include <SU2_ops.h>
 #include <SU3_ops.h>
 #include <types.h>
