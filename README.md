@@ -222,10 +222,13 @@ The mapping between the directions and the Lorentz indices is defined in lattice
 
 So mu=0 corresponds to the spatial x direction, and so on. The indices for transversing
 the configurations, are expected to have T as the most external index, and then 
-Z, Y, X, Lorentz, color, color and then the real and imaginary parts of the matrix. 
-The configuration is read in this order. The full matrices are expected to be stored,
-and not just two lines.
+Z, Y, X, Lorentz index, color index, color index and then the real and imaginary parts 
+of the matrix. The configuration is read in this order. The full matrices are expected 
+to be stored, and not just two rows.
 
+If you need to change the mapping between mu and the directions, you currently need to 
+change the define directives. I realize this is not the most convenient and should be 
+fixed in the future.
 
 ## Not (at least currently) supported
 
@@ -244,4 +247,4 @@ In the order of priority of possible future implementation
 11. [ ] Number of dimensions different from 4
 12. [ ] Support for custom precision datatypes
 
-Error handling is not great right now, and I'll be improving this as time allows.
+Error handling is not great right now, but I intend to improve this as time allows.
