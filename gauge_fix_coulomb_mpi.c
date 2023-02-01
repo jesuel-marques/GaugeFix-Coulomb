@@ -83,7 +83,10 @@ int main(int argc, char *argv[]) {
 
 	gfix_param = initORGaugeFixingParameters(argv[5]);
 		
+	
 
+	if(!rank){
+		printf("\n%s %s %s %s %s %s\n",argv[1],argv[2],argv[3],argv[4],argv[5], argv[6]);
 		if(!validORGaugeFixingParametersQ(gfix_param) ||
 			!validGeometricParametersQ()				 ) {
 			fprintf(stderr, "Bad input.\n"
@@ -102,10 +105,6 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "Initializing gauge-fixing parameters to default instead.\n");
 			gfix_param = initParametersORDefault();
 		}
-
-	if(!rank){
-	
-		
 
 		printf("\nGauge-fixing parameters provided:\n");
 		printORGaugeFixingParameters(gfix_param);
