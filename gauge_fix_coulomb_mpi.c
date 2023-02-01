@@ -86,7 +86,6 @@ int main(int argc, char *argv[]) {
 	
 
 	if(!rank){
-		printf("\n%s %s %s %s %s %s\n",argv[1],argv[2],argv[3],argv[4],argv[5], argv[6]);
 		if(!validORGaugeFixingParametersQ(gfix_param) ||
 			!validGeometricParametersQ()				 ) {
 			fprintf(stderr, "Bad input.\n"

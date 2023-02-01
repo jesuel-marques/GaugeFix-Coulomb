@@ -1,5 +1,5 @@
 #generic parameters
-gfix_proxy:					            theta    
+gfix_proxy:					            e2    
 tolerance:					            1.0E-16
 max_sweeps_to_fix:        			50000
 estimate_sweeps_to_gf_progress:     1000
