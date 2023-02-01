@@ -80,9 +80,9 @@ int main(int argc, char *argv[]) {
 	
 	ORGaugeFixingParameters gfix_param;
 
-	if(!rank){
-	
-		initGeometry(atoi(argv[3]), atoi(argv[4]));
+	initGeometry(atoi(argv[3]), atoi(argv[4]));
+
+
 
 		if(argc == 6){
 			gfix_param = initORGaugeFixingParameters(argv[5]);
@@ -111,17 +111,23 @@ int main(int argc, char *argv[]) {
 			gfix_param = initParametersORDefault();
 		}
 
+	if(!rank){
+	
+		
+
 		printf("\nGauge-fixing parameters provided:\n");
 		printORGaugeFixingParameters(gfix_param);
 		
-		int start_config = atoi(argv[6]);
+		
+	
+
+	}
+
+	int start_config = atoi(argv[6]);
 
 		const int nconfig = atoi(argv[7]);
 		//Calculate the number of configs per rank
 		int config_per_rank = nconfig / size;
-	
-
-	}
 
 	MPI_Barrier(comm);
 
