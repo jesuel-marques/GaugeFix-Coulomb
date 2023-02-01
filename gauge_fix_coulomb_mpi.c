@@ -114,9 +114,9 @@ int main(int argc, char *argv[]) {
 		printf("\nGauge-fixing parameters provided:\n");
 		printORGaugeFixingParameters(gfix_param);
 		
-		int start_config = argv[6];
+		int start_config = atoi(argv[6]);
 
-		const int nconfig = argv[7];
+		const int nconfig = atoi(argv[7]);
 		//Calculate the number of configs per rank
 		int config_per_rank = nconfig / size;
 	
