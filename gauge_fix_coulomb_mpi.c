@@ -29,7 +29,7 @@
 #include <string.h>
 #include <tgmath.h>
 
-// #include <mpi.h>
+#include <mpi.h>
 
 #include <fields.h>
 #include <fields_io.h>
@@ -66,8 +66,6 @@ int writeSweepsToGaugefix(char * identifier,
     return 0;
 }
 
-#define MAX_CONFIGS 498
-
 int main(int argc, char *argv[]) {
 
 	//Starts MPI
@@ -79,9 +77,6 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_rank(comm, &rank);
 	//The size is the number of processes
 	MPI_Comm_size(comm, &size);
-	const int nconfig = MAX_CONFIGS;
-	//Calculate the number of configs per rank
-	int config_per_rank = nconfig / size;
 	
 	ORGaugeFixingParameters gfix_param;
 
@@ -119,6 +114,12 @@ int main(int argc, char *argv[]) {
 		printf("\nGauge-fixing parameters provided:\n");
 		printORGaugeFixingParameters(gfix_param);
 		
+		int start_config = argv[6];
+
+		const int nconfig = argv[7];
+		//Calculate the number of configs per rank
+		int config_per_rank = nconfig / size;
+	
 
 	}
 
@@ -129,13 +130,13 @@ int main(int argc, char *argv[]) {
 		int actual_config_nr = start_config + config * skip_config;
 
 
-		const char config_filename[MAX_LENGTH_NAME];
-		const char gauge_transf_filename[MAX_LENGTH_NAME];
+		char config_filename[MAX_LENGTH_NAME];
+		char gauge_transf_filename[MAX_LENGTH_NAME];
 		
 		sprintf(config_filename, "Run1_%d.cfg", actual_config_nr);
 		sprintf(config_filename, "Run1_%d_e2_%3.2E.gt", actual_config_nr, gfix_param.generic_gf.tolerance );
 
-		const Mtrx3x3 * U = allocate3x3Field(DIM * lattice_param.volume);
+		Mtrx3x3 * U = allocate3x3Field(DIM * lattice_param.volume);
 		if(U == NULL) {
 			fprintf(stderr, "Could not allocate memory for config in file %s.\n",
 							config_filename);
