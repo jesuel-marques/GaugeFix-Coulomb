@@ -139,8 +139,8 @@ int main(int argc, char *argv[]) {
 		char config_filename[MAX_LENGTH_NAME];
 		char gauge_transf_filename[MAX_LENGTH_NAME];
 		
-		sprintf(config_filename, "Run1_%d.cfg", actual_config_nr);
-		sprintf(config_filename, "Run1_%d_e2_%3.2E.gt", actual_config_nr, gfix_param.generic_gf.tolerance );
+		sprintf(config_filename, "%s/Run1_%d.cfg", argv[1], actual_config_nr);
+		sprintf(config_filename, "%s/Run1_%d_e2_%3.2E.gt", argv[2], actual_config_nr, gfix_param.generic_gf.tolerance );
 
 		Mtrx3x3 * U = allocate3x3Field(DIM * lattice_param.volume);
 		if(U == NULL) {
