@@ -114,14 +114,15 @@ int main(int argc, char *argv[]) {
 	
 
 	}
+		MPI_Barrier(comm);
 
-	int start_config = atoi(argv[6]);
-	int skip_config = atoi(argv[7]);
-		const int nconfig = atoi(argv[8]);
+
+	const int start_config = atoi(argv[6]);
+	const int skip_config = atoi(argv[7]);
+	const int nconfig = atoi(argv[8]);
 		//Calculate the number of configs per rank
-		int config_per_rank = nconfig / size;
+	int config_per_rank = nconfig / size;
 
-	MPI_Barrier(comm);
 
 	for (int config = rank ; config < nconfig; config += size) {
 
