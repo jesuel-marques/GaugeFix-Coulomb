@@ -170,19 +170,9 @@ int main(int argc, char *argv[]) {
 			return EXIT_FAILURE;
 		}
 
-		printf("F before: %lf\n", calculateF(U));
-		printf("Average trace of spatial plaquettes before gauge transformation:"
-				" %.10lf\n", averagePlaquette(U, "spatial"));
-		printf("Average trace of temporal plaquettes before gauge transformation:"
-				" %.10lf\n", averagePlaquette(U, "temporal"));
-
 		//  fix the gauge
 		int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
-		printf("Average trace of spatial plaquettes after gauge transformation: %.10lf\n", 
-															averagePlaquette(U, "spatial"));
-		printf("Average trace of temporal plaquettes after gauge transformation: %.10lf\n", 
-														averagePlaquette(U, "temporal"));
-		printf("F after: %lf\n", calculateF(U));
+		
 		if(sweeps < 0) {
 			free(U);
 			free(G);
@@ -214,14 +204,6 @@ int main(int argc, char *argv[]) {
 					gfix_param.generic_gf.gfix_proxy(U));
 			writeSweepsToGaugefix(config_filename, sweeps);
 		}
-
-	// write the gauge fixed configuration to file
-	// if(writeConfig(U, strcat(config_filename, "fixed"))) {
-	// 	fprintf(stderr, "Fixed config writing failed for config %s.\n", config_filename);
-	// }
-	// else{
-	// 	printf("U fixed written for config %s.\n", config_filename);
-	// }
 
 		free(U);		//	Free memory allocated for the configuration.
 
