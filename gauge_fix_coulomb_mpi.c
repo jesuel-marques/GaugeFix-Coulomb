@@ -124,8 +124,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	int start_config = atoi(argv[6]);
-
-		const int nconfig = atoi(argv[7]);
+	int skip_config = atoi(argv[7]);
+		const int nconfig = atoi(argv[8]);
 		//Calculate the number of configs per rank
 		int config_per_rank = nconfig / size;
 
