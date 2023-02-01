@@ -23,7 +23,7 @@
 #ifndef GAUGEFIXING_H
 #define GAUGEFIXING_H
 
-#include <lattice.h>
+#include <geometry.h>
 #include <types.h>
 #include <SU3_ops.h>
 

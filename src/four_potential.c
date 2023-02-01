@@ -24,9 +24,9 @@
 #include <stdio.h>
 
 #include <fields.h>
-#include <flags.h>
+#include <../settings.h>
 #include <four_potential.h>
-#include <lattice.h>
+#include <geometry.h>
 #include <SU3_ops.h>
 #include <types.h>
 

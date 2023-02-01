@@ -275,7 +275,7 @@ src/measurement.c:
 #  Modification time never checked.
 #  File has not been updated.
 
-build/SU3_ops.o: src/SU3_ops.c include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h
+build/SU3_ops.o: src/SU3_ops.c include/math_ops.h include/geometry.h include/SU3_parameters.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -318,7 +318,7 @@ src/fields_io.c:
 #  Modification time never checked.
 #  File has not been updated.
 
-build/lattice.o: src/lattice.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/lattice.h include/SU3_ops.h include/gauge_fixing.h
+build/lattice.o: src/lattice.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/geometry.h include/SU3_ops.h include/gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -337,7 +337,7 @@ build/lattice.d:
 #  File has been updated.
 #  Successfully updated.
 
-build/gauge_fixing.o: src/gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/lattice.h include/math_ops.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h include/four_potential.h
+build/gauge_fixing.o: src/gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/geometry.h include/math_ops.h include/SU2_ops.h include/SU3_ops.h include/gauge_fixing.h include/four_potential.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -355,7 +355,7 @@ clean:
 #  recipe to execute (from 'Makefile', line 38):
 	rm -f $(BINARIES) $(BUILD_DIR)/*.[od] *~ */*~ 
 
-build/SU2_ops.o: src/SU2_ops.c Makefile src/SU2_ops.c include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h
+build/SU2_ops.o: src/SU2_ops.c Makefile src/SU2_ops.c include/math_ops.h include/geometry.h include/SU3_parameters.h include/SU2_ops.h
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'SU2_ops'
 #  Last modified 2022-08-22 18:32:31.539391279
@@ -368,13 +368,13 @@ build/SU2_ops.o: src/SU2_ops.c Makefile src/SU2_ops.c include/math_ops.h include
 # automatic
 # < := src/SU2_ops.c
 # automatic
-# + := src/SU2_ops.c Makefile src/SU2_ops.c include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h
+# + := src/SU2_ops.c Makefile src/SU2_ops.c include/math_ops.h include/geometry.h include/SU3_parameters.h include/SU2_ops.h
 # automatic
 # % := 
 # automatic
-# ^ := src/SU2_ops.c Makefile include/math_ops.h include/lattice.h include/SU3_parameters.h include/SU2_ops.h
+# ^ := src/SU2_ops.c Makefile include/math_ops.h include/geometry.h include/SU3_parameters.h include/SU2_ops.h
 # automatic
-# ? := include/lattice.h
+# ? := include/geometry.h
 # automatic
 # | := 
 # variable set hash-table stats:
@@ -421,7 +421,7 @@ src/integpoly_gauge_fixing.c:
 #  Modification time never checked.
 #  File has not been updated.
 
-build/measurement.o: src/measurement.c include/SU3_parameters.h include/lattice.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
+build/measurement.o: src/measurement.c include/SU3_parameters.h include/geometry.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -453,7 +453,7 @@ include/SU3_parameters.h:
 #  File has been updated.
 #  Successfully updated.
 
-build/fields_io.o: src/fields_io.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/lattice.h include/SU3_ops.h include/gauge_fixing.h
+build/fields_io.o: src/fields_io.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/geometry.h include/SU3_ops.h include/gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -519,7 +519,7 @@ include/math_ops.h:
 #  File has been updated.
 #  Successfully updated.
 
-include/lattice.h:
+include/geometry.h:
 #  Implicit rule search has been done.
 #  Last modified 2022-08-23 18:24:45.058719121
 #  File has been updated.
@@ -537,7 +537,7 @@ build/four_potential.d:
 #  File has been updated.
 #  Successfully updated.
 
-build/four_potential.o: src/four_potential.c include/SU3_parameters.h include/lattice.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
+build/four_potential.o: src/four_potential.c include/SU3_parameters.h include/geometry.h include/SU3_ops.h include/SU2_ops.h include/gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -552,7 +552,7 @@ gauge_fix_coulomb: build/SU2_ops.o build/SU3_ops.o build/fields_io.o build/conve
 #  recipe to execute (from 'Makefile', line 27):
 	$(CC) -o $@ $@.c $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
 
-build/integpoly_gauge_fixing.o: src/integpoly_gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU3_ops.h include/lattice.h include/SU2_ops.h include/gauge_fixing.h include/integpoly_gauge_fixing.h
+build/integpoly_gauge_fixing.o: src/integpoly_gauge_fixing.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU3_ops.h include/geometry.h include/SU2_ops.h include/gauge_fixing.h include/integpoly_gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.

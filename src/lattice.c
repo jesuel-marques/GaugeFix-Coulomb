@@ -23,8 +23,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <flags.h>
-#include <lattice.h>
+#include <../settings.h>
+#include <geometry.h>
 #include <SU3_ops.h>
 #include <types.h>
 

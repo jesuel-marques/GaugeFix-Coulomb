@@ -32,9 +32,8 @@
 #include <fields.h>
 #include <fields_io.h>
 #include <gauge_fixing.h>	
-#include <lattice.h>
+#include <geometry.h>
 #include <measurement.h>
-#include <misc.h>
 #include <SU3_ops.h>
 
 #define MAX_LENGTH_NAME 100
@@ -100,7 +99,7 @@ int main(int argc, char *argv[]) {
 		gfix_param = initParametersORDefault();
 	}
 
-	printf("\nGauge-fixing parameters that will be used:\n");
+	printf("\nGauge-fixing parameters provided:\n");
 	printORGaugeFixingParameters(gfix_param);
 	
 	const Mtrx3x3 * U = allocate3x3Field(DIM * lattice_param.volume);
@@ -138,12 +137,16 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	printf("Spatial plaquette before gauge transformation: %.10lf\n", averageSpatialPlaquette(U));
-	printf("Temporal plaquette before gauge transformation: %.10lf\n", averageTemporalPlaquette(U));
+	printf("Average trace of spatial plaquettes before gauge transformation: %.10lf\n", 
+													    averagePlaquette(U, "spatial"));
+	printf("Average trace of temporal plaquettes before gauge transformation: %.10lf\n", 
+													   averagePlaquette(U, "temporal"));
 	//  fix the gauge
 	int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
-	printf("Spatial plaquette after gauge transformation: %.10lf\n", averageSpatialPlaquette(U));
-	printf("Temporal plaquette after gauge transformation: %.10lf\n", averageTemporalPlaquette(U));
+	printf("Average trace of spatial plaquettes after gauge transformation: %.10lf\n", 
+														averagePlaquette(U, "spatial"));
+	printf("Average trace of temporal plaquettes after gauge transformation: %.10lf\n", 
+													   averagePlaquette(U, "temporal"));
 
 	if(sweeps < 0) {
 		free(U);

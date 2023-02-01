@@ -25,9 +25,8 @@
 #include <convert_precision_io.h>
 #include <fields.h>
 #include <fields_io.h>
-#include <flags.h>
-#include <lattice.h>
-#include <misc.h>
+#include <../settings.h>
+#include <geometry.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>

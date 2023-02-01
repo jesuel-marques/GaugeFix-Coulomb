@@ -23,9 +23,9 @@
 #ifndef FIELDS_IO_H
 #define FIELDS_IO_H
 
-#include <flags.h>
+#include <../settings.h>
 #include <types_io.h>
-#include <lattice.h>
+#include <geometry.h>
 
 InGTMtrx  *getGaugetransfIn (InGTMtrx  * restrict G_in,  
                                const PosVec position);

@@ -51,12 +51,12 @@ you can do so by leaving the line
 ```
 #define NEED_BYTE_SWAP_IN
 ```
-uncommented in include/flags.h. You can also change the endianess of an output 
+uncommented in settings.h. You can also change the endianess of an output 
 configuration if you leave
 ```
 #define NEED_BYTE_SWAP_OUT
 ```
-uncommented in include/flags.h. 
+uncommented in settings.h before compiling. 
 
 You cannot change the endianness of the gauge-transformation, neither for input or 
 output.
@@ -68,13 +68,13 @@ single precision, leave the line
 ```
 #define CONV_CFG_TO_WORKING_PRECISION
 ```
-uncommented in include/flags.h. 
+uncommented in settings.h before compiling. 
 
 If you want output configurations to be written in float, leave 
 ```
 #define CONV_CFG_FROM_WORKING_PRECISION
 ```
-uncommented in include/flags.h. 
+uncommented in settings.h before compiling. 
 
 If you want to input or output gauge-fixing transformations, also leave the following 
 lines commented or uncommented as appropriate:
@@ -211,7 +211,8 @@ surprisingly close to 2.
 
 ## More on the format
 
-The mapping between the directions and the Lorentz indices is defined in lattice.h.
+The mapping between the directions and the Lorentz indices is defined in settings.h 
+before compiling.
 
 ```
 #define X_INDX 0

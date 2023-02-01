@@ -7,6 +7,6 @@ hostfile
 *.txt
 *.cfg
 *.o
-build/*.o
+*.o
 *.d
 build

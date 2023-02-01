@@ -24,7 +24,7 @@
 #ifndef FOURVECTORFIELD_H
 #define FOURVECTORFIELD_H
 
-#include <lattice.h>
+#include <geometry.h>
 #include <SU3_ops.h>
 
 void calculateA (Mtrx3x3 * restrict U, 

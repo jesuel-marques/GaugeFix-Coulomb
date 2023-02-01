@@ -24,10 +24,9 @@
 #include <convert_precision_io.h>
 #include <fields.h>
 #include <fields_io.h>
-#include <flags.h>
+#include <../settings.h>
 #include <types_io.h>
-#include <lattice.h>
-#include <misc.h>
+#include <geometry.h>
 #include <SU3_ops.h>
 #include <types.h>
 
@@ -185,7 +184,7 @@ void convertCfg_in_work(InCfgMtrx * restrict U_in,
      * 
      * Macros:
 	 * ======
-     * LOOP_TEMPORAL_PARALLEL, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ.
+     * LOOP_TEMPORAL, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ.
      * 
      * Global Variables:
      * ================
@@ -201,7 +200,8 @@ void convertCfg_in_work(InCfgMtrx * restrict U_in,
      */
 
     PosIndex t;
-    LOOP_TEMPORAL_PARALLEL(t) {
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+    LOOP_TEMPORAL(t) {
         PosVec position;
         position.pos[T_INDX] = t;
         LOOP_SPATIAL(position) {
@@ -229,7 +229,7 @@ void convertCfg_work_out(Mtrx3x3Work * restrict U_work, OutCfgMtrx * restrict U_
      * 
      * Macros:
 	 * ======
-     * LOOP_TEMPORAL_PARALLEL, LOOP_SPATIAL, LOOP_LORENTZ.
+     * LOOP_TEMPORAL, LOOP_SPATIAL, LOOP_LORENTZ.
      * 
      * Global Variables:
      * ================
@@ -245,7 +245,8 @@ void convertCfg_work_out(Mtrx3x3Work * restrict U_work, OutCfgMtrx * restrict U_
      */
 
     PosIndex t;
-    LOOP_TEMPORAL_PARALLEL(t) {
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+    LOOP_TEMPORAL(t) {
         PosVec position;
         position.t = t;
         LOOP_SPATIAL(position) {
@@ -275,7 +276,7 @@ void convertCfg_work_out(Mtrx3x3Work * restrict U_work, OutCfgMtrx * restrict U_
      *
      * Macros:
 	 * ======
-     * LOOP_TEMPORAL_PARALLEL, LOOP_SPATIAL.
+     * LOOP_TEMPORAL, LOOP_SPATIAL.
      * 
      * Global Variables:
      * ================
@@ -292,7 +293,8 @@ void convertCfg_work_out(Mtrx3x3Work * restrict U_work, OutCfgMtrx * restrict U_
      */
 
     PosIndex t;
-    LOOP_TEMPORAL_PARALLEL(t) {
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+    LOOP_TEMPORAL(t) {
         PosVec position;
         position.t = t;
         LOOP_SPATIAL(position) {
@@ -320,7 +322,7 @@ void convertGT_work_out(Mtrx3x3Work  *G_work,
      *
      * Macros:
 	 * ======
-     * LOOP_TEMPORAL_PARALLEL, LOOP_SPATIAL.
+     * LOOP_TEMPORA, LOOP_SPATIAL.
      * 
      * Global Variables:
      * ================
@@ -337,7 +339,8 @@ void convertGT_work_out(Mtrx3x3Work  *G_work,
      */
 
     PosIndex t;
-    LOOP_TEMPORAL_PARALLEL(t) {
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+    LOOP_TEMPORAL(t) {
         PosVec position;
         position.t = t;
         LOOP_SPATIAL(position) {

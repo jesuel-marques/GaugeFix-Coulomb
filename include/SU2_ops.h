@@ -54,6 +54,7 @@ typedef struct {
 /* used to loop through color indices for 2x2 matrices */
 #define LOOP_2X2(a, b)  for(a = 0; a < 2; a++)  \
                         for(b = 0; b < 2; b++)
+ 
 
 //  void printMtrx2x2(const Mtrx2x2 * restrict u, 
 //                     const char *name, 

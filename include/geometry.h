@@ -21,27 +21,14 @@
     
  */
 
-#ifndef LATTICE_H
-#define LATTICE_H
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 #include <stdbool.h>
 
-#include <flags.h>
-#include <misc.h>
+#include <../settings.h>
+#include <../settings.h>
 #include <types.h>
 
-/*   Space-time lattice dimension */
-#define DIM 4
-
-/*  Associations between the numeric indices and the lorentz directions */
-// #define X_INDX 0
-// #define Y_INDX 1
-// #define Z_INDX 2
-// #define T_INDX 3
-
-#define T_INDX 0
-#define Z_INDX 1
-#define Y_INDX 2
-#define X_INDX 3
 
 #if Z_INDX < X_INDX 
     #define LOWEST_SPATIAL_INDEX Z_INDX
@@ -51,8 +38,8 @@
     #define HIGHEST_SPATIAL_INDEX Z_INDX
 #endif
 
-
-
+/*   Space-time lattice dimension */
+#define DIM 4
 
 /* Test to decide if position is odd */
 #define POSITION_IS_ODD(position)    (((position.pos[X_INDX]) ^ \
@@ -79,12 +66,7 @@
 /* Shortening for the loops in all spatial coordinate */                                              
 #define LOOP_SPATIAL(position) LOOP_SPATIAL_DIR(position, Z_INDX)  \
                                LOOP_SPATIAL_DIR(position, Y_INDX)  \
-                               LOOP_SPATIAL_DIR(position, X_INDX)
-
-/* Shortening for the loops in temporal coordinates.  
-   Parallelizing by slicing the time extent */
-#define LOOP_TEMPORAL_PARALLEL(t) OMP_PARALLEL_FOR \                                
-                                  LOOP_TEMPORAL(t)                           
+                               LOOP_SPATIAL_DIR(position, X_INDX)                         
 
 /* Shortening for the loop in Lorentz indices */
 #define LOOP_LORENTZ(mu) for(mu = 0; mu < DIM; mu++)  
@@ -152,4 +134,4 @@ void printPosVec(const PosVec u);
 
 PosVec getNeighbour(PosVec position, LorentzIdx mu, Direction dir);
 
-#endif  //LATTICE_H
+#endif  //GEOMETRY_H

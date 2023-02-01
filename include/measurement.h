@@ -26,7 +26,6 @@
 
 #include <SU3_ops.h>
 
-Scalar averageSpatialPlaquette (Mtrx3x3 * U),
-       averageTemporalPlaquette(Mtrx3x3 * U);
+Scalar averagePlaquette(Mtrx3x3 * restrict U, char * type);
 
 #endif  //MEASUREMENT_H

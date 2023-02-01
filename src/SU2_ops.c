@@ -23,10 +23,8 @@
 #include <stdio.h>
 #include <tgmath.h>
 
-#include <misc.h>
 #include <SU2_ops.h>
 #include <types.h>
-
 
 // All matrices are in the Cayley-Klein representation
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
@@ -192,7 +190,6 @@ inline Scalar determinant2x2(const Mtrx2x2CK * restrict u) {
      * 
      * Macros:
 	 * ======
-     * POW2,
      * LOOP_2_CK.
      * 
      * Global Variables:
@@ -212,7 +209,7 @@ inline Scalar determinant2x2(const Mtrx2x2CK * restrict u) {
     MtrxIdx2 a;
     LOOP_2_CK(a) {
 
-        det_u += POW2(u -> m[a]);
+        det_u += (u -> m[a]) * (u -> m[a]);
         //	In the Cayley-Klein representation, the determinant
         //	is the sum of the squares of the components.
 

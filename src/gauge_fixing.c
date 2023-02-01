@@ -29,11 +29,10 @@
 #include <omp.h>
 
 #include <fields.h>
-#include <flags.h>
+#include <../settings.h>
 #include <four_potential.h>
 #include <gauge_fixing.h>
-#include <lattice.h>
-#include <misc.h>
+#include <geometry.h>
 #include <SU3_ops.h>
 #include <types.h>
 
@@ -299,7 +298,7 @@ double calculateF(Mtrx3x3 * restrict U) {
      * Macros:
 	 * ======
      * Nc
-     * DIM, LOOP_TEMPORAL_PARALLEL, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, T_INDX.
+     * DIM, LOOP_TEMPORA, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, T_INDX.
      * 
      * Global Variables:
      * ================
@@ -397,7 +396,6 @@ double calculate_e2(Mtrx3x3 * restrict U) {
      * 
      * Macros:
 	 * ======
-     * POW2,
      * Nc,
      * NUM_THREADS,
      * LOOP_TEMPORAL, LOOP_SPATIAL, T_INDX.
@@ -423,8 +421,6 @@ double calculate_e2(Mtrx3x3 * restrict U) {
             Mtrx3x3 div_A;
             MtrxSU3Alg div_A_components;
 
-            double e2_slice = 0.0;
-
             PosVec position;
 
             position.pos[T_INDX] = t;
@@ -433,15 +429,14 @@ double calculate_e2(Mtrx3x3 * restrict U) {
 
                 divergenceA(U, position, &div_A);
                 decomposeAlgebraSU3(&div_A, &div_A_components);
-                for(SU3AlgIdx a = 1; a <= POW2(Nc)-1; a++) {
+                for(SU3AlgIdx a = 1; a <= Nc * Nc -1; a++) {
 
                     /* 	Sum of the squares of the color components 
                         of the divergence of A. */
-                    e2_slice += POW2(div_A_components.m[a]);
+                    e2 += (div_A_components.m[a]) * (div_A_components.m[a]);
 
                 }
             }
-            e2 += e2_slice;
         }
     return e2 / (lattice_param.volume);
 }
@@ -730,7 +725,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
      * 
      * Macros:
 	 * ======
-     * OMP_PARALLEL_FOR, LOOP_SPATIAL, 
+     * LOOP_SPATIAL, 
      * BLACKRED_SWEEP, MAX_SWEEPS_TO_FIX, SWEEPS_TO_REUNITARIZATION
      * 
      * Global Variables:
@@ -775,7 +770,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
     
     while(new_res > gfix_param.generic_gf.tolerance) {
         // Parallelizing by slicing the time extent
-        OMP_PARALLEL_FOR
+        #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
             for(PosIndex t = 0; t < lattice_param.n_T; t++) {
                 PosVec position;
                 position.pos[T_INDX] = t;

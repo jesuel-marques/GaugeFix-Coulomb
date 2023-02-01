@@ -24,9 +24,8 @@
 #include <stdlib.h>
 
 #include <fields.h>
-#include <flags.h>
-#include <lattice.h>
-#include <misc.h>
+#include <../settings.h>
+#include <geometry.h>
 #include <SU3_ops.h>
 
 #include <types.h>
@@ -93,7 +92,7 @@ int setFieldToIdentity(const Mtrx3x3 * restrict field, unsigned elements) {
         return -2;
     }
 
-    OMP_PARALLEL_FOR
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
     for(int i = 0; i < elements; i++)
         setIdentity3x3(field + i);
     
@@ -112,7 +111,6 @@ int copyField(const Mtrx3x3 * restrict field,
 	 *
 	 * Macros:
 	 * ======
-     * OMP_PARALLEL_FOR.
      * 
      * Global Variables:
      * ================
@@ -135,7 +133,7 @@ int copyField(const Mtrx3x3 * restrict field,
         return -2;
     }
 
-    OMP_PARALLEL_FOR
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
     for(int i = 0; i < elements; i++)
         copy3x3(field + i, field_copy + i);
 
@@ -390,7 +388,7 @@ void applyGaugeTransformationU(Mtrx3x3 * restrict U,
      * 
      * Macros:
      * ======
-     * LOOP_TEMPORAL_PARALLEL, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ.
+     * LOOP_TEMPORAL, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ.
      * 
      * Global Variables:
      * ================
@@ -406,7 +404,9 @@ void applyGaugeTransformationU(Mtrx3x3 * restrict U,
 	 */
 
     PosIndex t;
-    LOOP_TEMPORAL_PARALLEL(t) {
+
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+    LOOP_TEMPORAL(t) {
         Mtrx3x3 * g;
         Mtrx3x3 * u;
         Mtrx3x3 u_updated;

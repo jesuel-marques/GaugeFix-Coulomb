@@ -21,11 +21,12 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <omp.h>
 
 #include <fields.h>
-#include <lattice.h>
+#include <geometry.h>
 #include <SU3_ops.h>
 
 #include <types.h>
@@ -35,7 +36,7 @@ extern GeometricParameters lattice_param;
 /* Calculates the trace of a specified plaquette. */
 Scalar TrPlaquette(Mtrx3x3 * restrict U, 
                    const PosVec position, 
-                   const LorentzIdx mu, 
+                   const LorentzIdx mu,
                    const LorentzIdx nu) {
 
     /*
@@ -70,10 +71,10 @@ Scalar TrPlaquette(Mtrx3x3 * restrict U,
 
     const PosVec position_plus_mu = getNeighbour(position, mu, FRONT);
 
-    getLinkMatrix(U,              position,                     mu, FRONT, &ua);
-    getLinkMatrix(U,              position_plus_mu,             nu, FRONT, &ub);
-    getLinkMatrix(U, getNeighbour(position_plus_mu, nu, FRONT), mu, REAR , &uc);
-    getLinkMatrix(U, getNeighbour(position,         nu, FRONT), nu, REAR , &ud);
+    getLinkMatrix(U, position, mu, FRONT, &ua);
+    getLinkMatrix(U, position_plus_mu, nu, FRONT, &ub);
+    getLinkMatrix(U, getNeighbour(position_plus_mu, nu, FRONT), mu, REAR, &uc);
+    getLinkMatrix(U, getNeighbour(position, nu, FRONT), nu, REAR , &ud);
 
 	prodFour3x3(&ua, &ub, &uc, &ud, &plaquette);
 
@@ -81,8 +82,29 @@ Scalar TrPlaquette(Mtrx3x3 * restrict U,
 
 }
 
-/* Calculates the average of the spatial plaquettes for a SU(3) field. */
-Scalar averageSpatialPlaquette(Mtrx3x3 * restrict U) {
+Scalar averagePlaquettegeneric(Mtrx3x3 * U, LorentzIdx mu, LorentzIdx nu){
+
+    //  Calculates the spatial plaquette average
+    Scalar plaq_ave = 0.0;
+    
+    // Parallelizing by slicing the time extent
+    #pragma omp parallel for reduction (+:plaq_ave) \
+            num_threads(NUM_THREADS) schedule(dynamic) 
+        for(PosIndex t = 0; t < lattice_param.n_T; t++) {
+            PosVec position;
+            position.pos[T_INDX] = t;
+
+            LOOP_SPATIAL(position) {                
+                plaq_ave += TrPlaquette(U, position, mu, nu);                                    
+            }
+        }
+
+    plaq_ave /= ((double) lattice_param.volume);
+
+    return plaq_ave;
+}
+
+Scalar averagePlaquette(Mtrx3x3 * restrict U, char * type) {
 
     /*
 	 * Calls:
@@ -105,8 +127,8 @@ Scalar averageSpatialPlaquette(Mtrx3x3 * restrict U) {
      * 
 	 * Returns:
 	 * =======
-     * The average trace of the spatial plaquettes of the gluon field 
-     * as a double precision complex number.
+     * The average trace of the plaquettes of the gluon field as a double precision 
+     * complex number.
 	 * 
      */
 
@@ -114,92 +136,19 @@ Scalar averageSpatialPlaquette(Mtrx3x3 * restrict U) {
         fprintf(stderr, "Error in geometric parameters\n");
     }
 
-    //  Calculates the spatial plaquette average
-    Scalar plaq_ave = 0.0;
-    
-    // Parallelizing by slicing the time extent
-    #pragma omp parallel for reduction (+:plaq_ave) \
-            num_threads(NUM_THREADS) schedule(dynamic) 
-        for(PosIndex t = 0; t < lattice_param.n_T; t++) {
-
-            PosVec position;
-
-            position.pos[T_INDX] = t;
-            Scalar plaq_ave_slice = 0.0;
-
-            LOOP_SPATIAL(position) {
-                LorentzIdx i, j;
-                LOOP_LORENTZ_SPATIAL(i) {
-                    LOOP_LORENTZ_SPATIAL(j){
-                        if(i < j) {
-                            plaq_ave_slice += TrPlaquette(U, position, i, j);                                    
-                        }
-                    }
-                }
-            }
-            plaq_ave += plaq_ave_slice;
+    double average = 0.0;
+    unsigned short count = 0;
+    if(!strcmp(type, "total") || !strcmp(type, "temporal")){
+        LorentzIdx i;
+        LOOP_LORENTZ_SPATIAL(i){
+            average += averagePlaquettegeneric(U, T_INDX, i); count++;
         }
-    plaq_ave /= ((DIM - 1.0) * lattice_param.volume);
-
-    return plaq_ave;
-}
-
-/* Calculates the average of the temporal plaquettes for a SU(3) field. */
-Scalar averageTemporalPlaquette(Mtrx3x3 * restrict U) {
-
-    /*
-	 * Calls:
-	 * =====
-     * fprintf,
-     * validGeometricParametersQ,
-     * TrPlaquette.
-	 *
-	 * Macros:
-	 * ======
-     * NUM_THREADS, LOOP_TEMPORAL, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, DIM.
-     * 
-     * Global Variables:
-     * ================
-     * lattice_param.
-     * 
-	 * Parameters:
-	 * ==========
-     * Mtrx3x3 *  U:        SU(3) gluon field.
-     * 
-	 * Returns:
-	 * =======
-     * The average trace of the temporal plaquettes of the gluon field 
-     * as a double precision complex number.
-	 * 
-     */
-    
-    if(!validGeometricParametersQ()) {
-        fprintf(stderr, "Error in geometric parameters\n");
+    }
+    if(!strcmp(type, "total") || !strcmp(type, "spatial")){
+        average += averagePlaquettegeneric(U, X_INDX, Y_INDX); count++;
+        average += averagePlaquettegeneric(U, X_INDX, Z_INDX); count++;
+        average += averagePlaquettegeneric(U, Y_INDX, Z_INDX); count++;
     }
 
-    Scalar plaq_ave = 0.0;
-    PosIndex t;
-    // Parallelizing by slicing the time extent 
-    #pragma omp parallel for reduction (+:plaq_ave) \
-            num_threads(NUM_THREADS) schedule(dynamic) 
-        LOOP_TEMPORAL(t) {
-
-            PosVec position;
-
-            position.pos[T_INDX] = t;
-            Scalar plaq_ave_slice = 0.0;
-
-            LOOP_SPATIAL(position) {
-                LorentzIdx mu;
-                LOOP_LORENTZ_SPATIAL(mu) {
-                    plaq_ave_slice += TrPlaquette(U, position, T_INDX, mu);
-                }
-            }
-
-            plaq_ave += plaq_ave_slice;
-
-        }
-    plaq_ave /= ((DIM - 1.0) * lattice_param.volume);
-
-    return plaq_ave;
+    return average / (double) count;
 }

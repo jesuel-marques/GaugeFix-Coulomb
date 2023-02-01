@@ -24,7 +24,6 @@
 #include <tgmath.h>
 
 #include <gauge_fixing.h> // CHANGE THIS. HERE ONLY TO USE SU3_update_sub_Los_Alamos
-#include <misc.h>
 #include <SU2_ops.h>
 #include <SU3_ops.h>
 #include <types.h>
@@ -933,7 +932,7 @@ inline static int normalize3Vec(Vec3 * restrict v) {
     LOOP_3(a) {
         //  Calculates the sum of the absolute
         //  value squared of each component
-        r += POW2(fabs(v -> m[a]));
+        r += (fabs(v -> m[a])) * (fabs(v -> m[a]));
 
     }
     if(r != 0) {
@@ -964,7 +963,6 @@ inline static void crossproductConj(Vec3 u,
      * 
      * Macros:
 	 * ======
-     * POW2, 
      * LOOP_3.
      * 
      * Global Variables:

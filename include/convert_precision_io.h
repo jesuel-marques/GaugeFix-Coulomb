@@ -25,9 +25,9 @@
 #define  CONVERT_PRECISION_IO_H
 
 
-#include <flags.h>
+#include <../settings.h>
 #include <types_io.h>
-#include <lattice.h>
+#include <geometry.h>
 #include <types.h>
 #include <SU3_ops.h>
 

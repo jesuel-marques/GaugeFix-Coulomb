@@ -23,7 +23,7 @@
 #ifndef TYPES_IO_H
 #define TYPES_IO_H
 
-#include <flags.h>
+#include <../settings.h>
 #include <SU3_ops.h>
 #include <tgmath.h>
 #include <types.h>

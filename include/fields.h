@@ -23,8 +23,8 @@
 #ifndef FIELDS_H
 #define FIELDS_H
 
-#include <flags.h>
-#include <lattice.h>
+#include <../settings.h>
+#include <geometry.h>
 #include <SU3_ops.h>
 #include <types.h>
 
