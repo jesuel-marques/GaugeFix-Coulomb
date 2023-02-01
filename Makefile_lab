@@ -4,7 +4,7 @@ BUILD_DIR := build
  
 RM = rm -f
 CC := mpiicc
-CFLAGS := -I$(INCLUDE_DIR) -lm -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp -DMPI_CODE -DNUM_THREADS=`nproc`
+CFLAGS := -I$(INCLUDE_DIR) -lm -O3 -ipo -xHASWELL -axSKYLAKE,CASCADELAKE,TIGERLAKE -qopt-zmm-usage=high -qopenmp -DMPI_CODE -DNUM_THREADS=`nproc` -diag-disable=10441
 
 WARNINGS:= -Wall -Wextra
 

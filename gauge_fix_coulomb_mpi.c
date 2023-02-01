@@ -45,7 +45,6 @@ int writeSweepsToGaugefix(char * identifier,
 	
 	if(!validGeometricParametersQ()) {
 		fprintf(stderr, "Error in geometric parameters\n");
-		exit(EXIT_FAILURE);
     }
 
 	char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
