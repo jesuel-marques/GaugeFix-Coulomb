@@ -38,7 +38,7 @@
 #include <measurement.h>
 #include <SU3_ops.h>
 
-#define MAX_LENGTH_NAME 100
+#define MAX_LENGTH_NAME 1000
 
 int writeSweepsToGaugefix(char * identifier,
                           int sweeps) {
@@ -82,17 +82,10 @@ int main(int argc, char *argv[]) {
 
 	initGeometry(atoi(argv[3]), atoi(argv[4]));
 
+	gfix_param = initORGaugeFixingParameters(argv[5]);
+		
 
-
-		if(argc == 6){
-			gfix_param = initORGaugeFixingParameters(argv[5]);
-		}
-		else{
-			gfix_param = initORGaugeFixingParameters(" ");
-		}
-
-		if((argc != 6 && argc != 5) 				   || 
-			!validORGaugeFixingParametersQ(gfix_param) ||
+		if(!validORGaugeFixingParametersQ(gfix_param) ||
 			!validGeometricParametersQ()				 ) {
 			fprintf(stderr, "Bad input.\n"
 							"Usage: Input config filename, gt filename, n_SPC, n_T, "
@@ -146,13 +139,11 @@ int main(int argc, char *argv[]) {
 		if(U == NULL) {
 			fprintf(stderr, "Could not allocate memory for config in file %s.\n",
 							config_filename);
-			return EXIT_FAILURE;
 		}
 
 		if(loadConfig(U, config_filename)) {
 			fprintf(stderr, "Loading of file %s failed.\n", config_filename);
 			free(U);
-			return EXIT_FAILURE;
 		}
 		else{
 			printf("Config from file %s loaded.\n", config_filename);
@@ -165,7 +156,6 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "Configuration in file %s could not be reunitarized.\n",
 							config_filename);
 			free(U);
-			return EXIT_FAILURE;
 		}
 
 		Mtrx3x3 * G = allocate3x3Field(lattice_param.volume);
@@ -173,8 +163,7 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "Could not allocate memory for gauge transformation " 
 							"for file %s.\n",
 							config_filename);
-			free(U);
-			return EXIT_FAILURE;
+			free(U);			
 		}
 
 		//  fix the gauge
@@ -200,7 +189,6 @@ int main(int argc, char *argv[]) {
 					break;
 			}
 			
-			return EXIT_FAILURE;		
 		}
 
 		//	Record the effort to gauge-fix
