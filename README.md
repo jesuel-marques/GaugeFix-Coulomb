@@ -187,7 +187,7 @@ know how to maximize this global functional, we must resort to a local maximizat
 The first step of the algorithm has to do with this local maximization. At each lattice 
 site, we should find g, an SU(3) matrix, which maximizes
 
-Re Tr [g.w].
+Re Tr [g.w], where w is given.
 
 For SU(3) this is done via an interactive procedure. The max_hits is the numbers of 
 iterations in this process. If you want to get closer to the local maximum, you need to 
