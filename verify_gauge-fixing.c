@@ -148,8 +148,7 @@ int main(int argc, char *argv[]) {
 
 		double residue = gfix_param.generic_gf.gfix_proxy(U);
 		if(residue > gfix_param.generic_gf.tolerance)
-			fprintf(stderr, "WARNING: CONFIG %s not fixed\n", config_filename );
-		
+			fprintf(stderr, "WARNING: CONFIG %s not fixed. residue: %3.2E\n", config_filename, residue );
 		
 		free(U);		//	Free memory allocated for the configuration.		
 		free(G);		//	Free memory allocated for gauge transformation.
