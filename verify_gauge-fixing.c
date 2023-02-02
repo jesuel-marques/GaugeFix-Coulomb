@@ -40,31 +40,6 @@
 
 #define MAX_LENGTH_NAME 1000
 
-int writeSweepsToGaugefix(char * identifier,
-                          int sweeps) {
-	
-	if(!validGeometricParametersQ()) {
-		fprintf(stderr, "Error in geometric parameters\n");
-    }
-
-	char filename_sweeps_to_gaugefix[MAX_LENGTH_NAME];
-	sprintf(filename_sweeps_to_gaugefix, "sweeps_to_gaugefix_%dx%d.txt", 
-									     lattice_param.n_SPC, 
-									     lattice_param.n_T);
-    FILE* sweeps_to_gaugefix;
-
-    if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "a+")) == NULL) {
-        fprintf(stderr, "Error opening file %s to record sweeps needed to gaugefix.\n", 
-                        filename_sweeps_to_gaugefix);
-        return -1;
-    }
-    else{
-        fprintf(sweeps_to_gaugefix, "%s\t%d\n", identifier, sweeps);
-        fclose(sweeps_to_gaugefix);
-    }
-    return 0;
-}
-
 int main(int argc, char *argv[]) {
 
 	//Starts MPI
@@ -76,7 +51,6 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_rank(comm, &rank);
 	//The size is the number of processes
 	MPI_Comm_size(comm, &size);
-	
 	ORGaugeFixingParameters gfix_param;
 
 	initGeometry(atoi(argv[3]), atoi(argv[4]));
@@ -85,7 +59,7 @@ int main(int argc, char *argv[]) {
 		
 	if(!rank){
 		if(!validORGaugeFixingParametersQ(gfix_param) ||
-			!validGeometricParametersQ()				 ) {
+			!validGeometricParametersQ()				 )  {
 			fprintf(stderr, "Bad input.\n"
 							"Usage: Input config filename, gt filename, n_SPC, n_T, "
 							"tolerance and omega_OR in this order.\n"
@@ -103,11 +77,6 @@ int main(int argc, char *argv[]) {
 			gfix_param = initParametersORDefault();
 		}
 
-		printf("\nGauge-fixing parameters provided:\n");
-		printORGaugeFixingParameters(gfix_param);
-		
-		
-	
 
 	}
 		MPI_Barrier(comm);
@@ -162,55 +131,27 @@ int main(int argc, char *argv[]) {
 			free(U);			
 		}
 
-		//  fix the gauge
-		int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
-		
-		if(sweeps < 0) {
+		if(loadField(G, gauge_transf_filename)) {
+			fprintf(stderr, "Loading of file %s failed.\n", config_filename);
 			free(U);
 			free(G);
-			switch(sweeps) {
-				case -1:
-					fprintf(stderr, "Configuration in file %s could not be gauge-fixed "
-									"within the maximum number of sweeps passed.\n"	
-									"SOR algorithm seems not to work or be slower than "
-									"what the user expected for this particular config. \n", 
-									config_filename);
-					break;
-
-				case -2:
-					fprintf(stderr, "Error in parameters for gauge fixing\n");
-					break;
-
-				default:
-					break;
-			}
-			
-		}
-
-		//	Record the effort to gauge-fix
-		if(sweeps >= 0) {
-			printf("Sweeps needed to gauge-fix config from file %s: %d. residue: %3.2E \n", 
-					config_filename,
-					sweeps,
-					gfix_param.generic_gf.gfix_proxy(U));
-			writeSweepsToGaugefix(config_filename, sweeps);
-		}
-
-		free(U);		//	Free memory allocated for the configuration.
-
-		// write the gauge transformation to file
-		if(writeGaugeTransf(G, gauge_transf_filename)) {
-			fprintf(stderr, "Gauge transformation writing to file %s"
-							"failed for configuration %s .\n",
-							gauge_transf_filename,
-							config_filename);
 		}
 		else{
-			printf("G for config %s written to file %s.\n", 
-					config_filename,
-					gauge_transf_filename);
+			printf("Gauge-transformation from file %s loaded OK.\n", config_filename);
 		}
+
+		double plaquettes_before = averagePlaquette(U,"total");
+		applyGaugeTransformationU(U, G);
+		double plaquettes_after = averagePlaquette(U, "total");
+
+		fprintf("Difference in plaquettes for config %s: %3.2E \n", config_filename, plaquettes_after-plaquettes_before);
+
+		double residue = gfix_param.generic.gfix_proxy(U);
+		if(residue > gfix_param.generic.tolerance)
+			fprintf(stderr, "WARNING: CONFIG %s not fixed\n", config_filename );
 		
+		
+		free(U);		//	Free memory allocated for the configuration.		
 		free(G);		//	Free memory allocated for gauge transformation.
 	}
 	MPI_Finalize();
