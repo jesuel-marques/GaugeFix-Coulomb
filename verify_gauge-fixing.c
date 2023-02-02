@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
 			free(U);			
 		}
 
-		if(loadField(G, gauge_transf_filename)) {
+		if(loadGaugeTransf(G, gauge_transf_filename)) {
 			fprintf(stderr, "Loading of file %s failed.\n", config_filename);
 			free(U);
 			free(G);
@@ -144,10 +144,10 @@ int main(int argc, char *argv[]) {
 		applyGaugeTransformationU(U, G);
 		double plaquettes_after = averagePlaquette(U, "total");
 
-		fprintf("Difference in plaquettes for config %s: %3.2E \n", config_filename, plaquettes_after-plaquettes_before);
+		printf("Difference in plaquettes for config %s: %3.2E \n", config_filename, plaquettes_after-plaquettes_before);
 
-		double residue = gfix_param.generic.gfix_proxy(U);
-		if(residue > gfix_param.generic.tolerance)
+		double residue = gfix_param.generic_gf.gfix_proxy(U);
+		if(residue > gfix_param.generic_gf.tolerance)
 			fprintf(stderr, "WARNING: CONFIG %s not fixed\n", config_filename );
 		
 		
