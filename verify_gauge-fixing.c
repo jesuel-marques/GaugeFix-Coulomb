@@ -140,6 +140,13 @@ int main(int argc, char *argv[]) {
 			printf("Gauge-transformation from file %s loaded OK.\n", config_filename);
 		}
 
+		if(reunitarizeField(G, lattice_param.volume)) {
+			fprintf(stderr, "Gauge-transformation in file %s could not be reunitarized.\n",
+							gauge_transf_filename);
+			free(U);
+			free(G);
+		}
+
 		double plaquettes_before = averagePlaquette(U,"total");
 		applyGaugeTransformationU(U, G);
 		double plaquettes_after = averagePlaquette(U, "total");
@@ -147,6 +154,7 @@ int main(int argc, char *argv[]) {
 		printf("Difference in plaquettes for config %s: %3.2E \n", config_filename, plaquettes_after-plaquettes_before);
 
 		double residue = gfix_param.generic_gf.gfix_proxy(U);
+		printf("%d: %3.2E\n", actual_config_nr, residue );
 		if(residue > gfix_param.generic_gf.tolerance)
 			fprintf(stderr, "WARNING: CONFIG %s not fixed. residue: %3.2E\n", config_filename, residue );
 		
