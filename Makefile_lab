@@ -28,6 +28,10 @@ all: $(BINARIES)
 gauge_fix_coulomb_mpi: $(OBJECTS) gauge_fix_coulomb_mpi.c
 	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
 
+
+verify_gauge_fixing: $(OBJECTS) verify_gauge_fixing.c
+	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
+
 -include $(DEPENDS)
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c Makefile
