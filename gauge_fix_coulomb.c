@@ -117,6 +117,8 @@ int main(int argc, char *argv[]) {
 	else{
 		printf("Config from file %s loaded.\n", config_filename);
 	}
+		printMatrix3x3(U);
+
 
 	//	Reunitarizing right away because of loss of precision due to
 	//	storing config in single precision.	
@@ -127,6 +129,7 @@ int main(int argc, char *argv[]) {
 		free(U);
 		return EXIT_FAILURE;
 	}
+		printMatrix3x3(U);
 
 	Mtrx3x3 * G = allocate3x3Field(lattice_param.volume);
 	if(G == NULL) {
@@ -136,7 +139,6 @@ int main(int argc, char *argv[]) {
 		free(U);
 		return EXIT_FAILURE;
 	}
-
 	printf("Average trace of spatial plaquettes before gauge transformation: %.10lf\n", 
 													    averagePlaquette(U, "spatial"));
 	printf("Average trace of temporal plaquettes before gauge transformation: %.10lf\n", 

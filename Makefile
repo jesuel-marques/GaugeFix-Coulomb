@@ -8,7 +8,7 @@ CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx
 
 WARNINGS:= -Wall -Wextra
 
-LIBS := -lm -llapacke
+LIBS := -lm
 
 
 SOURCES := $(wildcard $(SOURCE_DIR)/*.c)
@@ -32,6 +32,7 @@ gauge_fix_coulomb: $(OBJECTS) gauge_fix_coulomb.c
 -include $(DEPENDS)
 
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c Makefile
+	if [ ! -d build ]; then mkdir build; fi
 	$(CC) -c $< -o $@  $(CFLAGS) $(WARNINGS) -MMD -MP
 
 clean:
