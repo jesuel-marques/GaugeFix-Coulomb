@@ -9,4 +9,4 @@ hostfile
 *.o
 *.o
 *.d
-build
+build/*
