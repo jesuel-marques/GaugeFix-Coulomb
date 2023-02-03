@@ -3,6 +3,7 @@ SOURCE_DIR := src
 BUILD_DIR := build
 
 RM = rm -f
+RMDIR = rmdir
 CC := gcc
 CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -DNUM_THREADS=`nproc`
 
@@ -37,3 +38,4 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c Makefile
 
 clean:
 	$(RM) $(BINARIES) $(OBJECTS) $(DEPENDS)
+	$(RMDIR) $(BUILD_DIR)
