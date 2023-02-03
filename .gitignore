@@ -1,6 +1,5 @@
 gauge_fix_coulomb
-plaquette_check
-test_matrix_power
+gauge_fix_coulomb_mpi
 hostfile
 *.sh
 *.dbg
@@ -9,4 +8,4 @@ hostfile
 *.o
 *.o
 *.d
-build
+build/*

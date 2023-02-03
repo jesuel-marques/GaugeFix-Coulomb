@@ -250,3 +250,16 @@ In the order of priority of possible future implementation
 13. [ ] Support for custom precision datatypes
 
 Error handling is not great right now, but I intend to improve this as time allows.
+
+
+double omega_OR:                 omega parameter of overrelaxation algorithm,
+     * unsigned hits:                   iterations hits for the maximization of Tr[w],
+     * double (*gfix_prox)(Mtrx3x3 * ): a function pointer to the function which 
+     *                                  calculates the residue, which will serve as a
+     *                                  proxy of the gauge-fixing condition,
+     * double tolerance:                tolerance for the gauge-fixing residue,
+     * unsigned max_sweeps_to_fix:      
+     * unsigned estimate_sweeps_to_gf_progress:
+     * 
+     * Initial estimate of sweeps it will take for gauge-fixing to progress substantially
+     *  Amount of sweeps to reunitarize fields

@@ -41,7 +41,6 @@ Scalar TrPlaquette(Mtrx3x3 * restrict U,
     /*
      * Calls:
 	 * =====
-     * creal,
      * getNeighbour, getLinkMatrix,
      * prodFour3x3, trace3x3.
 	 *
@@ -81,9 +80,35 @@ Scalar TrPlaquette(Mtrx3x3 * restrict U,
 
 }
 
+/* Average plaquette value for any given mu and nu */
 Scalar averagePlaquettegeneric(Mtrx3x3 * U, LorentzIdx mu, LorentzIdx nu){
 
-    //  Calculates the spatial plaquette average
+    /*
+	 * Calls:
+	 * =====
+     * TrPlaquette.
+	 *
+	 * Macros:
+	 * ======
+     * LOOP_SPATIAL, T_INDX, NUM_THREADS.
+     * 
+     * Global Variables:
+     * ================
+     * lattice_param.
+     * 
+	 * Parameters:
+	 * ==========
+     * Mtrx3x3 *  U:        SU(3) gluon field,
+     * LorentzIdx mu:       first direction of the plaquette specification, 
+     * LorentzIdx nu:       second direction of the plaquette specification.
+     * 
+	 * Returns:
+	 * =======
+     * The average plaquette value for given mu and nu as a double precision complex 
+     * number.
+     * 
+     */
+
     Scalar plaq_ave = 0.0;
     
     // Parallelizing by slicing the time extent
@@ -94,7 +119,7 @@ Scalar averagePlaquettegeneric(Mtrx3x3 * U, LorentzIdx mu, LorentzIdx nu){
             position.pos[T_INDX] = t;
 
             LOOP_SPATIAL(position) {                
-                plaq_ave += TrPlaquette(U, position, mu, nu);                                    
+                plaq_ave += TrPlaquette(U, position, mu, nu);
             }
         }
 
@@ -103,31 +128,34 @@ Scalar averagePlaquettegeneric(Mtrx3x3 * U, LorentzIdx mu, LorentzIdx nu){
     return plaq_ave;
 }
 
+/* Calculates the average plaquette on the lattice of specific type (total, 
+   spatial, temporal ) */
 Scalar averagePlaquette(Mtrx3x3 * restrict U, char * type) {
 
     /*
 	 * Calls:
 	 * =====
-     * fprintf,
+     * fprintf, strcmp,
      * validGeometricParametersQ,
-     * TrPlaquette.
+     * averagePlaquettegeneric.
 	 *
 	 * Macros:
 	 * ======
-     * NUM_THREADS, T_INDX, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, DIM.
+     * LOOP_LORENTZ_SPATIAL, T_INDX, X_INDX, Y_INDX, Z_INDX.
      * 
      * Global Variables:
      * ================
-     * lattice_param.
      * 
 	 * Parameters:
 	 * ==========
-     * Mtrx3x3 *  U:        SU(3) gluon field.
+     * Mtrx3x3 *  U:        SU(3) gluon field,
+     * char * type:         type of plaquette average requested. Can be either total, 
+     *                      spatial, temporal. Other values are ignored.
      * 
 	 * Returns:
 	 * =======
      * The average trace of the plaquettes of the gluon field as a double precision 
-     * complex number.
+     * complex number for the specified type.
 	 * 
      */
 

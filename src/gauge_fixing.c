@@ -83,7 +83,29 @@ ORGaugeFixingParameters initParametersORDefault(){
     return gfix_param;
 }
 
+/*  Prints gauge-fixing parameters for the parameter struct passed */
 void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param){
+
+    /*
+	 * Calls:
+	 * =====
+     * printf
+	 *
+     * Macros:
+	 * ======
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+     * ORGaugeFixingParameters gfix_param:    overrelaxation gauge fixing parameters.
+	 * 
+     * 
+	 * Returns:
+	 * =======
+	 * 
+	 */
 
     printf("\n");
     printf("max_hits: %u\n",
@@ -139,14 +161,17 @@ void removeSpaces(char * restrict string)
 }
 
 
-/* Initializes gauge-fixing parameters given a tolerance and a omega parameter
-   for the overrelaxation algorithm, checking if the parameters passed are valid. */
+/* Initializes gauge-fixing parameters given a parameter filename, 
+   checking if the parameters passed are valid. If parameters are not set in the
+   file, if filename passed if " " or if they are invalid, default values are used. */
 ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filename) {
 
     /*
 	 * Calls:
 	 * =====
-	 * validORGaugeFixingParametersQ.
+     * strcmp, printf, fopen, fgets, strtok, atof, fprintf, 
+     * removeSpaces, validORGaugeFixingParametersQ, printORGaugeFixingParameters,
+     * calculate_e2, calculate_theta.
 	 *
      * Macros:
 	 * ======
@@ -156,22 +181,15 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
      * 
 	 * Parameters:
 	 * ==========
-	 * double omega_OR:                 omega parameter of overrelaxation algorithm,
-     * unsigned hits:                   iterations hits for the maximization of Tr[w],
-     * double (*gfix_prox)(Mtrx3x3 * ): a function pointer to the function which 
-     *                                  calculates the residue, which will serve as a
-     *                                  proxy of the gauge-fixing condition,
-     * double tolerance:                tolerance for the gauge-fixing residue,
-     * unsigned max_sweeps_to_fix:      
-     * unsigned estimate_sweeps_to_gf_progress:
-     * 
-     * Initial estimate of sweeps it will take for gauge-fixing to progress substantially
-     *  Amount of sweeps to reunitarize fields
+     * const char * parameter_filename:     filename of the file containing the 
+     *                                      parameters for the gauge-fixing.
+	 * 
      * 
 	 * Returns:
 	 * =======
 	 * ORGaugeFixingParameters struct with parameters set. If parameters are invalid, 
      * the error flag in the struct will be set.
+     * 
 	 */
 
     ORGaugeFixingParameters gfix_param = initParametersORDefault();
@@ -263,8 +281,9 @@ static int whenNextConvergenceCheckQ(unsigned int current_sweep,
      * 
 	 * Parameters:
 	 * ==========
-     * int current_sweep:   already elapsed sweeps,
-	 * double residue:      index which shows how close config is to be gauge-fixed,
+     * int current_sweep:                   already elapsed sweeps,
+	 * double residue:                      index which shows how close config is to be
+     *                                      gauge-fixed,
      * ORGaugeFixingParameters gfix_param:	overrelaxation gauge fixing parameters.
      *  
 	 * Returns:
@@ -366,7 +385,6 @@ double calculateTheta(Mtrx3x3 * restrict U) {
 	 * Value of alternative gauge-fixing index theta in double precision.
      *
 	 */
-
     
 
     double theta = 0.0;
@@ -392,6 +410,7 @@ double calculateTheta(Mtrx3x3 * restrict U) {
 
     return creal(theta) / (double) (Nc * lattice_param.volume);
 }
+
 
 /* Calculates e2, an index to measure proximity to gauge-fixing condition
    (defined in eq 6.1 of hep-lat/0301019v2). It is the normalized sum of the squares 
@@ -686,7 +705,7 @@ inline static void gaugefixOverrelaxationLocal(Mtrx3x3 * restrict U,
 	 * Mtrx3x3 * U: 	                    SU(3) gluon field,
      * Mtrx3x3 * G:	                        SU(3) gauge-transformation field,
      * PosVec position:                     specific position for the update,
-     * ORGaugeFixingParameters gfix_param:	overrelaxation gauge fixing parameters.
+     * ORGaugeFixingParameters params:	    overrelaxation gauge fixing parameters.
      * 
 	 * Returns:
 	 * =======
@@ -724,7 +743,7 @@ inline static void gaugefixOverrelaxationLocal(Mtrx3x3 * restrict U,
    procedure, overwriting anything that may have been loaded to it. */
 int gaugefixOverrelaxation(Mtrx3x3 * restrict U, 
                            Mtrx3x3 * restrict G, 
-                           const ORGaugeFixingParameters gfix_param) {
+                           const ORGaugeFixingParameters params) {
 
     /* 
 	 * Calls:
@@ -748,7 +767,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
 	 * ==========
 	 * Mtrx3x3 * U:                  	    SU(3) gluon field,
      * Mtrx3x3 * G:	                        SU(3) gauge-transformation field,
-     * ORGaugeFixingParameters gfix_param:	overrelaxation gauge fixing parameters.
+     * ORGaugeFixingParameters params:  	overrelaxation gauge fixing parameters.
      * 
 	 * Returns:
 	 * =======
@@ -758,7 +777,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
      *      -2: parameters passed were invalid.
 	 */
 
-    if(!validORGaugeFixingParametersQ(gfix_param)) {
+    if(!validORGaugeFixingParametersQ(params)) {
         return -2;
     }
     setFieldToIdentity(G, lattice_param.volume);
@@ -775,12 +794,12 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
     
     /* No need to calculate residue all the time because it will typically take some 
        hundreds/thousands of sweeps to fix the gauge. */
-    double new_res = gfix_param.generic_gf.gfix_proxy(U);
+    double new_res = params.generic_gf.gfix_proxy(U);
     printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
     
-    int converge_check_due = whenNextConvergenceCheckQ(sweep, new_res, gfix_param);
+    int converge_check_due = whenNextConvergenceCheckQ(sweep, new_res, params);
     
-    while(new_res > gfix_param.generic_gf.tolerance) {
+    while(new_res > params.generic_gf.tolerance) {
         // Parallelizing by slicing the time extent
         #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
             for(PosIndex t = 0; t < lattice_param.n_T; t++) {
@@ -792,7 +811,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
                         /*	Implementation of the checkerboard subdivision 
                             of the lattice. */
                         
-                        gaugefixOverrelaxationLocal(U, G, position, gfix_param): 0;
+                        gaugefixOverrelaxationLocal(U, G, position, params): 0;
                         //  The actual gauge-fixing algorithm
 
                 }
@@ -804,26 +823,26 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
             double last_res = new_res;
 
             if(fabs((new_res = 
-                    gfix_param.generic_gf.gfix_proxy(U)) - last_res)/last_res < 10E-16){
+                    params.generic_gf.gfix_proxy(U)) - last_res)/last_res < 10E-16){
                 printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
                 return -1;  /* convergence too slow or not converging */
             }
-            else if(new_res <= gfix_param.generic_gf.tolerance) {
+            else if(new_res <= params.generic_gf.tolerance) {
                 break;  /* converged */
             }
             else{
                 printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
                 converge_check_due = 
-                                  whenNextConvergenceCheckQ(sweep, new_res, gfix_param);
+                                  whenNextConvergenceCheckQ(sweep, new_res, params);
             }
             
         }
 
-        if(sweep >= gfix_param.generic_gf.max_sweeps_to_fix) {
+        if(sweep >= params.generic_gf.max_sweeps_to_fix) {
             return -1;  /* convergence too slow or not converging */
         }
 
-        if(!(sweep % gfix_param.generic_gf.sweeps_to_reunitarization)) {
+        if(!(sweep % params.generic_gf.sweeps_to_reunitarization)) {
 
             reunitarizeField(U, DIM * lattice_param.volume);
             reunitarizeField(G, lattice_param.volume);
