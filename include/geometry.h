@@ -103,8 +103,12 @@ typedef struct {
     unsigned short n_T;		//   Temporal lattice size
 
     unsigned int volume;		//	Number of sites in the lattice
-    unsigned int spatial_volume;	
+    unsigned int spatial_volume;
 
+    double func_anisotropy;     //  Anisotropy of the gauge-functional to be extremized
+    double divergence_anisotropy; 
+    double wanisotropy;
+        
     bool error;
 } GeometricParameters;
 

@@ -63,16 +63,19 @@ bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param) {
 	 * true if parameters are valid, false if invalid.
 	 */
 
-    return (gfix_param.omega_OR  >= 1 && gfix_param.omega_OR < 2    && 
-            gfix_param.generic_gf.tolerance > 0                     && 
-            gfix_param.generic_gf.error != true                     &&
-            gfix_param.generic_gf.sweeps_to_reunitarization > 0         );
+    return ((!strcmp(gfix_param.generic_gf.gauge_type, "coulomb") || 
+             !strcmp(gfix_param.generic_gf.gauge_type, "landau")    )   &&
+            gfix_param.omega_OR  >= 1 && gfix_param.omega_OR < 2        && 
+            gfix_param.generic_gf.tolerance > 0                         && 
+            gfix_param.generic_gf.error != true                         &&
+            gfix_param.generic_gf.sweeps_to_reunitarization > 0             );
 }
 
 ORGaugeFixingParameters initParametersORDefault(){
     ORGaugeFixingParameters gfix_param = 
                     {.omega_OR = 1.95,  
-                     .hits = 2,                     
+                     .hits = 2,
+                     .generic_gf.gauge_type = "Coulomb",           
                      .generic_gf.error = false,
                      .generic_gf.gfix_proxy = calculate_e2,
                      .generic_gf.tolerance = 1E-16,
@@ -108,19 +111,16 @@ void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param){
 	 */
 
     printf("\n");
-    printf("max_hits: %u\n",
-            gfix_param.hits);
-    printf("omega_OR: %lf\n",
-            gfix_param.omega_OR);
+    printf("gauge type: %s\n", gfix_param.generic_gf.gauge_type);
+    printf("max_hits: %u\n", gfix_param.hits);
+    printf("omega_OR: %lf\n", gfix_param.omega_OR);
     printf("\n");
-    printf("tolerance: %3.2E\n",
-            gfix_param.generic_gf.tolerance);
-    printf("max_sweeps_to_fix: %u\n", 
-            gfix_param.generic_gf.max_sweeps_to_fix);
+    printf("tolerance: %3.2E\n", gfix_param.generic_gf.tolerance);
+    printf("max_sweeps_to_fix: %u\n", gfix_param.generic_gf.max_sweeps_to_fix);
     printf("estimate_sweeps_to_gfixprogress: %u\n", 
             gfix_param.generic_gf.estimate_sweeps_to_gf_progress);
     printf("\n");
-    printf("sweeps_to_reunitarization: %u\n",
+    printf("sweeps_to_reunitarization: %u\n", 
             gfix_param.generic_gf.sweeps_to_reunitarization);
     printf("\n");
 }
@@ -203,6 +203,7 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
 
     char delimiter[] = PARAMETER_KEY_VALUE_DELIMITER;
     char buff[100];
+    char gauge_type[100];
 
     if(parameter_file != NULL) {
         while(fgets(buff, 100, parameter_file)) {
@@ -216,7 +217,15 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
             value = strtok(NULL, "\n");
             if(value){
                 
-                if(!strcmp(key, "tolerance")) {
+                if(!strcmp(key, "gauge_type")) {
+                    strcpy(gauge_type, tolower(value));
+                    if(!strcmp(gauge_type, "coulomb") || !strcmp(gauge_type, "landau")){
+                        strcpy(gfix_param.generic_gf.gauge_type, gauge_type);
+                    }
+                    else{
+                        fprintf(stderr, "Gauge type not recognized: %s.\n", gauge_type);
+                    }
+                }else if(!strcmp(key, "tolerance")) {
                     gfix_param.generic_gf.tolerance = atof(value);            
                 }else if(!strcmp(key, "hits")) {
                     gfix_param.hits = atof(value);
@@ -305,7 +314,7 @@ static int whenNextConvergenceCheckQ(unsigned int current_sweep,
 
 /* Calculates the gauge-fixing functional F, which is to be extremized when 
    performing the gauge-fixing. */
-double calculateF(Mtrx3x3 * restrict U) {
+double calculateF(Mtrx3x3 * restrict U, char * gauge_type) {
 
     /*  
 	 * Calls:
@@ -350,6 +359,10 @@ double calculateF(Mtrx3x3 * restrict U) {
                 retrU_acc += creal(trace3x3(getLink(U, position, mu)));
 
             }
+            if(!(strcmp(gauge_type, "landau"))){
+                retrU_acc += lattice_param.func_anisotropy *
+                             creal(trace3x3(getLink(U, position, T_INDX)));
+            }
         }
     }
 
@@ -358,7 +371,7 @@ double calculateF(Mtrx3x3 * restrict U) {
 
 /* Calculates an alternative index to measure proximity to gauge-fixing condition.
    theta = 1/(N_c V) sum_n Re Tr[(div.A(n)).(div.A(n))^dagger]. */
-double calculateTheta(Mtrx3x3 * restrict U) {
+double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
 
     /*  
 	 * Calls:
@@ -415,7 +428,7 @@ double calculateTheta(Mtrx3x3 * restrict U) {
 /* Calculates e2, an index to measure proximity to gauge-fixing condition
    (defined in eq 6.1 of hep-lat/0301019v2). It is the normalized sum of the squares 
    of the color components of the divergence of A. */    
-double calculate_e2(Mtrx3x3 * restrict U) {
+double calculate_e2(Mtrx3x3 * restrict U, char * gauge_type) {
 
     /*
 	 * Calls:
@@ -523,7 +536,8 @@ static inline void accumulateFrontHearLink(Mtrx3x3 * restrict U,
    following the notation in hep-lat/9306018. */
 inline static void calculate_w(Mtrx3x3 * restrict U, 
                                const PosVec position,
-                               Mtrx3x3 * restrict w) {
+                               Mtrx3x3 * restrict w,
+                               const ORGaugeFixingParameters params) {
 
     /*
      * Calls:
@@ -557,6 +571,15 @@ inline static void calculate_w(Mtrx3x3 * restrict U,
 
         /* w = sum_mu U_mu(n) + U_dagger_mu(n-mu_hat) */ 
         accumulateFrontHearLink(U, position, mu, w);
+
+    }
+    if(!strcmp(params.generic_gf.gauge_type, "landau")){
+        Mtrx3x3 temporal_links;
+        setNull3x3(&temporal_links);
+
+        accumulateFrontHearLink(U, position, T_INDX, &temporal_links);
+        substMultScalar3x3(lattice_param.wanisotropy, &temporal_links);
+        accumulate3x3(&temporal_links, w);
 
     }
 }
@@ -713,7 +736,7 @@ inline static void gaugefixOverrelaxationLocal(Mtrx3x3 * restrict U,
 	 */
     
     Mtrx3x3 w;
-    calculate_w(U, position, &w);  
+    calculate_w(U, position, &w, params);  
 
     Mtrx3x3 update_LA;
     updateLosAlamos(&w, params.hits, &update_LA);
@@ -794,12 +817,12 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
     
     /* No need to calculate residue all the time because it will typically take some 
        hundreds/thousands of sweeps to fix the gauge. */
-    double new_res = params.generic_gf.gfix_proxy(U);
-    printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
+    double new_residue = params.generic_gf.gfix_proxy(U);
+    printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
     
-    int converge_check_due = whenNextConvergenceCheckQ(sweep, new_res, params);
+    int converge_check_due = whenNextConvergenceCheckQ(sweep, new_residue, params);
     
-    while(new_res > params.generic_gf.tolerance) {
+    while(new_residue > params.generic_gf.tolerance) {
         // Parallelizing by slicing the time extent
         #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
             for(PosIndex t = 0; t < lattice_param.n_T; t++) {
@@ -820,26 +843,23 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
         sweep++;
 
         if(sweep == converge_check_due) {
-            double last_res = new_res;
+            double last_residue = new_residue;
 
-            if(fabs((new_res = 
-                    params.generic_gf.gfix_proxy(U)) - last_res)/last_res < 10E-16){
-                printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
+            if(fabs((new_residue = params.generic_gf.gfix_proxy(U)) - last_residue) / 
+                                                               last_residue < 10E-16 ||
+               sweep >= params.generic_gf.max_sweeps_to_fix                           ){
+                printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
                 return -1;  /* convergence too slow or not converging */
             }
-            else if(new_res <= params.generic_gf.tolerance) {
+            else if(new_residue <= params.generic_gf.tolerance ) {
                 break;  /* converged */
             }
             else{
-                printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_res);
+                printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
                 converge_check_due = 
-                                  whenNextConvergenceCheckQ(sweep, new_res, params);
+                                  whenNextConvergenceCheckQ(sweep, new_residue, params);
             }
             
-        }
-
-        if(sweep >= params.generic_gf.max_sweeps_to_fix) {
-            return -1;  /* convergence too slow or not converging */
         }
 
         if(!(sweep % params.generic_gf.sweeps_to_reunitarization)) {

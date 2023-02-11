@@ -66,8 +66,8 @@ void calculateA(Mtrx3x3 * restrict U,
     multByScalar3x3(-0.5 * I, &U_minus_Udagger_trless, A);
 }
 
-/* Calculates the divergence of the field A in a specific position.  */
-void divergenceA(Mtrx3x3 * restrict U, 
+/* Calculates the 3 divergence of the field A in a specific position.  */
+void divergenceA3D(Mtrx3x3 * restrict U, 
                  const PosVec position, 
                  Mtrx3x3 * restrict div_A) {
 
@@ -110,4 +110,57 @@ void divergenceA(Mtrx3x3 * restrict U,
         subtraction3x3(&A1, &A2, &term_divA);
         accumulate3x3(&term_divA, div_A); 
     }
+}
+
+/* Calculates the 4-divergence of the field A in a specific position.  */
+void divergenceA4D(Mtrx3x3 * restrict U, 
+                 const PosVec position, 
+                 Mtrx3x3 * restrict div_A) {
+
+    /* 
+	 * Calls:
+	 * =====
+     * setNull3x3, subtraction3x3, accumulate3x3
+     * getNeighbour,
+     * calculateA.
+	 *
+     * Macros:
+	 * ======
+     * LOOP_LORENTZ_SPATIAL
+     * 
+     * Global Variables:
+     * ================
+     * 
+	 * Parameters:
+	 * ==========
+	 * Mtrx3x3 * U: 	    SU(3) gluon field,
+     * PosVec position:     specific position for the calculation,
+     * Mtrx3x3 * div_A:     calculated divergence of A at given position.
+     * 
+	 * Returns:
+	 * =======
+	 * 
+	 */
+
+    Mtrx3x3 A1;
+    Mtrx3x3 A2;
+
+    Mtrx3x3 term_divA;
+
+    setNull3x3(div_A);
+    LorentzIdx mu;
+    LOOP_LORENTZ(mu) {
+        calculateA(U,              position,            mu, &A1);
+        calculateA(U, getNeighbour(position, mu, REAR), mu, &A2);
+
+        subtraction3x3(&A1, &A2, &term_divA);
+
+        if(mu == T_INDX){
+            substMultScalar3x3(lattice_param.divergence_anisotropy, &term_divA);
+        }
+        
+        accumulate3x3(&term_divA, div_A); 
+    }
+
+    
 }

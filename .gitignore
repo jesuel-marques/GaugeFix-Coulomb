@@ -1,5 +1,4 @@
-gauge_fix_coulomb
-gauge_fix_coulomb_mpi
+gfix
 hostfile
 *.sh
 *.dbg

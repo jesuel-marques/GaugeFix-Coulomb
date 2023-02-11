@@ -220,6 +220,10 @@ int initGeometry(const short n_s, const short n_t) {
 	lattice_param.volume 	     = lattice_param.spatial_volume * 
                                    lattice_param.n_T;
 
+    lattice_param.divergence_anisotropy = 1.0;
+    lattice_param.func_anisotropy = 1.0;
+    lattice_param.wanisotropy = 1.0;
+    
     if(!validGeometricParametersQ()) {
         return 1;
     }

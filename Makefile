@@ -19,14 +19,14 @@ OBJECTS = $(patsubst %, $(BUILD_DIR)/%, $(_OBJECTS))
 _DEPENDS = $(patsubst $(SOURCE_DIR)/%.c, %.d, $(SOURCES))
 DEPENDS = $(patsubst %, $(BUILD_DIR)/%, $(_DEPENDS))
 
-BINARIES = gauge_fix_coulomb
+BINARIES = gfix
 
 .PHONY: all clean
 
 all: $(BINARIES)
 
 
-gauge_fix_coulomb: $(OBJECTS) gauge_fix_coulomb.c
+gfix: $(OBJECTS) gfix.c
 	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
 
 -include $(DEPENDS)

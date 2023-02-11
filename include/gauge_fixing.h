@@ -30,6 +30,8 @@
 /* Generic gauge-fixing parameters */
 typedef struct {
 
+    char * gauge_type;
+
     double tolerance;
     double (*gfix_proxy)(Mtrx3x3 * );
 
@@ -60,9 +62,9 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
 
 void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param);
 
-double calculateF    (Mtrx3x3 * restrict U);
-double calculateTheta(Mtrx3x3 * restrict U);
-double calculate_e2  (Mtrx3x3 * restrict U);
+double calculateF    (Mtrx3x3 * restrict U, char * gauge_type);
+double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type);
+double calculate_e2  (Mtrx3x3 * restrict U, char * gauge_type);
 
 int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
                            Mtrx3x3 * restrict G, 

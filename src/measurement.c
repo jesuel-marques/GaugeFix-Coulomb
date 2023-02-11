@@ -172,9 +172,15 @@ Scalar averagePlaquette(Mtrx3x3 * restrict U, char * type) {
         }
     }
     if(!strcmp(type, "total") || !strcmp(type, "spatial")){
-        average += averagePlaquettegeneric(U, X_INDX, Y_INDX); count++;
-        average += averagePlaquettegeneric(U, X_INDX, Z_INDX); count++;
-        average += averagePlaquettegeneric(U, Y_INDX, Z_INDX); count++;
+        LorentzIdx i, j;
+        LOOP_LORENTZ_SPATIAL(i){
+            LOOP_LORENTZ_SPATIAL(j){
+                if(i < j){
+                    average += averagePlaquettegeneric(U, i, j); count++;
+                }
+            }
+        }
+        
     }
 
     return average / (double) count;
