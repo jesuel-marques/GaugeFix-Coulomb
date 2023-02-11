@@ -7,7 +7,7 @@ gcc -c src/convert_precision.c -o build/convert_precision.o  -Iinclude -std=c99 
 gcc -c src/four_potential.c -o build/four_potential.o  -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -Wall -Wextra -MMD -MP
 gcc -c src/gauge_fixing.c -o build/gauge_fixing.o  -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -Wall -Wextra -MMD -MP
 gcc -c src/integpoly_gauge_fixing.c -o build/integpoly_gauge_fixing.o  -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -Wall -Wextra -MMD -MP
-gcc -c src/lattice.c -o build/lattice.o  -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -Wall -Wextra -MMD -MP
+gcc -c src/geometry.c -o build/lattice.o  -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -Wall -Wextra -MMD -MP
 gcc -c src/measurement.c -o build/measurement.o  -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -Wall -Wextra -MMD -MP
 gcc -o gauge_fix_coulomb gauge_fix_coulomb.c build/SU2_ops.o build/SU3_ops.o build/fields_io.o build/convert_precision.o build/four_potential.o build/gauge_fixing.o build/integpoly_gauge_fixing.o build/lattice.o build/measurement.o -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -Wall -Wextra -lm 
 gcc -o plaquette_check plaquette_check.c build/SU2_ops.o build/SU3_ops.o build/fields_io.o build/convert_precision.o build/four_potential.o build/gauge_fixing.o build/integpoly_gauge_fixing.o build/lattice.o build/measurement.o -Iinclude -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -Wall -Wextra -lm

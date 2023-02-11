@@ -1,5 +1,5 @@
 /*
-    Header to lattice.c, which takes care of the geometrical aspects of lattice 
+    Header to geometry.c, which takes care of the geometrical aspects of lattice 
     calculations.
 
     Copyright (C) 2023  Jesuel Marques

@@ -239,7 +239,7 @@ SUFFIXES :=
 # makefile (from 'Makefile', line 5)
 CC := gcc
 # makefile (from 'Makefile', line 12)
-SOURCES := src/SU2_ops.c src/SU3_ops.c src/fields_io.c src/convert_precision.c src/four_potential.c src/gauge_fixing.c src/integpoly_gauge_fixing.c src/lattice.c src/measurement.c
+SOURCES := src/SU2_ops.c src/SU3_ops.c src/fields_io.c src/convert_precision.c src/four_potential.c src/gauge_fixing.c src/integpoly_gauge_fixing.c src/geometry.c src/measurement.c
 # environment
 XDG_MENU_PREFIX = gnome-
 # environment
@@ -281,7 +281,7 @@ build/SU3_ops.o: src/SU3_ops.c include/math_ops.h include/geometry.h include/SU3
 #  File has not been updated.
 
 # Not a target:
-src/lattice.c:
+src/geometry.c:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -318,7 +318,7 @@ src/fields_io.c:
 #  Modification time never checked.
 #  File has not been updated.
 
-build/lattice.o: src/lattice.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/geometry.h include/SU3_ops.h include/gauge_fixing.h
+build/lattice.o: src/geometry.c include/SU3_gaugefixing_parameters.h include/SU3_parameters.h include/SU2_ops.h include/geometry.h include/SU3_ops.h include/gauge_fixing.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.

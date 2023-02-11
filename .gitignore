@@ -1,4 +1,4 @@
-gauge_fix_coulomb
+gfix
 hostfile
 *.sh
 *.dbg
@@ -6,3 +6,4 @@ hostfile
 *.cfg
 *.o
 *.d
+Makefile_cluster
