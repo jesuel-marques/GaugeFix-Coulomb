@@ -844,10 +844,9 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
 
         if(sweep == converge_check_due) {
             double last_residue = new_residue;
-
-            if(fabs((new_residue = params.generic_gf.gfix_proxy(U)) - last_residue) / 
-                                                               last_residue < 10E-16 ||
-               sweep >= params.generic_gf.max_sweeps_to_fix                           ){
+            new_residue = params.generic_gf.gfix_proxy(U);
+            if(fabs(new_residue - last_residue) / last_residue < 10E-16 ||
+               sweep >= params.generic_gf.max_sweeps_to_fix                 ){
                 printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
                 return -1;  /* convergence too slow or not converging */
             }
