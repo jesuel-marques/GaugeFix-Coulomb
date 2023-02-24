@@ -55,7 +55,7 @@ Mtrx3x3 *allocate3x3Field(unsigned elements) {
 	 * 
      */
     
-    const Mtrx3x3 *field = (Mtrx3x3 *) calloc(elements, sizeof(Mtrx3x3));
+    Mtrx3x3 *field = (Mtrx3x3 *) calloc(elements, sizeof(Mtrx3x3));
 	
     return field;
 }
