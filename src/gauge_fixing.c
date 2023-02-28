@@ -75,7 +75,7 @@ ORGaugeFixingParameters initParametersORDefault(){
     ORGaugeFixingParameters gfix_param = 
                     {.omega_OR = 1.95,  
                      .hits = 2,
-                     .generic_gf.gauge_type = "Coulomb",           
+                     .generic_gf.gauge_type = "coulomb",           
                      .generic_gf.error = false,
                      .generic_gf.gfix_proxy = calculate_e2,
                      .generic_gf.tolerance = 1E-16,
@@ -378,7 +378,7 @@ double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
 	 * =====
      * creal,
      * hermConj3x3, prod3x3, trace3x3,
-     * divergenceA.
+     * divergenceA3D, divergenceA4D.
 	 *
      * Macros:
 	 * ======
@@ -403,6 +403,15 @@ double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
     double theta = 0.0;
 
     PosIndex t;
+
+    void (* div_func)(Mtrx3x3 *, PosVec, Mtrx3x3 *);
+
+    if(!strcmp(gauge_type, "landau")){
+        div_func = divergenceA4D;
+    }
+    else if (!strcmp(gauge_type, "coulomb")){
+        div_func = divergenceA3D;
+    }
     #pragma omp parallel for reduction (+:theta) num_threads(NUM_THREADS) \
                              schedule(dynamic)                            
     LOOP_TEMPORAL(t) {
@@ -414,7 +423,7 @@ double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
         Mtrx3x3 div_A, div_A_dagger, prod;
 
         LOOP_SPATIAL(position) {
-            divergenceA(U, position, &div_A);
+            div_func(U, position, &div_A);
             hermConj3x3(&div_A, &div_A_dagger);
             prod3x3(&div_A, &div_A_dagger, &prod);
             theta += trace3x3(&prod);
@@ -434,7 +443,7 @@ double calculate_e2(Mtrx3x3 * restrict U, char * gauge_type) {
 	 * Calls:
 	 * =====
      * decomposeAlgebraSU3,
-     * divergenceA.
+     * divergenceA3D, divergenceA4D.
      * 
      * Macros:
 	 * ======
@@ -457,6 +466,15 @@ double calculate_e2(Mtrx3x3 * restrict U, char * gauge_type) {
 	 */
     double e2 = 0.0;
 
+    void (* div_func)(Mtrx3x3 *, PosVec, Mtrx3x3 *);
+
+    if(!strcmp(gauge_type, "landau")){
+        div_func = divergenceA4D;
+    }
+    else if (!strcmp(gauge_type, "coulomb")){
+        div_func = divergenceA3D;
+    }
+
     PosIndex t;
     // Parallelizing by slicing the time extent
     #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
@@ -470,7 +488,7 @@ double calculate_e2(Mtrx3x3 * restrict U, char * gauge_type) {
 
             LOOP_SPATIAL(position) {
 
-                divergenceA(U, position, &div_A);
+                div_func(U, position, &div_A);
                 decomposeAlgebraSU3(&div_A, &div_A_components);
                 for(SU3AlgIdx a = 1; a <= Nc * Nc - 1; a++) {
 

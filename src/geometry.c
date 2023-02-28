@@ -30,6 +30,9 @@
 
 GeometricParameters lattice_param;
 
+#define KSI 3.444
+#define GAMMAG 4.3
+
 /* Modulo function which deals with negative numbers. */
 static inline int mod(short a, unsigned short b) {
     
@@ -220,9 +223,9 @@ int initGeometry(const short n_s, const short n_t) {
 	lattice_param.volume 	     = lattice_param.spatial_volume * 
                                    lattice_param.n_T;
 
-    lattice_param.divergence_anisotropy = 1.0;
-    lattice_param.func_anisotropy = 1.0;
-    lattice_param.wanisotropy = 1.0;
+    lattice_param.divergence_anisotropy = 1.0 /(KSI * GAMMAG);
+    lattice_param.func_anisotropy = 1.0 /(KSI * GAMMAG);
+    lattice_param.wanisotropy = 1.0 /(KSI * GAMMAG);
     
     if(!validGeometricParametersQ()) {
         return 1;

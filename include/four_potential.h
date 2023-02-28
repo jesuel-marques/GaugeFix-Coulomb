@@ -32,7 +32,11 @@ void calculateA (Mtrx3x3 * restrict U,
                  const LorentzIdx mu, 
                  Mtrx3x3 * restrict A);
 
-void divergenceA(Mtrx3x3 * restrict U,
+void divergenceA3D(Mtrx3x3 * restrict U,
+                 const PosVec position, 
+                 Mtrx3x3 * restrict div_A);
+
+void divergenceA4D(Mtrx3x3 * restrict U,
                  const PosVec position, 
                  Mtrx3x3 * restrict div_A);
 
