@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <tgmath.h>
 
 #include <omp.h>
@@ -36,7 +37,7 @@
 #include <SU3_ops.h>
 #include <types.h>
 
-#define PARAMETER_KEY_VALUE_DELIMITER ":"
+#define PARAMETER_KEY_DELIMITER ":"
 
 //	Implementation of the checkerboard subdivision of the lattice.
 #define BLACKRED_SWEEP(position, sweep) ((POSITION_IS_EVEN(position)) ^ ((sweep) & 1))
@@ -63,19 +64,19 @@ bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param) {
 	 * true if parameters are valid, false if invalid.
 	 */
 
-    return ((!strcmp(gfix_param.generic_gf.gauge_type, "coulomb") || 
-             !strcmp(gfix_param.generic_gf.gauge_type, "landau")    )   &&
-            gfix_param.omega_OR  >= 1 && gfix_param.omega_OR < 2        && 
-            gfix_param.generic_gf.tolerance > 0                         && 
-            gfix_param.generic_gf.error != true                         &&
-            gfix_param.generic_gf.sweeps_to_reunitarization > 0             );
+    return ((gfix_param.generic_gf.gauge_type == COULOMB || 
+             gfix_param.generic_gf.gauge_type == LANDAU          )&&
+            gfix_param.omega_OR  >= 1 && gfix_param.omega_OR < 2  && 
+            gfix_param.generic_gf.tolerance > 0                   && 
+            gfix_param.generic_gf.error != true                   &&
+            gfix_param.generic_gf.sweeps_to_reunitarization > 0     );
 }
 
 ORGaugeFixingParameters initParametersORDefault(){
     ORGaugeFixingParameters gfix_param = 
                     {.omega_OR = 1.95,  
                      .hits = 2,
-                     .generic_gf.gauge_type = "coulomb",           
+                     .generic_gf.gauge_type = COULOMB,           
                      .generic_gf.error = false,
                      .generic_gf.gfix_proxy = calculate_e2,
                      .generic_gf.tolerance = 1E-16,
@@ -111,7 +112,8 @@ void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param){
 	 */
 
     printf("\n");
-    printf("gauge type: %s\n", gfix_param.generic_gf.gauge_type);
+    printf("gauge type: %s\n", 
+           gfix_param.generic_gf.gauge_type == LANDAU ? "Landau" : "Coulomb");
     printf("max_hits: %u\n", gfix_param.hits);
     printf("omega_OR: %lf\n", gfix_param.omega_OR);
     printf("\n");
@@ -201,12 +203,12 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
 
     FILE * parameter_file = fopen(parameter_filename, "r");
 
-    char delimiter[] = PARAMETER_KEY_VALUE_DELIMITER;
+    char delimiter[] = PARAMETER_KEY_DELIMITER;
     char buff[100];
-    char gauge_type[100];
 
     if(parameter_file != NULL) {
         while(fgets(buff, 100, parameter_file)) {
+
 
             removeSpaces(buff);
 
@@ -215,15 +217,22 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
             
             char * value;
             value = strtok(NULL, "\n");
+
             if(value){
-                
+
                 if(!strcmp(key, "gauge_type")) {
-                    strcpy(gauge_type, tolower(value));
-                    if(!strcmp(gauge_type, "coulomb") || !strcmp(gauge_type, "landau")){
-                        strcpy(gfix_param.generic_gf.gauge_type, gauge_type);
+                    
+                    for(int i = 0; value[i]; i++){
+                        value[i] = tolower(value[i]);
+                    }
+                    
+
+                    if(!strcmp(value, "coulomb") || !strcmp(value, "landau")){
+                        gfix_param.generic_gf.gauge_type = 
+                                            !strcmp(value, "landau") ? LANDAU : COULOMB;
                     }
                     else{
-                        fprintf(stderr, "Gauge type not recognized: %s.\n", gauge_type);
+                        fprintf(stderr, "Gauge type not recognized: %s.\n", value);
                     }
                 }else if(!strcmp(key, "tolerance")) {
                     gfix_param.generic_gf.tolerance = atof(value);            
@@ -314,7 +323,7 @@ static int whenNextConvergenceCheckQ(unsigned int current_sweep,
 
 /* Calculates the gauge-fixing functional F, which is to be extremized when 
    performing the gauge-fixing. */
-double calculateF(Mtrx3x3 * restrict U, char * gauge_type) {
+double calculateF(Mtrx3x3 * restrict U, GaugeType gauge_type) {
 
     /*  
 	 * Calls:
@@ -359,7 +368,7 @@ double calculateF(Mtrx3x3 * restrict U, char * gauge_type) {
                 retrU_acc += creal(trace3x3(getLink(U, position, mu)));
 
             }
-            if(!(strcmp(gauge_type, "landau"))){
+            if(gauge_type == LANDAU){
                 retrU_acc += lattice_param.func_anisotropy *
                              creal(trace3x3(getLink(U, position, T_INDX)));
             }
@@ -371,14 +380,14 @@ double calculateF(Mtrx3x3 * restrict U, char * gauge_type) {
 
 /* Calculates an alternative index to measure proximity to gauge-fixing condition.
    theta = 1/(N_c V) sum_n Re Tr[(div.A(n)).(div.A(n))^dagger]. */
-double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
+double calculateTheta(Mtrx3x3 * restrict U, GaugeType gauge_type) {
 
     /*  
 	 * Calls:
 	 * =====
      * creal,
      * hermConj3x3, prod3x3, trace3x3,
-     * divergenceA3D, divergenceA4D.
+     * spatialDivergenceA, quadriDivergenceA.
 	 *
      * Macros:
 	 * ======
@@ -391,7 +400,8 @@ double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
      * 
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U:    SU(3) gluon field.
+	 * Mtrx3x3 * U:          SU(3) gluon field.
+     * GaugeType gauge_type: the type of gauge which is being fixed.
      *  
 	 * Returns:
 	 * =======
@@ -404,14 +414,8 @@ double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
 
     PosIndex t;
 
-    void (* div_func)(Mtrx3x3 *, PosVec, Mtrx3x3 *);
+    DivergenceType divergence_type = gauge_type == LANDAU ? QUADRI : COULOMB;
 
-    if(!strcmp(gauge_type, "landau")){
-        div_func = divergenceA4D;
-    }
-    else if (!strcmp(gauge_type, "coulomb")){
-        div_func = divergenceA3D;
-    }
     #pragma omp parallel for reduction (+:theta) num_threads(NUM_THREADS) \
                              schedule(dynamic)                            
     LOOP_TEMPORAL(t) {
@@ -423,7 +427,7 @@ double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
         Mtrx3x3 div_A, div_A_dagger, prod;
 
         LOOP_SPATIAL(position) {
-            div_func(U, position, &div_A);
+            DivergenceA(U, position, &div_A, divergence_type);
             hermConj3x3(&div_A, &div_A_dagger);
             prod3x3(&div_A, &div_A_dagger, &prod);
             theta += trace3x3(&prod);
@@ -437,13 +441,13 @@ double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type) {
 /* Calculates e2, an index to measure proximity to gauge-fixing condition
    (defined in eq 6.1 of hep-lat/0301019v2). It is the normalized sum of the squares 
    of the color components of the divergence of A. */    
-double calculate_e2(Mtrx3x3 * restrict U, char * gauge_type) {
+double calculate_e2(Mtrx3x3 * restrict U, GaugeType gauge_type) {
 
     /*
 	 * Calls:
 	 * =====
      * decomposeAlgebraSU3,
-     * divergenceA3D, divergenceA4D.
+     * spatialDivergenceA, quadriDivergenceA.
      * 
      * Macros:
 	 * ======
@@ -457,23 +461,19 @@ double calculate_e2(Mtrx3x3 * restrict U, char * gauge_type) {
 	 *
 	 * Parameters:
 	 * ==========
-	 * Mtrx3x3 * U:    SU(3) gluon field.
+	 * Mtrx3x3 * U:          SU(3) gluon field.
+     * GaugeType gauge_type: the type of gauge which is being fixed.
      *  
 	 * Returns:
 	 * =======
-	 * Value of gauge-fixing index e2 in double precision.
+	 * Value of gauge-fixing index e2 in double precision for defined gauge-type. If 
+     * gauge-type is unknown, returns -1.
      *
 	 */
     double e2 = 0.0;
 
-    void (* div_func)(Mtrx3x3 *, PosVec, Mtrx3x3 *);
-
-    if(!strcmp(gauge_type, "landau")){
-        div_func = divergenceA4D;
-    }
-    else if (!strcmp(gauge_type, "coulomb")){
-        div_func = divergenceA3D;
-    }
+    DivergenceType divergence_type;
+    divergence_type = (gauge_type == LANDAU) ? QUADRI : SPATIAL;
 
     PosIndex t;
     // Parallelizing by slicing the time extent
@@ -488,7 +488,7 @@ double calculate_e2(Mtrx3x3 * restrict U, char * gauge_type) {
 
             LOOP_SPATIAL(position) {
 
-                div_func(U, position, &div_A);
+                DivergenceA(U, position, &div_A, divergence_type);
                 decomposeAlgebraSU3(&div_A, &div_A_components);
                 for(SU3AlgIdx a = 1; a <= Nc * Nc - 1; a++) {
 
@@ -591,7 +591,7 @@ inline static void calculate_w(Mtrx3x3 * restrict U,
         accumulateFrontHearLink(U, position, mu, w);
 
     }
-    if(!strcmp(params.generic_gf.gauge_type, "landau")){
+    if(params.generic_gf.gauge_type == LANDAU){
         Mtrx3x3 temporal_links;
         setNull3x3(&temporal_links);
 
@@ -835,7 +835,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
     
     /* No need to calculate residue all the time because it will typically take some 
        hundreds/thousands of sweeps to fix the gauge. */
-    double new_residue = params.generic_gf.gfix_proxy(U);
+    double new_residue = params.generic_gf.gfix_proxy(U, params.generic_gf.gauge_type);
     printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
     
     int converge_check_due = whenNextConvergenceCheckQ(sweep, new_residue, params);
@@ -862,7 +862,7 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
 
         if(sweep == converge_check_due) {
             double last_residue = new_residue;
-            new_residue = params.generic_gf.gfix_proxy(U);
+            new_residue = params.generic_gf.gfix_proxy(U,params.generic_gf.gauge_type);
             if(fabs(new_residue - last_residue) / last_residue < 10E-16 ||
                sweep >= params.generic_gf.max_sweeps_to_fix                 ){
                 printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);

@@ -38,8 +38,7 @@
 
 #define MAX_LENGTH_NAME 100
 
-int writeSweepsToGaugefix(char * identifier,
-                          int sweeps) {
+int writeSweepsToGaugefix(char * identifier, int sweeps) {
 	
 	if(!validGeometricParametersQ()) {
 		fprintf(stderr, "Error in geometric parameters\n");
@@ -52,7 +51,7 @@ int writeSweepsToGaugefix(char * identifier,
 									     lattice_param.n_T);
     FILE* sweeps_to_gaugefix;
 
-    if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "a+")) == NULL) {
+    if((sweeps_to_gaugefix = fopen(filename_sweeps_to_gaugefix, "w+")) == NULL) {
         fprintf(stderr, "Error opening file %s to record sweeps needed to gaugefix.\n", 
                         filename_sweeps_to_gaugefix);
         return -1;
@@ -71,14 +70,17 @@ int main(int argc, char *argv[]) {
 
 	initGeometry(atoi(argv[3]), atoi(argv[4]));
 
+
 	ORGaugeFixingParameters gfix_param;
 	if(argc == 6){
 		gfix_param = initORGaugeFixingParameters(argv[5]);
+
 	}
 	else{
 		gfix_param = initORGaugeFixingParameters(" ");
 	}
 
+    
 	if((argc != 6 && argc != 5) 				   || 
 		!validORGaugeFixingParametersQ(gfix_param) ||
 		!validGeometricParametersQ()				 ) {
@@ -118,8 +120,8 @@ int main(int argc, char *argv[]) {
 		printf("Config from file %s loaded.\n", config_filename);
 	}
 
-	//	Reunitarizing right away because of loss of precision due to
-	//	storing config in single precision.	
+	//	Reunitarizing right away because of loss of precision due to storing config in 
+    //  single precision.	
 
 	if(reunitarizeField(U, DIM * lattice_param.volume)) {
 		fprintf(stderr, "Configuration in file %s could not be reunitarized.\n",
@@ -143,7 +145,8 @@ int main(int argc, char *argv[]) {
 	printf("Average trace of temporal plaquettes before gauge transformation: %.10lf\n", 
 													   averagePlaquette(U, "temporal"));
 	//  fix the gauge
-	int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
+	 int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
+     
 	printf("Average trace of spatial plaquettes after gauge transformation: %.10lf\n", 
 														averagePlaquette(U, "spatial"));
 	printf("Average trace of temporal plaquettes after gauge transformation: %.10lf\n", 
@@ -172,14 +175,13 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;		
 	}
 
-	//	Record the effort to gauge-fix
-	if(sweeps >= 0) {
-		printf("Sweeps needed to gauge-fix config from file %s: %d. residue: %3.2E \n", 
-				config_filename,
-				sweeps,
-				gfix_param.generic_gf.gfix_proxy(U));
-		writeSweepsToGaugefix(config_filename, sweeps);
-	}
+	// Record the effort to gauge-fix
+	// printf("Sweeps needed to gauge-fix config from file %s: %d. residue: %3.2E \n", 
+	// 		config_filename,
+	// 		sweeps,
+	// 		gfix_param.generic_gf.gfix_proxy(U,gfix_param.generic_gf.gauge_type));
+	// writeSweepsToGaugefix(config_filename, sweeps);
+	// 
 
 	// write the gauge fixed configuration to file
 	// if(writeConfig(U, strcat(config_filename, "fixed"))) {

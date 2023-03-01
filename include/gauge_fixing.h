@@ -27,13 +27,15 @@
 #include <types.h>
 #include <SU3_ops.h>
 
+typedef enum {LANDAU, COULOMB} GaugeType; 
+
 /* Generic gauge-fixing parameters */
 typedef struct {
 
-    char * gauge_type;
+    GaugeType gauge_type;
 
     double tolerance;
-    double (*gfix_proxy)(Mtrx3x3 * );
+    double (*gfix_proxy)(Mtrx3x3 *, GaugeType);
 
     unsigned max_sweeps_to_fix;
     unsigned estimate_sweeps_to_gf_progress;
@@ -62,9 +64,9 @@ ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filen
 
 void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param);
 
-double calculateF    (Mtrx3x3 * restrict U, char * gauge_type);
-double calculateTheta(Mtrx3x3 * restrict U, char * gauge_type);
-double calculate_e2  (Mtrx3x3 * restrict U, char * gauge_type);
+double calculateF    (Mtrx3x3 * restrict U, GaugeType gauge_type);
+double calculateTheta(Mtrx3x3 * restrict U, GaugeType gauge_type);
+double calculate_e2  (Mtrx3x3 * restrict U, GaugeType gauge_type);
 
 int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
                            Mtrx3x3 * restrict G, 

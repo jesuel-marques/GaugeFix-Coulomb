@@ -27,17 +27,16 @@
 #include <geometry.h>
 #include <SU3_ops.h>
 
+typedef enum {SPATIAL, QUADRI} DivergenceType;
+
 void calculateA (Mtrx3x3 * restrict U, 
                  const PosVec position,
                  const LorentzIdx mu, 
                  Mtrx3x3 * restrict A);
 
-void divergenceA3D(Mtrx3x3 * restrict U,
+void DivergenceA(Mtrx3x3 * restrict U,
                  const PosVec position, 
-                 Mtrx3x3 * restrict div_A);
-
-void divergenceA4D(Mtrx3x3 * restrict U,
-                 const PosVec position, 
-                 Mtrx3x3 * restrict div_A);
+                 Mtrx3x3 * restrict div_A,
+                 DivergenceType divergence_type);
 
 #endif  //FOURVECTORFIELD_H

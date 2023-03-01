@@ -5,8 +5,8 @@ tolerance:					            1.0E-16
 max_sweeps_to_fix:        			50000
 estimate_sweeps_to_gf_progress:     1000
 
-#   parameters specific to overrelaxation 
-omega_OR:                       1.97
+#   parameters specific to overrelaxation
+omega_OR:                       1.5
 hits:                           2	
 
 #reunitarization parameter
