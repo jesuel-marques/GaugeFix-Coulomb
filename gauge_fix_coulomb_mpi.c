@@ -175,14 +175,11 @@ int main(int argc, char *argv[]) {
 									"SOR algorithm seems not to work or be slower than "
 									"what the user expected for this particular config. \n", 
 									config_filename);
-					break;
 
 				case -2:
 					fprintf(stderr, "Error in parameters for gauge fixing\n");
-					break;
 
 				default:
-					break;
 			}
 			
 		}
@@ -192,7 +189,7 @@ int main(int argc, char *argv[]) {
 			printf("Sweeps needed to gauge-fix config from file %s: %d. residue: %3.2E \n", 
 					config_filename,
 					sweeps,
-					gfix_param.generic_gf.gfix_proxy(U, gfix_param.generic_gf.gauge_type)));
+					gfix_param.generic_gf.gfix_proxy(U, gfix_param.generic_gf.gauge_type));
 			writeSweepsToGaugefix(config_filename, sweeps);
 		}
 
