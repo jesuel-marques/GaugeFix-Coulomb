@@ -166,8 +166,7 @@ int main(int argc, char *argv[]) {
 		int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
 		
 		if(sweeps < 0) {
-			free(U);
-			free(G);
+
 			switch(sweeps) {
 				case -1:
 					fprintf(stderr, "Configuration in file %s could not be gauge-fixed "
@@ -175,11 +174,14 @@ int main(int argc, char *argv[]) {
 									"SOR algorithm seems not to work or be slower than "
 									"what the user expected for this particular config. \n", 
 									config_filename);
+                    break;
 
 				case -2:
 					fprintf(stderr, "Error in parameters for gauge fixing\n");
+                    break;
 
 				default:
+                    break;
 			}
 			
 		}
