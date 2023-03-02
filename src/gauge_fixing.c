@@ -842,7 +842,8 @@ int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
     
     while(new_residue > params.generic_gf.tolerance) {
         // Parallelizing by slicing the time extent
-        #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+        #pragma omp parallel num_threads(NUM_THREADS)
+        #pragma omp for schedule(dynamic) nowait
             for(PosIndex t = 0; t < lattice_param.n_T; t++) {
                 PosVec position;
                 position.pos[T_INDX] = t;
