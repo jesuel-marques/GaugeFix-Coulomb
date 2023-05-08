@@ -8,3 +8,4 @@ hostfile
 *.o
 *.d
 build/*
+.prettier*
