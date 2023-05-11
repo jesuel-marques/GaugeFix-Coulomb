@@ -63,6 +63,7 @@ typedef struct {
 //                     const unsigned short decimal_places);
 
 void copy2x2(const Mtrx2x2CK* restrict u, Mtrx2x2CK* restrict u_copy);
+void setSU2Random(Mtrx2x2CK* restrict u);
 
 void convertFromCK(const Mtrx2x2CK* restrict u_ck, Mtrx2x2* restrict u);
 

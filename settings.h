@@ -50,14 +50,14 @@
 // #define Z_INDX 2
 // #define T_INDX 3
 
-// #define T_INDX 0
-// #define Z_INDX 1
-// #define Y_INDX 2
-// #define X_INDX 3
-
 #define T_INDX 0
-#define X_INDX 1
+#define Z_INDX 1
 #define Y_INDX 2
-#define Z_INDX 3
+#define X_INDX 3
+
+// #define T_INDX 0
+// #define X_INDX 1
+// #define Y_INDX 2
+// #define Z_INDX 3
 
 #endif  // SETTINGS_H

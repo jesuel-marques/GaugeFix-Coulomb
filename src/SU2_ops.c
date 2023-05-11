@@ -87,7 +87,7 @@ void copy2x2(const Mtrx2x2CK* restrict u,
     }
 }
 
-inline void setSU2Random(Mtrx2x2CK* restrict u) {
+void setSU2Random(Mtrx2x2CK* restrict u) {
     /*
      * Calls:
      * =====

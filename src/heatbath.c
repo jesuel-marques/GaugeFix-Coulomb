@@ -48,47 +48,45 @@ static inline void HeatBathSubmatrix(Mtrx3x3* restrict u, Submtrx sub, Mtrx3x3* 
 
     double modx, modf, mod_sqrd_f;
 
-    Mtrx2x2CK w, w_dagger;
+    Mtrx2x2CK w_dagger;
     Mtrx2x2CK update_SU2;
 
-    w.m[0] = 0.5 * creal(W->m[ELEM_3X3(a, a)] + W->m[ELEM_3X3(b, b)]);
-    w.m[1] = 0.5 * cimag(W->m[ELEM_3X3(a, b)] + W->m[ELEM_3X3(b, a)]);
-    w.m[2] = 0.5 * creal(W->m[ELEM_3X3(a, b)] - W->m[ELEM_3X3(b, a)]);
-    w.m[3] = 0.5 * cimag(W->m[ELEM_3X3(a, a)] - W->m[ELEM_3X3(b, b)]);
+    w_dagger.m[0] = 0.5 * creal(W->m[ELEM_3X3(a, a)] + W->m[ELEM_3X3(b, b)]);
+    w_dagger.m[1] = -0.5 * cimag(W->m[ELEM_3X3(a, b)] + W->m[ELEM_3X3(b, a)]);
+    w_dagger.m[2] = -0.5 * creal(W->m[ELEM_3X3(a, b)] - W->m[ELEM_3X3(b, a)]);
+    w_dagger.m[3] = -0.5 * cimag(W->m[ELEM_3X3(a, a)] - W->m[ELEM_3X3(b, b)]);
 
-    Scalar detw = projectSU2(&w);
-    hermConj2x2(&w, &w_dagger);
-
-    // 1.1.1 ENCONTRANDO x0
+    double detw = projectSU2(&w_dagger);
 
     double e[4], f[3];
 
     do {
         ranlxd(e, 4);
 
+#pragma unroll(4)
         for (int i = 0; i < 4; i++) {
             e[i] = 1.0 - e[i];
         }
 
         lambda_squared = -((double)1.0 / (2.0 * (2.0 / 3.0) * sqrt(detw) * beta)) * (log(e[1]) + pow2(cos(2.0 * M_PI * e[2])) * log(e[3]));
-    } while ((pow2(e[0]) > 1.0 - lambda_squared));
+    } while (pow2(e[0]) > 1.0 - lambda_squared);
 
     x.m[0] = 1.0 - 2.0 * lambda_squared;
 
-    // 1.1.2 ENCONTRANDO xi
     modx = sqrt(1.0 - pow2(x.m[0]));
 
     do {
         ranlxd(f, 3);
-
+#pragma unroll(3)
         for (int c = 0; c < 3; c++) {
-            f[c] = 2.0 * (1.0 - f[c]) - 1.0;
+            f[c] = 1.0 - 2.0 * f[c];
         }
 
         mod_sqrd_f = pow2(f[0]) + pow2(f[1]) + pow2(f[2]);
     } while (mod_sqrd_f > 1.0);
 
     modf = sqrt(mod_sqrd_f);
+#pragma unroll(3)
     for (int c = 1; c <= 3; c++) {
         x.m[c] = ((double)f[c - 1] / modf) * modx;
     }
@@ -109,8 +107,9 @@ double HeatBathSU3(Mtrx3x3* restrict U, PosVec position, LorentzIdx mu, double b
 
     sumStaples(U, position, mu, &staple_sum);
     prod3x3(u, &staple_sum, &W);
-    double old_action_contribution = -(beta / (double)Nc) * creal(trace3x3(&W));
+    double old_action_contribution = creal(trace3x3(&W));
 
+#pragma unroll(3)
     for (Submtrx sub = R; sub <= T; sub++) {
         HeatBathSubmatrix(u, sub, &W, beta);
         prod3x3(u, &staple_sum, &W);
@@ -118,8 +117,8 @@ double HeatBathSU3(Mtrx3x3* restrict U, PosVec position, LorentzIdx mu, double b
 
     projectSU3(u);
 
-    double new_action_contribution = -(beta / (double)Nc) * creal(trace3x3(&W));
-    return new_action_contribution - old_action_contribution;
+    double new_action_contribution = creal(trace3x3(&W));
+    return -(beta / Nc) * (new_action_contribution - old_action_contribution);
 }
 
 double updateLattice(Mtrx3x3* restrict U,

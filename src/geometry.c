@@ -128,13 +128,11 @@ inline PosVec getNeighbour(PosVec position, LorentzIdx mu, Direction dir) {
 
     PosVec neighbour = position;
 
-    if (dir == REAR) {
-        neighbour.pos[mu]--;
-    } else {
-        neighbour.pos[mu]++;
-    }
+    dir == REAR ? neighbour.pos[mu]-- : neighbour.pos[mu]++;
 
-    return makePeriodicBound(neighbour);
+    neighbour.pos[mu] = mod(neighbour.pos[mu], mu != T_INDX ? lattice_param.n_SPC : lattice_param.n_T);
+
+    return neighbour;
 }
 
 /* Check if current geometric parameters are valid. */

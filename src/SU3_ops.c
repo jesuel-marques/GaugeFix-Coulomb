@@ -182,6 +182,8 @@ inline void setSU3Random(Mtrx3x3* u) {
     setIdentity3x3(u);
 
     for (Submtrx sub = R; sub < T; sub++) {
+        setSU2Random(&aux);
+
         a = sub == T ? 1 : 0;
         b = sub == R ? 1 : 2;
         accumProdSU2_3x3(&aux, u, a, b);
@@ -326,14 +328,9 @@ inline void hermConj3x3(const Mtrx3x3* restrict u,
      *
      */
 
-    u_dagger->m[ELEM_3X3(0, 0)] = conj(u->m[ELEM_3X3(0, 0)]);
-    u_dagger->m[ELEM_3X3(1, 1)] = conj(u->m[ELEM_3X3(1, 1)]);
-    u_dagger->m[ELEM_3X3(2, 2)] = conj(u->m[ELEM_3X3(2, 2)]);
-
     MtrxIdx3 a, b;
     LOOP_3X3(a, b) {
         u_dagger->m[ELEM_3X3(b, a)] = conj(u->m[ELEM_3X3(a, b)]);
-        u_dagger->m[ELEM_3X3(a, b)] = conj(u->m[ELEM_3X3(b, a)]);
     }
 }
 
@@ -513,15 +510,10 @@ void prodThree3x3(const Mtrx3x3* restrict u,
      *
      */
 
-    MtrxIdx3 a, b, c, d;
-    LOOP_3X3(a, b) {
-        uvw->m[ELEM_3X3(a, b)] = 0.0;
-        LOOP_3(c) {
-            LOOP_3(d) {
-                uvw->m[ELEM_3X3(a, b)] += (u->m[ELEM_3X3(a, c)]) * (v->m[ELEM_3X3(c, d)]) * (w->m[ELEM_3X3(d, b)]);
-            }
-        }
-    }
+    Mtrx3x3 aux;
+
+    prod3x3(u, v, &aux);
+    prod3x3(&aux, w, uvw);
 }
 
 /* Calculates product of four 3x3 matrices. */
@@ -554,17 +546,11 @@ void prodFour3x3(const Mtrx3x3* restrict u,
      *
      */
 
-    MtrxIdx3 a, b, c, d, e;
-    LOOP_3X3(a, b) {
-        uvwx->m[ELEM_3X3(a, b)] = 0.0;
-        LOOP_3(c) {
-            LOOP_3(d) {
-                LOOP_3(e) {
-                    uvwx->m[ELEM_3X3(a, b)] += (u->m[ELEM_3X3(a, c)]) * (v->m[ELEM_3X3(c, d)]) * (w->m[ELEM_3X3(d, e)]) * (x->m[ELEM_3X3(e, b)]);
-                }
-            }
-        }
-    }
+    Mtrx3x3 aux1, aux2;
+
+    prod3x3(u, v, &aux1);
+    prod3x3(w, x, &aux2);
+    prod3x3(&aux1, &aux2, uvwx);
 }
 
 /* Calculates matrix product between g and acc_prod and

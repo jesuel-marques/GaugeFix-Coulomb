@@ -40,10 +40,12 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    setFieldToIdentity(U, lattice_param.volume * DIM);
+    // setFieldToIdentity(U, lattice_param.volume * DIM);
+    setFieldSU3Random(U, lattice_param.volume * DIM);
+
     double av_plaq = averagePlaquette(U, "total");
     for (int sweeps = 0; sweeps < max_sweeps; sweeps++) {
-        printf("average_plaq: %.10lf\n", av_plaq);
+        printf("%.10lf\n", av_plaq);
         av_plaq += -updateLattice(U, beta, HeatBathSU3) / (6 * 8 * 8 * 8 * 8 * beta);
     }
 
