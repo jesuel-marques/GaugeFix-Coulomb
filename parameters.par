@@ -7,7 +7,7 @@ estimate_sweeps_to_gf_progress:     1000
 
 #   parameters specific to overrelaxation
 omega_OR:                       1.995
-hits:                           2	
+hits:                           2
 
 #reunitarization parameter
 sweeps_to_reunitarization:  		250

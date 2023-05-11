@@ -184,27 +184,27 @@ int main(int argc, char *argv[]) {
 	// 
 
 	// write the gauge fixed configuration to file
-	// if(writeConfig(U, strcat(config_filename, "fixed"))) {
-	// 	fprintf(stderr, "Fixed config writing failed for config %s.\n", config_filename);
-	// }
-	// else{
-	// 	printf("U fixed written for config %s.\n", config_filename);
-	// }
+	if(writeConfig(U, strcat(config_filename, "fixed"))) {
+		fprintf(stderr, "Fixed config writing failed for config %s.\n", config_filename);
+	}
+	else{
+		printf("U fixed written for config %s.\n", config_filename);
+	}
 
 	free(U);		//	Free memory allocated for the configuration.
 
 	// write the gauge transformation to file
-	if(writeGaugeTransf(G, gauge_transf_filename)) {
-		fprintf(stderr, "Gauge transformation writing to file %s"
-						"failed for configuration %s .\n",
-						 gauge_transf_filename,
-						 config_filename);
-	}
-	else{
-		printf("G for config %s written to file %s.\n", 
-				config_filename,
-				gauge_transf_filename);
-	}
+	// if(writeGaugeTransf(G, gauge_transf_filename)) {
+	// 	fprintf(stderr, "Gauge transformation writing to file %s"
+	// 					"failed for configuration %s .\n",
+	// 					 gauge_transf_filename,
+	// 					 config_filename);
+	// }
+	// else{
+	// 	printf("G for config %s written to file %s.\n", 
+	// 			config_filename,
+	// 			gauge_transf_filename);
+	// }
 	
 	free(G);		//	Free memory allocated for gauge transformation.
 	// finalizeGeometry();

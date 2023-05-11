@@ -4,7 +4,7 @@ BUILD_DIR := build
 
 RM = rm -f
 CC := gcc
-CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=skylake-avx512 -mtune=skylake-avx512 -fopenmp -w -DNUM_THREADS=`nproc`
+CFLAGS := -I$(INCLUDE_DIR) -std=c99 -O4 -march=native -mtune=native -fopenmp -w -DNUM_THREADS=`nproc` -DAVX2
 
 WARNINGS:= -Wall -Wextra
 
@@ -19,7 +19,7 @@ OBJECTS = $(patsubst %, $(BUILD_DIR)/%, $(_OBJECTS))
 _DEPENDS = $(patsubst $(SOURCE_DIR)/%.c, %.d, $(SOURCES))
 DEPENDS = $(patsubst %, $(BUILD_DIR)/%, $(_DEPENDS))
 
-BINARIES = gfix
+BINARIES = gfix configGen
 
 .PHONY: all clean
 
@@ -28,6 +28,10 @@ all: $(BINARIES)
 
 gfix: $(OBJECTS) gfix.c
 	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
+
+configGen: $(OBJECTS) configGen.c
+	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
+
 
 -include $(DEPENDS)
 
