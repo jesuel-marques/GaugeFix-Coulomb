@@ -326,6 +326,13 @@ PosVec assignPosition(const PosIndex x,
     return position;
 }
 
+bool samePositionQ(PosVec position1, PosVec position2) {
+    return position1.pos[T_INDX] == position2.pos[T_INDX] &&
+           position1.pos[X_INDX] == position2.pos[X_INDX] &&
+           position1.pos[Y_INDX] == position2.pos[Y_INDX] &&
+           position1.pos[Z_INDX] == position2.pos[Z_INDX];
+}
+
 /* Prints a position to the screen. */
 void printPosVec(const PosVec position) {
     /*

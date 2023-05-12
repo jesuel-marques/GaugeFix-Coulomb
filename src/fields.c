@@ -442,7 +442,7 @@ void applyGaugeTransformationU(Mtrx3x3 *restrict U,
             LOOP_LORENTZ(mu) {
                 //	U'_mu(x) = g(x) . U_mu(x) . gdagger(x + mu)
                 prod_vuwdagger3x3(g,
-                                  u = getLink(U, position, mu),
+                                  getLink(U, position, mu),
                                   getGaugetransf(G, getNeighbour(position, mu, FRONT)),
                                   &u_updated);
 

@@ -130,6 +130,7 @@ PosVec assignPosition(const PosIndex x,
                       const PosIndex y,
                       const PosIndex z,
                       const PosIndex t);
+bool samePositionQ(PosVec position1, PosVec position2);
 
 void printPosVec(const PosVec u);
 
