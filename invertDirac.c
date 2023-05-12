@@ -1,3 +1,4 @@
+#include <SU3_ops.h>
 #include <bicgstab.h>
 #include <geometry.h>
 #include <stdio.h>
@@ -8,10 +9,7 @@ int main(int argc, char* argv[]) {
 
     initGeometry(atoi(argv[2]), atoi(argv[3]));
 
-    ORGaugeFixingParameters gfix_param;
-
     if ((argc != 6 && argc != 5) ||
-        !validORGaugeFixingParametersQ(gfix_param) ||
         !validGeometricParametersQ()) {
         fprintf(stderr,
                 "Bad input.\n"
@@ -26,10 +24,8 @@ int main(int argc, char* argv[]) {
                 "n_SPC: %d \nn_T: %d \n"
                 "omega_OR : %lf \n"
                 "tolerance : %3.2E \n",
-                lattice_param.n_SPC, lattice_param.n_T,
-                gfix_param.omega_OR, gfix_param.generic_gf.tolerance);
+                lattice_param.n_SPC, lattice_param.n_T);
         fprintf(stderr, "Initializing gauge-fixing parameters to default instead.\n");
-        gfix_param = initParametersORDefault();
     }
 
     const Mtrx3x3* U = allocate3x3Field(DIM * lattice_param.volume);
@@ -47,7 +43,9 @@ int main(int argc, char* argv[]) {
         printf("Config from file %s loaded.\n", config_filename);
     }
 
-    free(U);  //	Free memory allocated for the configuration.
+    initializePointSource(
+
+        free(U);  //	Free memory allocated for the configuration.
 
     return EXIT_SUCCESS;
 }

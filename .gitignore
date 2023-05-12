@@ -10,3 +10,4 @@ hostfile
 build/*
 bins/*
 parameters/*
+.vscode/*
