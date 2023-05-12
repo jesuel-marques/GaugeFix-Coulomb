@@ -1,6 +1,7 @@
 INCLUDE_DIR := include
 SOURCE_DIR := src
 BUILD_DIR := build
+BINS_DIR := bins
 
 RM = rm -f
 CC := gcc
@@ -27,10 +28,10 @@ all: $(BINARIES)
 
 
 gfix: $(OBJECTS) gfix.c
-	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
+	$(CC) -o $(BINS_DIR)/$@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
 
 configGen: $(OBJECTS) configGen.c
-	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
+	$(CC) -o $(BINS_DIR)/$@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
 
 
 -include $(DEPENDS)

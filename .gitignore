@@ -8,3 +8,5 @@ hostfile
 *.o
 *.d
 build/*
+bins/*
+parameters/*

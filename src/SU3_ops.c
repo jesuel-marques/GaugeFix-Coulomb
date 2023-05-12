@@ -511,7 +511,6 @@ void prodThree3x3(const Mtrx3x3* restrict u,
      */
 
     Mtrx3x3 aux;
-
     prod3x3(u, v, &aux);
     prod3x3(&aux, w, uvw);
 }
