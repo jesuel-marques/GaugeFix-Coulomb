@@ -1,21 +1,78 @@
 #include <SU3_ops.h>
+#include <dirac.h>
 #include <fields.h>
 #include <geometry.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <tgmath.h>
 
 #define ELEM_VEC_INV(v, position, dirac, color) ((v) + (((((position.pos[T_INDX]) * lattice_param.n_SPC + (position.pos[X_INDX])) * lattice_param.n_SPC + (position.pos[Y_INDX])) * lattice_param.n_SPC + (position.pos[Z_INDX])) * 4 + (dirac)) * Nc + (color))
 
-double complex Gamma[DIM][4][4];  // Matrizes gama de Dirac
-// double complex Sigma[d][d][4][4];	//	Matrizes sigma de Dirac/* Vou ignorar improvements por enquanto */
+DiracMatrix gamma[DIM] = {{{{0, 0, 1, 0},
+                            {0, 0, 0, 1},
+                            {1, 0, 0, 0},
+                            {0, 1, 0, 0}}},
 
-double complex identityDirac[4][4];  // Identidade no espaço de Dirac
+                          {{{0, 0, 0, -I},
+                            {0, 0, -I, 0},
+                            {0, I, 0, 0},
+                            {I, 0, 0, 0}}},
 
-double complex identityDiracminusGamma[DIM][4][4];  //	Identidade menos gama de Dirac
-double complex identityDiracplusGamma[DIM][4][4];   //	Identidade mais gama de Dirac
+                          {{{0, 0, 0, -1},
+                            {0, 0, 1, 0},
+                            {0, 1, 0, 0},
+                            {-1, 0, 0, 0}}},
 
-#define LOOP_DIRAC(alpha) for (alpha = 0; alpha < 4; alpha++)
+                          {{{0, 0, -I, 0},
+                            {0, 0, 0, I},
+                            {I, 0, 0, 0},
+                            {0, -I, 0, 0}}}};
+
+DiracMatrix identity_plus_gamma[DIM] = {{{{1, 0, 1, 0},
+                                          {0, 1, 0, 1},
+                                          {1, 0, 1, 0},
+                                          {0, 1, 0, 1}}},
+
+                                        {{{1, 0, 0, -I},
+                                          {0, 1, -I, 0},
+                                          {0, I, 1, 0},
+                                          {I, 0, 0, 1}}},
+
+                                        {{{1, 0, 0, -1},
+                                          {0, 1, 1, 0},
+                                          {0, 1, 1, 0},
+                                          {-1, 0, 0, 1}}},
+
+                                        {{{1, 0, -I, 0},
+                                          {0, 1, 0, I},
+                                          {I, 0, 1, 0},
+                                          {0, -I, 0, 1}}}};
+
+static DiracMatrix identity_minus_gamma[4] = {{{{1, 0, -1, 0},
+                                                {0, 1, 0, -1},
+                                                {-1, 0, 1, 0},
+                                                {0, -1, 0, 1}}},
+
+                                              {{{1, 0, 0, I},
+                                                {0, 1, I, 0},
+                                                {0, -I, 1, 0},
+                                                {-I, 0, 0, 1}}},
+
+                                              {{{1, 0, 0, 1},
+                                                {0, 1, -1, 0},
+                                                {0, -1, 1, 0},
+                                                {1, 0, 0, 1}}},
+
+                                              {{{1, 0, I, 0},
+                                                {0, 1, 0, -I},
+                                                {-I, 0, 1, 0},
+                                                {0, I, 0, 1}}}};
+
+static DiracMatrix identityDirac = {{{1, 0, 0, 0},
+                                     {0, 1, 0, 0},
+                                     {0, 0, 1, 0},
+                                     {0, 0, 0, 1}}};
 
 static void copy_vector(Scalar *f, Scalar *copy_f, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
@@ -23,15 +80,9 @@ static void copy_vector(Scalar *f, Scalar *copy_f, size_t number_of_elements) {
     }
 }
 
-static void prodwithscalarVector(double complex num, Scalar *f, Scalar *result, size_t number_of_elements) {
+static void prodwithscalarVector(Scalar num, Scalar *f, Scalar *result, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
         result[i] = num * f[i];
-    }
-}
-
-static void accumulateVector(Scalar *f, Scalar *result, size_t number_of_elements) {
-    for (size_t i = 0; i < number_of_elements; i++) {
-        result[i] += f[i];
     }
 }
 
@@ -43,30 +94,30 @@ static void subtractVector(Scalar *f, Scalar *g, Scalar *result, size_t number_o
 
 static void fmaVector(Scalar *f, Scalar num, Scalar *g, Scalar *result, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
-        result[i] = fma(num, g[i], f[i]);
+        result[i] = f[i] + num * g[i];
     }
 }
 
 static void fmaaccumulateVector(Scalar *f, Scalar num, Scalar *g, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
-        f[i] += fma(num, g[i], f[i]);
+        f[i] += num * g[i];
     }
 }
 
 static void doublefmaVector(Scalar *f, Scalar num1, Scalar *g1, Scalar num2, Scalar *g2, Scalar *result, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
-        result[i] = fma(num2, g2[i], fma(num1, g1[i], f[i]));
+        result[i] = f[i] + num1 * g1[i] + num2 * g2[i];
     }
 }
 
 static void doublefmaaccumulateVector(Scalar *f, Scalar num1, Scalar *g1, Scalar num2, Scalar *g2, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
-        f[i] = fma(num2, g2[i], fma(num1, g1[i], f[i]));
+        f[i] += num1 * g1[i] + num2 * g2[i];
     }
 }
 
 static Scalar dotproductVector(Scalar *f, Scalar *g, size_t number_of_elements) {
-    Scalar dot_product;
+    Scalar dot_product = 0.0;
     for (size_t i = 0; i < number_of_elements; i++) {
         dot_product += conj(f[i]) * g[i];
     }
@@ -112,13 +163,27 @@ void actDiracOperator(Mtrx3x3 *U, double kappa, Scalar *f, Scalar *g) {
 
                         LOOP_DIRAC(alphap) {
                             LOOP_3(ap) {
-                                prod1 = -kappa * identityDiracminusGamma[mu][alpha][alphap] * (link1.m[ELEM_3X3(a, ap)]) * (*(ELEM_VEC_INV(f, positionp1, alphap, ap)));
+                                prod1 = -kappa *
+                                        identity_minus_gamma[mu].m[alpha][alphap] *
+                                        (link1.m[ELEM_3X3(a, ap)]) *
+                                        (*(ELEM_VEC_INV(f, positionp1, alphap, ap)));
 
-                                prod1 = -kappa * identityDiracplusGamma[mu][alpha][alphap] * (link2.m[ELEM_3X3(a, ap)]) * (*(ELEM_VEC_INV(f, positionp2, alphap, ap)));
+                                prod2 = -kappa *
+                                        identity_plus_gamma[mu].m[alpha][alphap] *
+                                        (link2.m[ELEM_3X3(a, ap)]) *
+                                        (*(ELEM_VEC_INV(f, positionp2, alphap, ap)));
 
                                 //	Anti-periodic boundary condition
-                                (*(ELEM_VEC_INV(g, position, alpha, a))) += (mu != T_INDX || position.pos[T_INDX] != (lattice_param.n_T - 1)) ? prod1 : -prod1;
-                                (*(ELEM_VEC_INV(g, position, alpha, a))) += (mu != T_INDX || position.pos[T_INDX] != 0) ? prod2 : -prod2;
+                                (*(ELEM_VEC_INV(g, position, alpha, a))) +=
+                                    (mu != T_INDX ||
+                                     position.pos[T_INDX] != (lattice_param.n_T - 1))
+                                        ? prod1
+                                        : -prod1;
+                                (*(ELEM_VEC_INV(g, position, alpha, a))) +=
+                                    (mu != T_INDX ||
+                                     position.pos[T_INDX] != 0)
+                                        ? prod2
+                                        : -prod2;
                             }
                         }
                     }
@@ -146,14 +211,23 @@ void initializePointSource(PosVec source_position, int dirac_index, int color_in
         LOOP_SPATIAL(position) {
             LOOP_DIRAC(alpha) {
                 LOOP_3(a) {
-                    *(ELEM_VEC_INV(source, position, alpha, a)) = (samePositionQ(position, source_position) || alpha == dirac_index || a == color_index) ? 0.0 : 1.0;
+                    *(ELEM_VEC_INV(source, position, alpha, a)) =
+                        (samePositionQ(position, source_position) &&
+                         alpha == dirac_index &&
+                         a == color_index)
+                            ? 1.0
+                            : 0.0;
+                    // if (*(ELEM_VEC_INV(source, position, alpha, a)) == 1.0) {
+                    //     printf("dirac: %d color: %d \n", dirac_index, color_index);
+                    //     printPosVec(position);
+                    //     getchar();
                 }
             }
         }
     }
 }
 
-void BiCGStab(int dirac_index, int color_index, double kappa, double tolerance, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column) {
+void BiCGStab(double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, double tolerance) {
     //	Algoritmo para inversão da matriz de Dirac (descrito em Gattringer pg. 140 e Leandro pg. 110)
 
     // Variáveis do algoritmo de inversão
@@ -165,8 +239,8 @@ void BiCGStab(int dirac_index, int color_index, double kappa, double tolerance, 
 
     Scalar *v;
     Scalar *p;
-    Scalar *aux1;  // b e t na notação do Leandro
-    Scalar *aux2;  // s na notação do Leandro
+    Scalar *t;  // b e t na notação do Leandro
+    Scalar *s;  // s na notação do Leandro
 
     const size_t sizeof_vector = lattice_param.volume * 4 * Nc;
 
@@ -175,8 +249,8 @@ void BiCGStab(int dirac_index, int color_index, double kappa, double tolerance, 
     rtilde = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
     v = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
     p = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
-    aux1 = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
-    aux2 = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    t = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    s = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
 
     int cont = 0;
 
@@ -194,18 +268,20 @@ void BiCGStab(int dirac_index, int color_index, double kappa, double tolerance, 
     bool first_iteration = true;
     bool inverted = false;
 
-    copy_vector(source, aux1, sizeof_vector);
+    // copy_vector(source, t, sizeof_vector);
 
-    copy_vector(aux1, x, sizeof_vector); /*x0=b*/
+    copy_vector(source, x, sizeof_vector); /*x0=b*/
 
-    actDiracOperator(U, kappa, x, aux2);          /*aux2=A.x0*/
-    subtractVector(aux1, aux2, r, sizeof_vector); /*r=b-A.x0*/
+    actDiracOperator(U, kappa, x, s); /*s=A.x0*/
+    // printf("%.18lf\n", *ELEM_VEC_INV(s, assignPosition(2, 1, 4, 3), 1, 2));
+    subtractVector(source, s, r, sizeof_vector); /*r=b-A.x0*/
 
     copy_vector(r, rtilde, sizeof_vector); /*rtilde=r*/
 
     do {
         rho = dotproductVector(rtilde, r, sizeof_vector); /*rho=rtildedag.r*/
-
+        // printf("alpha: %lf beta: %lf omega: %lf rho: %lf\n", alpha, beta, omega, rho);
+        // getchar();
         if (rho == 0.0) {
             printf("Method failed.");
         }
@@ -217,18 +293,18 @@ void BiCGStab(int dirac_index, int color_index, double kappa, double tolerance, 
 
         else {
             beta = alpha * rho / (omega * previous_rho);
-            doublefmaVector(r, beta, p, -beta * omega, v, aux1, sizeof_vector); /*aux1=r+beta*(p-omega*v)*/
-            copy_vector(aux1, p, sizeof_vector);                                /*p=r+beta*(p-omega*v)*/
+            doublefmaVector(r, beta, p, -beta * omega, v, t, sizeof_vector); /*t=r+beta*(p-omega*v)*/
+            copy_vector(t, p, sizeof_vector);                                /*p=r+beta*(p-omega*v)*/
         }
         actDiracOperator(U, kappa, p, v); /*v=A.p*/
         alpha = rho / dotproductVector(rtilde, v, sizeof_vector);
-        fmaVector(r, -alpha, v, aux2, sizeof_vector); /*s=r-alfa*v*/
+        fmaVector(r, -alpha, v, s, sizeof_vector); /*s=r-alpha*v*/
 
         /*auxa=sdag.s*/
-        norm = fabs(creal(dotproductVector(aux2, aux2, sizeof_vector)));
+        norm = fabs(creal(dotproductVector(s, s, sizeof_vector)));
 
         if (cont % 5 == 0)
-            printf("norm s: %3.2E in Dirac %d Color %d\n", norm, dirac_index, color_index);
+            printf("norm s: %3.2E\n", norm);
 
         if (norm < tolerance) {
             fmaaccumulateVector(x, alpha, p, sizeof_vector); /*x=x+alfa*p*/
@@ -237,13 +313,13 @@ void BiCGStab(int dirac_index, int color_index, double kappa, double tolerance, 
         }
 
         else {
-            actDiracOperator(U, kappa, aux2, aux1); /*t=A.s*/
+            actDiracOperator(U, kappa, s, t); /*t=A.s*/
 
-            omega = dotproductVector(aux1, aux2, sizeof_vector) / dotproductVector(aux1, aux1, sizeof_vector); /*omega=tdag.s/tdag.t*/
+            omega = dotproductVector(t, s, sizeof_vector) / dotproductVector(t, t, sizeof_vector); /*omega=tdag.s/tdag.t*/
 
-            fmaVector(aux2, -omega, aux1, r, sizeof_vector);
+            fmaVector(s, -omega, t, r, sizeof_vector); /* r = s - omega*t*/
 
-            doublefmaaccumulateVector(x, alpha, p, omega, aux2, sizeof_vector);
+            doublefmaaccumulateVector(x, alpha, p, omega, s, sizeof_vector);
             /*x=x+alfa*p+omega*s*/
 
             previous_rho = rho;
@@ -253,7 +329,7 @@ void BiCGStab(int dirac_index, int color_index, double kappa, double tolerance, 
 
     } while (!inverted);
 
-    CopiarVetorInversao(x, inverse_column);
+    copy_vector(x, inverse_column, sizeof_vector);
 
     free(x);
 
@@ -263,6 +339,6 @@ void BiCGStab(int dirac_index, int color_index, double kappa, double tolerance, 
     free(v);
     free(p);
 
-    free(aux1);
-    free(aux2);
+    free(t);
+    free(s);
 }
