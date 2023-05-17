@@ -5,9 +5,9 @@ hostfile
 *.txt
 *.cfg
 *.o
-*.o
 *.d
 build/*
-bins/*
+bin/*
 parameters/*
 .vscode/*
+Mathematica/*

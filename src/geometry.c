@@ -286,8 +286,8 @@ inline bool positionmuValidQ(PosVec position,
 /* Assigns numbers to a PosVec position struct, implementing the periodic boundary
    conditions. */
 PosVec assignPosition(const PosIndex x,
-                      const PosIndex z,
                       const PosIndex y,
+                      const PosIndex z,
                       const PosIndex t) {
     /*
      * Calls:

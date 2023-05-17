@@ -1,7 +1,7 @@
 INCLUDE_DIR := include
 SOURCE_DIR := src
 BUILD_DIR := build
-BINS_DIR := bins
+BINS_DIR := bin
 
 RM = rm -f
 CC := gcc

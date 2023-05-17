@@ -4,6 +4,7 @@
 #include <fields.h>
 #include <fields_io.h>
 #include <geometry.h>
+#include <measurement.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +16,7 @@ int main(int argc, char* argv[]) {
 
     initGeometry(atoi(argv[2]), atoi(argv[3]));
     double kappa_critical = 0.1392;
+    // double kappa_critical = 1. / 4;
 
     double kappa = atof(argv[4]);
     double tolerance = atof(argv[5]);
@@ -33,27 +35,41 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Initializing gauge-fixing parameters to default instead.\n");
     }
 
+    char* inverse_filename = argv[6];
+
     const Mtrx3x3* U = allocate3x3Field(DIM * lattice_param.volume);
     if (U == NULL) {
         fprintf(stderr, "Could not allocate memory for config in file %s.\n",
                 config_filename);
         return EXIT_FAILURE;
     }
-    int error;
-    if (error = loadConfig(U, config_filename)) {
-        fprintf(stderr, "Loading of file %s failed. Error %d.\n", config_filename, error);
-        free(U);
-        return EXIT_FAILURE;
-    } else {
-        printf("Config from file %s loaded.\n", config_filename);
-    }
+
     // setFieldToIdentity(U, DIM * lattice_param.volume);
 
-    double am = 1.0 / (2.0 * kappa) - 1.0 / (2.0 * kappa_critical);
+    // int error;
+    // if (error = loadConfig(U, config_filename)) {
+    //     fprintf(stderr, "Loading of file %s failed. Error %d.\n", config_filename, error);
+    //     free(U);
+    //     return EXIT_FAILURE;
+    // } else {
+    //     printf("Config from file %s loaded.\n", config_filename);
+    // }
 
+    loadConfigPlainText(U, config_filename);
+    printf("plaquette average: %.18lf\n", averagePlaquette(U, "total"));
+
+    // FILE* dirac_op_file;
+    // char dirac_op_filename[MAX_SIZE];
+    // sprintf(dirac_op_filename, "%s.dirac_op", config_filename);
+    // dirac_op_file = fopen(dirac_op_filename, "w");
+    // printDiracOP(U, kappa, dirac_op_file);
+    // fclose(dirac_op_file);
+
+    double am = 1.0 / (2.0 * kappa) - 1.0 / (2.0 * kappa_critical);
     printf("kappa: %lf \t am: %lf\n", kappa, am);
+
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;
-    Scalar* inverse_column[4][3];
+    Scalar* inverse_columns[4][Nc];
 
     int alpha;
     MtrxIdx3 a;
@@ -62,39 +78,23 @@ int main(int argc, char* argv[]) {
         LOOP_3(a) {
             Scalar* source = (Scalar*)calloc(sizeof_vector, sizeof(Scalar));
 
-            inverse_column[alpha][a] = (Scalar*)calloc(sizeof_vector, sizeof(Scalar));
+            inverse_columns[alpha][a] = (Scalar*)calloc(sizeof_vector, sizeof(Scalar));
             initializePointSource(assignPosition(0, 0, 0, 0), alpha, a, source);
-            BiCGStab(kappa, U, source, inverse_column[alpha][a],
-                     tolerance / sizeof_vector);
+            invertDiracOperator(kappa, U, source, inverse_columns[alpha][a],
+                                tolerance / sizeof_vector,
+                                BiCGStab);
             free(source);
         }
     }
     free(U);  //	Free memory allocated for the configuration.
-    //  SAVE PROPAGATOR TO FILE
-    FILE* inverse_column_file;
-    char inverse_column_filename[MAX_SIZE];
 
-    sprintf(inverse_column_filename, "%s-Landau.prop", config_filename);
+    //  Save inverse to file
 
-    if ((inverse_column_file = fopen(inverse_column_filename, "wb")) == NULL) {
-        fprintf(stderr, "Error: Problem creating file %s for inverse of Dirac matrix.\n",
-                inverse_column_filename);
-    }
-    LOOP_DIRAC(alpha) {
-        LOOP_3(a) {
-            if (fwrite(inverse_column[alpha][a],
-                       sizeof(Scalar),
-                       sizeof_vector,
-                       inverse_column_file) != sizeof_vector) {
-                fprintf(stderr, "Error: Problem writing to file %s for inverse of Dirac matrix.\n", inverse_column_filename);
-            }
-        }
-    }
-    fclose(inverse_column_file);
+    printInverse(inverse_filename, inverse_columns);
 
     LOOP_DIRAC(alpha) {
         LOOP_3(a) {
-            free(inverse_column[alpha][a]);
+            free(inverse_columns[alpha][a]);
         }
     }
 

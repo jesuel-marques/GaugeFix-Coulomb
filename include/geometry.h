@@ -71,7 +71,6 @@
 #define LOOP_LORENTZ(mu) for (mu = 0; mu < DIM; mu++)
 
 /* Shortening for the loop in Lorentz indices associated to spatial directions only */
-// #define LOOP_LORENTZ_SPATIAL(mu) for(mu = 0; mu < DIM - 1 ; mu++)
 #define LOOP_LORENTZ_SPATIAL(mu) for (mu = LOWEST_SPATIAL_INDEX;   \
                                       mu <= HIGHEST_SPATIAL_INDEX; \
                                       mu++)

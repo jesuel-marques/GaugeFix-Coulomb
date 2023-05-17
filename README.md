@@ -150,7 +150,7 @@ with the 'sweeps_to_reunitarization'.
 The default value is 250. It has to be a positive number.
 
 - There are two parameters that are specific to the overrelaxation algorithm. Their 
-meaning will be explained in the in the Internal workings section. 
+meaning will be explained in the Internal workings section. 
 
 max_hits: Should be an integer.
 omega_OR: Should be a number 1 <= omega_OR < 2.

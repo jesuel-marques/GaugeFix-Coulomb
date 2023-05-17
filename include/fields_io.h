@@ -17,36 +17,38 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     Contact: jesuel.leal@usp.br
-    
+
  */
 
 #ifndef FIELDS_IO_H
 #define FIELDS_IO_H
 
 #include <../settings.h>
-#include <types_io.h>
 #include <geometry.h>
+#include <types_io.h>
 
-InGTMtrx  *getGaugetransfIn (InGTMtrx  * restrict G_in,  
-                               const PosVec position);
-OutGTMtrx *getGaugetransfOut(OutGTMtrx * restrict G_out, 
-                               const PosVec position);
+InGTMtrx *getGaugetransfIn(InGTMtrx *restrict G_in,
+                           const PosVec position);
+OutGTMtrx *getGaugetransfOut(OutGTMtrx *restrict G_out,
+                             const PosVec position);
 
-InCfgMtrx  *getLinkIn (InCfgMtrx  * restrict U_in,
-                         const PosVec position, 
-                         const LorentzIdx mu);
-OutCfgMtrx *getLinkOut(OutCfgMtrx * restrict U_out,
-                         const PosVec position,
-                         const LorentzIdx mu);
+InCfgMtrx *getLinkIn(InCfgMtrx *restrict U_in,
+                     const PosVec position,
+                     const LorentzIdx mu);
+OutCfgMtrx *getLinkOut(OutCfgMtrx *restrict U_out,
+                       const PosVec position,
+                       const LorentzIdx mu);
 
-int loadConfig (const Mtrx3x3 * restrict U,
-                     char * config_filename),
-    writeConfig(Mtrx3x3 * restrict U,
-                     char * config_filename);
+int loadConfig(const Mtrx3x3 *restrict U,
+               char *config_filename),
+    writeConfig(Mtrx3x3 *restrict U,
+                char *config_filename);
 
-int loadGaugeTransf (Mtrx3x3 * restrict G,
-                           char * gauge_transf_filename),
-    writeGaugeTransf(Mtrx3x3 * restrict G,
-                           char * gauge_transf_filename);
+int loadGaugeTransf(Mtrx3x3 *restrict G,
+                    char *gauge_transf_filename),
+    writeGaugeTransf(Mtrx3x3 *restrict G,
+                     char *gauge_transf_filename);
 
-#endif  //FIELDS_IO_H
+void loadConfigPlainText(Mtrx3x3 *U, char *config_filename);
+
+#endif  // FIELDS_IO_H

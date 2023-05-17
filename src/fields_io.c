@@ -560,3 +560,46 @@ int writeGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
 
     return 0;
 }
+
+void loadConfigPlainText(Mtrx3x3 *U, char *config_filename) {
+    //	Carrega a partir de um arquivo uma configuração de elos no programa
+
+    FILE *config_file;
+
+    PosVec position;
+    short t, x, y, z;
+    int mu, a, b, c;
+    double element;
+
+    Mtrx3x3 *u;
+
+    if ((config_file = fopen(config_filename, "r")) == NULL) {
+        fprintf(stderr, "error opening file");
+        return -2;
+    }
+    while (fscanf(config_file, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
+                  &t,
+                  &x,
+                  &y,
+                  &z,
+                  &mu,
+                  &a,
+                  &b,
+                  &c,
+                  &element) != EOF) {
+        if (mu == 1)
+            mu = 3;
+        else if (mu == 3)
+            mu = 1;
+
+        u = getLink(U, assignPosition(x, y, z, t), mu);
+
+        if (c == 0) {
+            u->m[ELEM_3X3(a, b)] = element;
+        } else if (c == 1) {
+            u->m[ELEM_3X3(a, b)] += I * element;
+        }
+    }
+
+    fclose(config_file);
+}
