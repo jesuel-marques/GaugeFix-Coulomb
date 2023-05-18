@@ -51,25 +51,25 @@ static DiracMatrix identity_plus_gamma[DIM] = {{{{1, 0, 1, 0},
                                                  {0, I, 1, 0},
                                                  {I, 0, 0, 1}}}};
 
-static DiracMatrix identity_minus_gamma[4] = {{{{1, 0, -1, 0},
-                                                {0, 1, 0, -1},
-                                                {-1, 0, 1, 0},
-                                                {0, -1, 0, 1}}},
+static DiracMatrix identity_minus_gamma[DIM] = {{{{1, 0, -1, 0},
+                                                  {0, 1, 0, -1},
+                                                  {-1, 0, 1, 0},
+                                                  {0, -1, 0, 1}}},
 
-                                              {{{1, 0, I, 0},
-                                                {0, 1, 0, -I},
-                                                {-I, 0, 1, 0},
-                                                {0, I, 0, 1}}},
+                                                {{{1, 0, I, 0},
+                                                  {0, 1, 0, -I},
+                                                  {-I, 0, 1, 0},
+                                                  {0, I, 0, 1}}},
 
-                                              {{{1, 0, 0, 1},
-                                                {0, 1, -1, 0},
-                                                {0, -1, 1, 0},
-                                                {1, 0, 0, 1}}},
+                                                {{{1, 0, 0, 1},
+                                                  {0, 1, -1, 0},
+                                                  {0, -1, 1, 0},
+                                                  {1, 0, 0, 1}}},
 
-                                              {{{1, 0, 0, I},
-                                                {0, 1, I, 0},
-                                                {0, -I, 1, 0},
-                                                {-I, 0, 0, 1}}}};
+                                                {{{1, 0, 0, I},
+                                                  {0, 1, I, 0},
+                                                  {0, -I, 1, 0},
+                                                  {-I, 0, 0, 1}}}};
 
 static DiracMatrix identityDirac = {{{1, 0, 0, 0},
                                      {0, 1, 0, 0},
@@ -168,22 +168,25 @@ void DiracOperator(Scalar *f, Scalar *g) {
                             }
                         }
                     }
+                    // Melhoria de trevo /* Vou ignorar improvements por enquanto */
+
+                    // for(int alfal=0;alfal<4;alfal++)
+                    // 	for(int al=0;al<3;al++){
+                    // 		(*(ELEM_VEC_INV(g, posicao, alfa, a))) += cSWkappaSigmaF[posicao[0]][posicao[1]][posicao[2]][posicao[3]][alfa][a][alfal][al] * (*(ELEM_VEC_INV(f, posicao, alfal, al)));
+                    // }
                 }
             }
         }
     }
-    // Melhoria de trevo /* Vou ignorar improvements por enquanto */
-
-    // for(int alfal=0;alfal<4;alfal++)
-    // 	for(int al=0;al<3;al++){
-    // 		(*(ELEM_VEC_INV(g, posicao, alfa, a))) += cSWkappaSigmaF[posicao[0]][posicao[1]][posicao[2]][posicao[3]][alfa][a][alfal][al] * (*(ELEM_VEC_INV(f, posicao, alfal, al)));
-    // }
 }
 
-double invertDiracOperator(double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double)) {
+double invertDiracOperator(double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
     U_dirac_operator = U;
     kappa_dirac_operator = kappa;
-    return inversion_algorithm(DiracOperator, source, inverse_column, tolerance);
+
+    size_t sizeof_vector = lattice_param.volume * 4 * Nc;
+
+    return inversion_algorithm(DiracOperator, source, inverse_column, tolerance, sizeof_vector);
 }
 
 void printDiracOP(Mtrx3x3 *U, double kappa, FILE *file_dirac_op) {
@@ -262,35 +265,4 @@ void printInverse(char *inverse_filename, Scalar *inverse[4][Nc]) {
         }
     }
     fclose(inverse_file);
-
-    //	Impressão em formato matricial (para comparação com Mathematica)
-    // inverse_file = fopen(inverse_filename, "w");
-
-    // PosIndex t;
-    // int alpha, beta;
-    // MtrxIdx3 a, b;
-    // LOOP_TEMPORAL(t) {
-    //     position.pos[T_INDX] = t;  // Lines
-    //     LOOP_SPATIAL(position) {
-    //         LOOP_DIRAC(alpha) {
-    //             LOOP_3(a) {
-    //                 LOOP_DIRAC(beta) {  // Columns
-    //                     LOOP_3(b) {
-    //                         fprintf(inverse_file, "%.16lf+I(%.16lf)",
-    //                                 creal((*(ELEM_VEC_INV(inverse[beta][b],
-    //                                                       position,
-    //                                                       alpha,
-    //                                                       a)))),
-    //                                 cimag((*(ELEM_VEC_INV(inverse[beta][b],
-    //                                                       position,
-    //                                                       alpha,
-    //                                                       a)))));
-    //                         fprintf(inverse_file, "\t");
-    //                     }
-    //                 }
-    //                 fprintf(inverse_file, "\n");
-    //             }
-    //         }
-    //     }
-    // }
 }

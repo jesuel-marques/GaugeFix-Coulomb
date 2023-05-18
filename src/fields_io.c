@@ -578,13 +578,9 @@ void loadConfigPlainText(Mtrx3x3 *U, char *config_filename) {
         return -2;
     }
     while (fscanf(config_file, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
-                  &t,
-                  &x,
-                  &y,
-                  &z,
+                  &t, &x, &y, &z,
                   &mu,
-                  &a,
-                  &b,
+                  &a, &b,
                   &c,
                   &element) != EOF) {
         if (mu == 1)

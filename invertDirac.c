@@ -4,27 +4,30 @@
 #include <fields.h>
 #include <fields_io.h>
 #include <geometry.h>
-#include <measurement.h>
+#include <plaquettes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_SIZE 1000
 
+#define KAPPA_CRITICAL 0.1392
+// #define KAPPA_CRITICAL 0.125
+
 int main(int argc, char* argv[]) {
     const char* config_filename = argv[1];
 
     initGeometry(atoi(argv[2]), atoi(argv[3]));
-    double kappa_critical = 0.1392;
-    // double kappa_critical = 1. / 4;
 
-    double kappa = atof(argv[4]);
-    double tolerance = atof(argv[5]);
-    if ((argc != 6 && argc != 5) || !validGeometricParametersQ()) {
+    const double kappa = atof(argv[4]);
+
+    const double tolerance = atof(argv[5]);
+    const char* inverse_filename = argv[6];
+    if ((argc != 7) || !validGeometricParametersQ()) {
         fprintf(stderr,
                 "Bad input.\n"
-                "Usage: Input config filename, gt filename, n_SPC, n_T, "
-                "tolerance and omega_OR in this order.\n"
+                "Usage: Input config filename, n_SPC, n_T, "
+                "kappa, tolerance and inverse filename in this order.\n"
                 "Check that:\n"
                 "n_SPC > 0 and n_T >0\n"
                 "tolerance > 0 \n");
@@ -32,10 +35,7 @@ int main(int argc, char* argv[]) {
                 "\n Provided parameters: \n"
                 "n_SPC: %d \nn_T: %d \n",
                 lattice_param.n_SPC, lattice_param.n_T);
-        fprintf(stderr, "Initializing gauge-fixing parameters to default instead.\n");
     }
-
-    char* inverse_filename = argv[6];
 
     const Mtrx3x3* U = allocate3x3Field(DIM * lattice_param.volume);
     if (U == NULL) {
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
     // printDiracOP(U, kappa, dirac_op_file);
     // fclose(dirac_op_file);
 
-    double am = 1.0 / (2.0 * kappa) - 1.0 / (2.0 * kappa_critical);
+    double am = 1.0 / (2.0 * kappa) - 1.0 / (2.0 * KAPPA_CRITICAL);
     printf("kappa: %lf \t am: %lf\n", kappa, am);
 
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;

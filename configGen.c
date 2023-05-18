@@ -4,7 +4,7 @@
 #include <fields_io.h>
 #include <geometry.h>
 #include <heatbath.h>
-#include <measurement.h>
+#include <plaquettes.h>
 #include <ranlux.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,19 +34,8 @@ int main(int argc, char** argv) {
 
     ranlux_state_file = fopen(ranlux_state_filename, "wb");
     ranlux_state = (int*)malloc(rlxd_size() * sizeof(int));
-
     // fread(ranlux_state, sizeof(int), rlxd_size(), ranlux_state_file);
-
     // rlxd_reset(ranlux_state);
-
-    // double random_numbers[100];
-    // ranlxd(random_numbers, 100);
-
-    // for (int i = 0; i < 100; i++) {
-    //     printf("%lf\n", random_numbers[i]);
-    // }
-
-    // exit(EXIT_SUCCESS);
 
     if (!validGeometricParametersQ() || argc != 9) {
         fprintf(stderr,
@@ -93,13 +82,11 @@ int main(int argc, char** argv) {
             }
         }
     }
+    free(U);
 
     rlxd_get(ranlux_state);
     fwrite(ranlux_state, sizeof(int), rlxd_size(), ranlux_state_file);
-
     fclose(ranlux_state_file);
-
-    free(U);  //
 
     return EXIT_SUCCESS;
 }

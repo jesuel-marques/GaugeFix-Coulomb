@@ -11,7 +11,7 @@ typedef struct {
     Scalar m[4][4];
 } DiracMatrix;
 
-double invertDiracOperator(double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double));
+double invertDiracOperator(double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t));
 
 void printDiracOP(Mtrx3x3 *U, double kappa, FILE *file_dirac_op);
 void initializePointSource(PosVec source_position, int dirac_index, int color_index, double complex *source);

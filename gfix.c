@@ -29,7 +29,7 @@
 #include <fields_io.h>
 #include <gauge_fixing.h>
 #include <geometry.h>
-#include <measurement.h>
+#include <plaquettes.h>
 #include <stdio.h>  //	Standard header files in C
 #include <stdlib.h>
 #include <string.h>
