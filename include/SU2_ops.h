@@ -33,13 +33,13 @@
 typedef unsigned short MtrxIdx2;
 
 /* 2x2 matrices */
-typedef struct {
+typedef struct Mtrx2x2 {
     Scalar m[2 * 2];
 } Mtrx2x2;
 
 /*  2x2 matrices in the Cayley-Klein form
     m = m[0] SU2_identity + i sum_i=1^3 m[i]sigma[i] */
-typedef struct {
+typedef struct Mtrx2x2CK {
     double m[4];
 } Mtrx2x2CK;
 
