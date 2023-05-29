@@ -1,5 +1,6 @@
 
 #include <SU3_ops.h>
+#include <config_generation.h>
 #include <fields.h>
 #include <fields_io.h>
 #include <geometry.h>
@@ -14,16 +15,16 @@
 #define MAX_FILE_SIZE 1000
 
 int main(int argc, char** argv) {
-    const char* config_filename = argv[1];
+    char* config_filename = argv[1];
     char complete_config_filename[MAX_FILE_SIZE];
 
     initGeometry(atoi(argv[2]), atoi(argv[3]));
 
     double beta = atof(argv[4]);
-    int max_configs = atoi(argv[5]);
+    unsigned max_configs = atoi(argv[5]);
 
-    int step_to_save = atoi(argv[6]);
-    int thermalization = atoi(argv[7]);
+    unsigned step_to_save = atoi(argv[6]);
+    unsigned thermalization = atoi(argv[7]);
 
     rlxd_init(1, 970223);
     int* ranlux_state;
@@ -50,7 +51,7 @@ int main(int argc, char** argv) {
                 lattice_param.n_SPC, lattice_param.n_T);
     }
 
-    const Mtrx3x3* U = allocate3x3Field(DIM * lattice_param.volume);
+    Mtrx3x3* U = allocate3x3Field(DIM * lattice_param.volume);
     if (U == NULL) {
         fprintf(stderr, "Could not allocate memory for configs %s.\n",
                 config_filename);
@@ -65,7 +66,7 @@ int main(int argc, char** argv) {
 
     double av_plaq = averagePlaquette(U, "total");
 
-    int configs_saved = 0;
+    unsigned configs_saved = 0;
     for (unsigned long sweeps = 0; configs_saved < max_configs; sweeps++) {
         av_plaq += -updateLattice(U, beta, HeatBathSU3) / (2.0 * Nc * pow(lattice_param.n_SPC, 3.0) * lattice_param.n_T * beta);
 

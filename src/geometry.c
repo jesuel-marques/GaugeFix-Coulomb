@@ -157,8 +157,8 @@ bool validGeometricParametersQ(void) {
      *
      */
 
-    short ns = lattice_param.n_SPC;
-    short nt = lattice_param.n_T;
+    unsigned short ns = lattice_param.n_SPC;
+    unsigned short nt = lattice_param.n_T;
 
     return (lattice_param.n_SPC > 0 &&
             lattice_param.n_T > 0 &&
@@ -195,6 +195,10 @@ int initGeometry(const short n_s, const short n_t) {
      *
      */
 
+    if (n_s <= 0 || n_t <= 0) {
+        lattice_param.error = 1;
+    }
+
     lattice_param.n_SPC = n_s;
     lattice_param.n_T = n_t;
 
@@ -210,7 +214,7 @@ int initGeometry(const short n_s, const short n_t) {
 
     lattice_param.divergence_anisotropy = 1.0 / (KSI * GAMMAG);
     lattice_param.func_anisotropy = 1.0 / (KSI * GAMMAG);
-    lattice_param.wanisotropy = 1.0 / (KSI * GAMMAG);
+    lattice_param.w_anisotropy = 1.0 / (KSI * GAMMAG);
 
     if (!validGeometricParametersQ()) {
         return 1;

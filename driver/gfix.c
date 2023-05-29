@@ -30,6 +30,7 @@
 #include <gauge_fixing.h>
 #include <geometry.h>
 #include <plaquettes.h>
+#include <ranlux.h>
 #include <stdio.h>  //	Standard header files in C
 #include <stdlib.h>
 #include <string.h>
@@ -61,8 +62,8 @@ int writeSweepsToGaugefix(char* identifier, int sweeps) {
 }
 
 int main(int argc, char* argv[]) {
-    const char* config_filename = argv[1];
-    const char* gauge_transf_filename = argv[2];
+    char* config_filename = argv[1];
+    char* gauge_transf_filename = argv[2];
 
     initGeometry(atoi(argv[3]), atoi(argv[4]));
 
@@ -99,7 +100,7 @@ int main(int argc, char* argv[]) {
     printf("\nGauge-fixing parameters provided:\n");
     printORGaugeFixingParameters(gfix_param);
 
-    const Mtrx3x3* U = allocate3x3Field(DIM * lattice_param.volume);
+    Mtrx3x3* U = allocate3x3Field(DIM * lattice_param.volume);
     if (U == NULL) {
         fprintf(stderr, "Could not allocate memory for config in file %s.\n",
                 config_filename);
@@ -133,23 +134,24 @@ int main(int argc, char* argv[]) {
         free(U);
         return EXIT_FAILURE;
     }
-
-    printf("F before: %lf\n", calculateF(U, gfix_param.generic_gf.gauge_type));
-    printf("Average trace of spatial plaquettes before gauge transformation: %.10lf\n",
-           averagePlaquette(U, "spatial"));
-    printf("Average trace of temporal plaquettes before gauge transformation: %.10lf\n",
-           averagePlaquette(U, "temporal"));
-    //  fix the gauge
     rlxd_init(1, 46851387);
+
     setFieldSU3Random(G, lattice_param.volume);
     applyGaugeTransformationU(U, G);
 
+    printf("F before gauge fixing: %lf\n", calculateF(U, gfix_param.generic_gf.gauge_type));
+    printf("Average trace of spatial plaquettes before gauge fixing: %.10lf\n",
+           creal(averagePlaquette(U, "spatial")));
+    printf("Average trace of temporal plaquettes before gauge fixing: %.10lf\n",
+           creal(averagePlaquette(U, "temporal")));
+    //  fix the gauge
+
     int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
 
-    printf("Average trace of spatial plaquettes after gauge transformation: %.10lf\n",
-           averagePlaquette(U, "spatial"));
-    printf("Average trace of temporal plaquettes after gauge transformation: %.10lf\n",
-           averagePlaquette(U, "temporal"));
+    printf("Average trace of spatial plaquettes after gauge fixing: %.10lf\n",
+           creal(averagePlaquette(U, "spatial")));
+    printf("Average trace of temporal plaquettes after gauge fixing: %.10lf\n",
+           creal(averagePlaquette(U, "temporal")));
     printf("F after: %lf\n", calculateF(U, gfix_param.generic_gf.gauge_type));
     if (sweeps < 0) {
         free(U);
@@ -193,17 +195,17 @@ int main(int argc, char* argv[]) {
     free(U);  //	Free memory allocated for the configuration.
 
     // write the gauge transformation to file
-    // if(writeGaugeTransf(G, gauge_transf_filename)) {
-    // 	fprintf(stderr, "Gauge transformation writing to file %s"
-    // 					"failed for configuration %s .\n",
-    // 					 gauge_transf_filename,
-    // 					 config_filename);
-    // }
-    // else{
-    // 	printf("G for config %s written to file %s.\n",
-    // 			config_filename,
-    // 			gauge_transf_filename);
-    // }
+    if (writeGaugeTransf(G, gauge_transf_filename)) {
+        fprintf(stderr,
+                "Gauge transformation writing to file %s"
+                "failed for configuration %s .\n",
+                gauge_transf_filename,
+                config_filename);
+    } else {
+        printf("G for config %s written to file %s.\n",
+               config_filename,
+               gauge_transf_filename);
+    }
 
     free(G);  //	Free memory allocated for gauge transformation.
     // finalizeGeometry();

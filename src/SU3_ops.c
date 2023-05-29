@@ -24,6 +24,7 @@
 #include <ranlux.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <tgmath.h>
 #include <types.h>
 
@@ -93,10 +94,7 @@ void copy3x3(const Mtrx3x3* restrict u, Mtrx3x3* restrict u_copy) {
      *
      */
 
-    MtrxIdx3 a, b;
-    LOOP_3X3(a, b) {
-        u_copy->m[ELEM_3X3(a, b)] = u->m[ELEM_3X3(a, b)];
-    }
+    memcpy(u_copy, u, sizeof(Mtrx3x3));
 }
 
 /* Sets a 3x3 matrix to be the 3x3 null matrix. */
@@ -474,6 +472,7 @@ inline void prod3x3(const Mtrx3x3* restrict u,
      */
 
     MtrxIdx3 a, b, c;
+
     LOOP_3X3(a, b) {
         uv->m[ELEM_3X3(a, b)] = 0.0;
         LOOP_3(c) {
@@ -510,9 +509,9 @@ void prodThree3x3(const Mtrx3x3* restrict u,
      *
      */
 
-    Mtrx3x3 aux;
-    prod3x3(u, v, &aux);
-    prod3x3(&aux, w, uvw);
+    Mtrx3x3 uv;
+    prod3x3(u, v, &uv);
+    prod3x3(&uv, w, uvw);
 }
 
 /* Calculates product of four 3x3 matrices. */
@@ -552,8 +551,13 @@ void prodFour3x3(const Mtrx3x3* restrict u,
     prod3x3(&aux1, &aux2, uvwx);
 }
 
-/* Calculates matrix product between g and acc_prod and
-   accumulates result in acc_prod. */
+void prod3x3_generic(Mtrx3x3** restrict u, short number_of_matrices,
+                     Mtrx3x3* restrict result) {
+    setIdentity3x3(result);
+    for (int i = 0; i < number_of_matrices; i++) {
+        accumRightProd3x3(result, *(u + i));
+    }
+}
 inline void accumLeftProd3x3(const Mtrx3x3* restrict g,
                              Mtrx3x3* restrict acc_prod) {
     /*
@@ -653,11 +657,14 @@ inline void accumProdSU2_3x3(const Mtrx2x2CK* restrict x_ck,
     convertFromCK(x_ck, &x);
 
     MtrxIdx3 c;
+
     LOOP_3(c) {
         //  Modifying only the terms in g that will actually receive contributions
 
-        xg1 = x.m[ELM_2X2(0, 0)] * g->m[ELEM_3X3(a, c)] + x.m[ELM_2X2(0, 1)] * g->m[ELEM_3X3(b, c)];
-        xg2 = x.m[ELM_2X2(1, 0)] * g->m[ELEM_3X3(a, c)] + x.m[ELM_2X2(1, 1)] * g->m[ELEM_3X3(b, c)];
+        xg1 = x.m[ELM_2X2(0, 0)] * g->m[ELEM_3X3(a, c)] +
+              x.m[ELM_2X2(0, 1)] * g->m[ELEM_3X3(b, c)];
+        xg2 = x.m[ELM_2X2(1, 0)] * g->m[ELEM_3X3(a, c)] +
+              x.m[ELM_2X2(1, 1)] * g->m[ELEM_3X3(b, c)];
 
         g->m[ELEM_3X3(a, c)] = xg1;
         g->m[ELEM_3X3(b, c)] = xg2;

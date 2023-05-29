@@ -26,6 +26,7 @@
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <types.h>
 
 extern GeometricParameters lattice_param;
@@ -77,7 +78,7 @@ Scalar TrPlaquette(Mtrx3x3* restrict U,
 }
 
 /* Average plaquette value for any given mu and nu */
-Scalar averagePlaquettegeneric(Mtrx3x3* U, LorentzIdx mu, LorentzIdx nu) {
+Scalar averagePlaquetteGeneric(Mtrx3x3* U, LorentzIdx mu, LorentzIdx nu) {
     /*
      * Calls:
      * =====
@@ -125,13 +126,13 @@ Scalar averagePlaquettegeneric(Mtrx3x3* U, LorentzIdx mu, LorentzIdx nu) {
 
 /* Calculates the average plaquette on the lattice of specific type (total,
    spatial, temporal ) */
-Scalar averagePlaquette(Mtrx3x3* restrict U, char* type) {
+Scalar averagePlaquette(Mtrx3x3* restrict U, const char* type) {
     /*
      * Calls:
      * =====
      * fprintf, strcmp,
      * validGeometricParametersQ,
-     * averagePlaquettegeneric.
+     * averagePlaquetteGeneric.
      *
      * Macros:
      * ======
@@ -162,7 +163,7 @@ Scalar averagePlaquette(Mtrx3x3* restrict U, char* type) {
     if (!strcmp(type, "total") || !strcmp(type, "temporal")) {
         LorentzIdx i;
         LOOP_LORENTZ_SPATIAL(i) {
-            average += averagePlaquettegeneric(U, T_INDX, i);
+            average += averagePlaquetteGeneric(U, T_INDX, i);
             count++;
         }
     }
@@ -171,13 +172,12 @@ Scalar averagePlaquette(Mtrx3x3* restrict U, char* type) {
         LOOP_LORENTZ_SPATIAL(i) {
             LOOP_LORENTZ_SPATIAL(j) {
                 if (i < j) {
-                    average += averagePlaquettegeneric(U, i, j);
+                    average += averagePlaquetteGeneric(U, i, j);
                     count++;
                 }
             }
         }
     }
 
-    return average /
-           (double)count;
+    return average / (double)count;
 }

@@ -1,44 +1,38 @@
 #include <bicgstab.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-static void copyVector(Scalar *f, Scalar *copy_f, size_t number_of_elements) {
-    for (size_t i = 0; i < number_of_elements; i++) {
-        copy_f[i] = f[i];
-    }
+static void copyVector(Scalar *restrict f, Scalar *restrict copy_f, size_t number_of_elements) {
+    memcpy(copy_f, f, number_of_elements * sizeof(Scalar));
 }
 
-static void prodwithscalarVector(Scalar num, Scalar *f, Scalar *result, size_t number_of_elements) {
-    for (size_t i = 0; i < number_of_elements; i++) {
-        result[i] = num * f[i];
-    }
-}
-
-static void subtractVector(Scalar *f, Scalar *g, Scalar *result, size_t number_of_elements) {
+static void subtractVector(Scalar *restrict f, Scalar *restrict g, Scalar *restrict result, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
         result[i] = f[i] - g[i];
     }
 }
 
-static void fmaVector(Scalar *f, Scalar num, Scalar *g, Scalar *result, size_t number_of_elements) {
+static void fmaVector(Scalar *restrict f, Scalar num, Scalar *restrict g, Scalar *restrict result, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
         result[i] = f[i] + num * g[i];
     }
 }
 
-static void fmaaccumulateVector(Scalar *f, Scalar num, Scalar *g, size_t number_of_elements) {
+static void fmaaccumulateVector(Scalar *restrict f, Scalar num, Scalar *restrict g, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
         f[i] += num * g[i];
     }
 }
 
-static void doublefmaVector(Scalar *f, Scalar num1, Scalar *g1, Scalar num2, Scalar *g2, Scalar *result, size_t number_of_elements) {
+static void doublefmaVector(Scalar *restrict f, Scalar num1, Scalar *restrict g1, Scalar num2, Scalar *restrict g2, Scalar *result, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
         result[i] = f[i] + num1 * g1[i] + num2 * g2[i];
     }
 }
 
-static void doublefmaaccumulateVector(Scalar *f, Scalar num1, Scalar *g1, Scalar num2, Scalar *g2, size_t number_of_elements) {
+static void doublefmaaccumulateVector(Scalar *restrict f, Scalar num1, Scalar *restrict g1, Scalar num2, Scalar *restrict g2, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
         f[i] += num1 * g1[i] + num2 * g2[i];
     }
@@ -46,13 +40,14 @@ static void doublefmaaccumulateVector(Scalar *f, Scalar num1, Scalar *g1, Scalar
 
 static Scalar dotproductVector(Scalar *f, Scalar *g, size_t number_of_elements) {
     Scalar dot_product = 0.0;
+
     for (size_t i = 0; i < number_of_elements; i++) {
         dot_product += conj(f[i]) * g[i];
     }
     return dot_product;
 }
 
-double BiCGStab(void (*operator)(Scalar *, Scalar *), Scalar *source, Scalar *inverse_column, const double tolerance, const size_t sizeof_vector) {
+double BiCGStab(void (*operator)(Scalar *, Scalar *), Scalar *restrict source, Scalar *restrict inverse_column, const double tolerance, const size_t sizeof_vector) {
     //	Algoritmo para inversão da matriz de Dirac (descrito em Gattringer pg. 140 e Leandro pg. 110)
 
     // Variáveis do algoritmo de inversão
@@ -64,10 +59,9 @@ double BiCGStab(void (*operator)(Scalar *, Scalar *), Scalar *source, Scalar *in
 
     Scalar *v = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
     Scalar *p = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
-    Scalar *t = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));  // b e t na notação do Leandro
-    Scalar *s = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));  // s na notação do Leandro
+    Scalar *t = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *s = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
 
-    Scalar auxa, auxb;
     Scalar alpha, beta, omega;
     Scalar rho, previous_rho;
 
@@ -84,7 +78,7 @@ double BiCGStab(void (*operator)(Scalar *, Scalar *), Scalar *source, Scalar *in
     subtractVector(source, s, r, sizeof_vector); /*r=b-A.x0*/
 
     copyVector(r, rtilde, sizeof_vector); /*rtilde=r*/
-
+    int cont = 0;
     do {
         rho = dotproductVector(rtilde, r, sizeof_vector); /*rho=rtildedag.r*/
         // printf("alpha: %lf beta: %lf omega: %lf rho: %lf\n", alpha, beta, omega, rho);
@@ -110,8 +104,8 @@ double BiCGStab(void (*operator)(Scalar *, Scalar *), Scalar *source, Scalar *in
         /*auxa=sdag.s*/
         norm = creal(dotproductVector(s, s, sizeof_vector));
 
-        // if (cont % 5 == 0)
-        //     printf("norm s: %3.2E\n", norm);
+        if (cont % 5 == 0)
+            printf("norm s: %3.2E\n", norm);
 
         if (norm < tolerance) {
             fmaaccumulateVector(x, alpha, p, sizeof_vector); /*x=x+alfa*p*/
@@ -127,10 +121,12 @@ double BiCGStab(void (*operator)(Scalar *, Scalar *), Scalar *source, Scalar *in
             fmaVector(s, -omega, t, r, sizeof_vector); /* r = s - omega*t*/
 
             doublefmaaccumulateVector(x, alpha, p, omega, s, sizeof_vector);
-            /*x=x+alfa*p+omega*s*/
+            /*x+=alfa*p+omega*s*/
 
             previous_rho = rho;
         }
+
+        cont++;
 
     } while (!inverted);
 

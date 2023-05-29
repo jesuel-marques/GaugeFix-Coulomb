@@ -1,5 +1,5 @@
 /*
-    header to four_potential.c, which contains routines to calculate the gauge 
+    header to four_potential.c, which contains routines to calculate the gauge
     four-potential field and related quantities.
 
     Copyright (C) 2023  Jesuel Marques
@@ -18,25 +18,26 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     Contact: jesuel.leal@usp.br
-    
+
  */
 
 #ifndef FOURVECTORFIELD_H
 #define FOURVECTORFIELD_H
 
-#include <geometry.h>
 #include <SU3_ops.h>
+#include <geometry.h>
 
-typedef enum {SPATIAL, QUADRI} DivergenceType;
+typedef enum { SPATIAL,
+               QUADRI } DivergenceType;
 
-void calculateA (Mtrx3x3 * restrict U, 
+void calculateA(Mtrx3x3* restrict U,
+                const PosVec position,
+                const LorentzIdx mu,
+                Mtrx3x3* restrict A);
+
+void DivergenceA(Mtrx3x3* restrict U,
                  const PosVec position,
-                 const LorentzIdx mu, 
-                 Mtrx3x3 * restrict A);
-
-void DivergenceA(Mtrx3x3 * restrict U,
-                 const PosVec position, 
-                 Mtrx3x3 * restrict div_A,
+                 Mtrx3x3* restrict div_A,
                  DivergenceType divergence_type);
 
-#endif  //FOURVECTORFIELD_H
+#endif  // FOURVECTORFIELD_H

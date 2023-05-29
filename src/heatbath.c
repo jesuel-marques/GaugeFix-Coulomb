@@ -63,7 +63,6 @@ static inline void HeatBathSubmatrix(Mtrx3x3* restrict u, Submtrx sub, Mtrx3x3* 
     do {
         ranlxd(e, 4);
 
-#pragma unroll(4)
         for (int i = 0; i < 4; i++) {
             e[i] = 1.0 - e[i];
         }
@@ -77,7 +76,7 @@ static inline void HeatBathSubmatrix(Mtrx3x3* restrict u, Submtrx sub, Mtrx3x3* 
 
     do {
         ranlxd(f, 3);
-#pragma unroll(3)
+
         for (int c = 0; c < 3; c++) {
             f[c] = 1.0 - 2.0 * f[c];
         }
@@ -86,7 +85,7 @@ static inline void HeatBathSubmatrix(Mtrx3x3* restrict u, Submtrx sub, Mtrx3x3* 
     } while (mod_sqrd_f > 1.0);
 
     modf = sqrt(mod_sqrd_f);
-#pragma unroll(3)
+
     for (int c = 1; c <= 3; c++) {
         x.m[c] = ((double)f[c - 1] / modf) * modx;
     }
@@ -109,7 +108,6 @@ double HeatBathSU3(Mtrx3x3* restrict U, PosVec position, LorentzIdx mu, double b
     prod3x3(u, &staple_sum, &W);
     double old_action_contribution = creal(trace3x3(&W));
 
-#pragma unroll(3)
     for (Submtrx sub = R; sub <= T; sub++) {
         HeatBathSubmatrix(u, sub, &W, beta);
         prod3x3(u, &staple_sum, &W);
@@ -119,25 +117,4 @@ double HeatBathSU3(Mtrx3x3* restrict U, PosVec position, LorentzIdx mu, double b
 
     double new_action_contribution = creal(trace3x3(&W));
     return -(beta / Nc) * (new_action_contribution - old_action_contribution);
-}
-
-double updateLattice(Mtrx3x3* restrict U,
-                     double beta,
-                     double (*algorithm)(Mtrx3x3*, PosVec, LorentzIdx, double)) {
-    PosIndex t;
-    PosVec position;
-    LorentzIdx mu;
-
-    double deltaS = 0.0;
-
-    LOOP_TEMPORAL(t) {
-        position.pos[T_INDX] = t;
-        LOOP_SPATIAL(position) {
-            LOOP_LORENTZ(mu) {
-                deltaS += algorithm(U, position, mu, beta);
-            }
-        }
-    }
-
-    return deltaS;
 }

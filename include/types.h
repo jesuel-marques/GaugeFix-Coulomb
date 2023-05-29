@@ -27,7 +27,7 @@
 
 //  Data types definitions
 
-typedef complex double WorkScalarType;      //  Calculations internally done in double
-typedef WorkScalarType Scalar;              //  Default scalar is a scalar of type Work
+typedef complex double WorkScalarType;  //  Calculations internally done in double
+typedef WorkScalarType Scalar;          //  Default scalar is a scalar of type Work
 
-#endif  //TYPES_H
+#endif  // TYPES_H

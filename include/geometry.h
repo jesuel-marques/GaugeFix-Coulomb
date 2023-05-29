@@ -81,7 +81,7 @@
 typedef short PosIndex;
 
 /*	Struct for position vectors */
-typedef struct {
+typedef struct PosVec {
     PosIndex pos[4];
 } PosVec;
 
@@ -91,11 +91,21 @@ typedef unsigned short LorentzIdx;
 /*	Direction for link. A front link is the link in the positive direction from a
     given point, whereas a rear link is a link in the negative direction  */
 typedef enum { REAR,
-               FRONT } Direction;
+               FRONT
+} Direction;
+
+typedef struct Link {
+    LorentzIdx mu;
+    Direction dir;
+} Link;
+
+typedef struct Path {
+    Link* links;
+} Path;
 
 /* Geometric parameters, which include the sizes of the lattice as well as the volume
    and the spatial volume for convenience. */
-typedef struct {
+typedef struct GeometricParameters {
     unsigned short n_SPC;  //   Spatial lattice size
     unsigned short n_T;    //   Temporal lattice size
 
@@ -104,7 +114,7 @@ typedef struct {
 
     double func_anisotropy;  //  Anisotropy of the gauge-functional to be extremized
     double divergence_anisotropy;
-    double wanisotropy;
+    double w_anisotropy;
 
     bool error;
 } GeometricParameters;

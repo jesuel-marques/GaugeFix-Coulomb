@@ -38,22 +38,22 @@ typedef unsigned short MtrxIdx3;
 typedef unsigned short SU3AlgIdx;
 
 /* 3x3 complex matrices in double */
-typedef struct {
+typedef struct Mtrx3x3Dbl {
     complex double m[Nc * Nc];
 } Mtrx3x3Dbl;
 
 /* 3x3 complex matrices in float */
-typedef struct {
+typedef struct Mtrx3x3Flt {
     complex float m[Nc * Nc];
 } Mtrx3x3Flt;
 
 /* 3 component vectors in color space. */
-typedef struct {
+typedef struct Vec3 {
     Scalar m[Nc];
 } Vec3;
 
 /* SU(3) algebra matrix with Nc²-1 components. */
-typedef struct {
+typedef struct MtrxSU3Alg {
     Scalar m[(Nc * Nc - 1) + 1]; /* one component added to keep the numbering neat
                                     the zeroth component should not be used */
 } MtrxSU3Alg;
@@ -159,5 +159,8 @@ short projectSU3(Mtrx3x3 *x);
 void decomposeAlgebraSU3(const Mtrx3x3 *a, MtrxSU3Alg *a_components);
 
 void projectSU3CabbiboMarinari(Mtrx3x3 *restrict w, Mtrx3x3 *restrict total_update);
+
+void prod3x3_generic(Mtrx3x3 **restrict u, short number_of_matrices,
+                     Mtrx3x3 *restrict result);
 
 #endif  // SU3OPS_H

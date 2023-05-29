@@ -17,21 +17,21 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     Contact: jesuel.leal@usp.br
-    
+
  */
 
 #ifndef GAUGEFIXING_H
 #define GAUGEFIXING_H
 
+#include <SU3_ops.h>
 #include <geometry.h>
 #include <types.h>
-#include <SU3_ops.h>
 
-typedef enum {LANDAU, COULOMB} GaugeType; 
+typedef enum { LANDAU,
+               COULOMB } GaugeType;
 
 /* Generic gauge-fixing parameters */
-typedef struct {
-
+typedef struct GenericGaugeFixingParameters {
     GaugeType gauge_type;
 
     double tolerance;
@@ -47,29 +47,28 @@ typedef struct {
 } GenericGaugeFixingParameters;
 
 /* Gauge-fixing parameters */
-typedef struct{
-
-    GenericGaugeFixingParameters generic_gf; 
+typedef struct ORGaugeFixingParameters {
+    GenericGaugeFixingParameters generic_gf;
 
     /* Overrelaxation specific gauge-fixing parameters. */
     float omega_OR;
     unsigned hits;
-    
+
 } ORGaugeFixingParameters;
 
 bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param);
 
 ORGaugeFixingParameters initParametersORDefault();
-ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filename);
+ORGaugeFixingParameters initORGaugeFixingParameters(const char *parameter_filename);
 
 void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param);
 
-double calculateF    (Mtrx3x3 * restrict U, GaugeType gauge_type);
-double calculateTheta(Mtrx3x3 * restrict U, GaugeType gauge_type);
-double calculate_e2  (Mtrx3x3 * restrict U, GaugeType gauge_type);
+double calculateF(Mtrx3x3 *restrict U, GaugeType gauge_type);
+double calculateTheta(Mtrx3x3 *restrict U, GaugeType gauge_type);
+double calculate_e2(Mtrx3x3 *restrict U, GaugeType gauge_type);
 
-int gaugefixOverrelaxation(Mtrx3x3 * restrict U,
-                           Mtrx3x3 * restrict G, 
+int gaugefixOverrelaxation(Mtrx3x3 *restrict U,
+                           Mtrx3x3 *restrict G,
                            ORGaugeFixingParameters parameters);
 
-#endif  //GAUGEFIXING_H
+#endif  // GAUGEFIXING_H

@@ -27,15 +27,6 @@
 #include <SU3_ops.h>
 #include <geometry.h>
 
-void sumStaples(Mtrx3x3* restrict U,
-                const PosVec position,
-                const LorentzIdx mu,
-                Mtrx3x3* restrict staple_sum);
-
 double HeatBathSU3(Mtrx3x3* U, PosVec position, LorentzIdx mu, double beta);
-
-double updateLattice(Mtrx3x3* U,
-                     double beta,
-                     double (*algorithm)(Mtrx3x3*, PosVec, LorentzIdx, double));
 
 #endif  // HEATBATH_H

@@ -39,16 +39,14 @@ OutCfgMtrx *getLinkOut(OutCfgMtrx *restrict U_out,
                        const PosVec position,
                        const LorentzIdx mu);
 
-int loadConfig(const Mtrx3x3 *restrict U,
-               char *config_filename),
-    writeConfig(Mtrx3x3 *restrict U,
-                char *config_filename);
+int loadConfig(Mtrx3x3 *restrict U, const char *config_filename),
+    writeConfig(Mtrx3x3 *restrict U, const char *config_filename);
 
 int loadGaugeTransf(Mtrx3x3 *restrict G,
                     char *gauge_transf_filename),
     writeGaugeTransf(Mtrx3x3 *restrict G,
                      char *gauge_transf_filename);
 
-void loadConfigPlainText(Mtrx3x3 *U, char *config_filename);
+int loadConfigPlainText(Mtrx3x3 *U, char *config_filename);
 
 #endif  // FIELDS_IO_H

@@ -29,7 +29,7 @@
 #include <types.h>
 
 /* Does the pointer arithmetic to get the correct index for the gauge transformation */
-#define GET_GT(G, position) G + (((position.pos[T_INDX] * lattice_param.n_SPC + position.pos[X_INDX]) * lattice_param.n_SPC + position.pos[Y_INDX]) * lattice_param.n_SPC + position.pos[Z_INDX])
+#define GET_GT(G, position) G + (((position.pos[T_INDX] * lattice_param.n_SPC + position.pos[Z_INDX]) * lattice_param.n_SPC + position.pos[Y_INDX]) * lattice_param.n_SPC + position.pos[X_INDX])
 
 /* Does the pointer arithmetic to get the correct index for the configuration */
 // #define GET_LINK(U, position, mu) U + ((((position.pos[T_INDX] * lattice_param.n_SPC + position.pos[X_INDX]) * lattice_param.n_SPC + position.pos[Y_INDX]) * lattice_param.n_SPC + position.pos[Z_INDX]) * DIM + mu)
@@ -38,28 +38,28 @@
 
 Mtrx3x3 *allocate3x3Field(unsigned elements);
 
-int setFieldToIdentity(const Mtrx3x3 *restrict field,
+int setFieldToIdentity(Mtrx3x3 *restrict field,
                        unsigned elements);
-int setFieldSU3Random(const Mtrx3x3 *restrict field, unsigned elements);
-int copyField(const Mtrx3x3 *restrict field,
+int setFieldSU3Random(Mtrx3x3 *restrict field, unsigned elements);
+int copyField(Mtrx3x3 *restrict field,
               unsigned elements,
-              const Mtrx3x3 *restrict field_copy);
+              Mtrx3x3 *restrict field_copy);
 
-int reunitarizeField(const Mtrx3x3 *restrict field, unsigned elements);
+int reunitarizeField(Mtrx3x3 *restrict field, unsigned elements);
 
-Scalar averageFieldDet(const Mtrx3x3 *restrict field, unsigned elements);
+Scalar averageFieldDet(Mtrx3x3 *restrict field, unsigned elements);
 
-Mtrx3x3 *getLink(const Mtrx3x3 *U,
+Mtrx3x3 *getLink(Mtrx3x3 *U,
                  const PosVec position,
                  const LorentzIdx mu);
 
-void getLinkMatrix(const Mtrx3x3 *restrict U,
+void getLinkMatrix(Mtrx3x3 *restrict U,
                    const PosVec position,
                    const LorentzIdx mu,
                    Direction dir,
-                   const Mtrx3x3 *restrict u);
+                   Mtrx3x3 *restrict u);
 
-Mtrx3x3 *getGaugetransf(const Mtrx3x3 *restrict G,
+Mtrx3x3 *getGaugetransf(Mtrx3x3 *restrict G,
                         const PosVec position);
 
 void applyGaugeTransformationU(Mtrx3x3 *restrict U,

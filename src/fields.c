@@ -27,6 +27,7 @@
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <types.h>
 
 /* Allocated the memory for 3x3 with a given number of elements. */
@@ -53,13 +54,13 @@ Mtrx3x3 *allocate3x3Field(unsigned elements) {
      *
      */
 
-    const Mtrx3x3 *field = (Mtrx3x3 *)calloc(elements, sizeof(Mtrx3x3));
+    Mtrx3x3 *field = (Mtrx3x3 *)calloc(elements, sizeof(Mtrx3x3));
 
     return field;
 }
 
 /* Sets all 3x3 matrices entries in field to unit matrices. */
-int setFieldToIdentity(const Mtrx3x3 *restrict field, unsigned elements) {
+int setFieldToIdentity(Mtrx3x3 *restrict field, unsigned elements) {
     /*
      * Calls:
      * =====
@@ -90,7 +91,7 @@ int setFieldToIdentity(const Mtrx3x3 *restrict field, unsigned elements) {
     }
 
 #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
-    for (int i = 0; i < elements; i++)
+    for (unsigned int i = 0; i < elements; i++)
         setIdentity3x3(field + i);
 
     return 0;
@@ -98,7 +99,7 @@ int setFieldToIdentity(const Mtrx3x3 *restrict field, unsigned elements) {
 
 /* Sets all 3x3 matrices entries in field to special unitary random matrices using de
 ranlux random number generator. */
-int setFieldSU3Random(const Mtrx3x3 *restrict field, unsigned elements) {
+int setFieldSU3Random(Mtrx3x3 *restrict field, unsigned elements) {
     /*
      * Calls:
      * =====
@@ -127,16 +128,16 @@ int setFieldSU3Random(const Mtrx3x3 *restrict field, unsigned elements) {
         return -2;
     }
 
-    for (int i = 0; i < elements; i++)
+    for (unsigned int i = 0; i < elements; i++)
         setSU3Random(field + i);
 
     return 0;
 }
 
 /* Copies a field to field_copy. */
-int copyField(const Mtrx3x3 *restrict field,
+int copyField(Mtrx3x3 *restrict field,
               unsigned elements,
-              const Mtrx3x3 *restrict field_copy) {
+              Mtrx3x3 *restrict field_copy) {
     /*
      * Calls:
      * =====
@@ -166,15 +167,13 @@ int copyField(const Mtrx3x3 *restrict field,
         return -2;
     }
 
-#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
-    for (int i = 0; i < elements; i++)
-        copy3x3(field + i, field_copy + i);
+    memcpy(field_copy, field, elements * sizeof(Mtrx3x3));
 
     return 0;
 }
 
 /* Reunitarizes all the matrices in the field by projecting them all to SU(3). */
-int reunitarizeField(const Mtrx3x3 *restrict field, unsigned elements) {
+int reunitarizeField(Mtrx3x3 *restrict field, unsigned elements) {
     /*
      * Calls:
      * =====
@@ -209,7 +208,7 @@ int reunitarizeField(const Mtrx3x3 *restrict field, unsigned elements) {
     int exit_status = 0;
 #pragma omp parallel for num_threads(NUM_THREADS) \
     reduction(| : exit_status) schedule(dynamic)
-    for (int i = 0; i < elements; i++)
+    for (unsigned int i = 0; i < elements; i++)
         exit_status |= projectSU3(field + i);
 
     if (exit_status != 0) {
@@ -219,7 +218,7 @@ int reunitarizeField(const Mtrx3x3 *restrict field, unsigned elements) {
 }
 
 /* Gives the average determinant for a field of 3x3 matrices. */
-Scalar averageFieldDet(const Mtrx3x3 *restrict field, unsigned elements) {
+Scalar averageFieldDet(Mtrx3x3 *restrict field, unsigned elements) {
     /*
      * Calls:
      * =====
@@ -252,7 +251,7 @@ Scalar averageFieldDet(const Mtrx3x3 *restrict field, unsigned elements) {
 
 #pragma omp parallel for num_threads(NUM_THREADS) \
     schedule(dynamic) reduction(+ : det)
-    for (int i = 0; i < elements; i++)
+    for (unsigned int i = 0; i < elements; i++)
         det += determinant3x3(field + i);
 
     det /= (Scalar)elements;
@@ -261,7 +260,7 @@ Scalar averageFieldDet(const Mtrx3x3 *restrict field, unsigned elements) {
 }
 
 /* Gets a pointer to a link at the given position and mu. */
-Mtrx3x3 *getLink(const Mtrx3x3 *restrict U,
+Mtrx3x3 *getLink(Mtrx3x3 *restrict U,
                  const PosVec position,
                  const LorentzIdx mu) {
     /*
@@ -301,11 +300,11 @@ Mtrx3x3 *getLink(const Mtrx3x3 *restrict U,
 }
 
 /* Gets forward or backward link at given position and mu. */
-void getLinkMatrix(const Mtrx3x3 *restrict U,
+void getLinkMatrix(Mtrx3x3 *restrict U,
                    const PosVec position,
                    const LorentzIdx mu,
                    Direction dir,
-                   const Mtrx3x3 *restrict u) {
+                   Mtrx3x3 *restrict u) {
     /*
      * Calls:
      * =====
@@ -357,7 +356,7 @@ void getLinkMatrix(const Mtrx3x3 *restrict U,
 }
 
 /* Gets a pointer to the gauge transformation at the given position. */
-Mtrx3x3 *getGaugetransf(const Mtrx3x3 *restrict G,
+Mtrx3x3 *getGaugetransf(Mtrx3x3 *restrict G,
                         const PosVec position) {
     /*
      * Calls:
@@ -425,7 +424,6 @@ void applyGaugeTransformationU(Mtrx3x3 *restrict U,
      */
 
     PosIndex t;
-
 #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
     LOOP_TEMPORAL(t) {
         Mtrx3x3 *g;
@@ -442,7 +440,7 @@ void applyGaugeTransformationU(Mtrx3x3 *restrict U,
             LOOP_LORENTZ(mu) {
                 //	U'_mu(x) = g(x) . U_mu(x) . gdagger(x + mu)
                 prod_vuwdagger3x3(g,
-                                  getLink(U, position, mu),
+                                  (u = getLink(U, position, mu)),
                                   getGaugetransf(G, getNeighbour(position, mu, FRONT)),
                                   &u_updated);
 
@@ -480,8 +478,6 @@ void applyRandomGaugeTransformationU(Mtrx3x3 *restrict U) {
      * =======
      *
      */
-
-    PosIndex t;
 
     Mtrx3x3 *G = allocate3x3Field(lattice_param.volume);
     setFieldSU3Random(G, lattice_param.volume);

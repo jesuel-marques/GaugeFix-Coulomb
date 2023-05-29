@@ -1,4 +1,7 @@
 gfix
+configGen
+invertDirac
+correlator
 hostfile
 *.sh
 *.dbg

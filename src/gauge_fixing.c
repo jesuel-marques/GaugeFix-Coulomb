@@ -17,398 +17,368 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     Contact: jesuel.leal@usp.br
-    
+
  */
 
+#include <../settings.h>
+#include <SU3_ops.h>
 #include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <tgmath.h>
-
-#include <omp.h>
-
 #include <fields.h>
 #include <four_potential.h>
 #include <gauge_fixing.h>
 #include <geometry.h>
-#include <../settings.h>
-#include <SU3_ops.h>
+#include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <tgmath.h>
 #include <types.h>
 
 #define PARAMETER_KEY_DELIMITER ":"
 
 //	Implementation of the checkerboard subdivision of the lattice.
-#define BLACKRED_SWEEP(position, sweep) ((POSITION_IS_EVEN(position)) ^ ((sweep) & 1))
+#define BLACKRED_SWEEP(position, sweep) ((POSITION_IS_EVEN(position)) ^ ((sweep)&1))
 
 /* Verifies if gfix_param contain valid parameters for the gauge-fixing. */
 bool validORGaugeFixingParametersQ(ORGaugeFixingParameters gfix_param) {
-
-    /* 
-	 * Calls:
-	 * =====
-     * 
+    /*
+     * Calls:
+     * =====
+     *
      * Macros:
-	 * ======
-     * 
+     * ======
+     *
      * Global Variables:
      * ================
-	 *
-	 * Parameters:
-	 * ==========
-	 * ORGaugeFixingParameters	gfix_param:		overrelaxation gauge fixing parameters.
-	 *
-	 * Returns:
-	 * =======
-	 * true if parameters are valid, false if invalid.
-	 */
+     *
+     * Parameters:
+     * ==========
+     * ORGaugeFixingParameters	gfix_param:		overrelaxation gauge fixing parameters.
+     *
+     * Returns:
+     * =======
+     * true if parameters are valid, false if invalid.
+     */
 
-    return ((gfix_param.generic_gf.gauge_type == COULOMB || 
-             gfix_param.generic_gf.gauge_type == LANDAU          )&&
-            gfix_param.omega_OR  >= 1 && gfix_param.omega_OR < 2  && 
-            gfix_param.generic_gf.tolerance > 0                   && 
-            gfix_param.generic_gf.error != true                   &&
-            gfix_param.generic_gf.sweeps_to_reunitarization > 0     );
+    return ((gfix_param.generic_gf.gauge_type == COULOMB ||
+             gfix_param.generic_gf.gauge_type == LANDAU) &&
+            gfix_param.omega_OR >= 1 && gfix_param.omega_OR < 2 &&
+            gfix_param.generic_gf.tolerance > 0 &&
+            gfix_param.generic_gf.error != true &&
+            gfix_param.generic_gf.sweeps_to_reunitarization > 0);
 }
 
-ORGaugeFixingParameters initParametersORDefault(){
-    ORGaugeFixingParameters gfix_param = 
-                    {.omega_OR = 1.95,  
-                     .hits = 2,
-                     .generic_gf.gauge_type = COULOMB,           
-                     .generic_gf.error = false,
-                     .generic_gf.gfix_proxy = calculate_e2,
-                     .generic_gf.tolerance = 1E-16,
-                     .generic_gf.max_sweeps_to_fix = 100000,
-                     .generic_gf.estimate_sweeps_to_gf_progress = 1000,
-                     .generic_gf.sweeps_to_reunitarization = 250};
+ORGaugeFixingParameters initParametersORDefault() {
+    ORGaugeFixingParameters gfix_param =
+        {.omega_OR = 1.95,
+         .hits = 2,
+         .generic_gf.gauge_type = COULOMB,
+         .generic_gf.error = false,
+         .generic_gf.gfix_proxy = calculate_e2,
+         .generic_gf.tolerance = 1E-16,
+         .generic_gf.max_sweeps_to_fix = 100000,
+         .generic_gf.estimate_sweeps_to_gf_progress = 1000,
+         .generic_gf.sweeps_to_reunitarization = 250};
 
     return gfix_param;
 }
 
 /*  Prints gauge-fixing parameters for the parameter struct passed */
-void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param){
-
+void printORGaugeFixingParameters(ORGaugeFixingParameters gfix_param) {
     /*
-	 * Calls:
-	 * =====
+     * Calls:
+     * =====
      * printf
-	 *
+     *
      * Macros:
-	 * ======
-     * 
+     * ======
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
+     *
+     * Parameters:
+     * ==========
      * ORGaugeFixingParameters gfix_param:    overrelaxation gauge fixing parameters.
-	 * 
-     * 
-	 * Returns:
-	 * =======
-	 * 
-	 */
+     *
+     *
+     * Returns:
+     * =======
+     *
+     */
 
     printf("\n");
-    printf("gauge type: %s\n", 
+    printf("gauge type: %s\n",
            gfix_param.generic_gf.gauge_type == LANDAU ? "Landau" : "Coulomb");
     printf("max_hits: %u\n", gfix_param.hits);
     printf("omega_OR: %lf\n", gfix_param.omega_OR);
     printf("\n");
     printf("tolerance: %3.2E\n", gfix_param.generic_gf.tolerance);
     printf("max_sweeps_to_fix: %u\n", gfix_param.generic_gf.max_sweeps_to_fix);
-    printf("estimate_sweeps_to_gfixprogress: %u\n", 
-            gfix_param.generic_gf.estimate_sweeps_to_gf_progress);
+    printf("estimate_sweeps_to_gfixprogress: %u\n",
+           gfix_param.generic_gf.estimate_sweeps_to_gf_progress);
     printf("\n");
-    printf("sweeps_to_reunitarization: %u\n", 
-            gfix_param.generic_gf.sweeps_to_reunitarization);
+    printf("sweeps_to_reunitarization: %u\n",
+           gfix_param.generic_gf.sweeps_to_reunitarization);
     printf("\n");
 }
 
 /* Removes whitespace characters from a string. */
-void removeSpaces(char * restrict string)
-{
+void removeSpaces(char* restrict string) {
     /*
-	 * Calls:
-	 * =====
-	 * isspace.
-	 *
+     * Calls:
+     * =====
+     * isspace.
+     *
      * Macros:
-	 * ======
-     * 
+     * ======
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
-	 * char * string:      string whose spaces will be removed           
-     * 
-	 * Returns:
-	 * =======
-	 * 
-	 */
+     *
+     * Parameters:
+     * ==========
+     * char * string:      string whose spaces will be removed
+     *
+     * Returns:
+     * =======
+     *
+     */
 
     int non_space_count = 0;
 
-    for(unsigned count = 0; string[count]; count++) {
-        if(!isspace(string[count])) {
+    for (unsigned count = 0; string[count]; count++) {
+        if (!isspace(string[count])) {
             string[non_space_count] = string[count];
             non_space_count++;
         }
     }
-    
+
     string[non_space_count] = '\0';
 }
 
-
-/* Initializes gauge-fixing parameters given a parameter filename, 
+/* Initializes gauge-fixing parameters given a parameter filename,
    checking if the parameters passed are valid. If parameters are not set in the
    file, if filename passed if " " or if they are invalid, default values are used. */
-ORGaugeFixingParameters initORGaugeFixingParameters(const char * parameter_filename) {
-
+ORGaugeFixingParameters initORGaugeFixingParameters(const char* parameter_filename) {
     /*
-	 * Calls:
-	 * =====
-     * strcmp, printf, fopen, fgets, strtok, atof, fprintf, 
+     * Calls:
+     * =====
+     * strcmp, printf, fopen, fgets, strtok, atof, fprintf,
      * removeSpaces, validORGaugeFixingParametersQ, printORGaugeFixingParameters,
      * calculate_e2, calculate_theta.
-	 *
+     *
      * Macros:
-	 * ======
-     * 
+     * ======
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
-     * const char * parameter_filename:     filename of the file containing the 
+     *
+     * Parameters:
+     * ==========
+     * const char * parameter_filename:     filename of the file containing the
      *                                      parameters for the gauge-fixing.
-	 * 
-     * 
-	 * Returns:
-	 * =======
-	 * ORGaugeFixingParameters struct with parameters set. If parameters are invalid, 
+     *
+     *
+     * Returns:
+     * =======
+     * ORGaugeFixingParameters struct with parameters set. If parameters are invalid,
      * the error flag in the struct will be set.
-     * 
-	 */
+     *
+     */
 
     ORGaugeFixingParameters gfix_param = initParametersORDefault();
 
-    if(!strcmp(parameter_filename, " ")){
+    if (!strcmp(parameter_filename, " ")) {
         printf("No parameter-file detected, using default values.\n");
         return gfix_param;
     }
 
-    FILE * parameter_file = fopen(parameter_filename, "r");
+    FILE* parameter_file = fopen(parameter_filename, "r");
 
     char delimiter[] = PARAMETER_KEY_DELIMITER;
     char buff[100];
 
-    if(parameter_file != NULL) {
-        while(fgets(buff, 100, parameter_file)) {
-
-
+    if (parameter_file != NULL) {
+        while (fgets(buff, 100, parameter_file)) {
             removeSpaces(buff);
 
-            char * key;
+            char* key;
             key = strtok(buff, delimiter);
-            
-            char * value;
+
+            char* value;
             value = strtok(NULL, "\n");
 
-            if(value){
-
-                if(!strcmp(key, "gauge_type")) {
-                    
-                    for(int i = 0; value[i]; i++){
+            if (value) {
+                if (!strcmp(key, "gauge_type")) {
+                    for (int i = 0; value[i]; i++) {
                         value[i] = tolower(value[i]);
                     }
-                    
 
-                    if(!strcmp(value, "coulomb") || !strcmp(value, "landau")){
-                        gfix_param.generic_gf.gauge_type = 
-                                            !strcmp(value, "landau") ? LANDAU : COULOMB;
-                    }
-                    else{
+                    if (!strcmp(value, "coulomb") || !strcmp(value, "landau")) {
+                        gfix_param.generic_gf.gauge_type =
+                            !strcmp(value, "landau") ? LANDAU : COULOMB;
+                    } else {
                         fprintf(stderr, "Gauge type not recognized: %s.\n", value);
                     }
-                }else if(!strcmp(key, "tolerance")) {
-                    gfix_param.generic_gf.tolerance = atof(value);            
-                }else if(!strcmp(key, "hits")) {
+                } else if (!strcmp(key, "tolerance")) {
+                    gfix_param.generic_gf.tolerance = atof(value);
+                } else if (!strcmp(key, "hits")) {
                     gfix_param.hits = atof(value);
-                }else if(!strcmp(key, "omega_OR")) {
+                } else if (!strcmp(key, "omega_OR")) {
                     gfix_param.omega_OR = atof(value);
-                }else if(!strcmp(key, "max_sweeps_to_fix")) {
+                } else if (!strcmp(key, "max_sweeps_to_fix")) {
                     gfix_param.generic_gf.max_sweeps_to_fix = atof(value);
-                }else if(!strcmp(key, "estimate_sweeps_to_gf_progress")) {
+                } else if (!strcmp(key, "estimate_sweeps_to_gf_progress")) {
                     gfix_param.generic_gf.estimate_sweeps_to_gf_progress = atof(value);
-                }else if(!strcmp(key, "sweeps_to_reunitarization")) {
+                } else if (!strcmp(key, "sweeps_to_reunitarization")) {
                     gfix_param.generic_gf.sweeps_to_reunitarization = atof(value);
-                }else if(!strcmp(key, "gfix_proxy")) {
-                
-                    if(!strcmp(value, "e2")){
+                } else if (!strcmp(key, "gfix_proxy")) {
+                    if (!strcmp(value, "e2")) {
                         gfix_param.generic_gf.gfix_proxy = calculate_e2;
-                    }
-                    else if(!strcmp(value, "theta")) {
+                    } else if (!strcmp(value, "theta")) {
                         gfix_param.generic_gf.gfix_proxy = calculateTheta;
-                    }
-                    else{
+                    } else {
                         fprintf(stderr, "Unrecognized gfix_proxy: %s.\n", value);
                     }
 
-                }else if(strcmp(key, "\n")) {
+                } else if (strcmp(key, "\n")) {
                     fprintf(stderr, "Unrecognized parameter: %s.\n", key);
                 }
-
             }
         }
         fclose(parameter_file);
-    }
-    else{
-        fprintf(stderr, "Gauge-fixing parameter file %s could not be opened. "
-                        "Using default parameters instead.\n", parameter_filename);
+    } else {
+        fprintf(stderr,
+                "Gauge-fixing parameter file %s could not be opened. "
+                "Using default parameters instead.\n",
+                parameter_filename);
         printORGaugeFixingParameters(gfix_param);
     }
 
-    if(!validORGaugeFixingParametersQ(gfix_param)) {
+    if (!validORGaugeFixingParametersQ(gfix_param)) {
         gfix_param.generic_gf.error = true;
     }
 
-	return gfix_param;
+    return gfix_param;
 }
-
 
 /* Calculates number of sweeps to check if gauge-fixing is attained. */
-static int whenNextConvergenceCheckQ(unsigned int current_sweep,
-                                     const double residue, 
-                                     ORGaugeFixingParameters gfix_param) {
-                                 
-    /*  
-	 * Calls:
-	 * =====
+static unsigned whenNextConvergenceCheckQ(unsigned int current_sweep,
+                                          const double residue,
+                                          ORGaugeFixingParameters gfix_param) {
+    /*
+     * Calls:
+     * =====
      * log10.
-     * 
-	 * Macros:
-	 * ======
+     *
+     * Macros:
+     * ======
      * ESTIMATE_SWEEPS_TO_GF_PROGRESS.
-     * 
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
+     *
+     * Parameters:
+     * ==========
      * int current_sweep:                   already elapsed sweeps,
-	 * double residue:                      index which shows how close config is to be
+     * double residue:                      index which shows how close config is to be
      *                                      gauge-fixed,
      * ORGaugeFixingParameters gfix_param:	overrelaxation gauge fixing parameters.
-     *  
-	 * Returns:
-	 * =======
-	 * Non-negative integer which says how long to wait to measure residue again.
      *
-	 */
+     * Returns:
+     * =======
+     * Non-negative integer which says how long to wait to measure residue again.
+     *
+     */
 
-    if(residue < gfix_param.generic_gf.tolerance) {
+    if (residue < gfix_param.generic_gf.tolerance) {
         return current_sweep;
+    } else {
+        return current_sweep + 10 + (unsigned)(gfix_param.generic_gf.estimate_sweeps_to_gf_progress * (1.0 - log10(residue) / log10(gfix_param.generic_gf.tolerance)));
     }
-    else{
-        return current_sweep + 10 
-                + (unsigned)(gfix_param.generic_gf.estimate_sweeps_to_gf_progress * 
-                       (1.0 - log10(residue) / log10(gfix_param.generic_gf.tolerance))); 
-    }
-
 }
 
-/* Calculates the gauge-fixing functional F, which is to be extremized when 
+/* Calculates the gauge-fixing functional F, which is to be extremized when
    performing the gauge-fixing. */
-double calculateF(Mtrx3x3 * restrict U, GaugeType gauge_type) {
-
-    /*  
-	 * Calls:
-	 * =====
+double calculateF(Mtrx3x3* restrict U, GaugeType gauge_type) {
+    /*
+     * Calls:
+     * =====
      * creal,
      * trace3x3,
      * getLink.
-     * 
+     *
      * Macros:
-	 * ======
+     * ======
      * Nc
      * LOOP_TEMPORAL, LOOP_SPATIAL, LOOP_LORENTZ_SPATIAL, T_INDX.
-     * 
+     *
      * Global Variables:
      * ================
      * lattice_param
-	 *
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * U:    SU(3) gluon field.
-     *  
-	 * Returns:
-	 * =======
-	 * Value of functional for the given configuration in double precision.
      *
-	 */
-
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U:    SU(3) gluon field.
+     *
+     * Returns:
+     * =======
+     * Value of functional for the given configuration in double precision.
+     *
+     */
 
     double retrU_acc = 0.0;
-    
-    PosIndex t;
-    #pragma omp parallel for reduction (+:retrU_acc) num_threads(NUM_THREADS)   \
-                             schedule(dynamic)                                  
-    LOOP_TEMPORAL(t) {
 
-        PosVec position;    
-        position.pos[T_INDX]  = t;
+    PosIndex t;
+#pragma omp parallel for reduction(+ : retrU_acc) num_threads(NUM_THREADS) \
+    schedule(dynamic)
+    LOOP_TEMPORAL(t) {
+        PosVec position;
+        position.pos[T_INDX] = t;
         LOOP_SPATIAL(position) {
             LorentzIdx mu;
             LOOP_LORENTZ_SPATIAL(mu) {
-                
                 retrU_acc += creal(trace3x3(getLink(U, position, mu)));
-
             }
-            if(gauge_type == LANDAU){
+            if (gauge_type == LANDAU) {
                 retrU_acc += lattice_param.func_anisotropy *
                              creal(trace3x3(getLink(U, position, T_INDX)));
             }
         }
     }
 
-    return retrU_acc / (double) (lattice_param.volume * Nc * (DIM - 1));
+    return retrU_acc / (double)(lattice_param.volume * Nc * (DIM - 1));
 }
 
 /* Calculates an alternative index to measure proximity to gauge-fixing condition.
    theta = 1/(N_c V) sum_n Re Tr[(div.A(n)).(div.A(n))^dagger]. */
-double calculateTheta(Mtrx3x3 * restrict U, GaugeType gauge_type) {
-
-    /*  
-	 * Calls:
-	 * =====
+double calculateTheta(Mtrx3x3* restrict U, GaugeType gauge_type) {
+    /*
+     * Calls:
+     * =====
      * creal,
      * hermConj3x3, prod3x3, trace3x3,
      * spatialDivergenceA, quadriDivergenceA.
-	 *
+     *
      * Macros:
-	 * ======
+     * ======
      * Nc,
      * LOOP_TEMPORAL, LOOP_SPATIAL, T_INDX.
-     * 
+     *
      * Global Variables:
      * ================
      * lattice_param.
-     * 
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * U:          SU(3) gluon field.
-     * GaugeType gauge_type: the type of gauge which is being fixed.
-     *  
-	 * Returns:
-	 * =======
-	 * Value of alternative gauge-fixing index theta in double precision.
      *
-	 */
-    
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U:          SU(3) gluon field.
+     * GaugeType gauge_type: the type of gauge which is being fixed.
+     *
+     * Returns:
+     * =======
+     * Value of alternative gauge-fixing index theta in double precision.
+     *
+     */
 
     double theta = 0.0;
 
@@ -416,10 +386,9 @@ double calculateTheta(Mtrx3x3 * restrict U, GaugeType gauge_type) {
 
     DivergenceType divergence_type = gauge_type == LANDAU ? QUADRI : COULOMB;
 
-    #pragma omp parallel for reduction (+:theta) num_threads(NUM_THREADS) \
-                             schedule(dynamic)                            
+#pragma omp parallel for reduction(+ : theta) num_threads(NUM_THREADS) \
+    schedule(dynamic)
     LOOP_TEMPORAL(t) {
-
         PosVec position;
 
         position.pos[T_INDX] = t;
@@ -434,151 +403,141 @@ double calculateTheta(Mtrx3x3 * restrict U, GaugeType gauge_type) {
         }
     }
 
-    return creal(theta) / (double) (Nc * lattice_param.volume);
+    return creal(theta) / (double)(Nc * lattice_param.volume);
 }
 
-
 /* Calculates e2, an index to measure proximity to gauge-fixing condition
-   (defined in eq 6.1 of hep-lat/0301019v2). It is the normalized sum of the squares 
-   of the color components of the divergence of A. */    
-double calculate_e2(Mtrx3x3 * restrict U, GaugeType gauge_type) {
-
+   (defined in eq 6.1 of hep-lat/0301019v2). It is the normalized sum of the squares
+   of the color components of the divergence of A. */
+double calculate_e2(Mtrx3x3* restrict U, GaugeType gauge_type) {
     /*
-	 * Calls:
-	 * =====
+     * Calls:
+     * =====
      * decomposeAlgebraSU3,
      * spatialDivergenceA, quadriDivergenceA.
-     * 
+     *
      * Macros:
-	 * ======
+     * ======
      * Nc,
      * NUM_THREADS,
      * LOOP_TEMPORAL, LOOP_SPATIAL, T_INDX.
-     * 
+     *
      * Global Variables:
      * ================
      * lattice_param.
-	 *
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * U:          SU(3) gluon field.
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U:          SU(3) gluon field.
      * GaugeType gauge_type: the type of gauge which is being fixed.
-     *  
-	 * Returns:
-	 * =======
-	 * Value of gauge-fixing index e2 in double precision for defined gauge-type. If 
+     *
+     * Returns:
+     * =======
+     * Value of gauge-fixing index e2 in double precision for defined gauge-type. If
      * gauge-type is unknown, returns -1.
      *
-	 */
+     */
     double e2 = 0.0;
 
     DivergenceType divergence_type;
     divergence_type = (gauge_type == LANDAU) ? QUADRI : SPATIAL;
 
     PosIndex t;
-    // Parallelizing by slicing the time extent
-    #pragma omp parallel for reduction (+:e2) num_threads(NUM_THREADS) schedule(dynamic) 
-        LOOP_TEMPORAL(t) {
-            Mtrx3x3 div_A;
-            MtrxSU3Alg div_A_components;
+// Parallelizing by slicing the time extent
+#pragma omp parallel for reduction(+ : e2) num_threads(NUM_THREADS) schedule(dynamic)
+    LOOP_TEMPORAL(t) {
+        Mtrx3x3 div_A;
+        MtrxSU3Alg div_A_components;
 
-            PosVec position;
+        PosVec position;
 
-            position.pos[T_INDX] = t;
+        position.pos[T_INDX] = t;
 
-            LOOP_SPATIAL(position) {
-
-                DivergenceA(U, position, &div_A, divergence_type);
-                decomposeAlgebraSU3(&div_A, &div_A_components);
-                for(SU3AlgIdx a = 1; a <= Nc * Nc - 1; a++) {
-
-                    /* 	Sum of the squares of the color components 
-                        of the divergence of A. */
-                    e2 += (div_A_components.m[a]) * (div_A_components.m[a]);
-
-                }
+        LOOP_SPATIAL(position) {
+            DivergenceA(U, position, &div_A, divergence_type);
+            decomposeAlgebraSU3(&div_A, &div_A_components);
+            for (SU3AlgIdx a = 1; a <= Nc * Nc - 1; a++) {
+                /* 	Sum of the squares of the color components
+                    of the divergence of A. */
+                e2 += (div_A_components.m[a]) * (div_A_components.m[a]);
             }
         }
+    }
 
     return e2 / (lattice_param.volume);
 }
 
 /* Accumulates the value of U_mu(n) and U_-mu(n) into w. */
-static inline void accumulateFrontHearLink(Mtrx3x3 * restrict U, 
-                                           const PosVec position, 
-                                           LorentzIdx mu, 
-                                           Mtrx3x3 * restrict w) {
-
+static inline void accumulateFrontHearLink(Mtrx3x3* restrict U,
+                                           const PosVec position,
+                                           LorentzIdx mu,
+                                           Mtrx3x3* restrict w) {
     /*
-	 * Calls:
-	 * =====
+     * Calls:
+     * =====
      * conj,
      * getNeighbour,
-	 * getLink.
-     * 
-	 * Macros:
-	 * ======
+     * getLink.
+     *
+     * Macros:
+     * ======
      * ELEM_3X3,
      * LOOP_TEMPORAL, LOOP_SPATIAL, T_INDX.
-     * 
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * U: 	    SU(3) gluon field,
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U: 	    SU(3) gluon field,
      * PosVec position:     specific position which is being dealt with,
      * LorentzIdx mu:       specific lorentz index which is being dealt with,
      * Mtrx3x3 * w:         matrix which holds the accumulation.
-     *  
-	 * Returns:
-	 * =======
-	 * 
-	 */
+     *
+     * Returns:
+     * =======
+     *
+     */
 
-    Mtrx3x3 * u_front = getLink(U,              position,             mu);
-    Mtrx3x3 * u_rear  = getLink(U, getNeighbour(position, mu, REAR),  mu);
+    Mtrx3x3* u_front = getLink(U, position, mu);
+    Mtrx3x3* u_rear = getLink(U, getNeighbour(position, mu, REAR), mu);
 
     MtrxIdx3 a, b;
     LOOP_3X3(a, b) {
-
         //  w += U_mu(n) + U_dagger_mu(n - mu_hat)
-        
-        w -> m[ELEM_3X3(a, b)] +=       u_front -> m[ELEM_3X3(a, b)]
-                                 + conj(u_rear  -> m[ELEM_3X3(b, a)]);        
-    
+
+        w->m[ELEM_3X3(a, b)] += u_front->m[ELEM_3X3(a, b)] + conj(u_rear->m[ELEM_3X3(b, a)]);
     }
 }
 
 /* Calculates w(n) = sum_mu U_mu(n) + U_dagger_mu(n-mu_hat),
    following the notation in hep-lat/9306018. */
-inline static void calculate_w(Mtrx3x3 * restrict U, 
+inline static void calculate_w(Mtrx3x3* restrict U,
                                const PosVec position,
-                               Mtrx3x3 * restrict w,
+                               Mtrx3x3* restrict w,
                                const ORGaugeFixingParameters params) {
-
     /*
      * Calls:
-	 * =====
+     * =====
      * setNull3x3, accumulateFrontHearLink.
-	 * 
-	 * Macros:
-	 * ======
+     *
+     * Macros:
+     * ======
      * LOOP_LORENTZ_SPATIAL.
-     * 
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * U: 	    SU(3) gluon field,
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U: 	    SU(3) gluon field,
      * PosVec position:     specific position which is being dealt with,
      * Mtrx3x3 * w:         matrix which holds the sum of links.
-     *  
-	 * Returns:
-	 * =======
-	 * 
-	 */
+     *
+     * Returns:
+     * =======
+     *
+     */
 
     setNull3x3(w);  //	Initializing w = 0
 
@@ -586,19 +545,16 @@ inline static void calculate_w(Mtrx3x3 * restrict U,
 
     LorentzIdx mu;
     LOOP_LORENTZ_SPATIAL(mu) {
-
-        /* w = sum_mu U_mu(n) + U_dagger_mu(n-mu_hat) */ 
+        /* w = sum_mu U_mu(n) + U_dagger_mu(n-mu_hat) */
         accumulateFrontHearLink(U, position, mu, w);
-
     }
-    if(params.generic_gf.gauge_type == LANDAU){
+    if (params.generic_gf.gauge_type == LANDAU) {
         Mtrx3x3 temporal_links;
         setNull3x3(&temporal_links);
 
         accumulateFrontHearLink(U, position, T_INDX, &temporal_links);
-        substMultScalar3x3(lattice_param.wanisotropy, &temporal_links);
+        substMultScalar3x3(lattice_param.w_anisotropy, &temporal_links);
         accumulate3x3(&temporal_links, w);
-
     }
 }
 
@@ -606,99 +562,91 @@ inline static void calculate_w(Mtrx3x3 * restrict U,
    algorithm for SU(3), with a division of the update matrix in submatrices
    following the Cabbibo-Marinari trick. Actual update is obtained after a number
    of "hits" to be performed one after another.  */
-inline void updateLosAlamos(Mtrx3x3 * restrict w, 
+inline void updateLosAlamos(Mtrx3x3* restrict w,
                             const unsigned max_hits,
-                            Mtrx3x3 * restrict total_update) {
-
+                            Mtrx3x3* restrict total_update) {
     /*
-	 * Calls:
-	 * =====
+     * Calls:
+     * =====
      * setIdentity3x3, prod3x3, inverse3x3,
      * updateSubLosAlamos.
-	 *
+     *
      * Macros:
-	 * ======
-     * 
+     * ======
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * w:             matrix to be updated; comes from accumulating links,
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * w:             matrix to be updated; comes from accumulating links,
      * const unsigned max_hits: iterations hits for the maximization of Tr[w(n)],
      * Submtrx sub:             index of SU(2) Cabbibo-Marinari submatrix of SU(3).
-     *  
-	 * Returns:
-	 * =======
-	 *
-	 */
+     *
+     * Returns:
+     * =======
+     *
+     */
 
-    Mtrx3x3 w_inv_old; 
-     /* First calculates the inverse of w.
-     The function will update w successively and to
-     extract what was the combined update, we can 
-     multiply from the right by the old inverse. */
-       
-    if(inverse3x3(w, &w_inv_old)) {
+    Mtrx3x3 w_inv_old;
+    /* First calculates the inverse of w.
+    The function will update w successively and to
+    extract what was the combined update, we can
+    multiply from the right by the old inverse. */
 
+    if (inverse3x3(w, &w_inv_old)) {
         /*  Local maximization is attained iteratively in SU(3),
             thus we need to make many hits ... */
-        for(unsigned short hits = 1; hits <= max_hits; hits++) {
-
+        for (unsigned short hits = 1; hits <= max_hits; hits++) {
             /* ... and each hit contains the Cabbibo-Marinari subdivision. */
-            for(Submtrx sub = R; sub <= T; sub++) {
+            for (Submtrx sub = R; sub <= T; sub++) {
                 /* Submatrices are indicated by numbers from 0 to 2
                    with codenames R, S and T. */
 
                 updateSubLosAlamos(w, sub);
-                
             }
         }
-    }
-    else{
-
+    } else {
         /* if w has no inverse, update will be given by the identity */
         setIdentity3x3(total_update);
-
     }
-    
+
     prod3x3(w, &w_inv_old, total_update);
     /*	Updates matrix with total_update. It is the
-    	accumulated updates from the hits. */
+        accumulated updates from the hits. */
 }
 
-/* Transforms gluon field U and the accumulated gauge-transformation field G by an 
+/* Transforms gluon field U and the accumulated gauge-transformation field G by an
    update gauge-transformation only at a given position. */
-static void updateLocalUG(Mtrx3x3 * restrict U, 
-                          Mtrx3x3 * restrict G, 
-                          const PosVec position, 
-                          const Mtrx3x3 * restrict update) {
-    
-    /* 
-	 * Calls:
-	 * =====
+static void updateLocalUG(Mtrx3x3* restrict U,
+                          Mtrx3x3* restrict G,
+                          const PosVec position,
+                          const Mtrx3x3* restrict update) {
+    /*
+     * Calls:
+     * =====
      * accumLeftProd3x3, accumRightProd3x3, hermConj3x3,
      * getNeighbour,
-	 * getLink, getGaugetransf.
-     * 
-	 * Macros:
-	 * ======
+     * getLink, getGaugetransf.
+     *
+     * Macros:
+     * ======
      * LOOP_LORENTZ.
-     * 
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * U: 	    SU(3) gluon field,
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U: 	    SU(3) gluon field,
      * Mtrx3x3 * G:	        SU(3) gauge-transformation field,
      * PosVec position:     specific position for the update,
      * Mtrx3x3 * update:    update gauge-transformation to be applied to the fields.
-     * 
-	 * Returns:
-	 * =======
-	 * 
-	 */
+     *
+     * Returns:
+     * =======
+     *
+     */
 
     //  G'(x) = g(x) . G(x) . 1 for red-black updates
 
@@ -709,182 +657,171 @@ static void updateLocalUG(Mtrx3x3 * restrict U,
 
     LorentzIdx mu;
     LOOP_LORENTZ(mu) {
-
         //	U'_mu(x) = g(x) . U_mu(x) . 1 for red-black updates
 
         accumLeftProd3x3(update, getLink(U, position, mu));
 
         //	U'_mu(x - mu) = 1 . U_mu(x - mu) . g_dagger(x) for red-black updates
 
-        accumRightProd3x3(getLink(U, getNeighbour(position, mu, REAR), mu), 
-                             &update_dagger);
-
+        accumRightProd3x3(getLink(U, getNeighbour(position, mu, REAR), mu),
+                          &update_dagger);
     }
 }
 
-/* Performs a gauge-transformation update at the given position according to the 
-   overrelaxation algorithm. Generalization of the algorithm described in 
+/* Performs a gauge-transformation update at the given position according to the
+   overrelaxation algorithm. Generalization of the algorithm described in
    hep-lat/0301019v2, using the Cabbibo-Marinari submatrices trick.	*/
-inline static void gaugefixOverrelaxationLocal(Mtrx3x3 * restrict U,  
-                                               Mtrx3x3 * restrict G, 
-                                               const PosVec position, 
+inline static void gaugefixOverrelaxationLocal(Mtrx3x3* restrict U,
+                                               Mtrx3x3* restrict G,
+                                               const PosVec position,
                                                const ORGaugeFixingParameters params) {
     /*
      * Calls:
-	 * =====
+     * =====
      * setIdentity3x3, power3x3Binomial,
      * calculate_w, updateLosAlamos, updateLocalUG.
-	 *
+     *
      * Macros:
-	 * ======
-     * 
+     * ======
+     *
      * Global Variables:
      * ================
-     * 
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * U: 	                    SU(3) gluon field,
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U: 	                    SU(3) gluon field,
      * Mtrx3x3 * G:	                        SU(3) gauge-transformation field,
      * PosVec position:                     specific position for the update,
      * ORGaugeFixingParameters params:	    overrelaxation gauge fixing parameters.
-     * 
-	 * Returns:
-	 * =======
-	 * 
-	 */
-    
+     *
+     * Returns:
+     * =======
+     *
+     */
+
     Mtrx3x3 w;
-    calculate_w(U, position, &w, params);  
+    calculate_w(U, position, &w, params);
 
     Mtrx3x3 update_LA;
     updateLosAlamos(&w, params.hits, &update_LA);
 
-    /*	The above function determines update_LA which would be the naïve
-   	update to bring the local function to its mininum. However,	using overrelaxation,
-    which means using update_LA^omega instead of  update_LA, where 1<omega<2 
-    makes the converge faster. update_LA^omega is calculated using the first two terms 
-    of the binomial expansion: 
-    update_LA^omega=I+omega(update_LA-I)+...=I(1-omega)+omega*update_LA+... . */
+    /*	The above function determines update_LA which would be the naïve update to bring
+the local function to its mininum. However, using overrelaxation, which means using update_LA^omega instead of  update_LA, where 1<omega<2 makes the converge faster.
+
+        update_LA^omega is calculated using the first two terms of the binomial
+        expansion:
+        update_LA^omega=I+omega(update_LA-I)+...=I(1-omega)+omega*update_LA+... . */
 
     Mtrx3x3 update_OR;
 
     /* update_OR = update_LA^omega = Proj_SU3((I(1-omega)+omega*update_LA) */
-    
-    if(power3x3Binomial(&update_LA, params.omega_OR, &update_OR)){
-        setIdentity3x3(&update_OR);   
-        /*  If matrix could not be projected to SU3 inside
-        power_3x3 binomial, then use identity as update. */
+
+    if (power3x3Binomial(&update_LA, params.omega_OR, &update_OR)) {
+        setIdentity3x3(&update_OR);
+        /*  If matrix could not be projected to SU3 inside power_3x3 binomial, then use identity as update. */
     }
 
     updateLocalUG(U, G, position, &update_OR);
 }
 
-/* Performs the gauge-fixing of a gluon-field following the overrelaxation 
-   algorithm with the given parameters. Sets G to identity before starting the 
+/* Performs the gauge-fixing of a gluon-field following the overrelaxation
+   algorithm with the given parameters. Sets G to identity before starting the
    procedure, overwriting anything that may have been loaded to it. */
-int gaugefixOverrelaxation(Mtrx3x3 * restrict U, 
-                           Mtrx3x3 * restrict G, 
+int gaugefixOverrelaxation(Mtrx3x3* restrict U,
+                           Mtrx3x3* restrict G,
                            const ORGaugeFixingParameters params) {
-
-    /* 
-	 * Calls:
-	 * =====
+    /*
+     * Calls:
+     * =====
      * fabs,
      * reunitarizeField,
      * validORGaugeFixingParametersQ, sweepsToNextMeasurement,
-     * gaugefixOverrelaxationLocal, 
+     * gaugefixOverrelaxationLocal,
      * printf.
-     * 
+     *
      * Macros:
-	 * ======
-     * LOOP_SPATIAL, 
+     * ======
+     * LOOP_SPATIAL,
      * BLACKRED_SWEEP, MAX_SWEEPS_TO_FIX, SWEEPS_TO_REUNITARIZATION
-     * 
+     *
      * Global Variables:
      * ================
      * lattice_param
-     * 
-	 * Parameters:
-	 * ==========
-	 * Mtrx3x3 * U:                  	    SU(3) gluon field,
+     *
+     * Parameters:
+     * ==========
+     * Mtrx3x3 * U:                  	    SU(3) gluon field,
      * Mtrx3x3 * G:	                        SU(3) gauge-transformation field,
      * ORGaugeFixingParameters params:  	overrelaxation gauge fixing parameters.
-     * 
-	 * Returns:
-	 * =======
-	 * Non-negative number of sweeps needed to gauge-fix if successful. 
-     * Integer error-code otherwise. 
-     *      -1: gauge-fixing algorithm didn't converge. 
+     *
+     * Returns:
+     * =======
+     * Non-negative number of sweeps needed to gauge-fix if successful.
+     * Integer error-code otherwise.
+     *      -1: gauge-fixing algorithm didn't converge.
      *      -2: parameters passed were invalid.
-	 */
+     */
 
-    if(!validORGaugeFixingParametersQ(params)) {
+    if (!validORGaugeFixingParametersQ(params)) {
         return -2;
     }
-    setFieldToIdentity(G, lattice_param.volume);
 
-    /*	
+    /*
      *  Gauge-fixing index, indicates how far we are to the Landau-gauge.
      *  It will be less than the tolerance,
      *	when the gauge-fixing is considered to be attained.
      *	Following the notation of hep-lat/0301019v2
      */
-    
+
     //	Counter to the number of sweeps to fix config to Coulomb gauge
-    int sweep = 0;
-    
-    /* No need to calculate residue all the time because it will typically take some 
+    unsigned sweep = 0;
+    /* No need to calculate residue all the time because it will typically take some
        hundreds/thousands of sweeps to fix the gauge. */
     double new_residue = params.generic_gf.gfix_proxy(U, params.generic_gf.gauge_type);
     printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
-    
-    int converge_check_due = whenNextConvergenceCheckQ(sweep, new_residue, params);
-    
-    while(new_residue > params.generic_gf.tolerance) {
-        // Parallelizing by slicing the time extent
-        #pragma omp parallel num_threads(NUM_THREADS)
-        #pragma omp for schedule(dynamic)
-            for(PosIndex t = 0; t < lattice_param.n_T; t++) {
-                PosVec position;
-                position.pos[T_INDX] = t;
-                LOOP_SPATIAL(position) {
 
-                    BLACKRED_SWEEP(position, sweep) ?
-                        /*	Implementation of the checkerboard subdivision 
-                            of the lattice. */
-                        
-                        gaugefixOverrelaxationLocal(U, G, position, params): 0;
-                        //  The actual gauge-fixing algorithm
+    unsigned converge_check_due = whenNextConvergenceCheckQ(sweep, new_residue, params);
 
+    while (new_residue > params.generic_gf.tolerance) {
+// Parallelizing by slicing the time extent
+#pragma omp parallel num_threads(NUM_THREADS)
+#pragma omp for schedule(dynamic)
+        for (PosIndex t = 0; t < lattice_param.n_T; t++) {
+            PosVec position;
+            position.pos[T_INDX] = t;
+            LOOP_SPATIAL(position) {
+                if (BLACKRED_SWEEP(position, sweep)) {
+                    /*	Implementation of the checkerboard
+                    subdivision of the lattice. */
+
+                    gaugefixOverrelaxationLocal(U, G, position, params);
+
+                    //  The actual gauge-fixing algorithm}
                 }
             }
+        }
 
         sweep++;
 
-        if(sweep == converge_check_due) {
+        if (sweep == converge_check_due) {
             double last_residue = new_residue;
-            new_residue = params.generic_gf.gfix_proxy(U,params.generic_gf.gauge_type);
-            if(fabs(new_residue - last_residue) / last_residue < 10E-16 ||
-               sweep >= params.generic_gf.max_sweeps_to_fix                 ){
+            new_residue = params.generic_gf.gfix_proxy(U, params.generic_gf.gauge_type);
+            if (fabs(new_residue - last_residue) / last_residue < 10E-16 ||
+                sweep >= params.generic_gf.max_sweeps_to_fix) {
                 printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
-                return -1;  /* convergence too slow or not converging */
-            }
-            else if(new_residue <= params.generic_gf.tolerance ) {
-                break;  /* converged */
-            }
-            else{
+                return -1; /* convergence too slow or not converging */
+            } else if (new_residue <= params.generic_gf.tolerance) {
+                break; /* converged */
+            } else {
                 printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
-                converge_check_due = 
-                                  whenNextConvergenceCheckQ(sweep, new_residue, params);
+                converge_check_due =
+                    whenNextConvergenceCheckQ(sweep, new_residue, params);
             }
-            
         }
 
-        if(!(sweep % params.generic_gf.sweeps_to_reunitarization)) {
-
+        if (!(sweep % params.generic_gf.sweeps_to_reunitarization)) {
             reunitarizeField(U, DIM * lattice_param.volume);
             reunitarizeField(G, lattice_param.volume);
-
         }
     }
 

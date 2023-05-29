@@ -1,5 +1,5 @@
 /*
-    Header to measurement.c, which performs measurements on lattice quantities 
+    Header to measurement.c, which performs measurements on lattice quantities
     like plaquettes.
 
     Copyright (C) 2023  Jesuel Marques
@@ -18,7 +18,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
     Contact: jesuel.leal@usp.br
-    
+
  */
 
 #ifndef MEASUREMENT_H
@@ -26,6 +26,6 @@
 
 #include <SU3_ops.h>
 
-Scalar averagePlaquette(Mtrx3x3 * restrict U, char * type);
+Scalar averagePlaquette(Mtrx3x3* restrict U, const char* type);
 
-#endif  //MEASUREMENT_H
+#endif  // MEASUREMENT_H

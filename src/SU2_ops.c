@@ -23,6 +23,7 @@
 #include <SU2_ops.h>
 #include <ranlux.h>
 #include <stdio.h>
+#include <string.h>
 #include <tgmath.h>
 #include <types.h>
 
@@ -81,10 +82,7 @@ void copy2x2(const Mtrx2x2CK* restrict u,
      *
      */
 
-    MtrxIdx2 a;
-    LOOP_2_CK(a) {
-        u_copy->m[a] = u->m[a];
-    }
+    memcpy(u_copy, u, sizeof(Mtrx2x2CK));
 }
 
 void setSU2Random(Mtrx2x2CK* restrict u) {

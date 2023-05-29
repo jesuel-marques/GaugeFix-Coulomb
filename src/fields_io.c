@@ -213,7 +213,7 @@ OutGTMtrx *getGaugetransfOut(OutGTMtrx *restrict G_out, const PosVec position) {
 }
 
 /* Reads a file with filename config_filename and loads a gluon-field from it. */
-int loadConfig(const Mtrx3x3 *restrict U, char *config_filename) {
+int loadConfig(Mtrx3x3 *restrict U, const char *config_filename) {
     /*
      * Calls:
      * =====
@@ -249,7 +249,7 @@ int loadConfig(const Mtrx3x3 *restrict U, char *config_filename) {
         return -1;
     }
 
-    const InCfgMtrx *U_in;
+    InCfgMtrx *U_in;
 
 #ifdef CONV_CFG_TO_WORKING_PRECISION
     U_in = (InCfgMtrx *)calloc(lattice_param.volume * DIM, sizeof(InCfgMtrx));
@@ -336,7 +336,7 @@ int loadGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
      * 0 on success, negative integer on failure.
      */
 
-    const InGTMtrx *G_in;
+    InGTMtrx *G_in;
 
 #ifdef CONV_GT_TO_WORKING_PRECISION
     G_in = (InGTMtrx *)calloc(lattice_param.volume, sizeof(InGTMtrx));
@@ -347,7 +347,7 @@ int loadGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
     G_in = (InGTMtrx *)G;
 #endif  // CONV_GT_TO_WORKING_PRECISION
 
-    const FILE *gaugetransf_file;
+    FILE *gaugetransf_file;
 
     if ((gaugetransf_file = fopen(gauge_transf_filename, "rb")) == NULL) {
         fprintf(stderr,
@@ -400,7 +400,7 @@ int loadGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
 }
 
 /* Creates a file with filename config_filename and stores a gluon-field in it. */
-int writeConfig(Mtrx3x3 *restrict U, char *config_filename) {
+int writeConfig(Mtrx3x3 *restrict U, const char *config_filename) {
     /*
      * Calls:
      * =====
@@ -453,7 +453,7 @@ int writeConfig(Mtrx3x3 *restrict U, char *config_filename) {
     }
 #endif  // NEED_BYTE_SWAP_OUT
 
-    const FILE *config_file;
+    FILE *config_file;
 
     if ((config_file = fopen(config_filename, "wb")) == NULL) {
         fprintf(stderr, "Error: Problem creating file %s for config.\n",
@@ -531,7 +531,7 @@ int writeGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
     G_out = (OutGTMtrx *)G;
 #endif  // CONV_GT_FROM_WORKING_PRECISION
 
-    const FILE *gaugetransf_file;
+    FILE *gaugetransf_file;
 
     if ((gaugetransf_file = fopen(gauge_transf_filename, "wb")) == NULL) {
 #ifdef CONV_GT_FROM_WORKING_PRECISION
@@ -561,12 +561,11 @@ int writeGaugeTransf(Mtrx3x3 *restrict G, char *gauge_transf_filename) {
     return 0;
 }
 
-void loadConfigPlainText(Mtrx3x3 *U, char *config_filename) {
+int loadConfigPlainText(Mtrx3x3 *U, char *config_filename) {
     //	Carrega a partir de um arquivo uma configuração de elos no programa
 
     FILE *config_file;
 
-    PosVec position;
     short t, x, y, z;
     int mu, a, b, c;
     double element;
@@ -577,7 +576,7 @@ void loadConfigPlainText(Mtrx3x3 *U, char *config_filename) {
         fprintf(stderr, "error opening file");
         return -2;
     }
-    while (fscanf(config_file, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
+    while (fscanf(config_file, "%hd\t%hd\t%hd\t%hd\t%d\t%d\t%d\t%d\t%lf\n",
                   &t, &x, &y, &z,
                   &mu,
                   &a, &b,
@@ -598,4 +597,5 @@ void loadConfigPlainText(Mtrx3x3 *U, char *config_filename) {
     }
 
     fclose(config_file);
+    return 0;
 }
