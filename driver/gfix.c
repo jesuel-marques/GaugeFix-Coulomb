@@ -29,9 +29,9 @@
 #include <fields_io.h>
 #include <gauge_fixing.h>
 #include <geometry.h>
-#include <plaquettes.h>
+#include <plaquette.h>
 #include <ranlux.h>
-#include <stdio.h>  //	Standard header files in C
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tgmath.h>

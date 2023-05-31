@@ -56,7 +56,7 @@ void printMatrix12x12(DiracColorMatrix* restrict u) {
     printf("}}\n\n");
 }
 
-DiracColorMatrix fourier_transform(DiracColorMatrix* restrict x_space_vector, double momentum[DIM]) {
+DiracColorMatrix fourierTransform(DiracColorMatrix* restrict x_space_vector, double momentum[DIM]) {
     PosVec position;
 
     DiracColorMatrix prop_momentum, term;

@@ -200,7 +200,7 @@ void DiracOperator(Scalar *f, Scalar *g) {
 }
 
 double invertDiracOperator(double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
-    //  TODO: CREATE INITIALIZER AND FINALIZER OF DIRAC OPERATOR
+    //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR
     U_dirac_operator = U;
     kappa_dirac_operator = kappa;
 

@@ -5,7 +5,7 @@
 #include <fields_io.h>
 #include <geometry.h>
 #include <heatbath.h>
-#include <plaquettes.h>
+#include <plaquette.h>
 #include <ranlux.h>
 #include <stdio.h>
 #include <stdlib.h>

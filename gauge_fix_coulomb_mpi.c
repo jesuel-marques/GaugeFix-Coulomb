@@ -30,7 +30,7 @@
 #include <gauge_fixing.h>
 #include <geometry.h>
 #include <mpi.h>
-#include <plaquettes.h>
+#include <plaquette.h>
 #include <stdio.h>  //	Standard header files in C
 #include <stdlib.h>
 #include <string.h>

@@ -5,7 +5,7 @@
 #include <fields_io.h>
 #include <gauge_fixing.h>
 #include <geometry.h>
-#include <plaquettes.h>
+#include <plaquette.h>
 #include <ranlux.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,8 +13,8 @@
 
 #define MAX_SIZE 1000
 
-// #define KAPPA_CRITICAL 0.1392
-#define KAPPA_CRITICAL 0.125
+#define KAPPA_CRITICAL 0.1392
+// #define KAPPA_CRITICAL 0.125
 
 int main(int argc, char* argv[]) {
     const char* config_filename = argv[1];
@@ -48,16 +48,16 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    setFieldToIdentity(U, DIM * lattice_param.volume);
+    // setFieldToIdentity(U, DIM * lattice_param.volume);
 
-    // int error;
-    // if ((error = loadConfig(U, config_filename))) {
-    //     fprintf(stderr, "Loading of file %s failed. Error %d.\n", config_filename, error);
-    //     free(U);
-    //     return EXIT_FAILURE;
-    // } else {
-    //     printf("Config from file %s loaded.\n", config_filename);
-    // }
+    int error;
+    if ((error = loadConfig(U, config_filename))) {
+        fprintf(stderr, "Loading of file %s failed. Error %d.\n", config_filename, error);
+        free(U);
+        return EXIT_FAILURE;
+    } else {
+        printf("Config from file %s loaded.\n", config_filename);
+    }
 
     // Mtrx3x3* G = allocate3x3Field(lattice_param.volume);
     // if (G == NULL) {

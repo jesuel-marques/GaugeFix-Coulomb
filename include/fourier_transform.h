@@ -3,6 +3,6 @@
 
 #include <geometry.h>
 
-DiracColorMatrix fourier_transform(DiracColorMatrix* restrict x_space_vector, double momentum[DIM]);
+DiracColorMatrix fourierTransform(DiracColorMatrix* restrict x_space_vector, double momentum[DIM]);
 
 #endif

@@ -9,8 +9,9 @@ int main(int argc, char** argv) {
     const char* inverse_filename = argv[1];
 
     initGeometry(atoi(argv[2]), atoi(argv[3]));
+    char* traces_filename = argv[4];
 
-    if ((argc != 6) || !validGeometricParametersQ()) {
+    if ((argc != 5) || !validGeometricParametersQ()) {
         fprintf(stderr,
                 "Bad input.\n"
                 "Usage: Inverse filename, n_SPC, n_T, "
@@ -44,7 +45,7 @@ int main(int argc, char** argv) {
             if (fread(inverse_columns[alpha][a], sizeof(Scalar), sizeof_vector, inverse_file) != sizeof_vector) {
                 fprintf(stderr, "Error reading from file %s for alpha %hd and a %hd.\n", inverse_filename, alpha, a);
                 return EXIT_FAILURE;
-            };
+            }
         }
     }
     fclose(inverse_file);
@@ -69,7 +70,6 @@ int main(int argc, char** argv) {
     }
 
     FILE* traces_file;
-    char* traces_filename = argv[5];
     traces_file = fopen(traces_filename, "w");
     short unsigned N_T = lattice_param.n_T;
     short unsigned N_S = lattice_param.n_SPC;
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
                     aK_from_ap(ap, aK);
                     // printf("{%lf, %lf, %lf, %lf} \n", ap[T_INDX], ap[Z_INDX], ap[Y_INDX], ap[X_INDX]);
 
-                    propagator_p_space = colortraceFromDiracColor(fourier_transform(inverse, ap));
+                    propagator_p_space = colortraceFromDiracColor(fourierTransform(inverse, ap));
                     // printDiracMatrix(propagator_p_space);
                     // getchar();
                     trace_scalar = diractraceFromDirac(propagator_p_space);
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
                         diractraceFromDirac(prodDirac(calculateMatrixSlash(aK),
                                                       propagator_p_space));
 
-                    trace_scalar /= 4 * Nc;
+                    trace_scalar /= (4 * Nc);
                     trace_vector /= (4 * Nc * dotprod(aK, aK) * (-I));
 
                     // fwrite(ap, sizeof(double), 4, traces_file);
