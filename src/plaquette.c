@@ -31,48 +31,36 @@
 
 extern GeometricParameters lattice_param;
 
+void Plaquette(Mtrx3x3* restrict U,
+               const PosVec position,
+               const LorentzIdx mu,
+               const Direction dir_mu,
+               const LorentzIdx nu,
+               const Direction dir_nu,
+               Mtrx3x3* restrict plaquette) {
+    Mtrx3x3 ua, ub, uc, ud;
+
+    Direction opposite_dir_mu = dir_mu == FRONT ? REAR : FRONT;
+    Direction opposite_dir_nu = dir_nu == FRONT ? REAR : FRONT;
+
+    const PosVec position_plus_mu = getNeighbour(position, mu, dir_mu);
+
+    getLinkMatrix(U, position, mu, dir_mu, &ua);
+    getLinkMatrix(U, position_plus_mu, nu, dir_nu, &ub);
+    getLinkMatrix(U, getNeighbour(position_plus_mu, nu, dir_nu), mu, opposite_dir_mu, &uc);
+    getLinkMatrix(U, getNeighbour(position, nu, dir_nu), nu, opposite_dir_nu, &ud);
+
+    prodFour3x3(&ua, &ub, &uc, &ud, plaquette);
+}
+
 /* Calculates the trace of a specified plaquette. */
 Scalar TrPlaquette(Mtrx3x3* restrict U,
                    const PosVec position,
                    const LorentzIdx mu,
                    const LorentzIdx nu) {
-    /*
-     * Calls:
-     * =====
-     * getNeighbour, getLinkMatrix,
-     * prodFour3x3, trace3x3.
-     *
-     * Macros:
-     * ======
-     *
-     * Global Variables:
-     * ================
-     *
-     * Parameters:
-     * ==========
-     * Mtrx3x3 *  U:        SU(3) gluon field,
-     * PosVec position:     position to which the plaquette is attached,
-     * LorentzIdx mu:       first direction of the plaquette specification,
-     * LorentzIdx nu:       second direction of the plaquette specification.
-     *
-     * Returns:
-     * =======
-     * The trace of the plaquette as a double precision complex number.
-     *
-     */
-
     Mtrx3x3 plaquette;
 
-    Mtrx3x3 ua, ub, uc, ud;
-
-    const PosVec position_plus_mu = getNeighbour(position, mu, FRONT);
-
-    getLinkMatrix(U, position, mu, FRONT, &ua);
-    getLinkMatrix(U, position_plus_mu, nu, FRONT, &ub);
-    getLinkMatrix(U, getNeighbour(position_plus_mu, nu, FRONT), mu, REAR, &uc);
-    getLinkMatrix(U, getNeighbour(position, nu, FRONT), nu, REAR, &ud);
-
-    prodFour3x3(&ua, &ub, &uc, &ud, &plaquette);
+    Plaquette(U, position, mu, FRONT, nu, FRONT, &plaquette);
 
     return trace3x3(&plaquette) / Nc;
 }
@@ -180,4 +168,22 @@ Scalar averagePlaquette(Mtrx3x3* restrict U, const char* type) {
     }
 
     return average / (double)count;
+}
+
+void CloverTerm(Mtrx3x3* restrict U,
+                const PosVec position,
+                const LorentzIdx mu,
+                const LorentzIdx nu,
+                Mtrx3x3* clover_term) {
+    Mtrx3x3 plaq[4];
+
+    Plaquette(U, position, mu, FRONT, nu, FRONT, plaq);
+    Plaquette(U, position, nu, FRONT, mu, REAR, plaq + 1);
+    Plaquette(U, position, mu, REAR, nu, REAR, plaq + 2);
+    Plaquette(U, position, nu, REAR, mu, FRONT, plaq + 3);
+
+    setNull3x3(clover_term);
+    for (int i = 0; i < 4; i++) {
+        accumulate3x3(plaq + i, clover_term);
+    }
 }

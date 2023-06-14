@@ -15,3 +15,6 @@ parameters/*
 .vscode/*
 Mathematica/*
 scripts/*
+src/matrix.c
+include/matrix.h 
+include/link.h 

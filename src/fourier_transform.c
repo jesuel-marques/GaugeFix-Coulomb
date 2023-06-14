@@ -67,8 +67,6 @@ DiracColorMatrix fourierTransform(DiracColorMatrix* restrict x_space_vector, dou
             accumulateDiracColorMatrix(&term, &prop_momentum);
         }
     }
-    // printf("%lf %lf %lf %lf\n", momentum[T_INDX], momentum[X_INDX], momentum[Y_INDX], momentum[Z_INDX]);
-    // printMatrix12x12(&prop_momentum);
-    // getchar();
+
     return prop_momentum;
 }

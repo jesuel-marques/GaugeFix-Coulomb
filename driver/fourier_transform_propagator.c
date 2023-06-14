@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
         fprintf(stderr,
                 "Bad input.\n"
                 "Usage: Inverse filename, n_SPC, n_T, "
-                "correlator filename and correlator type in this order.\n"
+                "form factor filename in this order.\n"
                 "Check that:\n"
                 "n_SPC > 0 and n_T > 0\n");
         fprintf(stderr,
@@ -74,41 +74,47 @@ int main(int argc, char** argv) {
     short unsigned N_T = lattice_param.n_T;
     short unsigned N_S = lattice_param.n_SPC;
 
-    DiracMatrix propagator_p_space;
+#pragma omp parallel shared(inverse, traces_file)
+    {
+        DiracMatrix propagator_p_space;
+        double ap[DIM], aK[DIM];
+        Scalar trace_scalar, trace_vector;
+#pragma omp for collapse(4)
+        for (int nt = -N_T / 8; nt <= N_T / 8; nt++) {
+            for (int nz = -N_S / 8; nz <= N_S / 8; nz++) {
+                for (int ny = -N_S / 8; ny <= N_S / 8; ny++) {
+                    for (int nx = -N_S / 8; nx <= N_S / 8; nx++) {
+                        ap[T_INDX] = (2.0 * M_PI / N_T) * (nt + 0.5);
+                        ap[Z_INDX] = (2.0 * M_PI / N_S) * nz;
+                        ap[Y_INDX] = (2.0 * M_PI / N_S) * ny;
+                        ap[X_INDX] = (2.0 * M_PI / N_S) * nx;
 
-    double ap[DIM], aK[DIM];
-    Scalar trace_scalar, trace_vector;
-    for (int nt = 1; nt <= N_T / 4; nt++) {
-        ap[T_INDX] = (2.0 * M_PI / N_T) * (nt + 0.5);
-        for (int nz = 1; nz <= N_S / 4; nz++) {
-            ap[Z_INDX] = (2.0 * M_PI / N_S) * nz;
-            for (int ny = 1; ny <= N_S / 4; ny++) {
-                ap[Y_INDX] = (2.0 * M_PI / N_S) * ny;
-                for (int nx = 1; nx <= N_S / 4; nx++) {
-                    ap[X_INDX] = (2.0 * M_PI / N_S) * nx;
+                        aK_from_ap(ap, aK);
+                        // printf("{%lf, %lf, %lf, %lf} \n", ap[T_INDX], ap[Z_INDX], ap[Y_INDX], ap[X_INDX]);
 
-                    aK_from_ap(ap, aK);
-                    // printf("{%lf, %lf, %lf, %lf} \n", ap[T_INDX], ap[Z_INDX], ap[Y_INDX], ap[X_INDX]);
+                        propagator_p_space = colortraceFromDiracColor(fourierTransform(inverse, ap));
+                        // printDiracMatrix(propagator_p_space);
+                        // getchar();
+                        trace_scalar = diractraceFromDirac(propagator_p_space);
+                        trace_vector =
+                            diractraceFromDirac(prodDirac(calculateMatrixSlash(aK),
+                                                          propagator_p_space));
 
-                    propagator_p_space = colortraceFromDiracColor(fourierTransform(inverse, ap));
-                    // printDiracMatrix(propagator_p_space);
-                    // getchar();
-                    trace_scalar = diractraceFromDirac(propagator_p_space);
-                    trace_vector =
-                        diractraceFromDirac(prodDirac(calculateMatrixSlash(aK),
-                                                      propagator_p_space));
+                        trace_scalar /= (4 * Nc);
+                        trace_vector /= (4 * Nc * dotprod(aK, aK) * (-I));
 
-                    trace_scalar /= (4 * Nc);
-                    trace_vector /= (4 * Nc * dotprod(aK, aK) * (-I));
+#pragma omp critical
+                        {
+                            // fwrite(ap, sizeof(double), 4, traces_file);
+                            // fwrite(&trace_scalar, sizeof(Scalar), 1, traces_file);
+                            // fwrite(&trace_vector, sizeof(Scalar), 1, traces_file);
 
-                    // fwrite(ap, sizeof(double), 4, traces_file);
-                    // fwrite(&trace_scalar, sizeof(Scalar), 1, traces_file);
-                    // fwrite(&trace_vector, sizeof(Scalar), 1, traces_file);
-
-                    fprintf(traces_file, "{%d,%d,%d,%d}\t %lf+I*(%lf) \t %lf+I*(%lf)\n",
-                            nt, nz, ny, nx,
-                            creal(trace_vector), cimag(trace_vector),
-                            creal(trace_scalar), cimag(trace_scalar));
+                            fprintf(traces_file, "{%d,%d,%d,%d}\t %lf+I*(%lf) \t %lf+I*(%lf)\n",
+                                    nt, nz, ny, nx,
+                                    creal(trace_vector), cimag(trace_vector),
+                                    creal(trace_scalar), cimag(trace_scalar));
+                        }
+                    }
                 }
             }
         }

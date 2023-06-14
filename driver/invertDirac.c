@@ -22,15 +22,16 @@ int main(int argc, char* argv[]) {
     initGeometry(atoi(argv[2]), atoi(argv[3]));
 
     const double kappa = atof(argv[4]);
+    const double c_SW = atof(argv[5]);
 
-    const double tolerance = atof(argv[5]);
-    const char* inverse_filename = argv[6];
+    const double tolerance = atof(argv[6]);
+    const char* inverse_filename = argv[7];
 
-    if ((argc != 7) || !validGeometricParametersQ()) {
+    if ((argc != 8) || !validGeometricParametersQ()) {
         fprintf(stderr,
                 "Bad input.\n"
                 "Usage: Input config filename, n_SPC, n_T, "
-                "kappa, tolerance and inverse filename in this order.\n"
+                "kappa, c_SW, tolerance and inverse filename in this order.\n"
                 "Check that:\n"
                 "n_SPC > 0 and n_T > 0\n"
                 "kappa > 0 and tolerance > 0 \n");
@@ -86,6 +87,14 @@ int main(int argc, char* argv[]) {
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;
     Scalar* restrict inverse_columns[4][Nc];
 
+    DiracColorMatrix* sigmamunuFmunu = NULL;
+    if (c_SW != 0.0) {
+        sigmamunuFmunu =
+            (DiracColorMatrix*)calloc(sizeof_vector, sizeof(DiracColorMatrix));
+
+        initializePauliTerm(U, c_SW, sigmamunuFmunu);
+    }
+
     DiracIdx alpha;
     MtrxIdx3 a;
 #pragma omp parallel for collapse(2)
@@ -95,13 +104,21 @@ int main(int argc, char* argv[]) {
 
             inverse_columns[alpha][a] = (Scalar*)calloc(sizeof_vector, sizeof(Scalar));
             initializePointSource(assignPosition(0, 0, 0, 0), alpha, a, source);
-            invertDiracOperator(kappa, U, source, inverse_columns[alpha][a],
-                                tolerance * sizeof_vector,
-                                BiCGStab);
+            if (c_SW == 0.0) {
+                invertDiracOperator(kappa, U, source,
+                                    inverse_columns[alpha][a],
+                                    tolerance * sizeof_vector, BiCGStab);
+            } else {
+                invertImprovedDiracOperator(kappa, U, sigmamunuFmunu, source,
+                                            inverse_columns[alpha][a],
+                                            tolerance * sizeof_vector, BiCGStab);
+            }
             free(source);
         }
     }
     free(U);  //	Free memory allocated for the configuration.
+    free(sigmamunuFmunu);
+
     //  Save inverse to file
 
     printInverse(inverse_filename, inverse_columns);

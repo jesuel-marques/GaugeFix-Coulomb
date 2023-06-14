@@ -26,6 +26,12 @@
 
 #include <SU3_ops.h>
 
+void CloverTerm(Mtrx3x3* restrict U,
+                const PosVec position,
+                const LorentzIdx mu,
+                const LorentzIdx nu,
+                Mtrx3x3* clover_term);
+
 Scalar averagePlaquette(Mtrx3x3* restrict U, const char* type);
 
 #endif  // MEASUREMENT_H

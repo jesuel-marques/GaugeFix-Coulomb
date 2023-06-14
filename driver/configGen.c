@@ -33,7 +33,6 @@ int main(int argc, char** argv) {
     char ranlux_state_filename[MAX_FILE_SIZE];
     sprintf(ranlux_state_filename, "%s_%dx%d_beta_%f_%s_start.rlx_state", config_filename, lattice_param.n_SPC, lattice_param.n_T, beta, argv[8]);
 
-    ranlux_state_file = fopen(ranlux_state_filename, "wb");
     ranlux_state = (int*)malloc(rlxd_size() * sizeof(int));
     // fread(ranlux_state, sizeof(int), rlxd_size(), ranlux_state_file);
     // rlxd_reset(ranlux_state);
@@ -80,14 +79,16 @@ int main(int argc, char** argv) {
             } else {
                 printf("U written for config %s.\n", config_filename);
                 configs_saved++;
+
+                ranlux_state_file = fopen(ranlux_state_filename, "wb");
+                rlxd_get(ranlux_state);
+                fwrite(ranlux_state, sizeof(int), rlxd_size(), ranlux_state_file);
+                fclose(ranlux_state_file);
             }
         }
     }
     free(U);
-
-    rlxd_get(ranlux_state);
-    fwrite(ranlux_state, sizeof(int), rlxd_size(), ranlux_state_file);
-    fclose(ranlux_state_file);
+    free(ranlux_state);
 
     return EXIT_SUCCESS;
 }

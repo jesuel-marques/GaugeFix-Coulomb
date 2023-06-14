@@ -2,11 +2,15 @@
 #include <bicgstab.h>
 #include <dirac.h>
 #include <fields.h>
+#include <plaquette.h>
 #include <stdlib.h>
 #include <tgmath.h>
 
 static Mtrx3x3 *U_dirac_operator;
+static DiracColorMatrix *sigmamunuFmunu_dirac_operator;
+
 static double kappa_dirac_operator;
+static double c_SW_dirac_operator;
 
 static const DiracMatrix gamma[DIM] = {{{0, 0, 1, 0,
                                          0, 0, 0, 1,
@@ -187,19 +191,20 @@ void DiracOperator(Scalar *f, Scalar *g) {
                             }
                         }
                     }
-                    // Melhoria de trevo /* Vou ignorar improvements por enquanto */
-
-                    // for(int alfal=0;alfal<4;alfal++)
-                    // 	for(int al=0;al<3;al++){
-                    // 		(*(ELEM_VEC_POSDC(g, posicao, alfa, a))) += cSWkappaSigmaF[posicao[0]][posicao[1]][posicao[2]][posicao[3]][alfa][a][alfal][al] * (*(ELEM_VEC_POSDC(f, posicao, alfal, al)));
-                    // }
+                    if (c_SW_dirac_operator != 0.0) {
+                        LOOP_DIRAC(alphap) {
+                            LOOP_3(ap) {
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) += (c_SW_dirac_operator / 2.0) * ((*(ELEM_VEC_POS(sigmamunuFmunu_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, alphap, ap)]) * (*(ELEM_VEC_POSDC(f, position, alphap, ap)));
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-double invertDiracOperator(double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
+double invertDiracOperator(const double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
     //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR
     U_dirac_operator = U;
     kappa_dirac_operator = kappa;
@@ -207,6 +212,80 @@ double invertDiracOperator(double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inv
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;
 
     return inversion_algorithm(DiracOperator, source, inverse_column, tolerance, sizeof_vector);
+}
+
+void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *sigmamunuFmunu) {
+    LorentzIdx mu, nu;
+    DiracIdx alpha, beta, delta;
+    MtrxIdx3 a, b;
+    PosVec position;
+
+    DiracMatrix sigma[DIM][DIM];
+
+    Mtrx3x3 Qmunu, Qnumu;
+
+    LOOP_LORENTZ(mu) {
+        LOOP_LORENTZ(nu) {
+            LOOP_DIRAC(alpha) {
+                LOOP_DIRAC(beta) {
+                    sigma[mu][nu].m[alpha * 4 + beta] = 0.0;
+                    LOOP_DIRAC(delta) {
+                        sigma[mu][nu].m[alpha * 4 + beta] +=
+                            (gamma[mu].m[alpha * 4 + delta] *
+                                 gamma[nu].m[delta * 4 + beta] -
+                             gamma[nu].m[alpha * 4 + delta] *
+                                 gamma[mu].m[delta * 4 + beta]) /
+                            (2.0 * I);
+                    }
+                }
+            }
+        }
+    }
+
+    LOOP_TEMPORAL(position.pos[T_INDX]) {
+        LOOP_SPATIAL(position) {
+            LOOP_DIRAC(alpha) {
+                LOOP_3(a) {
+                    LOOP_DIRAC(beta) {
+                        LOOP_3(b) {
+                            (*(ELEM_VEC_POS(sigmamunuFmunu, position))).m[ELEM_DCxDC(alpha, a, beta, b)] = 0.0;
+                        }
+                    }
+                }
+            }
+
+            LOOP_LORENTZ(mu) {
+                LOOP_LORENTZ(nu) {
+                    CloverTerm(U, position, mu, nu, &Qmunu);
+                    CloverTerm(U, position, nu, mu, &Qnumu);
+                    LOOP_DIRAC(alpha) {
+                        LOOP_3(a) {
+                            LOOP_DIRAC(beta) {
+                                LOOP_3(b) {
+                                    (*(ELEM_VEC_POS(sigmamunuFmunu, position))).m[ELEM_DCxDC(alpha, a, beta, b)] += (c_SW / 2.0) *
+                                                                                                                    sigma[mu][nu].m[alpha * 4 + beta] * (-I / (8.0)) *
+                                                                                                                    (Qmunu.m[ELEM_3X3(a, b)] -
+                                                                                                                     Qnumu.m[ELEM_3X3(a, b)]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+double invertImprovedDiracOperator(const double kappa, Mtrx3x3 *U, DiracColorMatrix *sigmamunuFmunu, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
+    //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR
+    U_dirac_operator = U;
+    kappa_dirac_operator = kappa;
+
+    size_t sizeof_vector = lattice_param.volume * 4 * Nc;
+    sigmamunuFmunu_dirac_operator = sigmamunuFmunu;
+
+    double norm = inversion_algorithm(DiracOperator, source, inverse_column, tolerance, sizeof_vector);
+    return norm;
 }
 
 void printDiracOperator(FILE *file_dirac_op) {
