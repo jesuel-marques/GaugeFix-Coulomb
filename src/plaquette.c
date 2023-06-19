@@ -175,15 +175,15 @@ void CloverTerm(Mtrx3x3* restrict U,
                 const LorentzIdx mu,
                 const LorentzIdx nu,
                 Mtrx3x3* clover_term) {
-    Mtrx3x3 plaq[4];
-
-    Plaquette(U, position, mu, FRONT, nu, FRONT, plaq);
-    Plaquette(U, position, nu, FRONT, mu, REAR, plaq + 1);
-    Plaquette(U, position, mu, REAR, nu, REAR, plaq + 2);
-    Plaquette(U, position, nu, REAR, mu, FRONT, plaq + 3);
+    Mtrx3x3 plaq;
 
     setNull3x3(clover_term);
-    for (int i = 0; i < 4; i++) {
-        accumulate3x3(plaq + i, clover_term);
-    }
+    Plaquette(U, position, mu, FRONT, nu, FRONT, &plaq);
+    accumulate3x3(&plaq, clover_term);
+    Plaquette(U, position, nu, FRONT, mu, REAR, &plaq);
+    accumulate3x3(&plaq, clover_term);
+    Plaquette(U, position, mu, REAR, nu, REAR, &plaq);
+    accumulate3x3(&plaq, clover_term);
+    Plaquette(U, position, nu, REAR, mu, FRONT, &plaq);
+    accumulate3x3(&plaq, clover_term);
 }

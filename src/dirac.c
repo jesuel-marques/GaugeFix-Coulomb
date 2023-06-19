@@ -7,7 +7,7 @@
 #include <tgmath.h>
 
 static Mtrx3x3 *U_dirac_operator;
-static DiracColorMatrix *sigmamunuFmunu_dirac_operator;
+static DiracColorMatrix *pauli_term_dirac_operator;
 
 static double kappa_dirac_operator;
 static double c_SW_dirac_operator;
@@ -149,8 +149,8 @@ void DiracOperator(Scalar *f, Scalar *g) {
     Mtrx3x3 link2;
     Scalar prod2;
 
-    MtrxIdx3 a, ap;
-    DiracIdx alpha, alphap;
+    MtrxIdx3 a, b;
+    DiracIdx alpha, beta;
     LorentzIdx mu;
 
     LOOP_TEMPORAL(position.pos[T_INDX]) {
@@ -171,17 +171,17 @@ void DiracOperator(Scalar *f, Scalar *g) {
                         positionp1 = getNeighbour(position, mu, FRONT);
                         positionp2 = getNeighbour(position, mu, REAR);
 
-                        LOOP_DIRAC(alphap) {
-                            LOOP_3(ap) {
+                        LOOP_DIRAC(beta) {
+                            LOOP_3(b) {
                                 prod1 = -0.5 *
-                                        (identityDirac.m[alpha * 4 + alphap] - gamma[mu].m[alpha * 4 + alphap]) *
-                                        (link1.m[ELEM_3X3(a, ap)]) *
-                                        (*(ELEM_VEC_POSDC(f, positionp1, alphap, ap)));
+                                        (identityDirac.m[alpha * 4 + beta] - gamma[mu].m[alpha * 4 + beta]) *
+                                        (link1.m[ELEM_3X3(a, b)]) *
+                                        (*(ELEM_VEC_POSDC(f, positionp1, beta, b)));
 
                                 prod2 = -0.5 *
-                                        (identityDirac.m[alpha * 4 + alphap] + gamma[mu].m[alpha * 4 + alphap]) *
-                                        (link2.m[ELEM_3X3(a, ap)]) *
-                                        (*(ELEM_VEC_POSDC(f, positionp2, alphap, ap)));
+                                        (identityDirac.m[alpha * 4 + beta] + gamma[mu].m[alpha * 4 + beta]) *
+                                        (link2.m[ELEM_3X3(a, b)]) *
+                                        (*(ELEM_VEC_POSDC(f, positionp2, beta, b)));
 
                                 //	Anti-periodic boundary condition
                                 (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
@@ -192,9 +192,11 @@ void DiracOperator(Scalar *f, Scalar *g) {
                         }
                     }
                     if (c_SW_dirac_operator != 0.0) {
-                        LOOP_DIRAC(alphap) {
-                            LOOP_3(ap) {
-                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) += (c_SW_dirac_operator / 2.0) * ((*(ELEM_VEC_POS(sigmamunuFmunu_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, alphap, ap)]) * (*(ELEM_VEC_POSDC(f, position, alphap, ap)));
+                        LOOP_DIRAC(beta) {
+                            LOOP_3(b) {
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
+                                    ((*(ELEM_VEC_POS(pauli_term_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, beta, b)]) *
+                                    (*(ELEM_VEC_POSDC(f, position, beta, b)));
                             }
                         }
                     }
@@ -205,7 +207,7 @@ void DiracOperator(Scalar *f, Scalar *g) {
 }
 
 double invertDiracOperator(const double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
-    //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR
+    //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR FOR EXECUTION BY  SINGLE THREAD
     U_dirac_operator = U;
     kappa_dirac_operator = kappa;
 
@@ -214,7 +216,7 @@ double invertDiracOperator(const double kappa, Mtrx3x3 *U, Scalar *source, Scala
     return inversion_algorithm(DiracOperator, source, inverse_column, tolerance, sizeof_vector);
 }
 
-void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *sigmamunuFmunu) {
+void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *pauli_term) {
     LorentzIdx mu, nu;
     DiracIdx alpha, beta, delta;
     MtrxIdx3 a, b;
@@ -248,7 +250,7 @@ void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *sigmam
                 LOOP_3(a) {
                     LOOP_DIRAC(beta) {
                         LOOP_3(b) {
-                            (*(ELEM_VEC_POS(sigmamunuFmunu, position))).m[ELEM_DCxDC(alpha, a, beta, b)] = 0.0;
+                            (*(ELEM_VEC_POS(pauli_term, position))).m[ELEM_DCxDC(alpha, a, beta, b)] = 0.0;
                         }
                     }
                 }
@@ -262,10 +264,10 @@ void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *sigmam
                         LOOP_3(a) {
                             LOOP_DIRAC(beta) {
                                 LOOP_3(b) {
-                                    (*(ELEM_VEC_POS(sigmamunuFmunu, position))).m[ELEM_DCxDC(alpha, a, beta, b)] += (c_SW / 2.0) *
-                                                                                                                    sigma[mu][nu].m[alpha * 4 + beta] * (-I / (8.0)) *
-                                                                                                                    (Qmunu.m[ELEM_3X3(a, b)] -
-                                                                                                                     Qnumu.m[ELEM_3X3(a, b)]);
+                                    (*(ELEM_VEC_POS(pauli_term, position))).m[ELEM_DCxDC(alpha, a, beta, b)] += (c_SW / 2.0) *
+                                                                                                                sigma[mu][nu].m[alpha * 4 + beta] * (-I / (8.0)) *
+                                                                                                                (Qmunu.m[ELEM_3X3(a, b)] -
+                                                                                                                 Qnumu.m[ELEM_3X3(a, b)]);
                                 }
                             }
                         }
@@ -276,13 +278,13 @@ void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *sigmam
     }
 }
 
-double invertImprovedDiracOperator(const double kappa, Mtrx3x3 *U, DiracColorMatrix *sigmamunuFmunu, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
-    //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR
+double invertImprovedDiracOperator(const double kappa, Mtrx3x3 *U, DiracColorMatrix *pauli_term, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
+    //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR FOR EXECUTION BY  SINGLE THREAD
     U_dirac_operator = U;
     kappa_dirac_operator = kappa;
 
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;
-    sigmamunuFmunu_dirac_operator = sigmamunuFmunu;
+    pauli_term_dirac_operator = pauli_term;
 
     double norm = inversion_algorithm(DiracOperator, source, inverse_column, tolerance, sizeof_vector);
     return norm;
@@ -291,44 +293,26 @@ double invertImprovedDiracOperator(const double kappa, Mtrx3x3 *U, DiracColorMat
 void printDiracOperator(FILE *file_dirac_op) {
     //	Imprime a Matriz de Dirac explicitamente (Comparação com Mathematica)
 
-    PosVec position1, position2;
+    PosVec position;
 
     Scalar *f;
     Scalar *g;
 
-    f = (double complex *)calloc(lattice_param.volume * 4 * Nc, sizeof(double complex));
-    g = (double complex *)calloc(lattice_param.volume * 4 * Nc, sizeof(double complex));
+    size_t size_of_vector = lattice_param.volume * 4 * Nc;
 
-    DiracIdx alpha, beta;
-    MtrxIdx3 a, b;
-    LorentzIdx t1, t2;
-    LOOP_TEMPORAL(t1) {
-        position1.pos[T_INDX] = t1;
-        LOOP_SPATIAL(position1) {
+    f = (Scalar *)calloc(size_of_vector, sizeof(Scalar));
+    g = (Scalar *)calloc(size_of_vector, sizeof(Scalar));
+
+    DiracIdx alpha;
+    MtrxIdx3 a;
+    LOOP_TEMPORAL(position.pos[T_INDX]) {
+        LOOP_SPATIAL(position) {
             LOOP_DIRAC(alpha) {
                 LOOP_3(a) {
-                    (*(ELEM_VEC_POSDC(f, position1, alpha, a))) = 1.0;
+                    (*(ELEM_VEC_POSDC(f, position, alpha, a))) = 1.0;
                     DiracOperator(f, g);
-                    (*(ELEM_VEC_POSDC(f, position1, alpha, a))) = 0.0;
-                    LOOP_TEMPORAL(t2) {
-                        position2.pos[T_INDX] = t2;
-                        LOOP_SPATIAL(position2) {
-                            LOOP_DIRAC(beta) {
-                                LOOP_3(b) {
-                                    fprintf(file_dirac_op, "%.20lf+I(%.20lf)\t",
-                                            creal((*(ELEM_VEC_POSDC(g,
-                                                                    position2,
-                                                                    beta,
-                                                                    b)))),
-                                            cimag((*(ELEM_VEC_POSDC(g,
-                                                                    position2,
-                                                                    beta,
-                                                                    b)))));
-                                }
-                            }
-                        }
-                    }
-                    fprintf(file_dirac_op, "\n");
+                    (*(ELEM_VEC_POSDC(f, position, alpha, a))) = 0.0;
+                    fwrite(g, sizeof(Scalar), size_of_vector, file_dirac_op);
                 }
             }
         }
@@ -407,25 +391,25 @@ Scalar diractraceFromDirac(DiracMatrix m_D) {
     return trace;
 }
 
-void aK_from_ap(double ap[4], double aK[4]) {
+void aK_from_ap(double b[4], double aK[4]) {
     LorentzIdx mu;
     LOOP_LORENTZ(mu) {
-        aK[mu] = sin(ap[mu]);
+        aK[mu] = sin(b[mu]);
     }
 }
 
-void aQ_from_ap(double ap[4], double aQ[4]) {
+void aQ_from_ap(double b[4], double aQ[4]) {
     LorentzIdx mu;
     LOOP_LORENTZ(mu) {
-        aQ[mu] = 2.0 * sin(ap[mu] / 2.0);
+        aQ[mu] = 2.0 * sin(b[mu] / 2.0);
     }
 }
 
-double dotprod(double ap[4], double aq[4]) {
+double dotprod(double b[4], double aq[4]) {
     double dot_prod = 0.0;
     LorentzIdx mu;
     LOOP_LORENTZ(mu) {
-        dot_prod += ap[mu] * aq[mu];
+        dot_prod += b[mu] * aq[mu];
     }
 
     return dot_prod;

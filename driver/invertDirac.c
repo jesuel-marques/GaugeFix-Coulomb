@@ -13,8 +13,8 @@
 
 #define MAX_SIZE 1000
 
-#define KAPPA_CRITICAL 0.1392
-// #define KAPPA_CRITICAL 0.125
+// #define KAPPA_CRITICAL 0.1392
+#define KAPPA_CRITICAL 0.125
 
 int main(int argc, char* argv[]) {
     const char* config_filename = argv[1];
@@ -49,16 +49,16 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    // setFieldToIdentity(U, DIM * lattice_param.volume);
+    setFieldToIdentity(U, DIM * lattice_param.volume);
 
-    int error;
-    if ((error = loadConfig(U, config_filename))) {
-        fprintf(stderr, "Loading of file %s failed. Error %d.\n", config_filename, error);
-        free(U);
-        return EXIT_FAILURE;
-    } else {
-        printf("Config from file %s loaded.\n", config_filename);
-    }
+    // int error;
+    // if ((error = loadConfig(U, config_filename))) {
+    //     fprintf(stderr, "Loading of file %s failed. Error %d.\n", config_filename, error);
+    //     free(U);
+    //     return EXIT_FAILURE;
+    // } else {
+    //     printf("Config from file %s loaded.\n", config_filename);
+    // }
 
     // Mtrx3x3* G = allocate3x3Field(lattice_param.volume);
     // if (G == NULL) {
@@ -73,13 +73,11 @@ int main(int argc, char* argv[]) {
 
     // loadConfigPlainText(U, config_filename);
     printf("Plaquette average after GT: %.18lf. e2: %3.2E \n", creal(averagePlaquette(U, "total")), calculate_e2(U, LANDAU));
-
-    // FILE* dirac_op_file;
-    // char dirac_op_filename[MAX_SIZE];
-    // sprintf(dirac_op_filename, "%s.dirac_op", config_filename);
-    // dirac_op_file = fopen(dirac_op_filename, "w");
-    // printDiracOP(U, kappa, dirac_op_file);
-    // fclose(dirac_op_file);
+    // Mtrx3x3 link;
+    // PosVec position_to_print = assignPosition(atoi(argv[8]), atoi(argv[9]), atoi(argv[10]), atoi(argv[11]));
+    // getLinkMatrix(U, position_to_print, atoi(argv[12]), REAR, &link);
+    // printMatrix3x3(&link);
+    // getchar();
 
     double am = 1.0 / (2.0 * kappa) - 1.0 / (2.0 * KAPPA_CRITICAL);
     printf("kappa: %lf \t am: %lf\n", kappa, am);
@@ -87,12 +85,12 @@ int main(int argc, char* argv[]) {
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;
     Scalar* restrict inverse_columns[4][Nc];
 
-    DiracColorMatrix* sigmamunuFmunu = NULL;
+    DiracColorMatrix* pauli_term = NULL;
     if (c_SW != 0.0) {
-        sigmamunuFmunu =
+        pauli_term =
             (DiracColorMatrix*)calloc(sizeof_vector, sizeof(DiracColorMatrix));
 
-        initializePauliTerm(U, c_SW, sigmamunuFmunu);
+        initializePauliTerm(U, c_SW, pauli_term);
     }
 
     DiracIdx alpha;
@@ -109,15 +107,25 @@ int main(int argc, char* argv[]) {
                                     inverse_columns[alpha][a],
                                     tolerance * sizeof_vector, BiCGStab);
             } else {
-                invertImprovedDiracOperator(kappa, U, sigmamunuFmunu, source,
+                invertImprovedDiracOperator(kappa, U, pauli_term, source,
                                             inverse_columns[alpha][a],
                                             tolerance * sizeof_vector, BiCGStab);
             }
             free(source);
         }
     }
+
+    FILE* dirac_op_file;
+    char dirac_op_filename[MAX_SIZE];
+    sprintf(dirac_op_filename, "%s.dirac_op", config_filename);
+    dirac_op_file = fopen(dirac_op_filename, "w");
+    printDiracOperator(dirac_op_file);
+    fclose(dirac_op_file);
+
     free(U);  //	Free memory allocated for the configuration.
-    free(sigmamunuFmunu);
+    if (c_SW != 0) {
+        free(pauli_term);
+    }
 
     //  Save inverse to file
 
