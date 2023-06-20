@@ -1,6 +1,6 @@
 CC := gcc
 
-BINARIES := gfix configGen invertDirac correlator fourier_transform_propagator
+BINARIES := gfix configGen invertDirac correlator fourier_transform_propagator averagePolyakov
 
 DRIVER_DIR := driver
 INCLUDE_DIR := include
@@ -43,6 +43,7 @@ configGen: $(BINARIES_DIR)/configGen
 invertDirac: $(BINARIES_DIR)/invertDirac
 correlator: $(BINARIES_DIR)/correlator
 fourier_transform_propagator: $(BINARIES_DIR)/fourier_transform_propagator
+averagePolyakov: $(BINARIES_DIR)/averagePolyakov
 
 $(BINARIES_DIR)/gfix: $(BUILD_DIR)/gfix.o $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS)
@@ -58,7 +59,9 @@ $(BINARIES_DIR)/correlator: $(BUILD_DIR)/correlator.o $(OBJECTS)
 
 $(BINARIES_DIR)/fourier_transform_propagator: $(BUILD_DIR)/fourier_transform_propagator.o $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
-	
+
+$(BINARIES_DIR)/averagePolyakov: $(BUILD_DIR)/averagePolyakov.o $(OBJECTS)
+	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 	
 
 -include $(DEPENDS) $(DRIVER_DEPENDS)
 

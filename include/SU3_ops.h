@@ -91,6 +91,10 @@ This is used in this program for the updates to the local gauge transformations.
 updates are performed for each submatrix in turn.
 */
 
+typedef enum { ONE,
+               TWO_PI_OVER_THREE,
+               FOUR_PI_OVER_THREE } CenterElement;
+
 /* used to get the element of 3x3 matrices */
 #define ELEM_3X3(a, b) (a) * Nc + (b)
 

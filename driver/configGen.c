@@ -6,6 +6,7 @@
 #include <geometry.h>
 #include <heatbath.h>
 #include <plaquette.h>
+#include <polyakov.h>
 #include <ranlux.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,28 +65,30 @@ int main(int argc, char** argv) {
     }
 
     double av_plaq = averagePlaquette(U, "total");
-
+    Scalar average_polyakov_loop;
     unsigned configs_saved = 0;
     for (unsigned long sweeps = 0; configs_saved < max_configs; sweeps++) {
         av_plaq += -updateLattice(U, beta, HeatBathSU3) / (2.0 * Nc * pow(lattice_param.n_SPC, 3.0) * lattice_param.n_T * beta);
+        // applyCenterTransformation(U, 0, TWO_PI_OVER_THREE);
+        average_polyakov_loop = averagePolyakovLoop(U);
 
-        printf("%.10lf\n", av_plaq);
+        printf("sweep: %ld \t plaq: %.10lf \t polyakov loop: %.10lf+I*(%.10lf)\n", sweeps, av_plaq, creal(average_polyakov_loop), cimag(average_polyakov_loop));
 
-        if (sweeps >= thermalization && (sweeps - thermalization) % step_to_save == 0) {
-            sprintf(complete_config_filename, "%s_sweep_%lu_%dx%d_beta_%f_%s_start", config_filename, sweeps, lattice_param.n_SPC, lattice_param.n_T, beta, argv[8]);
+        // if (sweeps >= thermalization && (sweeps - thermalization) % step_to_save == 0) {
+        //     sprintf(complete_config_filename, "%s_sweep_%lu_%dx%d_beta_%f_%s_start", config_filename, sweeps, lattice_param.n_SPC, lattice_param.n_T, beta, argv[8]);
 
-            if (writeConfig(U, complete_config_filename)) {
-                fprintf(stderr, "Config writing failed for config %s.\n", config_filename);
-            } else {
-                printf("U written for config %s.\n", config_filename);
-                configs_saved++;
+        //     if (writeConfig(U, complete_config_filename)) {
+        //         fprintf(stderr, "Config writing failed for config %s.\n", config_filename);
+        //     } else {
+        //         printf("U written for config %s.\n", config_filename);
+        //         configs_saved++;
 
-                ranlux_state_file = fopen(ranlux_state_filename, "wb");
-                rlxd_get(ranlux_state);
-                fwrite(ranlux_state, sizeof(int), rlxd_size(), ranlux_state_file);
-                fclose(ranlux_state_file);
-            }
-        }
+        //         ranlux_state_file = fopen(ranlux_state_filename, "wb");
+        //         rlxd_get(ranlux_state);
+        //         fwrite(ranlux_state, sizeof(int), rlxd_size(), ranlux_state_file);
+        //         fclose(ranlux_state_file);
+        //     }
+        // }
     }
     free(U);
     free(ranlux_state);

@@ -75,6 +75,7 @@
         "stdexcept": "c",
         "streambuf": "c",
         "cstdbool": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "polyakov.h": "c"
     }
 }
