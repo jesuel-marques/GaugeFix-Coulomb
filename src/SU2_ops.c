@@ -31,32 +31,34 @@
 //	u=u[0] SU2_identity + i sum_i=1^3 u[i]sigma[i]
 //	where sigma[i] are the Pauli matrices.
 
-// void printMtrx2x2(const Mtrx2x2 * restrict u,
-//                     const char *name,
-//                     const unsigned short decimal_places) {
-//     // Prints the matrix on screen with a given number of decimal places and
-//     // adds a name on the top
+void printMtrx2x2CK(const Mtrx2x2CK* restrict u_CK) {
+    Mtrx2x2 u;
+    convertFromCK(u_CK, &u);
+    printMtrx2x2(&u);
+}
 
-//     printf("\n\n %s \n", name);
+void printMtrx2x2(const Mtrx2x2* restrict u) {
+    // Prints the matrix on screen with a given number of decimal places and
+    // adds a name on the top
 
-//     printf("{");
-//     for(MtrxIdx2  a = 0; a < 2; a++) {
-//         printf("{");
+    printf("{");
+    for (MtrxIdx2 a = 0; a < 2; a++) {
+        printf("{");
 
-//         for(MtrxIdx2  b = 0; b < 2; b++) {
-//             printf("%.*lf + I(%.*lf)", decimal_places, creal(u -> m[ELM_2X2(a, b)]),
-//                                        decimal_places, cimag(u -> m[ELM_2X2(a, b)]));
+        for (MtrxIdx2 b = 0; b < 2; b++) {
+            printf("%.*lf + I(%.*lf)", 18, creal(u->m[ELM_2X2(a, b)]),
+                   18, cimag(u->m[ELM_2X2(a, b)]));
 
-//             b != 2 -1 ?  printf(",") : 0 ;
-//         }
+            b != 2 - 1 ? printf(",") : 0;
+        }
 
-//         a != 2 - 1 ?  printf("},\n") : 0 ;
-//     }
+        a != 2 - 1 ? printf("},\n") : 0;
+    }
 
-//     printf("}}\n\n");
+    printf("}}\n\n");
 
-//     getchar();
-// }
+    getchar();
+}
 
 /* Copies a 2x2 matrix in the Cayley-Klein representation. */
 void copy2x2(const Mtrx2x2CK* restrict u,

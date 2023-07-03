@@ -80,10 +80,14 @@ int main(int argc, char** argv) {
         double ap[DIM], aK[DIM];
         Scalar trace_scalar, trace_vector;
 #pragma omp for collapse(4)
-        for (int nt = -N_T / 8; nt <= N_T / 8; nt++) {
-            for (int nz = -N_S / 8; nz <= N_S / 8; nz++) {
-                for (int ny = -N_S / 8; ny <= N_S / 8; ny++) {
-                    for (int nx = -N_S / 8; nx <= N_S / 8; nx++) {
+        // for (int nt = -N_T / 8; nt <= N_T / 8; nt++) {
+        //     for (int nz = -N_S / 8; nz <= N_S / 8; nz++) {
+        //         for (int ny = -N_S / 8; ny <= N_S / 8; ny++) {
+        //             for (int nx = -N_S / 8; nx <= N_S / 8; nx++) {
+        for (int nt = 0; nt < N_T; nt++) {
+            for (int nz = 0; nz < N_S; nz++) {
+                for (int ny = 0; ny < N_S; ny++) {
+                    for (int nx = 0; nx < N_S; nx++) {
                         ap[T_INDX] = (2.0 * M_PI / N_T) * (nt + 0.5);
                         ap[Z_INDX] = (2.0 * M_PI / N_S) * nz;
                         ap[Y_INDX] = (2.0 * M_PI / N_S) * ny;
@@ -109,7 +113,7 @@ int main(int argc, char** argv) {
                             // fwrite(&trace_scalar, sizeof(Scalar), 1, traces_file);
                             // fwrite(&trace_vector, sizeof(Scalar), 1, traces_file);
 
-                            fprintf(traces_file, "{%d,%d,%d,%d}\t %lf+I*(%lf) \t %lf+I*(%lf)\n",
+                            fprintf(traces_file, "{%d,%d,%d,%d}\t %.10lf+I*(%.10lf) \t %.10lf+I*(%.10lf)\n",
                                     nt, nz, ny, nx,
                                     creal(trace_vector), cimag(trace_vector),
                                     creal(trace_scalar), cimag(trace_scalar));

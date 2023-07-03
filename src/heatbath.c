@@ -8,7 +8,8 @@
 #include <tgmath.h>
 
 #define POW2(a) ((a) * (a))
-#define METROPOLIS_EPS 0.1
+#define METROPOLIS_EPS 0.3
+#define MAX_METROPOLIS_HITS 5
 
 static inline void sumStaples(Mtrx3x3* restrict U,
                               const PosVec position,
@@ -47,7 +48,7 @@ static inline void HeatBathSubmatrix(Mtrx3x3* restrict u, Submtrx sub, Mtrx3x3* 
     double lambda_squared;
     Mtrx2x2CK x;
 
-    double modx, modf, mod_sqrd_f;
+    double modx, modf, mod_sqrd_f = 0.0;
 
     Mtrx2x2CK w_dagger;
     Mtrx2x2CK update_SU2;
@@ -77,7 +78,7 @@ static inline void HeatBathSubmatrix(Mtrx3x3* restrict u, Submtrx sub, Mtrx3x3* 
 
     do {
         ranlxd(f, 3);
-
+        mod_sqrd_f = 0.0;
         for (int c = 0; c < 3; c++) {
             f[c] = 1.0 - 2.0 * f[c];
             mod_sqrd_f += POW2(f[c]);
@@ -126,28 +127,34 @@ static inline void MetropolisSubmatrix(Mtrx3x3* restrict update, Submtrx sub) {
 
     double r[4];
     ranlxd(r, 4);
+    for (int a = 0; a < 4; a++) {
+        r[a] -= 0.5;
+    }
 
-    Mtrx2x2CK x;
+    Mtrx2x2CK x = {.m = {0.0, 0.0, 0.0, 0.0}};
 
-    double norm_squared;
+    double norm_squared = 0.0;
 
-    for (int a = 1; a < 3; a++) {
+    for (int a = 1; a < 4; a++) {
         norm_squared += POW2(r[a]);
     }
     if (norm_squared != 0) {
-        for (int a = 1; a < 3; a++) {
+        for (int a = 1; a < 4; a++) {
             r[a] /= sqrt(norm_squared);
         }
     } else {
-        for (int a = 1; a < 3; a++) {
-            r[a] = 1.0;
+        for (int a = 1; a < 4; a++) {
+            r[a] = 0.5;
         }
     }
 
-    x.m[0] = (r[0] > 0 ? 1.0 : -1.0) * sqrt(1.0 - POW2(METROPOLIS_EPS));
-    for (int a = 1; a < 3; a++) {
+    x.m[0] = ((r[0]) > 0 ? 1.0 : -1.0) * sqrt(1.0 - POW2(METROPOLIS_EPS));
+    for (int a = 1; a < 4; a++) {
         x.m[a] = METROPOLIS_EPS * r[a];
     }
+
+    // printMtrx2x2CK(&x);
+    // getchar();
 
     accumProdSU2_3x3(&x, update, a, b);
 }
@@ -159,41 +166,59 @@ double MetropolisSU3(Mtrx3x3* restrict U, PosVec position, LorentzIdx mu, double
 
     Mtrx3x3* u = getLink(U, position, mu);
 
-    Mtrx3x3 update, update_dagger;
-    setIdentity3x3(&update);
-
     sumStaples(U, position, mu, &staple_sum);
+
+    Mtrx3x3 update, update_dagger;
+
     prod3x3(u, &staple_sum, &W);
-    double old_action_contribution = creal(trace3x3(&W));
+    double early_action_contribution = -(beta / Nc) * creal(trace3x3(&W));
+    double new_action_contribution = 0.0, old_action_contribution = early_action_contribution;
 
-    for (Submtrx sub = R; sub <= T; sub++) {
-        MetropolisSubmatrix(&update, sub);
-    }
+    double dagger_or_notQ;
+    double acceptQ;
 
-    double dagger_or_not;
-    hermConj3x3(&update, &update_dagger);
-    ranlxd(&dagger_or_not, 1);
-    update = dagger_or_not > 0.0 ? update : update_dagger;
+    for (int hits = 0; hits < MAX_METROPOLIS_HITS; hits++) {
+        setIdentity3x3(&update);
 
-    accumLeftProd3x3(&update, &W);
-    double would_be_action_contribution = creal(trace3x3(&W));
-    double new_action_contribution;
-
-    if ((would_be_action_contribution - old_action_contribution) < 0.0) {
-        new_action_contribution = would_be_action_contribution;
-        accumLeftProd3x3(&update, u);
-    } else {
-        double acceptQ;
-        ranlxd(&acceptQ, 1);
-        if (acceptQ <= exp(-(would_be_action_contribution - old_action_contribution))) {
-            accumLeftProd3x3(&update, u);
-            new_action_contribution = would_be_action_contribution;
-        } else {
-            new_action_contribution = old_action_contribution;
+        for (Submtrx sub = R; sub <= T; sub++) {
+            MetropolisSubmatrix(&update, sub);
         }
+
+        // printMatrix3x3(&update);
+        // getchar();
+
+        hermConj3x3(&update, &update_dagger);
+        ranlxd(&dagger_or_notQ, 1);
+        update = (dagger_or_notQ - 0.5) > 0.0 ? update : update_dagger;
+
+        accumLeftProd3x3(&update, &W);
+        new_action_contribution = -(beta / Nc) * creal(trace3x3(&W));
+
+        if ((new_action_contribution - old_action_contribution) < 0.0) {
+            // printf("action is less\n");
+            accumLeftProd3x3(&update, u);
+        } else {
+            // printf("action is more\n");
+
+            ranlxd(&acceptQ, 1);
+            // printf("acceptQ: %lf\t DeltaS: %lf\n", acceptQ, (new_action_contribution - old_action_contribution));
+            if (acceptQ <= exp(-(new_action_contribution - old_action_contribution))) {
+                // printf("update was accepted\n");
+                accumLeftProd3x3(&update, u);
+            } else {
+                new_action_contribution = old_action_contribution;
+                hermConj3x3(&update, &update_dagger);
+                accumLeftProd3x3(&update_dagger, &W);
+                // printf("update was rejected\n");
+            }
+        }
+        old_action_contribution = new_action_contribution;
+
+        // getchar();
     }
-
     projectSU3(u);
+    // printMatrix3x3(u);
+    // getchar();
 
-    return -(beta / Nc) * (new_action_contribution - old_action_contribution);
+    return (new_action_contribution - early_action_contribution);
 }

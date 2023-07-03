@@ -1,6 +1,6 @@
 CC := gcc
 
-BINARIES := gfix configGen invertDirac correlator fourier_transform_propagator averagePolyakov
+BINARIES := gfix configGen invertDirac correlator fourier_transform_propagator fourier_transform_propagator_fftw averagePolyakov 
 
 DRIVER_DIR := driver
 INCLUDE_DIR := include
@@ -14,7 +14,7 @@ DEPEND_FLAGS = -MMD -MP
 WARNINGS := -Wall -Wextra -Wpedantic
 WARNINGS_EXTRA := -Werror
 
-LIBS := -lm
+LIBS := -lm -lfftw3
 
 SOURCES = $(wildcard $(SOURCE_DIR)/*.c)
 DRIVER_SOURCES = $(wildcard $(DRIVER_DIR)/*.c)
@@ -43,6 +43,7 @@ configGen: $(BINARIES_DIR)/configGen
 invertDirac: $(BINARIES_DIR)/invertDirac
 correlator: $(BINARIES_DIR)/correlator
 fourier_transform_propagator: $(BINARIES_DIR)/fourier_transform_propagator
+fourier_transform_propagator_fftw: $(BINARIES_DIR)/fourier_transform_propagator_fftw
 averagePolyakov: $(BINARIES_DIR)/averagePolyakov
 
 $(BINARIES_DIR)/gfix: $(BUILD_DIR)/gfix.o $(OBJECTS)
@@ -59,6 +60,9 @@ $(BINARIES_DIR)/correlator: $(BUILD_DIR)/correlator.o $(OBJECTS)
 
 $(BINARIES_DIR)/fourier_transform_propagator: $(BUILD_DIR)/fourier_transform_propagator.o $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 
+
+$(BINARIES_DIR)/fourier_transform_propagator_fftw: $(BUILD_DIR)/fourier_transform_propagator_fftw.o $(OBJECTS)
+	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS)
 
 $(BINARIES_DIR)/averagePolyakov: $(BUILD_DIR)/averagePolyakov.o $(OBJECTS)
 	$(CC) -o $@ $^ $(CFLAGS) $(WARNINGS) $(LIBS) 	

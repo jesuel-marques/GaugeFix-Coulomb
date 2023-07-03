@@ -67,6 +67,9 @@ void setSU2Random(Mtrx2x2CK* restrict u);
 
 void convertFromCK(const Mtrx2x2CK* restrict u_ck, Mtrx2x2* restrict u);
 
+void printMtrx2x2CK(const Mtrx2x2CK* restrict u_CK);
+void printMtrx2x2(const Mtrx2x2* restrict u);
+
 // void setNull2x2(Mtrx2x2CK * u), setIdentity2x2(Mtrx2x2CK * u);
 
 // void accumulate2x2(const Mtrx2x2CK * u, Mtrx2x2CK* acc);

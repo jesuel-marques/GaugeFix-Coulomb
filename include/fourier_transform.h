@@ -5,4 +5,6 @@
 
 DiracColorMatrix fourierTransform(DiracColorMatrix* restrict x_space_vector, double momentum[DIM]);
 
+void printMatrix12x12(DiracColorMatrix* restrict u);
+
 #endif

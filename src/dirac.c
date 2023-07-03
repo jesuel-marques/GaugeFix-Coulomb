@@ -191,15 +191,15 @@ void DiracOperator(Scalar *f, Scalar *g) {
                             }
                         }
                     }
-                    if (c_SW_dirac_operator != 0.0) {
-                        LOOP_DIRAC(beta) {
-                            LOOP_3(b) {
-                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
-                                    ((*(ELEM_VEC_POS(pauli_term_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, beta, b)]) *
-                                    (*(ELEM_VEC_POSDC(f, position, beta, b)));
-                            }
-                        }
-                    }
+                    // if (c_SW_dirac_operator != 0.0) {
+                    //     LOOP_DIRAC(beta) {
+                    //         LOOP_3(b) {
+                    //             (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
+                    //                 ((*(ELEM_VEC_POS(pauli_term_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, beta, b)]) *
+                    //                 (*(ELEM_VEC_POSDC(f, position, beta, b)));
+                    //         }
+                    //     }
+                    // }
                 }
             }
         }

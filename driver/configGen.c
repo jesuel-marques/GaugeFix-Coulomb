@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     unsigned step_to_save = atoi(argv[6]);
     unsigned thermalization = atoi(argv[7]);
 
-    rlxd_init(1, 970223);
+    rlxd_init(1, 32244000);
     int* ranlux_state;
 
     FILE* ranlux_state_file;
@@ -65,15 +65,16 @@ int main(int argc, char** argv) {
     }
 
     double av_plaq = averagePlaquette(U, "total");
-    Scalar average_polyakov_loop;
+    Scalar average_polyakov_loop = 0.0;
     unsigned configs_saved = 0;
     for (unsigned long sweeps = 0; configs_saved < max_configs; sweeps++) {
-        av_plaq += -updateLattice(U, beta, HeatBathSU3) / (2.0 * Nc * pow(lattice_param.n_SPC, 3.0) * lattice_param.n_T * beta);
-        // applyCenterTransformation(U, 0, TWO_PI_OVER_THREE);
-        average_polyakov_loop = averagePolyakovLoop(U);
+        av_plaq += -updateLattice(U, beta, MetropolisSU3) / (2.0 * Nc * pow(lattice_param.n_SPC, 3.0) * lattice_param.n_T * beta);
 
-        printf("sweep: %ld \t plaq: %.10lf \t polyakov loop: %.10lf+I*(%.10lf)\n", sweeps, av_plaq, creal(average_polyakov_loop), cimag(average_polyakov_loop));
+        if (!(sweeps % 10)) {
+            average_polyakov_loop = averagePolyakovLoop(U);
 
+            printf("sweep: %ld \t plaq: %.10lf \t polyakov loop: %.10lf+I*(%.10lf)\n", sweeps, av_plaq, creal(average_polyakov_loop), cimag(average_polyakov_loop));
+        }
         // if (sweeps >= thermalization && (sweeps - thermalization) % step_to_save == 0) {
         //     sprintf(complete_config_filename, "%s_sweep_%lu_%dx%d_beta_%f_%s_start", config_filename, sweeps, lattice_param.n_SPC, lattice_param.n_T, beta, argv[8]);
 

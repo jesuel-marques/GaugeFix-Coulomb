@@ -27,6 +27,7 @@
 #include <SU3_ops.h>
 #include <geometry.h>
 
+double MetropolisSU3(Mtrx3x3* restrict U, PosVec position, LorentzIdx mu, double beta);
 double HeatBathSU3(Mtrx3x3* U, PosVec position, LorentzIdx mu, double beta);
 
 #endif  // HEATBATH_H

@@ -112,18 +112,20 @@ int main(int argc, char* argv[]) {
                                             tolerance * sizeof_vector, BiCGStab);
             }
             free(source);
+            printf("Inversion finished for alpha: %d a:%d\n", alpha, a);
         }
     }
 
-    FILE* dirac_op_file;
-    char dirac_op_filename[MAX_SIZE];
-    sprintf(dirac_op_filename, "%s.dirac_op", config_filename);
-    dirac_op_file = fopen(dirac_op_filename, "w");
-    printDiracOperator(dirac_op_file);
-    fclose(dirac_op_file);
+    // FILE* dirac_op_file;
+    // char dirac_op_filename[MAX_SIZE];
+    // sprintf(dirac_op_filename, "%s.dirac_op", config_filename);
+    // printf("prop filename: %s", dirac_op_filename);
+    // dirac_op_file = fopen(dirac_op_filename, "wb");
+    // printDiracOperator(dirac_op_file);
+    // fclose(dirac_op_file);
 
     free(U);  //	Free memory allocated for the configuration.
-    if (c_SW != 0) {
+    if (c_SW != 0.0) {
         free(pauli_term);
     }
 
