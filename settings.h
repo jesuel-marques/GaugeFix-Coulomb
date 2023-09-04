@@ -24,7 +24,7 @@
 #define SETTINGS_H
 
 /* Uncomment if conversion from big to little endian is needed in config being read */
-// #define     NEED_BYTE_SWAP_IN
+// #define NEED_BYTE_SWAP_IN
 
 /* Uncomment if conversion from big to little endian is needed in config being written*/
 // #define  NEED_BYTE_SWAP_OUT

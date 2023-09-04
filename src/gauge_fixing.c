@@ -72,7 +72,7 @@ ORGaugeFixingParameters initParametersORDefault() {
     ORGaugeFixingParameters gfix_param =
         {.omega_OR = 1.95,
          .hits = 2,
-         .generic_gf.gauge_type = COULOMB,
+         .generic_gf.gauge_type = LANDAU,
          .generic_gf.error = false,
          .generic_gf.gfix_proxy = calculate_e2,
          .generic_gf.tolerance = 1E-16,
@@ -778,6 +778,7 @@ int gaugefixOverrelaxation(Mtrx3x3* restrict U,
     /* No need to calculate residue all the time because it will typically take some
        hundreds/thousands of sweeps to fix the gauge. */
     double new_residue = params.generic_gf.gfix_proxy(U, params.generic_gf.gauge_type);
+
     printf("Sweeps: %8d.\t residue: %3.2E \n", sweep, new_residue);
 
     unsigned converge_check_due = whenNextConvergenceCheckQ(sweep, new_residue, params);

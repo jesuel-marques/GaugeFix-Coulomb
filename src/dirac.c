@@ -6,33 +6,20 @@
 #include <stdlib.h>
 #include <tgmath.h>
 
-static Mtrx3x3 *U_dirac_operator;
-static DiracColorMatrix *pauli_term_dirac_operator;
+static Mtrx3x3 *U_dirac_operator = NULL;
+static DiracColorMatrix *pauli_term_dirac_operator = NULL;
 
 static double kappa_dirac_operator;
 static double c_SW_dirac_operator;
 
-static const DiracMatrix gamma[DIM] = {{{0, 0, 1, 0,
-                                         0, 0, 0, 1,
-                                         1, 0, 0, 0,
-                                         0, 1, 0, 0}},
+static DiracMatrix *gamma = NULL;
 
-                                       {{0, 0, -I, 0,
-                                         0, 0, 0, I,
-                                         I, 0, 0, 0,
-                                         0, -I, 0, 0}},
+static DiracMatrix *identity_plus_gamma = NULL;
+static DiracMatrix *identity_minus_gamma = NULL;
 
-                                       {{0, 0, 0, -1,
-                                         0, 0, 1, 0,
-                                         0, 1, 0, 0,
-                                         -1, 0, 0, 0}},
+static DiracMatrix *sigma = NULL;
 
-                                       {{0, 0, 0, -I,
-                                         0, 0, -I, 0,
-                                         0, I, 0, 0,
-                                         I, 0, 0, 0}}};
-
-// static DiracMatrix identity_plus_gamma[DIM] = {{{1, 0, 1, 0,
+//  static DiracMatrix identity_minus_gamma[DIM] = {{{1, 0, 1, 0,
 //                                                  0, 1, 0, 1,
 //                                                  1, 0, 1, 0,
 //                                                  0, 1, 0, 1}},  //    gamma[T_INDX]
@@ -72,10 +59,7 @@ static const DiracMatrix gamma[DIM] = {{{0, 0, 1, 0,
 //                                                   0, -I, 1, 0,
 //                                                   -I, 0, 0, 1}}};
 
-static const DiracMatrix identityDirac = {{1, 0, 0, 0,
-                                           0, 1, 0, 0,
-                                           0, 0, 1, 0,
-                                           0, 0, 0, 1}};
+static DiracMatrix identityDirac;
 
 #define DIGITS_MATRIX 8
 void printDiracMatrix(DiracMatrix u) {
@@ -90,6 +74,22 @@ void printDiracMatrix(DiracMatrix u) {
             b != 4 - 1 ? printf(", ") : 0;
         }
         a != 4 - 1 ? printf("},\n") : 0;
+    }
+    printf("}}\n\n");
+}
+
+void printDiracColorMatrix(DiracColorMatrix u) {
+    unsigned short a, b;
+    printf("{");
+    LOOP_DC(a) {
+        printf("{");
+        LOOP_DC(b) {
+            printf("%.*lf + I*(%.*lf)", DIGITS_MATRIX, creal(u.m[a * 4 * 3 + b]),
+                   DIGITS_MATRIX, cimag(u.m[a * 4 * 3 + b]));
+
+            b != 12 - 1 ? printf(", ") : 0;
+        }
+        a != 12 - 1 ? printf("},\n") : 0;
     }
     printf("}}\n\n");
 }
@@ -136,7 +136,165 @@ void initializePointSource(PosVec source_position, DiracIdx dirac_index, MtrxIdx
     }
 }
 
-void DiracOperator(Scalar *f, Scalar *g) {
+void InitializeDiracMatrices(void) {
+    DiracMatrix gamma_T = {{0, 0, 1, 0,
+                            0, 0, 0, 1,
+                            1, 0, 0, 0,
+                            0, 1, 0, 0}},
+                gamma_Z = {{0, 0, -I, 0,
+                            0, 0, 0, I,
+                            I, 0, 0, 0,
+                            0, -I, 0, 0}},
+                gamma_Y = {{0, 0, 0, -1,
+                            0, 0, 1, 0,
+                            0, 1, 0, 0,
+                            -1, 0, 0, 0}},
+                gamma_X = {{0, 0, 0, -I,
+                            0, 0, -I, 0,
+                            0, I, 0, 0,
+                            I, 0, 0, 0}};
+
+    gamma = (DiracMatrix *)calloc(DIM, sizeof(DiracMatrix));
+    identity_plus_gamma = (DiracMatrix *)calloc(DIM, sizeof(DiracMatrix));
+    identity_minus_gamma = (DiracMatrix *)calloc(DIM, sizeof(DiracMatrix));
+
+    sigma = (DiracMatrix *)calloc(DIM * DIM, sizeof(DiracMatrix));
+
+    LorentzIdx mu, nu;
+    DiracIdx alpha, beta, delta;
+
+    // Initialize gamma matrices
+
+    gamma[T_INDX] = gamma_T;
+    gamma[Z_INDX] = gamma_Z;
+    gamma[Y_INDX] = gamma_Y;
+    gamma[X_INDX] = gamma_X;
+
+    LOOP_DIRAC(alpha) {
+        LOOP_DIRAC(beta) {
+            identityDirac.m[alpha * 4 + beta] = (alpha == beta) ? 1.0 : 0.0;
+        }
+    }
+
+    LOOP_LORENTZ(mu) {
+        LOOP_DIRAC(alpha) {
+            LOOP_DIRAC(beta) {
+                identity_plus_gamma[mu].m[alpha * 4 + beta] = identityDirac.m[alpha * 4 + beta] + gamma[mu].m[alpha * 4 + beta];
+                identity_minus_gamma[mu].m[alpha * 4 + beta] = identityDirac.m[alpha * 4 + beta] - gamma[mu].m[alpha * 4 + beta];
+            }
+        }
+    }
+
+    // Initialize sigma matrices
+    LOOP_LORENTZ(mu) {
+        LOOP_LORENTZ(nu) {
+            LOOP_DIRAC(alpha) {
+                LOOP_DIRAC(beta) {
+                    sigma[mu * DIM + nu].m[alpha * 4 + beta] = 0.0;
+                    LOOP_DIRAC(delta) {
+                        sigma[mu * DIM + nu].m[alpha * 4 + beta] +=
+                            (gamma[mu].m[alpha * 4 + delta] *
+                                 gamma[nu].m[delta * 4 + beta] -
+                             gamma[nu].m[alpha * 4 + delta] *
+                                 gamma[mu].m[delta * 4 + beta]) /
+                            (2.0 * I);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void initializePauliTerm(void) {
+    LorentzIdx mu, nu;
+    DiracIdx alpha, beta;
+    MtrxIdx3 a, b;
+    PosVec position;
+
+    Mtrx3x3 Qmunu, Qnumu;
+
+    // Calculate Pauli term
+    LOOP_TEMPORAL(position.pos[T_INDX]) {
+        LOOP_SPATIAL(position) {
+            LOOP_DIRAC(alpha) {
+                LOOP_3(a) {
+                    LOOP_DIRAC(beta) {
+                        LOOP_3(b) {
+                            (*(ELEM_VEC_POS(pauli_term_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, beta, b)] = 0.0;
+                        }
+                    }
+                }
+            }
+
+            LOOP_LORENTZ(mu) {
+                LOOP_LORENTZ(nu) {
+                    if (mu < nu) {
+                        CloverTerm(U_dirac_operator, position, mu, nu, &Qmunu);
+                        CloverTerm(U_dirac_operator, position, nu, mu, &Qnumu);
+                        LOOP_DIRAC(alpha) {
+                            LOOP_3(a) {
+                                LOOP_DIRAC(beta) {
+                                    LOOP_3(b) {
+                                        (*(ELEM_VEC_POS(pauli_term_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, beta, b)] += (c_SW_dirac_operator / 2.0) *
+                                                                                                                                   sigma[mu * DIM + nu].m[alpha * 4 + beta] * (-I / (8.0)) *
+                                                                                                                                   (Qmunu.m[ELEM_3X3(a, b)] -
+                                                                                                                                    Qnumu.m[ELEM_3X3(a, b)]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void setupDiracOperator(const double kappa, const double c_SW, Mtrx3x3 *U) {
+    U_dirac_operator = U;
+    kappa_dirac_operator = kappa;
+    c_SW_dirac_operator = c_SW;
+
+    InitializeDiracMatrices();
+    if (c_SW != 0.0) {
+        pauli_term_dirac_operator =
+            (DiracColorMatrix *)calloc(lattice_param.volume, sizeof(DiracColorMatrix));
+        initializePauliTerm();
+    }
+}
+
+void destroyDiracMatrices() {
+    free(gamma);
+    free(identity_plus_gamma);
+    free(identity_minus_gamma);
+    free(sigma);
+}
+
+void destroyDiracOperator() {
+    destroyDiracMatrices();
+    if (pauli_term_dirac_operator != NULL) {
+        free(pauli_term_dirac_operator);
+    }
+    U_dirac_operator = NULL;
+    kappa_dirac_operator = 0.0;
+    c_SW_dirac_operator = 0.0;
+}
+
+void NonNullDiracEntries(DiracMatrix M, DiracIdxPair *non_null_entries) {
+    DiracIdx alpha, beta;
+    DiracIdxPair *non_null_entries_ptr = non_null_entries;
+
+    LOOP_DIRAC(alpha) {
+        LOOP_DIRAC(beta) {
+            if (M.m[alpha * 4 + beta] != 0.0) {
+                *non_null_entries_ptr = (DiracIdxPair){alpha, beta};
+                non_null_entries_ptr++;
+            }
+        }
+    }
+}
+
+Scalar *oldDiracOperator(Scalar *f, Scalar *g) {
     //	Calcula g=D.f, ou seja, a matriz de Dirac agindo no vetor f, e coloca o resultado em g.
 
     PosVec position;
@@ -191,84 +349,12 @@ void DiracOperator(Scalar *f, Scalar *g) {
                             }
                         }
                     }
-                    // if (c_SW_dirac_operator != 0.0) {
-                    //     LOOP_DIRAC(beta) {
-                    //         LOOP_3(b) {
-                    //             (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
-                    //                 ((*(ELEM_VEC_POS(pauli_term_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, beta, b)]) *
-                    //                 (*(ELEM_VEC_POSDC(f, position, beta, b)));
-                    //         }
-                    //     }
-                    // }
-                }
-            }
-        }
-    }
-}
-
-double invertDiracOperator(const double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
-    //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR FOR EXECUTION BY  SINGLE THREAD
-    U_dirac_operator = U;
-    kappa_dirac_operator = kappa;
-
-    size_t sizeof_vector = lattice_param.volume * 4 * Nc;
-
-    return inversion_algorithm(DiracOperator, source, inverse_column, tolerance, sizeof_vector);
-}
-
-void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *pauli_term) {
-    LorentzIdx mu, nu;
-    DiracIdx alpha, beta, delta;
-    MtrxIdx3 a, b;
-    PosVec position;
-
-    DiracMatrix sigma[DIM][DIM];
-
-    Mtrx3x3 Qmunu, Qnumu;
-
-    LOOP_LORENTZ(mu) {
-        LOOP_LORENTZ(nu) {
-            LOOP_DIRAC(alpha) {
-                LOOP_DIRAC(beta) {
-                    sigma[mu][nu].m[alpha * 4 + beta] = 0.0;
-                    LOOP_DIRAC(delta) {
-                        sigma[mu][nu].m[alpha * 4 + beta] +=
-                            (gamma[mu].m[alpha * 4 + delta] *
-                                 gamma[nu].m[delta * 4 + beta] -
-                             gamma[nu].m[alpha * 4 + delta] *
-                                 gamma[mu].m[delta * 4 + beta]) /
-                            (2.0 * I);
-                    }
-                }
-            }
-        }
-    }
-
-    LOOP_TEMPORAL(position.pos[T_INDX]) {
-        LOOP_SPATIAL(position) {
-            LOOP_DIRAC(alpha) {
-                LOOP_3(a) {
-                    LOOP_DIRAC(beta) {
-                        LOOP_3(b) {
-                            (*(ELEM_VEC_POS(pauli_term, position))).m[ELEM_DCxDC(alpha, a, beta, b)] = 0.0;
-                        }
-                    }
-                }
-            }
-
-            LOOP_LORENTZ(mu) {
-                LOOP_LORENTZ(nu) {
-                    CloverTerm(U, position, mu, nu, &Qmunu);
-                    CloverTerm(U, position, nu, mu, &Qnumu);
-                    LOOP_DIRAC(alpha) {
-                        LOOP_3(a) {
-                            LOOP_DIRAC(beta) {
-                                LOOP_3(b) {
-                                    (*(ELEM_VEC_POS(pauli_term, position))).m[ELEM_DCxDC(alpha, a, beta, b)] += (c_SW / 2.0) *
-                                                                                                                sigma[mu][nu].m[alpha * 4 + beta] * (-I / (8.0)) *
-                                                                                                                (Qmunu.m[ELEM_3X3(a, b)] -
-                                                                                                                 Qnumu.m[ELEM_3X3(a, b)]);
-                                }
+                    if (pauli_term_dirac_operator != NULL) {
+                        LOOP_DIRAC(beta) {
+                            LOOP_3(b) {
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
+                                    (*(ELEM_VEC_POS(pauli_term_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, beta, b)] *
+                                    (*(ELEM_VEC_POSDC(f, position, beta, b)));
                             }
                         }
                     }
@@ -276,18 +362,114 @@ void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *pauli_
             }
         }
     }
+
+    return g;
 }
 
-double invertImprovedDiracOperator(const double kappa, Mtrx3x3 *U, DiracColorMatrix *pauli_term, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
-    //  TODO: CREATE INITIALIZER AND DESTRUCTOR OF DIRAC OPERATOR FOR EXECUTION BY  SINGLE THREAD
-    U_dirac_operator = U;
-    kappa_dirac_operator = kappa;
+inline static Scalar *applyHoppingTerm(Scalar *f, Scalar *g) {
+    // Hopping term with forward (positive mu, 1) and backward (negative mu, 2) neighbors
+    PosVec position, positionp1, positionp2;
+    LorentzIdx mu;
+    MtrxIdx3 a, b;
+    DiracIdx alpha, beta;
 
+    Mtrx3x3 link1, link2;
+
+    double antiperiodicity1, antiperiodicity2;
+
+    LOOP_TEMPORAL(position.pos[T_INDX]) {
+        LOOP_SPATIAL(position) {
+            LOOP_LORENTZ(mu) {
+                //	Anti-periodic boundary condition
+                antiperiodicity1 = (mu != T_INDX || position.pos[T_INDX] != (lattice_param.n_T - 1)) ? 1.0 : -1.0;
+                antiperiodicity2 = (mu != T_INDX || position.pos[T_INDX] != 0) ? 1.0 : -1.0;
+
+                getLinkMatrix(U_dirac_operator, position, mu, FRONT, &link1);
+                getLinkMatrix(U_dirac_operator, position, mu, REAR, &link2);
+
+                positionp1 = getNeighbour(position, mu, FRONT);
+                positionp2 = getNeighbour(position, mu, REAR);
+                LOOP_DIRAC(alpha) {
+                    LOOP_DIRAC(beta) {
+                        LOOP_3(a) {
+                            LOOP_3(b) {
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) += -0.5 * antiperiodicity1 *
+                                                                              (identity_minus_gamma[mu].m[alpha * 4 + beta]) *
+                                                                              (link1.m[ELEM_3X3(a, b)]) *
+                                                                              (*(ELEM_VEC_POSDC(f, positionp1, beta, b)));
+
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) += -0.5 * antiperiodicity2 *
+                                                                              (identity_plus_gamma[mu].m[alpha * 4 + beta]) *
+                                                                              (link2.m[ELEM_3X3(a, b)]) *
+                                                                              (*(ELEM_VEC_POSDC(f, positionp2, beta, b)));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return g;
+}
+
+inline static Scalar *applyPauliTerm(Scalar *f, Scalar *g) {
+    PosVec position;
+    MtrxIdx3 a, b;
+    DiracIdx alpha, beta;
+    LOOP_TEMPORAL(position.pos[T_INDX]) {
+        LOOP_SPATIAL(position) {
+            LOOP_DIRAC(alpha) {
+                LOOP_3(a) {
+                    LOOP_DIRAC(beta) {
+                        LOOP_3(b) {
+                            (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
+                                (*(ELEM_VEC_POS(pauli_term_dirac_operator, position))).m[ELEM_DCxDC(alpha, a, beta, b)] *
+                                (*(ELEM_VEC_POSDC(f, position, beta, b)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return g;
+}
+
+Scalar *DiracOperator(Scalar *f, Scalar *g) {
+    //	Calcula g=D.f, ou seja, a matriz de Dirac agindo no vetor f, e coloca o resultado em g.
+
+    PosVec position;
+
+    MtrxIdx3 a;
+    DiracIdx alpha;
+
+    // printf("%lf\n", kappa_dirac_operator);
+    // getchar();
+
+    LOOP_TEMPORAL(position.pos[T_INDX]) {
+        LOOP_SPATIAL(position) {
+            LOOP_DIRAC(alpha) {
+                LOOP_3(a) {
+                    // Diagonal term: simply copy content of g to f with a factor
+
+                    (*(ELEM_VEC_POSDC(g, position, alpha, a))) = (1.0 / (2.0 * kappa_dirac_operator)) * (*(ELEM_VEC_POSDC(f, position, alpha, a)));
+                }
+            }
+        }
+    }
+
+    applyHoppingTerm(f, g);
+    if (pauli_term_dirac_operator != NULL) {
+        applyPauliTerm(f, g);
+    }
+
+    return g;
+}
+
+double invertDiracOperator(Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(Scalar *(*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;
-    pauli_term_dirac_operator = pauli_term;
 
-    double norm = inversion_algorithm(DiracOperator, source, inverse_column, tolerance, sizeof_vector);
-    return norm;
+    return inversion_algorithm(oldDiracOperator, source, inverse_column, tolerance, sizeof_vector);
 }
 
 void printDiracOperator(FILE *file_dirac_op) {
@@ -391,25 +573,25 @@ Scalar diractraceFromDirac(DiracMatrix m_D) {
     return trace;
 }
 
-void aK_from_ap(double b[4], double aK[4]) {
+void aK_from_ap(double ap[4], double aK[4]) {
     LorentzIdx mu;
     LOOP_LORENTZ(mu) {
-        aK[mu] = sin(b[mu]);
+        aK[mu] = sin(ap[mu]);
     }
 }
 
-void aQ_from_ap(double b[4], double aQ[4]) {
+void aQ_from_ap(double ap[4], double aQ[4]) {
     LorentzIdx mu;
     LOOP_LORENTZ(mu) {
-        aQ[mu] = 2.0 * sin(b[mu] / 2.0);
+        aQ[mu] = 2.0 * sin(ap[mu] / 2.0);
     }
 }
 
-double dotprod(double b[4], double aq[4]) {
+double dotprod(double ap[4], double aq[4]) {
     double dot_prod = 0.0;
     LorentzIdx mu;
     LOOP_LORENTZ(mu) {
-        dot_prod += b[mu] * aq[mu];
+        dot_prod += ap[mu] * aq[mu];
     }
 
     return dot_prod;

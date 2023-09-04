@@ -30,6 +30,7 @@
 #include <gauge_fixing.h>
 #include <geometry.h>
 #include <plaquette.h>
+#include <polyakov.h>
 #include <ranlux.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,7 +82,7 @@ int main(int argc, char* argv[]) {
         fprintf(stderr,
                 "Bad input.\n"
                 "Usage: Input config filename, gt filename, n_SPC, n_T, "
-                "tolerance and omega_OR in this order.\n"
+                "and parameter file in this order.\n"
                 "Check that:\n"
                 "1 < omega_OR < 2\n"
                 "n_SPC > 0 and n_T >0\n"
@@ -125,6 +126,13 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    Scalar average_polyloop = averagePolyakovLoop(U);
+
+    printf("Plaquette average: %.18lf. e2: %3.2E. polyakov loop: %.10lf+I*(%.10lf) \n", creal(averagePlaquette(U, "total")), calculate_e2(U, LANDAU), creal(average_polyloop), cimag(average_polyloop));
+
+    // applyCenterTransformation(U, 0, FOUR_PI_OVER_THREE);
+    average_polyloop = averagePolyakovLoop(U);
+
     Mtrx3x3* G = allocate3x3Field(lattice_param.volume);
     if (G == NULL) {
         fprintf(stderr,
@@ -136,8 +144,10 @@ int main(int argc, char* argv[]) {
     }
     rlxd_init(1, 46851387);
 
-    setFieldSU3Random(G, lattice_param.volume);
-    applyGaugeTransformationU(U, G);
+    // setFieldSU3Random(G, lattice_param.volume);
+    // applyGaugeTransformationU(U, G);
+
+    printf("Plaquette average: %.18lf. e2: %3.2E. polyakov loop: %.10lf+I*(%.10lf) \n", creal(averagePlaquette(U, "total")), calculate_e2(U, LANDAU), creal(average_polyloop), cimag(average_polyloop));
 
     printf("F before gauge fixing: %lf\n", calculateF(U, gfix_param.generic_gf.gauge_type));
     printf("Average trace of spatial plaquettes before gauge fixing: %.10lf\n",
@@ -148,11 +158,16 @@ int main(int argc, char* argv[]) {
 
     int sweeps = gaugefixOverrelaxation(U, G, gfix_param);
 
+    average_polyloop = averagePolyakovLoop(U);
+
     printf("Average trace of spatial plaquettes after gauge fixing: %.10lf\n",
            creal(averagePlaquette(U, "spatial")));
     printf("Average trace of temporal plaquettes after gauge fixing: %.10lf\n",
            creal(averagePlaquette(U, "temporal")));
     printf("F after: %lf\n", calculateF(U, gfix_param.generic_gf.gauge_type));
+
+    printf("Plaquette average: %.18lf. e2: %3.2E. polyakov loop: %.10lf+I*(%.10lf) \n", creal(averagePlaquette(U, "total")), calculate_e2(U, LANDAU), creal(average_polyloop), cimag(average_polyloop));
+
     if (sweeps < 0) {
         free(U);
         free(G);
@@ -186,7 +201,7 @@ int main(int argc, char* argv[]) {
     //
 
     // write the gauge fixed configuration to file
-    if (writeConfig(U, strcat(config_filename, ".gfix"))) {
+    if (writeConfig(U, strcat(config_filename, "_4piover3.gfix"))) {
         fprintf(stderr, "Fixed config writing failed for config %s.\n", config_filename);
     } else {
         printf("U fixed written for config %s.\n", config_filename);

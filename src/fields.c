@@ -97,6 +97,18 @@ int setFieldToIdentity(Mtrx3x3 *restrict field, unsigned elements) {
     return 0;
 }
 
+int multFieldByScalar(Mtrx3x3 *restrict field, unsigned elements, Scalar scalar) {
+    if (field == NULL) {
+        return -2;
+    }
+
+#pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic)
+    for (unsigned int i = 0; i < elements; i++)
+        substMultScalar3x3(scalar, field + i);
+
+    return 0;
+}
+
 /* Sets all 3x3 matrices entries in field to special unitary random matrices using de
 ranlux random number generator. */
 int setFieldSU3Random(Mtrx3x3 *restrict field, unsigned elements) {

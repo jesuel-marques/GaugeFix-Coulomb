@@ -89,6 +89,6 @@ int main(int argc, char* argv[]) {
     // doCenterTransformation(U, 0, TWO_PI_OVER_THREE);
 
     Scalar average_polyakov_loop = averagePolyakovLoop(U);
-    // printf("%lf+I*(%lf)\n", creal(average_polyakov_loop), cimag(average_polyakov_loop));
+    printf("%lf+I*(%lf)\n", creal(average_polyakov_loop), cimag(average_polyakov_loop));
     return EXIT_SUCCESS;
 }

@@ -29,6 +29,9 @@
 
 GeometricParameters lattice_param;
 
+// #define KSI 3.444
+// #define GAMMAG 4.3
+
 #define KSI 1.0
 #define GAMMAG 1.0
 

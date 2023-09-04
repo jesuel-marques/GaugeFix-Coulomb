@@ -40,6 +40,7 @@ Mtrx3x3 *allocate3x3Field(unsigned elements);
 
 int setFieldToIdentity(Mtrx3x3 *restrict field,
                        unsigned elements);
+int multFieldByScalar(Mtrx3x3 *restrict field, unsigned elements, Scalar scalar);
 int setFieldSU3Random(Mtrx3x3 *restrict field, unsigned elements);
 int copyField(Mtrx3x3 *restrict field,
               unsigned elements,

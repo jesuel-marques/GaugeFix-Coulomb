@@ -22,7 +22,22 @@ typedef struct DiracColorMatrix {
     Scalar m[4 * Nc * 4 * Nc];
 } DiracColorMatrix;
 
-#define ELEM_DCxDC(alpha, a, beta, b) ((((alpha)*Nc + (a)) * 4 + (beta)) * Nc + (b))
+typedef struct DiracIdxPair {
+    DiracIdx alpha;
+    DiracIdx beta;
+} DiracIdxPair;
+
+typedef struct SparseArrayEntry {
+    size_t index[2];
+    Scalar value;
+} SparseArrayEntry;
+
+typedef struct SparseArray {
+    SparseArrayEntry *entries;
+    size_t number_of_entries;
+} SparseArray;
+
+#define ELEM_DCxDC(alpha, a, beta, b) ((((alpha) * Nc + (a)) * 4 + (beta)) * Nc + (b))
 #define ELEM_12x12(a, b) (a) * 12 + (b)
 
 #define LOOP_DCXDC(a, b)         \
@@ -32,11 +47,11 @@ typedef struct DiracColorMatrix {
 #define LOOP_DC(a) \
     for (a = 0; a < 4 * Nc; a++)
 
-double invertDiracOperator(const double kappa, Mtrx3x3 *U, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t));
+void setupDiracOperator(double kappa, double c_SW, Mtrx3x3 *U);
 
-void initializePauliTerm(Mtrx3x3 *U, const double c_SW, DiracColorMatrix *sigmamunuFmunu);
+double invertDiracOperator(Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(Scalar *(*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t));
 
-double invertImprovedDiracOperator(const double kappa, Mtrx3x3 *U, DiracColorMatrix *sigmamunuFmunu, Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(void (*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t));
+void destroyDiracOperator();
 
 void printDiracOperator(FILE *file_dirac_op);
 

@@ -6,6 +6,7 @@
 #include <gauge_fixing.h>
 #include <geometry.h>
 #include <plaquette.h>
+#include <polyakov.h>
 #include <ranlux.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,8 +14,9 @@
 
 #define MAX_SIZE 1000
 
-// #define KAPPA_CRITICAL 0.1392
-#define KAPPA_CRITICAL 0.125
+// #define KAPPA_CRITICAL 0.15624
+#define KAPPA_CRITICAL 0.1392
+// #define KAPPA_CRITICAL 0.125
 
 int main(int argc, char* argv[]) {
     const char* config_filename = argv[1];
@@ -49,16 +51,16 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    setFieldToIdentity(U, DIM * lattice_param.volume);
+    // setFieldToIdentity(U, DIM * lattice_param.volume);
 
-    // int error;
-    // if ((error = loadConfig(U, config_filename))) {
-    //     fprintf(stderr, "Loading of file %s failed. Error %d.\n", config_filename, error);
-    //     free(U);
-    //     return EXIT_FAILURE;
-    // } else {
-    //     printf("Config from file %s loaded.\n", config_filename);
-    // }
+    int error;
+    if ((error = loadConfig(U, config_filename))) {
+        fprintf(stderr, "Loading of file %s failed. Error %d.\n", config_filename, error);
+        free(U);
+        return EXIT_FAILURE;
+    } else {
+        printf("Config from file %s loaded.\n", config_filename);
+    }
 
     // Mtrx3x3* G = allocate3x3Field(lattice_param.volume);
     // if (G == NULL) {
@@ -72,26 +74,17 @@ int main(int argc, char* argv[]) {
     // free(G);
 
     // loadConfigPlainText(U, config_filename);
-    printf("Plaquette average after GT: %.18lf. e2: %3.2E \n", creal(averagePlaquette(U, "total")), calculate_e2(U, LANDAU));
-    // Mtrx3x3 link;
-    // PosVec position_to_print = assignPosition(atoi(argv[8]), atoi(argv[9]), atoi(argv[10]), atoi(argv[11]));
-    // getLinkMatrix(U, position_to_print, atoi(argv[12]), REAR, &link);
-    // printMatrix3x3(&link);
-    // getchar();
+    double complex average_polyloop = averagePolyakovLoop(U);
+
+    printf("Plaquette average: %.18lf. e2: %3.2E. polyakov loop: %.10lf+I*(%.10lf) \n", creal(averagePlaquette(U, "total")), calculate_e2(U, LANDAU), creal(average_polyloop), cimag(average_polyloop));
 
     double am = 1.0 / (2.0 * kappa) - 1.0 / (2.0 * KAPPA_CRITICAL);
-    printf("kappa: %lf \t am: %lf\n", kappa, am);
+    printf("kappa: %lf \t kappa critical: %lf \t am: %lf\n", kappa, KAPPA_CRITICAL, am);
+
+    setupDiracOperator(kappa, c_SW, U);
 
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;
     Scalar* restrict inverse_columns[4][Nc];
-
-    DiracColorMatrix* pauli_term = NULL;
-    if (c_SW != 0.0) {
-        pauli_term =
-            (DiracColorMatrix*)calloc(sizeof_vector, sizeof(DiracColorMatrix));
-
-        initializePauliTerm(U, c_SW, pauli_term);
-    }
 
     DiracIdx alpha;
     MtrxIdx3 a;
@@ -103,31 +96,27 @@ int main(int argc, char* argv[]) {
             inverse_columns[alpha][a] = (Scalar*)calloc(sizeof_vector, sizeof(Scalar));
             initializePointSource(assignPosition(0, 0, 0, 0), alpha, a, source);
             if (c_SW == 0.0) {
-                invertDiracOperator(kappa, U, source,
-                                    inverse_columns[alpha][a],
-                                    tolerance * sizeof_vector, BiCGStab);
+                printf("Inverting non-improved Dirac Operator.\n");
             } else {
-                invertImprovedDiracOperator(kappa, U, pauli_term, source,
-                                            inverse_columns[alpha][a],
-                                            tolerance * sizeof_vector, BiCGStab);
+                printf("Inverting improved Dirac Operator: c_SW = %lf.\n", c_SW);
             }
+            invertDiracOperator(source, inverse_columns[alpha][a], tolerance * sizeof_vector, BiCGStab);
+
             free(source);
             printf("Inversion finished for alpha: %d a:%d\n", alpha, a);
         }
     }
 
     // FILE* dirac_op_file;
-    // char dirac_op_filename[MAX_SIZE];
+    // char dirac_op_filename[100000];
     // sprintf(dirac_op_filename, "%s.dirac_op", config_filename);
-    // printf("prop filename: %s", dirac_op_filename);
+    // printf("dirac op filename: %s", dirac_op_filename);
     // dirac_op_file = fopen(dirac_op_filename, "wb");
     // printDiracOperator(dirac_op_file);
     // fclose(dirac_op_file);
 
+    destroyDiracOperator();
     free(U);  //	Free memory allocated for the configuration.
-    if (c_SW != 0.0) {
-        free(pauli_term);
-    }
 
     //  Save inverse to file
 
