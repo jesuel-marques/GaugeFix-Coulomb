@@ -4,6 +4,7 @@
 #include <fields.h>
 #include <plaquette.h>
 #include <stdlib.h>
+#include <string.h>
 #include <tgmath.h>
 
 static Mtrx3x3 *U_dirac_operator = NULL;
@@ -136,7 +137,7 @@ void initializePointSource(PosVec source_position, DiracIdx dirac_index, MtrxIdx
     }
 }
 
-void InitializeDiracMatrices(void) {
+void initializeDiracMatrices(void) {
     DiracMatrix gamma_T = {{0, 0, 1, 0,
                             0, 0, 0, 1,
                             1, 0, 0, 0,
@@ -255,7 +256,7 @@ void setupDiracOperator(const double kappa, const double c_SW, Mtrx3x3 *U) {
     kappa_dirac_operator = kappa;
     c_SW_dirac_operator = c_SW;
 
-    InitializeDiracMatrices();
+    initializeDiracMatrices();
     if (c_SW != 0.0) {
         pauli_term_dirac_operator =
             (DiracColorMatrix *)calloc(lattice_param.volume, sizeof(DiracColorMatrix));
@@ -263,7 +264,7 @@ void setupDiracOperator(const double kappa, const double c_SW, Mtrx3x3 *U) {
     }
 }
 
-void destroyDiracMatrices() {
+void destroyDiracMatrices(void) {
     free(gamma);
     free(identity_plus_gamma);
     free(identity_minus_gamma);
@@ -294,22 +295,20 @@ void NonNullDiracEntries(DiracMatrix M, DiracIdxPair *non_null_entries) {
     }
 }
 
-Scalar *oldDiracOperator(Scalar *f, Scalar *g) {
+Scalar *DiracOperator(Scalar *f, Scalar *g) {
     //	Calcula g=D.f, ou seja, a matriz de Dirac agindo no vetor f, e coloca o resultado em g.
 
     PosVec position;
     PosVec positionp1;
     PosVec positionp2;
 
-    Mtrx3x3 link1;
-    Scalar prod1;
-
-    Mtrx3x3 link2;
-    Scalar prod2;
+    Mtrx3x3 link1, link2;
 
     MtrxIdx3 a, b;
     DiracIdx alpha, beta;
     LorentzIdx mu;
+
+    double antiperiodic_bc1 = 1.0, antiperiodic_bc2 = 1.0;
 
     LOOP_TEMPORAL(position.pos[T_INDX]) {
         LOOP_SPATIAL(position) {
@@ -323,6 +322,10 @@ Scalar *oldDiracOperator(Scalar *f, Scalar *g) {
                     // (negative mu, 2) neighbors
 
                     LOOP_LORENTZ(mu) {
+                        //	Anti-periodic boundary condition
+                        antiperiodic_bc1 = (mu != T_INDX || position.pos[T_INDX] != (lattice_param.n_T - 1)) ? 1.0 : -1.0;
+                        antiperiodic_bc2 = (mu != T_INDX || position.pos[T_INDX] != 0) ? 1.0 : -1.0;
+
                         getLinkMatrix(U_dirac_operator, position, mu, FRONT, &link1);
                         getLinkMatrix(U_dirac_operator, position, mu, REAR, &link2);
 
@@ -331,21 +334,13 @@ Scalar *oldDiracOperator(Scalar *f, Scalar *g) {
 
                         LOOP_DIRAC(beta) {
                             LOOP_3(b) {
-                                prod1 = -0.5 *
-                                        (identityDirac.m[alpha * 4 + beta] - gamma[mu].m[alpha * 4 + beta]) *
-                                        (link1.m[ELEM_3X3(a, b)]) *
-                                        (*(ELEM_VEC_POSDC(f, positionp1, beta, b)));
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) += -0.5 * antiperiodic_bc1 *
+                                                                              (identity_minus_gamma[mu].m[alpha * 4 + beta]) * (link1.m[ELEM_3X3(a, b)]) *
+                                                                              (*(ELEM_VEC_POSDC(f, positionp1, beta, b)));
 
-                                prod2 = -0.5 *
-                                        (identityDirac.m[alpha * 4 + beta] + gamma[mu].m[alpha * 4 + beta]) *
-                                        (link2.m[ELEM_3X3(a, b)]) *
-                                        (*(ELEM_VEC_POSDC(f, positionp2, beta, b)));
-
-                                //	Anti-periodic boundary condition
-                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
-                                    (mu != T_INDX || position.pos[T_INDX] != (lattice_param.n_T - 1)) ? prod1 : -prod1;
-                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
-                                    (mu != T_INDX || position.pos[T_INDX] != 0) ? prod2 : -prod2;
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) += -0.5 * antiperiodic_bc2 *
+                                                                              (identity_plus_gamma[mu].m[alpha * 4 + beta]) * (link2.m[ELEM_3X3(a, b)]) *
+                                                                              (*(ELEM_VEC_POSDC(f, positionp2, beta, b)));
                             }
                         }
                     }
@@ -393,15 +388,19 @@ inline static Scalar *applyHoppingTerm(Scalar *f, Scalar *g) {
                     LOOP_DIRAC(beta) {
                         LOOP_3(a) {
                             LOOP_3(b) {
-                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) += -0.5 * antiperiodicity1 *
-                                                                              (identity_minus_gamma[mu].m[alpha * 4 + beta]) *
-                                                                              (link1.m[ELEM_3X3(a, b)]) *
-                                                                              (*(ELEM_VEC_POSDC(f, positionp1, beta, b)));
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
+                                    -0.5 *
+                                    antiperiodicity1 *
+                                    (identity_minus_gamma[mu].m[alpha * 4 + beta]) *
+                                    (link1.m[ELEM_3X3(a, b)]) *
+                                    (*(ELEM_VEC_POSDC(f, positionp1, beta, b)));
 
-                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) += -0.5 * antiperiodicity2 *
-                                                                              (identity_plus_gamma[mu].m[alpha * 4 + beta]) *
-                                                                              (link2.m[ELEM_3X3(a, b)]) *
-                                                                              (*(ELEM_VEC_POSDC(f, positionp2, beta, b)));
+                                (*(ELEM_VEC_POSDC(g, position, alpha, a))) +=
+                                    -0.5 *
+                                    antiperiodicity2 *
+                                    (identity_plus_gamma[mu].m[alpha * 4 + beta]) *
+                                    (link2.m[ELEM_3X3(a, b)]) *
+                                    (*(ELEM_VEC_POSDC(f, positionp2, beta, b)));
                             }
                         }
                     }
@@ -435,7 +434,7 @@ inline static Scalar *applyPauliTerm(Scalar *f, Scalar *g) {
     return g;
 }
 
-Scalar *DiracOperator(Scalar *f, Scalar *g) {
+Scalar *newDiracOperator(Scalar *f, Scalar *g) {
     //	Calcula g=D.f, ou seja, a matriz de Dirac agindo no vetor f, e coloca o resultado em g.
 
     PosVec position;
@@ -469,7 +468,90 @@ Scalar *DiracOperator(Scalar *f, Scalar *g) {
 double invertDiracOperator(Scalar *source, Scalar *inverse_column, const double tolerance, double (*inversion_algorithm)(Scalar *(*)(Scalar *, Scalar *), Scalar *, Scalar *, double, size_t)) {
     size_t sizeof_vector = lattice_param.volume * 4 * Nc;
 
-    return inversion_algorithm(oldDiracOperator, source, inverse_column, tolerance, sizeof_vector);
+    return inversion_algorithm(DiracOperator, source, inverse_column, tolerance, sizeof_vector);
+}
+
+Scalar *rotateWaveFunction(Scalar cq, Scalar *psi) {
+    Scalar *rotated_psi = (Scalar *)calloc(lattice_param.volume * 4 * Nc, sizeof(Scalar));
+
+    PosVec position;
+    PosVec positionp1;
+    PosVec positionp2;
+
+    Mtrx3x3 link1, link2;
+
+    MtrxIdx3 a, b;
+    DiracIdx alpha, beta;
+    LorentzIdx mu;
+
+    double antiperiodic_bc1 = 1.0, antiperiodic_bc2 = 1.0;
+
+    LOOP_TEMPORAL(position.pos[T_INDX]) {
+        LOOP_SPATIAL(position) {
+            LOOP_DIRAC(alpha) {
+                LOOP_3(a) {
+                    // Diagonal term: simply copy content of f to g
+
+                    (*(ELEM_VEC_POSDC(rotated_psi, position, alpha, a))) = (*(ELEM_VEC_POSDC(psi, position, alpha, a)));
+
+                    // -Hopping term with forward (positive mu, 1) and backward
+                    // (negative mu, 2) neighbors
+
+                    LOOP_LORENTZ(mu) {
+                        //	Anti-periodic boundary condition
+                        antiperiodic_bc1 = (mu != T_INDX || position.pos[T_INDX] != (lattice_param.n_T - 1)) ? 1.0 : -1.0;
+                        antiperiodic_bc2 = (mu != T_INDX || position.pos[T_INDX] != 0) ? 1.0 : -1.0;
+
+                        getLinkMatrix(U_dirac_operator, position, mu, FRONT, &link1);
+                        getLinkMatrix(U_dirac_operator, position, mu, REAR, &link2);
+
+                        positionp1 = getNeighbour(position, mu, FRONT);
+                        positionp2 = getNeighbour(position, mu, REAR);
+
+                        LOOP_DIRAC(beta) {
+                            LOOP_3(b) {
+                                (*(ELEM_VEC_POSDC(rotated_psi, position, alpha, a))) +=
+                                    -(cq / 2.0) *
+                                    antiperiodic_bc1 *
+                                    (gamma[mu].m[alpha * 4 + beta]) *
+                                    (link1.m[ELEM_3X3(a, b)]) *
+                                    (*(ELEM_VEC_POSDC(psi, positionp1, beta, b)));
+
+                                (*(ELEM_VEC_POSDC(rotated_psi, position, alpha, a))) +=
+                                    +(cq / 2.0) *
+                                    antiperiodic_bc2 *
+                                    (gamma[mu].m[alpha * 4 + beta]) *
+                                    (link2.m[ELEM_3X3(a, b)]) *
+                                    (*(ELEM_VEC_POSDC(psi, positionp2, beta, b)));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    memcpy(psi, rotated_psi, lattice_param.volume * 4 * Nc * sizeof(Scalar));
+    free(rotated_psi);
+    return psi;
+}
+
+Scalar *scaleWaveFunction(Scalar scale, Scalar *psi) {
+    PosVec position;
+    MtrxIdx3 a;
+    DiracIdx alpha;
+
+    LOOP_TEMPORAL(position.pos[T_INDX]) {
+        LOOP_SPATIAL(position) {
+            LOOP_DIRAC(alpha) {
+                LOOP_3(a) {
+                    (*(ELEM_VEC_POSDC(psi, position, alpha, a))) *= scale;
+                }
+            }
+        }
+    }
+
+    return psi;
 }
 
 void printDiracOperator(FILE *file_dirac_op) {

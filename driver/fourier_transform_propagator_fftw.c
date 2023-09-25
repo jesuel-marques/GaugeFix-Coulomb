@@ -158,7 +158,9 @@ int main(int argc, char** argv) {
     fftw_destroy_plan(forward_plan);
 
     FILE* traces_file;
+
     traces_file = fopen(traces_filename, "w");
+    initializeDiracMatrices();
 
 #pragma omp parallel shared(inverse_momentum_space, traces_file)
     {
@@ -171,7 +173,8 @@ int main(int argc, char** argv) {
             for (int nz = 0; nz < N_S; nz++) {
                 for (int ny = 0; ny < N_S; ny++) {
                     for (int nx = 0; nx < N_S; nx++) {
-                        if (!((nx == 0 || nx == N_S / 2) && (ny == 0 || ny == N_S / 2) && (nz == 0 || nz == N_S / 2))) {
+                        // if (!((nx == 0 || nx == N_S / 2) && (ny == 0 || ny == N_S / 2) && (nz == 0 || nz == N_S / 2))) {
+                        if (!(nx == N_S / 2 || ny == N_S / 2 || nz == N_S / 2)) {
                             n_momentum.pos[T_INDX] = nt;
                             n_momentum.pos[Z_INDX] = nz;
                             n_momentum.pos[Y_INDX] = ny;
@@ -229,6 +232,7 @@ int main(int argc, char** argv) {
             }
         }
     }
+    destroyDiracMatrices();
     fclose(traces_file);
 
     LOOP_DIRAC(alpha) {

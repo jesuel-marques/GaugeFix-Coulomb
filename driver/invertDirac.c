@@ -26,10 +26,13 @@ int main(int argc, char* argv[]) {
     const double kappa = atof(argv[4]);
     const double c_SW = atof(argv[5]);
 
-    const double tolerance = atof(argv[6]);
-    const char* inverse_filename = argv[7];
+    const double bq = atof(argv[6]);
+    const double cq = atof(argv[7]);
 
-    if ((argc != 8) || !validGeometricParametersQ()) {
+    const double tolerance = atof(argv[8]);
+    const char* inverse_filename = argv[9];
+
+    if ((argc != 10) || !validGeometricParametersQ()) {
         fprintf(stderr,
                 "Bad input.\n"
                 "Usage: Input config filename, n_SPC, n_T, "
@@ -43,6 +46,8 @@ int main(int argc, char* argv[]) {
                 lattice_param.n_SPC, lattice_param.n_T);
         return EXIT_FAILURE;
     }
+
+    printf("Input parameters kappa = %lf, c_SW = %lf, tolerance = %3.2E, bq = %lf, cq = %lf\n", kappa, c_SW, tolerance, bq, cq);
 
     Mtrx3x3* U = allocate3x3Field(DIM * lattice_param.volume);
     if (U == NULL) {
@@ -95,14 +100,23 @@ int main(int argc, char* argv[]) {
 
             inverse_columns[alpha][a] = (Scalar*)calloc(sizeof_vector, sizeof(Scalar));
             initializePointSource(assignPosition(0, 0, 0, 0), alpha, a, source);
+            if (cq != 0.0) {
+                rotateWaveFunction(cq, source);
+            }
             if (c_SW == 0.0) {
                 printf("Inverting non-improved Dirac Operator.\n");
             } else {
                 printf("Inverting improved Dirac Operator: c_SW = %lf.\n", c_SW);
             }
             invertDiracOperator(source, inverse_columns[alpha][a], tolerance * sizeof_vector, BiCGStab);
-
             free(source);
+            if (cq != 0.0) {
+                inverse_columns[alpha][a] = rotateWaveFunction(cq, inverse_columns[alpha][a]);
+            }
+            if (bq != 0.0) {
+                scaleWaveFunction(1.0 + 2.0 * bq * am, inverse_columns[alpha][a]);
+            }
+
             printf("Inversion finished for alpha: %d a:%d\n", alpha, a);
         }
     }
@@ -120,6 +134,7 @@ int main(int argc, char* argv[]) {
 
     //  Save inverse to file
 
+    printf("Printing to file %s.\n", inverse_filename);
     printInverse(inverse_filename, inverse_columns);
 
     LOOP_DIRAC(alpha) {
@@ -127,6 +142,12 @@ int main(int argc, char* argv[]) {
             free(inverse_columns[alpha][a]);
         }
     }
+
+    printf("Input parameters kappa = %lf, c_SW = %lf, tolerance = %3.2E, bq = %lf, cq = %lf\n", kappa, c_SW, tolerance, bq, cq);
+
+    printf("kappa: %lf \t kappa critical: %lf \t am: %lf\n", kappa, KAPPA_CRITICAL, am);
+
+    printf("Propagator filename: %s", inverse_filename);
 
     return EXIT_SUCCESS;
 }

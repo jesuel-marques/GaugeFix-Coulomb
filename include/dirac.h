@@ -53,10 +53,16 @@ double invertDiracOperator(Scalar *source, Scalar *inverse_column, const double 
 
 void destroyDiracOperator();
 
+void initializeDiracMatrices(void);
+void destroyDiracMatrices(void);
+
 void printDiracOperator(FILE *file_dirac_op);
 
 DiracMatrix prodDirac(DiracMatrix m1, DiracMatrix m2);
 void initializePointSource(PosVec source_position, DiracIdx dirac_index, MtrxIdx3 color_index, Scalar *source);
+
+Scalar *rotateWaveFunction(Scalar cq, Scalar *psi);
+Scalar *scaleWaveFunction(Scalar scale, Scalar *psi);
 
 void printInverse(const char *restrict inverse_filename, Scalar *restrict inverse[4][Nc]);
 
