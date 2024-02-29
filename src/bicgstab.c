@@ -20,6 +20,8 @@ static Scalar *setVector(Scalar *restrict f, double complex value, size_t number
 static Scalar *setRandomVector(Scalar *restrict f, size_t number_of_elements) {
     rlxd_init(2, 32244000);
     ranlxd(f, 2 * number_of_elements);
+
+    return f;
 }
 
 static Scalar *subtractVector(Scalar *restrict f, Scalar *restrict g, Scalar *restrict result, size_t number_of_elements) {
@@ -29,7 +31,7 @@ static Scalar *subtractVector(Scalar *restrict f, Scalar *restrict g, Scalar *re
     return result;
 }
 
-static Scalar *fmaVector(Scalar *restrict f, Scalar num, Scalar *restrict g, Scalar *restrict result, size_t number_of_elements) {
+static Scalar *fmaVector(Scalar *f, Scalar num, Scalar *g, Scalar *result, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
         result[i] = f[i] + num * g[i];
     }
@@ -43,7 +45,7 @@ static Scalar *fmaaccumulateVector(Scalar *restrict f, Scalar num, Scalar *restr
     return f;
 }
 
-static Scalar *doublefmaVector(Scalar *restrict f, Scalar num1, Scalar *restrict g1, Scalar num2, Scalar *restrict g2, Scalar *result, size_t number_of_elements) {
+static Scalar *doublefmaVector(Scalar *f, Scalar num1, Scalar *g1, Scalar num2, Scalar *g2, Scalar *result, size_t number_of_elements) {
     for (size_t i = 0; i < number_of_elements; i++) {
         result[i] = f[i] + num1 * g1[i] + num2 * g2[i];
     }
@@ -65,6 +67,15 @@ static Scalar dotproductVector(Scalar *f, Scalar *g, size_t number_of_elements) 
         dot_product += conj(f[i]) * g[i];
     }
     return dot_product;
+}
+
+static Scalar *productwithScalarVector(Scalar num, Scalar *f, Scalar *numf, size_t number_of_elements) {
+    Scalar dot_product = 0.0;
+
+    for (size_t i = 0; i < number_of_elements; i++) {
+        numf[i] = num * f[i];
+    }
+    return numf;
 }
 
 double BiCGStab(Scalar *(*operator)(Scalar *, Scalar *), Scalar *restrict source, Scalar *restrict inverse_column, const double tolerance, const size_t sizeof_vector) {
@@ -166,4 +177,145 @@ double BiCGStab(Scalar *(*operator)(Scalar *, Scalar *), Scalar *restrict source
     free(s);
 
     return norm;
+}
+
+double BiCGStabM(Scalar *(*operator)(Scalar *, Scalar *), Scalar *restrict source, Scalar *restrict inverse_column, const double sigma, const double tolerance, const size_t sizeof_vector) {
+    //	Multimass version of BiCGStab by Beat Jegerlehner (arXiv:hep-lat/9612014v1)
+    bool first_iteration = true;
+
+    Scalar *x_sigma = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+
+    Scalar *old_r = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *r = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *s = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *As = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+
+    Scalar *s_sigma = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+
+    Scalar *w = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *w0 = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *Aw = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+
+    Scalar alpha = 0.0, old_beta = 1.0, beta, old_delta, delta, phi, chi;
+    Scalar alpha_sigma = 0.0, beta_sigma, old_zeta_sigma = 1.0, twice_old_zeta_sigma = 0, zeta_sigma, old_rho_sigma = 1.0, rho_sigma, chi_sigma;
+
+    double norm_w;
+
+    setVector(x_sigma, 0.0, sizeof_vector);
+    copyVector(source, old_r, sizeof_vector);
+    copyVector(source, s, sizeof_vector);
+    copyVector(source, s_sigma, sizeof_vector);
+
+    setRandomVector(w0, sizeof_vector);
+    copyVector(w0, w, sizeof_vector);
+    operator(s, As);
+    while (true) {
+        if (first_iteration == true) {
+            first_iteration = false;
+            old_delta = dotproductVector(w0, r, sizeof_vector);
+
+            phi = dotproductVector(w, As, sizeof_vector) / delta;
+        }
+        beta = -1 / phi;
+
+        zeta_sigma = (old_zeta_sigma * twice_old_zeta_sigma * old_beta) / (beta * alpha * (twice_old_zeta_sigma - old_zeta_sigma) + twice_old_zeta_sigma * old_beta * (1 - sigma * beta));
+
+        beta_sigma = beta * zeta_sigma / old_zeta_sigma;
+
+        fmaVector(old_r, beta, As, w, sizeof_vector);
+        if ((norm_w = dotproductVector(w, w, sizeof_vector)) < tolerance) {
+            // I'm guessing here because the paper doesn't explain the stop criterion
+            fmaaccumulateVector(x_sigma, -beta_sigma, s, sizeof_vector);
+            break;
+        }
+        operator(w, Aw);
+
+        chi = dotproductVector(Aw, w, sizeof_vector) / dotproductVector(Aw, Aw, sizeof_vector);
+        chi_sigma = chi / (1 + chi * sigma);
+        rho_sigma = old_rho_sigma / (1 + chi * sigma);
+
+        fmaVector(w, -chi, Aw, r, sizeof_vector);
+
+        doublefmaaccumulateVector(x_sigma, -beta_sigma, s, chi_sigma * rho_sigma * zeta_sigma, w, sizeof_vector);
+
+        delta = dotproductVector(w0, r, sizeof_vector);
+
+        alpha = -beta * delta / (old_delta * chi);
+        alpha_sigma = alpha * zeta_sigma * beta_sigma / (old_zeta_sigma * beta);
+
+        doublefmaVector(r, alpha, s, -alpha * chi, As, s, sizeof_vector);
+        operator(s, As);
+
+        productwithScalarVector(zeta_sigma * rho_sigma, r, s_sigma, sizeof_vector);
+        fmaaccumulateVector(s_sigma, alpha_sigma, s_sigma, sizeof_vector);
+        fmaaccumulateVector(s_sigma, -alpha_sigma * chi_sigma * zeta_sigma * rho_sigma / beta_sigma, w, sizeof_vector);
+        fmaaccumulateVector(s_sigma, alpha_sigma * (chi_sigma / beta_sigma) * old_zeta_sigma * old_rho_sigma, old_r, sizeof_vector);
+
+        phi = dotproductVector(w0, As, sizeof_vector) / delta;
+
+        old_beta = beta;
+        old_delta = delta;
+        twice_old_zeta_sigma = old_zeta_sigma;
+        old_zeta_sigma = zeta_sigma;
+        old_rho_sigma = rho_sigma;
+
+        copyVector(r, old_r, sizeof_vector);
+    }
+    return norm_w;
+}
+
+double CG(Scalar *(*operator)(Scalar *, Scalar *), Scalar *restrict source, Scalar *restrict inverse_column, const double tolerance, const size_t sizeof_vector) {
+    //	Algoritmo para inversão da matriz (descrito em mscg.pdf do Martin Lüscher)
+
+    // Variáveis do algoritmo de inversão
+
+    Scalar *x = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *r = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *p = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+    Scalar *Ap = (Scalar *)calloc(sizeof_vector, sizeof(Scalar));
+
+    Scalar alpha, beta;
+
+    Scalar old_norm_r = 0.0, norm_r = 0.0;
+
+    setVector(x, 0.0, sizeof_vector);
+    copyVector(source, r, sizeof_vector);
+    copyVector(source, p, sizeof_vector);
+
+    old_norm_r = dotproductVector(r, r, sizeof_vector);
+    printf("norm r: %3.2E\n", creal(old_norm_r));
+    system("sleep 5");
+    int cont = 0;
+    do {
+        operator(p, Ap);
+        alpha = old_norm_r / dotproductVector(p, Ap, sizeof_vector);
+        fmaaccumulateVector(x, alpha, p, sizeof_vector);
+
+        fmaaccumulateVector(r, -alpha, Ap, sizeof_vector);
+
+        norm_r = dotproductVector(r, r, sizeof_vector);
+
+        printf("norm r: %3.2E\n", creal(norm_r));
+
+        if (creal(norm_r) < tolerance) {
+            break;
+        } else {
+            beta = norm_r / old_norm_r;
+            fmaVector(r, beta, p, p, sizeof_vector);
+            old_norm_r = norm_r;
+        }
+
+        cont++;
+    } while (true);
+
+    copyVector(x, inverse_column, sizeof_vector);
+
+    free(x);
+
+    free(r);
+
+    free(p);
+    free(Ap);
+
+    return norm_r;
 }

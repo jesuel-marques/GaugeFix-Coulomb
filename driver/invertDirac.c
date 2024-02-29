@@ -15,7 +15,9 @@
 #define MAX_SIZE 1000
 
 // #define KAPPA_CRITICAL 0.15624
-#define KAPPA_CRITICAL 0.1392
+// #define KAPPA_CRITICAL 0.1392
+#define KAPPA_CRITICAL 0.135196
+// #define KAPPA_CRITICAL 0.135605
 // #define KAPPA_CRITICAL 0.125
 
 int main(int argc, char* argv[]) {

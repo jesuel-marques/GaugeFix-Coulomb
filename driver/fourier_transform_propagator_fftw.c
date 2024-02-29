@@ -6,6 +6,8 @@
 #include <spectrum.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <tgmath.h>
+#define BIG_NUMBER 1.0E+3
 
 int main(int argc, char** argv) {
     const char* inverse_filename = argv[1];
@@ -168,66 +170,67 @@ int main(int argc, char** argv) {
         DiracMatrix propagator_p_space;
         double ap[DIM], aK[DIM];
         Scalar trace_scalar, trace_vector_temporal, trace_vector_spatial;
+        double re_trace_vector_spatial, im_trace_vector_spatial;
 #pragma omp for collapse(4)
         for (int nt = 0; nt < N_T; nt++) {
             for (int nz = 0; nz < N_S; nz++) {
                 for (int ny = 0; ny < N_S; ny++) {
                     for (int nx = 0; nx < N_S; nx++) {
                         // if (!((nx == 0 || nx == N_S / 2) && (ny == 0 || ny == N_S / 2) && (nz == 0 || nz == N_S / 2))) {
-                        if (!(nx == N_S / 2 || ny == N_S / 2 || nz == N_S / 2)) {
-                            n_momentum.pos[T_INDX] = nt;
-                            n_momentum.pos[Z_INDX] = nz;
-                            n_momentum.pos[Y_INDX] = ny;
-                            n_momentum.pos[X_INDX] = nx;
+                        // if (!(nx == N_S / 2 || ny == N_S / 2 || nz == N_S / 2)) {
+                        n_momentum.pos[T_INDX] = nt;
+                        n_momentum.pos[Z_INDX] = nz;
+                        n_momentum.pos[Y_INDX] = ny;
+                        n_momentum.pos[X_INDX] = nx;
 
-                            LOOP_DIRAC(alpha) {
-                                LOOP_DIRAC(beta) {
-                                    propagator_p_space.m[alpha * 4 + beta] = 0.0;
+                        LOOP_DIRAC(alpha) {
+                            LOOP_DIRAC(beta) {
+                                propagator_p_space.m[alpha * 4 + beta] = 0.0;
 
-                                    LOOP_3(a) {
-                                        propagator_p_space.m[alpha * 4 + beta] +=
-                                            *(ELEM_VEC_POS(inverse_momentum_space[alpha * Nc + a][beta * Nc + a], n_momentum));
-                                    }
+                                LOOP_3(a) {
+                                    propagator_p_space.m[alpha * 4 + beta] +=
+                                        *(ELEM_VEC_POS(inverse_momentum_space[alpha * Nc + a][beta * Nc + a], n_momentum));
                                 }
                             }
+                        }
 
-                            trace_scalar = diractraceFromDirac(propagator_p_space) / (4.0 * Nc);
+                        trace_scalar = diractraceFromDirac(propagator_p_space) / (4.0 * Nc);
 
-                            ap[T_INDX] = (2.0 * M_PI / N_T) * (nt + 0.5);
-                            ap[Z_INDX] = 0.0;
-                            ap[Y_INDX] = 0.0;
-                            ap[X_INDX] = 0.0;
-                            aK_from_ap(ap, aK);
+                        ap[T_INDX] = (2.0 * M_PI / N_T) * (nt + 0.5);
+                        ap[Z_INDX] = 0.0;
+                        ap[Y_INDX] = 0.0;
+                        ap[X_INDX] = 0.0;
+                        aK_from_ap(ap, aK);
 
-                            trace_vector_temporal =
-                                diractraceFromDirac(prodDirac(calculateMatrixSlash(aK),
-                                                              propagator_p_space)) /
-                                (4.0 * Nc * dotprod(aK, aK) * (-I));
+                        trace_vector_temporal =
+                            diractraceFromDirac(prodDirac(calculateMatrixSlash(aK),
+                                                          propagator_p_space)) /
+                            (4.0 * Nc * dotprod(aK, aK) * (-I));
 
-                            ap[T_INDX] = 0.0;
-                            ap[Z_INDX] = (2.0 * M_PI / N_S) * nz;
-                            ap[Y_INDX] = (2.0 * M_PI / N_S) * ny;
-                            ap[X_INDX] = (2.0 * M_PI / N_S) * nx;
-                            aK_from_ap(ap, aK);
+                        ap[T_INDX] = 0.0;
+                        ap[Z_INDX] = (2.0 * M_PI / N_S) * nz;
+                        ap[Y_INDX] = (2.0 * M_PI / N_S) * ny;
+                        ap[X_INDX] = (2.0 * M_PI / N_S) * nx;
+                        aK_from_ap(ap, aK);
 
-                            trace_vector_spatial =
-                                diractraceFromDirac(prodDirac(calculateMatrixSlash(aK),
-                                                              propagator_p_space)) /
-                                (4.0 * Nc * dotprod(aK, aK) * (-I));
+                        trace_vector_spatial =
+                            diractraceFromDirac(prodDirac(calculateMatrixSlash(aK),
+                                                          propagator_p_space)) /
+                            (4.0 * Nc * dotprod(aK, aK) * (-I));
 
 #pragma omp critical
-                            {
-                                fprintf(traces_file, "{%d,%d,%d,%d}\t%.10lf+I*(%.10lf)\t%.10lf+I*(%.10lf)\t%.10lf+I*(%.10lf)\n",
-                                        nt, nz, ny, nx,
-                                        creal(trace_vector_temporal),
-                                        cimag(trace_vector_temporal),
-                                        creal(trace_vector_spatial),
-                                        cimag(trace_vector_spatial),
-                                        creal(trace_scalar),
-                                        cimag(trace_scalar));
-                            }
+                        {
+                            fprintf(traces_file, "{%d,%d,%d,%d}\t%.10lf+I*(%.10lf)\t%.10lf+I*(%.10lf)\t%.10lf+I*(%.10lf)\n",
+                                    nt, nz, ny, nx,
+                                    creal(trace_vector_temporal),
+                                    cimag(trace_vector_temporal),
+                                    fabs(re_trace_vector_spatial = creal(trace_vector_spatial)) < BIG_NUMBER ? re_trace_vector_spatial : NAN,
+                                    fabs(im_trace_vector_spatial = cimag(trace_vector_spatial)) < BIG_NUMBER ? im_trace_vector_spatial : NAN,
+                                    creal(trace_scalar),
+                                    cimag(trace_scalar));
                         }
                     }
+                    // }
                 }
             }
         }

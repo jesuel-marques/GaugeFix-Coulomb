@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 
     printf("Plaquette average: %.18lf. e2: %3.2E. polyakov loop: %.10lf+I*(%.10lf) \n", creal(averagePlaquette(U, "total")), calculate_e2(U, LANDAU), creal(average_polyloop), cimag(average_polyloop));
 
-    // applyCenterTransformation(U, 0, FOUR_PI_OVER_THREE);
+    // applyCenterTransformation(U, 0, TWO_PI_OVER_THREE);
     average_polyloop = averagePolyakovLoop(U);
 
     Mtrx3x3* G = allocate3x3Field(lattice_param.volume);
@@ -201,7 +201,7 @@ int main(int argc, char* argv[]) {
     //
 
     // write the gauge fixed configuration to file
-    if (writeConfig(U, strcat(config_filename, "_4piover3.gfix"))) {
+    if (writeConfig(U, strcat(config_filename, "_0piover3.gfix"))) {
         fprintf(stderr, "Fixed config writing failed for config %s.\n", config_filename);
     } else {
         printf("U fixed written for config %s.\n", config_filename);

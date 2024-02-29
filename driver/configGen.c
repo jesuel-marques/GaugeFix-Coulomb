@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 
     FILE* ranlux_state_file;
     char ranlux_state_filename[MAX_FILE_SIZE];
-    sprintf(ranlux_state_filename, "%s_%dx%d_beta_%f_%s_start.rlx_state", config_filename, lattice_param.n_SPC, lattice_param.n_T, beta, argv[8]);
+    sprintf(ranlux_state_filename, "%s_%dx%d_beta_%f_%s_start.rlx_state", config_filename, lattice_param.n_SPC, lattice_param.n_T, beta, "cold");
 
     rlxd_init(1, 32244000);
     int* ranlux_state;
@@ -63,13 +63,14 @@ int main(int argc, char** argv) {
     } else if (!strcmp(argv[8], "hot")) {
         setFieldSU3Random(U, lattice_param.volume * DIM);
     } else if (!strcmp(argv[8], "restart")) {
-        sprintf(complete_config_filename, "%s_sweep_%lu_%dx%d_beta_%f_cold_start", config_filename, sweeps, lattice_param.n_SPC, lattice_param.n_T, beta);
+        sprintf(complete_config_filename, "%s_sweep_%lu_%dx%d_beta_%f_restart_start", config_filename, sweeps, lattice_param.n_SPC, lattice_param.n_T, beta);
 
         printf("Restarting from config %s.\n", complete_config_filename);
         if (loadConfig(U, complete_config_filename)) {
             fprintf(stderr, "Config reading failed for config %s.\n", complete_config_filename);
             return EXIT_FAILURE;
         }
+        printf("Restarting from ranlux state %s.\n", ranlux_state_filename);
         ranlux_state_file = fopen(ranlux_state_filename, "rb");
 
         if (fread(ranlux_state, sizeof(int), rlxd_size(), ranlux_state_file) != rlxd_size()) {
@@ -100,6 +101,7 @@ int main(int argc, char** argv) {
     unsigned configs_saved = 0;
 
     printf("sweep: %ld \t plaq: %.10lf \t polyakov loop: %.10lf+I*(%.10lf)\n", sweeps, av_plaq, creal(average_polyakov_loop), cimag(average_polyakov_loop));
+    if (argc == 10) system("sleep 5");
 
     for (; configs_saved < max_configs && sweeps < MAX_SWEEPS; sweeps++) {
         av_plaq += -updateLattice(U, beta, MetropolisSU3) / (2.0 * Nc * pow(lattice_param.n_SPC, 3.0) * lattice_param.n_T * beta);
